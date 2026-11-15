@@ -60,6 +60,14 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
 .given b{color:var(--text)}
 [id]{scroll-margin-top:16px}
 h3:target,.card:target{outline:2px solid var(--accent);outline-offset:6px;border-radius:8px}
+details.sol{margin-top:10px;border:1px dashed var(--border-strong);border-radius:10px;padding:6px 12px;background:var(--surface)}
+details.sol summary{cursor:pointer;color:var(--accent);font-weight:500}
+details.sol[open] summary{margin-bottom:6px}
+.q>details.sol:not([open]){display:inline-block;vertical-align:middle;margin:0;padding:0;border:0;background:none}
+.q>details.sol summary{list-style:none;display:inline-block;font-size:14px;border:1px solid var(--border-strong);border-radius:8px;padding:5px 14px;background:var(--surface)}
+.q>details.sol summary::-webkit-details-marker{display:none}
+.q>details.sol summary:hover{background:var(--surface-1)}
+@media print{details.sol{border-style:solid}}
 /* ===== END SHARED STYLE ===== */
 </style>
 <style>
@@ -167,14 +175,28 @@ y = gaussmf(x,[sigma c]);</div>
     <div class="given"><b>اسلاید ۸۸ چه می‌گوید؟</b> دستور متلب <span class="m">gaussmf(x,[σ c])</span> است: اول پهنا <span class="m">σ</span>، بعد مرکز <span class="m">c</span>. فرمول: <span class="m">μ(x) = e^(−(x−c)² / (2σ²))</span>. <a href="#gauss">↑ بخش ۱، «گاوسی»</a></div>
     <table class="t"><tr><th>x</th><th>5</th><th>6</th><th>7</th><th>9</th><th>0</th></tr>
       <tr><th>μ(x)</th><td><input type="text" data-k="1" data-tol="0.01" aria-label="mu at 5"></td><td><input type="text" data-k="0.8825" data-tol="0.01" aria-label="mu at 6"></td><td><input type="text" data-k="0.6065" data-tol="0.01" aria-label="mu at 7"></td><td><input type="text" data-k="0.1353" data-tol="0.01" aria-label="mu at 9"></td><td><input type="text" data-k="0.0439" data-tol="0.01" aria-label="mu at 0"></td></tr></table>
-    <button class="check" type="button">بررسی</button><div class="fb"></div>
+    <button class="check" type="button">بررسی</button>
+    <details class="sol"><summary>راه‌حل</summary>
+      <p>σ=2 و c=5، پس <span class="m">μ(x) = e^(−(x−5)²/8)</span>. اول توان را حساب کن، بعد e را:</p><div class="mb pre">x=5: (5−5)²/8 = 0       →  e^0      = 1
+x=6: (6−5)²/8 = 0.125   →  e^−0.125 ≈ 0.8825
+x=7: (7−5)²/8 = 0.5     →  e^−0.5   ≈ 0.6065
+x=9: (9−5)²/8 = 2       →  e^−2     ≈ 0.1353
+x=0: (0−5)²/8 = 3.125   →  e^−3.125 ≈ 0.0439</div>
+    </details><div class="fb"></div>
   </div>
 
   <div class="q practice" data-hint="a=2، b=2، c=6، پس توان 2b = 4: μ = 1/(1+|(x−6)/2|⁴). مثلاً x=9: |3/2|⁴ = 5.0625." data-yes="عالی! دقت کن x=4 و x=8 هر دو 0.5 شدند: همان c ± a.">
     <p><b>سؤال ۲ (زنگوله‌ای).</b> برای <span class="m">gbellmf(x,[2 2 6])</span> مقدار μ را حساب کن.</p>
     <table class="t"><tr><th>x</th><th>6</th><th>8</th><th>4</th><th>9</th><th>10</th></tr>
       <tr><th>μ(x)</th><td><input type="text" data-k="1" data-tol="0.01" aria-label="mu at 6"></td><td><input type="text" data-k="0.5" data-tol="0.01" aria-label="mu at 8"></td><td><input type="text" data-k="0.5" data-tol="0.01" aria-label="mu at 4"></td><td><input type="text" data-k="0.1649" data-tol="0.01" aria-label="mu at 9"></td><td><input type="text" data-k="0.0588" data-tol="0.01" aria-label="mu at 10"></td></tr></table>
-    <button class="check" type="button">بررسی</button><div class="fb"></div>
+    <button class="check" type="button">بررسی</button>
+    <details class="sol"><summary>راه‌حل</summary>
+      <p>a=2، b=2، c=6، پس <span class="m">μ = 1/(1 + |(x−6)/2|⁴)</span>:</p><div class="mb pre">x=6:  |0|⁴   = 0        →  1/1      = 1
+x=8:  |1|⁴   = 1        →  1/2      = 0.5
+x=4:  |−1|⁴  = 1        →  1/2      = 0.5
+x=9:  |1.5|⁴ = 5.0625   →  1/6.0625 ≈ 0.1649
+x=10: |2|⁴   = 16       →  1/17     ≈ 0.0588</div>
+    </details><div class="fb"></div>
   </div>
 
   <div class="q practice" data-hint="e^(−2) ≈ 0.1353 و e^(2) ≈ 7.389. برای sigmf(x,[2 4]) توان برابر −2·(x−4) است. از S(−x) = 1 − S(x) هم کمک بگیر." data-yes="عالی! sigmf در x=c همیشه 0.5 است، درست مثل S(0) = 0.5.">
@@ -182,7 +204,14 @@ y = gaussmf(x,[sigma c]);</div>
     <div class="given"><b>اسلاید ۹۳ چه می‌گوید؟</b> فقط شکل پایه <span class="m">S(x)</span> را می‌دهد که فرمولش در صورت سؤال آمده. دستور <span class="m">sigmf</span> متلب در اسلاید نیست؛ فرمولش را هم در سؤال نوشته‌ایم. <a href="#sig">↑ بخش ۱، «سیگموئید»</a></div>
     <table class="t"><tr><th>S(0)</th><th>S(2)</th><th>S(−2)</th><th>sigmf(4,[2 4])</th><th>sigmf(5,[2 4])</th></tr>
       <tr><td><input type="text" data-k="0.5" data-tol="0.01" aria-label="S0"></td><td><input type="text" data-k="0.8808" data-tol="0.01" aria-label="S2"></td><td><input type="text" data-k="0.1192" data-tol="0.01" aria-label="S-2"></td><td><input type="text" data-k="0.5" data-tol="0.01" aria-label="sigmf 4"></td><td><input type="text" data-k="0.8808" data-tol="0.01" aria-label="sigmf 5"></td></tr></table>
-    <button class="check" type="button">بررسی</button><div class="fb"></div>
+    <button class="check" type="button">بررسی</button>
+    <details class="sol"><summary>راه‌حل</summary>
+      <div class="mb pre">S(0)  = 1/(1 + e^0)       = 1/2      = 0.5
+S(2)  = 1/(1 + e^−2)      = 1/1.1353 ≈ 0.8808
+S(−2) = 1 − S(2)          ≈ 0.1192
+sigmf(4,[2 4]) = 1/(1 + e^(−2·0)) = 0.5
+sigmf(5,[2 4]) = 1/(1 + e^(−2·1)) = S(2) ≈ 0.8808</div><p><b>نکته:</b> sigmf در <span class="m">x = c</span> همیشه 0.5 است.</p>
+    </details><div class="fb"></div>
   </div>
 
   <div class="q mcq" data-yes="درست! در متلب اول sigma و بعد c می‌آید: σ = 2 و مرکز c = 5." data-no="نه. ترتیب در gaussmf(x,[sigma c]) است — اول sigma. اسلاید ۸۸: c=5 و sigma=2.">
@@ -229,7 +258,15 @@ y = gaussmf(x,[sigma c]);</div>
     <p><b>سؤال ۸ (جور کردن).</b> هر دستور متلب چند پارامتر در کروشه می‌گیرد؟</p>
     <table class="t"><tr><th>گاوسی gaussmf</th><th>گاوسی دوطرفه gauss2mf</th><th>زنگوله‌ای gbellmf</th><th>Z: zmf</th><th>Pi: pimf</th><th>ذوزنقه trapmf</th></tr>
       <tr><td><input type="text" data-k="2" data-tol="0" aria-label="gaussmf"></td><td><input type="text" data-k="4" data-tol="0" aria-label="gauss2mf"></td><td><input type="text" data-k="3" data-tol="0" aria-label="gbellmf"></td><td><input type="text" data-k="2" data-tol="0" aria-label="zmf"></td><td><input type="text" data-k="4" data-tol="0" aria-label="pimf"></td><td><input type="text" data-k="4" data-tol="0" aria-label="trapmf"></td></tr></table>
-    <button class="check" type="button">بررسی</button><div class="fb"></div>
+    <button class="check" type="button">بررسی</button>
+    <details class="sol"><summary>راه‌حل</summary>
+      <p>تعداد اسم‌های داخل کروشه را بشمار:</p><div class="mb pre">gaussmf   [sigma c]            → 2
+gauss2mf  [sig1 c1 sig2 c2]    → 4
+gbellmf   [a b c]              → 3
+zmf       [a b]                → 2
+pimf      [a b c d]            → 4
+trapmf    [a b c d]            → 4</div>
+    </details><div class="fb"></div>
   </div>
 
   <div class="q mcq" data-yes="درست! S درست وسط بازه، در (2+8)/2 = 5، از نیمه رد می‌شود: μ = 0.5." data-no="نه. smf از a=2 تا b=8 از ۰ به ۱ می‌رسد و درست وسط، یعنی x = (a+b)/2 = 5، مقدارش 0.5 است.">
@@ -256,7 +293,13 @@ y = gaussmf(x,[sigma c]);</div>
     <p><b>سؤال ۱۱ (مرور درس ۹ و ۴).</b> دو مجموعه فازی روی یک محور: <span class="m">A = trimf(x,[2 5 9])</span> و <span class="m">B = gaussmf(x,[2 5])</span>. در <span class="m">x = 7</span>:</p>
     <table class="t"><tr><th>μ_A(7)</th><th>μ_B(7)</th><th>μ_A∩B(7)</th><th>μ_A∪B(7)</th></tr>
       <tr><td><input type="text" data-k="0.5" data-tol="0.01" aria-label="A"></td><td><input type="text" data-k="0.6065" data-tol="0.01" aria-label="B"></td><td><input type="text" data-k="0.5" data-tol="0.01" aria-label="A and B"></td><td><input type="text" data-k="0.6065" data-tol="0.01" aria-label="A or B"></td></tr></table>
-    <button class="check" type="button">بررسی</button><div class="fb"></div>
+    <button class="check" type="button">بررسی</button>
+    <details class="sol"><summary>راه‌حل</summary>
+      <div class="mb pre">μ_A(7) = (9 − 7)/(9 − 5) = 2/4 = 0.5     (falling side of the triangle)
+μ_B(7) = e^(−(7−5)²/8) = e^−0.5 ≈ 0.6065
+A∩B = min(0.5, 0.6065) = 0.5
+A∪B = max(0.5, 0.6065) ≈ 0.6065</div>
+    </details><div class="fb"></div>
   </div>
 </div></section>
 
@@ -314,6 +357,7 @@ document.querySelectorAll('.stepper').forEach(function(s){
   if(al)al.addEventListener('click',function(){n=st.length;upd()});
   upd();
 });
+window.addEventListener('beforeprint',function(){document.querySelectorAll('details.sol').forEach(function(d){d.open=true})});
 })();
 /* ===== END SHARED JS ===== */
 </script>

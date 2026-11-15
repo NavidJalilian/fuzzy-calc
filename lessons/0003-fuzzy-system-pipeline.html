@@ -60,6 +60,14 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
 .given b{color:var(--text)}
 [id]{scroll-margin-top:16px}
 h3:target,.card:target{outline:2px solid var(--accent);outline-offset:6px;border-radius:8px}
+details.sol{margin-top:10px;border:1px dashed var(--border-strong);border-radius:10px;padding:6px 12px;background:var(--surface)}
+details.sol summary{cursor:pointer;color:var(--accent);font-weight:500}
+details.sol[open] summary{margin-bottom:6px}
+.q>details.sol:not([open]){display:inline-block;vertical-align:middle;margin:0;padding:0;border:0;background:none}
+.q>details.sol summary{list-style:none;display:inline-block;font-size:14px;border:1px solid var(--border-strong);border-radius:8px;padding:5px 14px;background:var(--surface)}
+.q>details.sol summary::-webkit-details-marker{display:none}
+.q>details.sol summary:hover{background:var(--surface-1)}
+@media print{details.sol{border-style:solid}}
 /* ===== END SHARED STYLE ===== */
 </style>
 <style>
@@ -172,27 +180,49 @@ h3:target,.card:target{outline:2px solid var(--accent);outline-offset:6px;border
   <div class="q practice" data-hint="خنک بین ۱۸ و ۲۶ پایین می‌آید: (۲۶ − T) ÷ ۸. گرم بین ۱۸ و ۲۶ بالا می‌رود: (T − ۱۸) ÷ ۸. سرد از ۱۸ به بعد صفر است. مرطوب: (H − ۴۰) ÷ ۴۰." data-yes="عالی! ورودی فازی‌شده را به همان نماد μ/x درس ۲ نوشتی.">
     <p><b>سؤال ۱ (فازی‌سازی + نماد درس ۲).</b> برای <span class="m">T = 24</span> و <span class="m">H = 50</span>، ورودی‌های فازی‌شده را کامل کن.</p>
     <div class="mb">T̃ = { <span style="display:inline-block;border-radius:8px;padding:2px"><input type="text" data-k="0" aria-label="درجه سرد"></span> /سرد ,  <span style="display:inline-block;border-radius:8px;padding:2px"><input type="text" data-k="0.25" aria-label="درجه خنک"></span> /خنک ,  <span style="display:inline-block;border-radius:8px;padding:2px"><input type="text" data-k="0.75" aria-label="درجه گرم"></span> /گرم }      μ_humid(50) = <span style="display:inline-block;border-radius:8px;padding:2px"><input type="text" data-k="0.25" aria-label="درجه مرطوب"></span></div>
-    <button class="check">بررسی</button><div class="fb"></div>
+    <button class="check">بررسی</button>
+    <details class="sol"><summary>راه‌حل</summary>
+      <p>مجموعه‌های این درس: سرد تا ۱۰ برابر ۱ و در ۱۸ صفر؛ خنک از ۱۰ تا ۱۸ بالا و از ۱۸ تا ۲۶ پایین؛ گرم از ۱۸ بالا و از ۲۶ به بعد ۱؛ مرطوب در ۴۰٪ صفر و در ۸۰٪ یک.</p><p><b>قدم ۱ — دمای ۲۴:</b></p><div class="mb pre">cold(24) = 0                     (cold is 0 after 18)
+cool(24) = (26 − 24)/8 = 0.25    (falling side)
+warm(24) = (24 − 18)/8 = 0.75    (rising side)</div><p><b>قدم ۲ — رطوبت ۵۰:</b> <span class="m">μ_humid(50) = (50 − 40)/40 = 0.25</span>.</p>
+    </details><div class="fb"></div>
   </div>
 
   <div class="q practice" data-hint="اول فازی‌سازی: سرد = (۱۸ − ۱۲) ÷ ۸، خنک = (۱۲ − ۱۰) ÷ ۸، مرطوب = (۶۰ − ۴۰) ÷ ۴۰. بعد برای قاعده ۳ کمینه سرد و مرطوب را بگیر." data-yes="درست! قاعده ۳ با min(0.75, 0.5) = 0.5 فعال شد.">
     <p><b>سؤال ۲ (استنتاج).</b> برای <span class="m">T = 12</span> و <span class="m">H = 60</span>، درجه درستی سه قاعده را پیدا کن.</p>
     <table class="t"><tr><th>w1 (گرم ← زیاد)</th><th>w2 (خنک ← خاموش)</th><th>w3 (سرد و مرطوب ← کم)</th></tr>
       <tr><td><input type="text" data-k="0" aria-label="w1"></td><td><input type="text" data-k="0.25" aria-label="w2"></td><td><input type="text" data-k="0.5" aria-label="w3"></td></tr></table>
-    <button class="check">بررسی</button><div class="fb"></div>
+    <button class="check">بررسی</button>
+    <details class="sol"><summary>راه‌حل</summary>
+      <p><b>قدم ۱ — فازی‌سازی T = 12 و H = 60:</b></p><div class="mb pre">cold(12)  = (18 − 12)/8  = 0.75
+cool(12)  = (12 − 10)/8  = 0.25   (rising side)
+warm(12)  = 0                     (warm starts at 18)
+humid(60) = (60 − 40)/40 = 0.5</div><p><b>قدم ۲ — درجه درستی هر قاعده:</b> قاعده‌ای که یک شرط دارد، همان درجه شرطش را می‌گیرد؛ «و» یعنی min.</p><div class="mb pre">w1 = warm = 0
+w2 = cool = 0.25
+w3 = min(cold, humid) = min(0.75, 0.5) = 0.5</div>
+    </details><div class="fb"></div>
   </div>
 
   <div class="q practice" data-hint="y = (0·w2 + 40·w3 + 100·w1) ÷ (w1 + w2 + w3). با جواب‌های سؤال ۲: (0 + 40·0.5 + 0) ÷ 0.75." data-yes="درست! 20 ÷ 0.75 ≈ 26.7٪.">
     <p><b>سؤال ۳ (غیرفازی‌سازی).</b> با جواب سؤال ۲ و همان عددهای نماینده (خاموش = ۰، کم = ۴۰، زیاد = ۱۰۰)، سرعت هوا چند درصد است؟ (تا یک رقم اعشار)</p>
     <p>y = <span style="display:inline-block;border-radius:8px;padding:2px"><input type="text" data-k="26.67" data-tol="0.05" aria-label="سرعت هوا درصد"></span> %</p>
-    <button class="check">بررسی</button><div class="fb"></div>
+    <button class="check">بررسی</button>
+    <details class="sol"><summary>راه‌حل</summary>
+      <p><b>قدم ۱:</b> میانگین وزنی: عدد نماینده هر فرمان را در درجه قاعده‌اش ضرب کن، جمع بزن و بر جمع درجه‌ها تقسیم کن.</p><div class="mb pre">y = (0·w2 + 40·w3 + 100·w1) / (w1 + w2 + w3)
+  = (0·0.25 + 40·0.5 + 100·0) / (0 + 0.25 + 0.5)
+  = 20 / 0.75
+  ≈ 26.67 %   →   26.7 %</div><p>یعنی کولر هوا را با حدود ۲۶٫۷٪ قدرت می‌دمد.</p>
+    </details><div class="fb"></div>
   </div>
 
   <div class="q practice" data-hint="ترتیب: اول عدد فازی می‌شود، بعد قواعد ارزیابی می‌شوند، بعد نتیجه‌ها ترکیب می‌شوند، آخر سر دوباره عدد می‌شود." data-yes="عالی! فازی‌سازی ← استنتاج ← ترکیب ← غیرفازی‌سازی.">
     <p><b>سؤال ۴.</b> شماره هر مرحله را در روش چهار مرحله‌ای بنویس (۱ تا ۴).</p>
     <table class="t" style="direction:rtl"><tr><th>ساخت (ترکیب)</th><th>فازی کردن</th><th>بازگرداندن از حالت فازی</th><th>استنتاج</th></tr>
       <tr><td><input type="text" data-k="3" aria-label="شماره ترکیب"></td><td><input type="text" data-k="1" aria-label="شماره فازی کردن"></td><td><input type="text" data-k="4" aria-label="شماره غیرفازی سازی"></td><td><input type="text" data-k="2" aria-label="شماره استنتاج"></td></tr></table>
-    <button class="check">بررسی</button><div class="fb"></div>
+    <button class="check">بررسی</button>
+    <details class="sol"><summary>راه‌حل</summary>
+      <p>منطق ترتیب: تا عدد ورودی فازی نشده، نمی‌شود قاعده‌ها را سنجید؛ تا قاعده‌ها سنجیده نشده‌اند، چیزی برای ترکیب نیست؛ و برگرداندن به عدد همیشه آخر است.</p><ol style="margin:0 0 6px;padding-right:22px"><li>فازی کردن ← 1</li><li>استنتاج ← 2</li><li>ساخت (ترکیب) ← 3</li><li>بازگرداندن از حالت فازی ← 4</li></ol>
+    </details><div class="fb"></div>
   </div>
 
   <div class="q practice" data-hint="لباسشویی: نوع کثیفی، مقدار کثیفی، حجم لباس ← تعداد دورها. کوره سیمان: اکسیژن، دمای گاز، گشتاور آسیاب، وزن کلینکر ← زغال‌سنگ و جریان هوا." data-yes="درست! لباسشویی «چند ورودی، یک خروجی» است و کوره سیمان «چند ورودی، چند خروجی».">
@@ -201,7 +231,10 @@ h3:target,.card:target{outline:2px solid var(--accent);outline-offset:6px;border
     <table class="t" style="direction:rtl"><tr><th>سیستم</th><th>تعداد ورودی</th><th>تعداد خروجی</th></tr>
       <tr><th>ماشین لباسشویی فازی</th><td><input type="text" data-k="3" aria-label="ورودی لباسشویی"></td><td><input type="text" data-k="1" aria-label="خروجی لباسشویی"></td></tr>
       <tr><th>کنترل فازی کوره سیمان</th><td><input type="text" data-k="4" aria-label="ورودی کوره"></td><td><input type="text" data-k="2" aria-label="خروجی کوره"></td></tr></table>
-    <button class="check">بررسی</button><div class="fb"></div>
+    <button class="check">بررسی</button>
+    <details class="sol"><summary>راه‌حل</summary>
+      <p>ورودی = چیزی که <b>اندازه گرفته می‌شود</b>؛ خروجی = چیزی که <b>تعیین یا تنظیم می‌شود</b>.</p><p><b>لباسشویی:</b> ورودی‌ها: نوع کثیفی، مقدار کثیفی، حجم لباس ← <b>3</b>. خروجی: تعداد دورهای شستشو ← <b>1</b>.</p><p><b>کوره سیمان:</b> ورودی‌ها: اکسیژن، دمای گاز، گشتاور آسیاب، وزن کلینکر ← <b>4</b>. خروجی‌ها: زغال‌سنگ و جریان هوا ← <b>2</b>.</p>
+    </details><div class="fb"></div>
   </div>
 
   <div class="q mcq" data-yes="درست! ورودی و خروجی سیستم خالص مجموعه فازی است، ولی سیستم‌های مهندسی با عدد حقیقی کار می‌کنند." data-no="نه. آن یکی عیب TSK است یا اصلاً درست نیست. اسلاید ۳۰: مشکل سیستم خالص این است که ورودی و خروجی‌اش مجموعه فازی است.">
@@ -380,6 +413,7 @@ document.querySelectorAll('.stepper').forEach(function(s){
   if(al)al.addEventListener('click',function(){n=st.length;upd()});
   upd();
 });
+window.addEventListener('beforeprint',function(){document.querySelectorAll('details.sol').forEach(function(d){d.open=true})});
 })();
 /* ===== END SHARED JS ===== */
 </script>

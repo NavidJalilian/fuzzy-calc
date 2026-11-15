@@ -60,6 +60,14 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
 .given b{color:var(--text)}
 [id]{scroll-margin-top:16px}
 h3:target,.card:target{outline:2px solid var(--accent);outline-offset:6px;border-radius:8px}
+details.sol{margin-top:10px;border:1px dashed var(--border-strong);border-radius:10px;padding:6px 12px;background:var(--surface)}
+details.sol summary{cursor:pointer;color:var(--accent);font-weight:500}
+details.sol[open] summary{margin-bottom:6px}
+.q>details.sol:not([open]){display:inline-block;vertical-align:middle;margin:0;padding:0;border:0;background:none}
+.q>details.sol summary{list-style:none;display:inline-block;font-size:14px;border:1px solid var(--border-strong);border-radius:8px;padding:5px 14px;background:var(--surface)}
+.q>details.sol summary::-webkit-details-marker{display:none}
+.q>details.sol summary:hover{background:var(--surface-1)}
+@media print{details.sol{border-style:solid}}
 /* ===== END SHARED STYLE ===== */
 </style>
 <style>
@@ -167,7 +175,14 @@ h3:target,.card:target{outline:2px solid var(--accent);outline-offset:6px;border
     <table class="t"><tr><th>قد (cm)</th><th>165</th><th>180</th><th>200</th></tr>
       <tr><th>قطعی (0 یا 1)</th><td><input type="text" data-k="0" aria-label="قطعی برای 165"></td><td><input type="text" data-k="1" aria-label="قطعی برای 180"></td><td><input type="text" data-k="1" aria-label="قطعی برای 200"></td></tr>
       <tr><th>فازی <span class="m">μ_tall</span></th><td><input type="text" data-k="0.2" aria-label="فازی برای 165"></td><td><input type="text" data-k="0.8" aria-label="فازی برای 180"></td><td><input type="text" data-k="1" aria-label="فازی برای 200"></td></tr></table>
-    <button class="check">بررسی</button><div class="fb"></div>
+    <button class="check">بررسی</button>
+    <details class="sol"><summary>راه‌حل</summary>
+      <p><b>قدم ۱ — قطعی:</b> فقط بپرس «قد ≥ ۱۸۰؟». بله = ۱، نه = ۰.</p><div class="mb pre">165 ≥ 180 ?  no   → 0
+180 ≥ 180 ?  yes  → 1
+200 ≥ 180 ?  yes  → 1</div><p><b>قدم ۲ — فازی:</b> اول ببین قد در کدام تکه فرمول است: تا ۱۶۰ صفر، بین ۱۶۰ و ۱۸۵ برابر <span class="m">(h − 160)/25</span>، از ۱۸۵ به بالا یک.</p><div class="mb pre">μ_tall(165) = (165 − 160)/25 = 5/25  = 0.2
+μ_tall(180) = (180 − 160)/25 = 20/25 = 0.8
+μ_tall(200) = 1                      (200 ≥ 185)</div><p><b>نکته:</b> قد ۱۸۰ از نظر قطعی کامل «بلند» است (۱)، ولی از نظر فازی فقط ۰٫۸.</p>
+    </details><div class="fb"></div>
   </div>
 
   <div class="q practice" data-hint="قطعی: «بالاتر از ۳۰» یعنی خود ۳۰ حساب نیست. فازی: (T − 12.5) ÷ 25." data-yes="درست! دقت کن خود ۳۰ «بالاتر از ۳۰» نیست، پس قطعی‌اش ۰ است.">
@@ -176,7 +191,13 @@ h3:target,.card:target{outline:2px solid var(--accent);outline-offset:6px;border
     <table class="t"><tr><th>دما T</th><th>20</th><th>25</th><th>30</th><th>35</th></tr>
       <tr><th>قطعی</th><td>—</td><td><input type="text" data-k="0" aria-label="قطعی 25"></td><td><input type="text" data-k="0" aria-label="قطعی 30"></td><td><input type="text" data-k="1" aria-label="قطعی 35"></td></tr>
       <tr><th>فازی <span class="m">μ_warm</span></th><td><input type="text" data-k="0.3" aria-label="فازی 20"></td><td>0.5</td><td><input type="text" data-k="0.7" aria-label="فازی 30"></td><td>0.9</td></tr></table>
-    <button class="check">بررسی</button><div class="fb"></div>
+    <button class="check">بررسی</button>
+    <details class="sol"><summary>راه‌حل</summary>
+      <p><b>قدم ۱ — قطعی:</b> قاعده می‌گوید «<b>بالاتر از</b> ۳۰»، پس خودِ ۳۰ گرم حساب نمی‌شود.</p><div class="mb pre">25 > 30 ?  no   → 0
+30 > 30 ?  no   → 0
+35 > 30 ?  yes  → 1</div><p><b>قدم ۲ — فازی:</b> دما را در فرمول بگذار:</p><div class="mb pre">μ_warm(20) = (20 − 12.5)/25 = 7.5/25  = 0.3
+μ_warm(30) = (30 − 12.5)/25 = 17.5/25 = 0.7</div><p><b>بررسی:</b> همین فرمول برای ۲۵ و ۳۵ همان ۰٫۵ و ۰٫۹ اسلاید را می‌دهد، پس فرمول با اسلاید جور است.</p>
+    </details><div class="fb"></div>
   </div>
 
   <div class="q practice" data-hint="در مثال قد اسلاید ۱۵، دو درجه «بلند» و «کوتاه» با هم ۱ شدند (۰٫۶ + ۰٫۴). همین ایده را برای «آخر هفته / نه آخر هفته» به کار ببر. «۷۰ درصد» را به عدد اعشاری بنویس." data-yes="عالی! (این «یک منهای درجه» همان «مکمل» است که در درس ۴ رسمی می‌شود.)">
@@ -186,7 +207,11 @@ h3:target,.card:target{outline:2px solid var(--accent);outline-offset:6px;border
       <tr><th style="text-align:right">رضا با درجه 0.6 بلند است؛ درجه «کوتاه» بودنش (مثل اسلاید ۱۵)</th><td><input type="text" data-k="0.4" aria-label="درجه کوتاهی"></td></tr>
       <tr><th style="text-align:right">پنجشنبه با درجه 0.8 آخر هفته است؛ درجه «آخر هفته نبودن» آن</th><td><input type="text" data-k="0.2" aria-label="درجه آخر هفته نبودن"></td></tr>
       <tr><th style="text-align:right">«آقای الف ۷۰٪ عضو بزرگسالان است»؛ <span class="m">μ_adult(الف)</span></th><td><input type="text" data-k="0.7" aria-label="درجه بزرگسالی"></td></tr></table>
-    <button class="check">بررسی</button><div class="fb"></div>
+    <button class="check">بررسی</button>
+    <details class="sol"><summary>راه‌حل</summary>
+      <p><b>ردیف ۱ و ۲:</b> «کوتاه» یعنی «نه بلند» و «آخر هفته نبودن» یعنی «نه آخر هفته». درجه «نه چیزی» = ۱ منهای درجه خودش:</p><div class="mb pre">μ_short          = 1 − 0.6 = 0.4
+μ_not weekend    = 1 − 0.8 = 0.2</div><p><b>ردیف ۳:</b> درصد را به عدد بین ۰ و ۱ تبدیل کن: ۷۰٪ = ۷۰ ÷ ۱۰۰ = <span class="m">0.7</span>.</p>
+    </details><div class="fb"></div>
   </div>
 
   <div class="q mcq" data-yes="درست! لطفی‌زاده منطق فازی را در ۱۹۶۵ در برکلی مطرح کرد." data-no="نه. سال طرح منطق فازی در اسلاید ۹ آمده: ۱۹۶۵.">
@@ -295,6 +320,7 @@ document.querySelectorAll('.stepper').forEach(function(s){
   if(al)al.addEventListener('click',function(){n=st.length;upd()});
   upd();
 });
+window.addEventListener('beforeprint',function(){document.querySelectorAll('details.sol').forEach(function(d){d.open=true})});
 })();
 /* ===== END SHARED JS ===== */
 </script>

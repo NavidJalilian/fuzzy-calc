@@ -60,6 +60,14 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
 .given b{color:var(--text)}
 [id]{scroll-margin-top:16px}
 h3:target,.card:target{outline:2px solid var(--accent);outline-offset:6px;border-radius:8px}
+details.sol{margin-top:10px;border:1px dashed var(--border-strong);border-radius:10px;padding:6px 12px;background:var(--surface)}
+details.sol summary{cursor:pointer;color:var(--accent);font-weight:500}
+details.sol[open] summary{margin-bottom:6px}
+.q>details.sol:not([open]){display:inline-block;vertical-align:middle;margin:0;padding:0;border:0;background:none}
+.q>details.sol summary{list-style:none;display:inline-block;font-size:14px;border:1px solid var(--border-strong);border-radius:8px;padding:5px 14px;background:var(--surface)}
+.q>details.sol summary::-webkit-details-marker{display:none}
+.q>details.sol summary:hover{background:var(--surface-1)}
+@media print{details.sol{border-style:solid}}
 /* ===== END SHARED STYLE ===== */
 </style>
 <style>
@@ -150,21 +158,36 @@ h3:target,.card:target{outline:2px solid var(--accent);outline-offset:6px;border
     <p><b>سؤال ۱ (شکل تمرین ۱).</b> <span class="m">X = {1,2,3,4,5,6}</span> و <span class="m">A = {0.5/2, 0.7/3, 1/4, 0.6/5, 1/6}</span>. درجه عضویت هر عنصر را بنویس.</p>
     <table class="t"><tr><th>x</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th></tr>
       <tr><th>μ_A(x)</th><td><input type="text" data-k="0" aria-label="mu A 1"></td><td><input type="text" data-k="0.5" aria-label="mu A 2"></td><td><input type="text" data-k="0.7" aria-label="mu A 3"></td><td><input type="text" data-k="1" aria-label="mu A 4"></td><td><input type="text" data-k="0.6" aria-label="mu A 5"></td><td><input type="text" data-k="1" aria-label="mu A 6"></td></tr></table>
-    <button class="check">بررسی</button><div class="fb"></div>
+    <button class="check">بررسی</button>
+    <details class="sol"><summary>راه‌حل</summary>
+      <p><b>قدم ۱:</b> هر کسر <span class="m">μ/x</span> را بخوان: عدد بالا درجه است و عدد پایین خودِ عنصر. مثلاً <span class="m">0.5/2</span> یعنی «عنصر ۲ با درجه ۰٫۵».</p><div class="mb pre">0.5/2  →  μ_A(2) = 0.5
+0.7/3  →  μ_A(3) = 0.7
+1/4    →  μ_A(4) = 1
+0.6/5  →  μ_A(5) = 0.6
+1/6    →  μ_A(6) = 1</div><p><b>قدم ۲:</b> عنصر ۱ در <span class="m">X</span> هست ولی در فهرست A نیامده. عنصر ننوشته یعنی درجه صفر: <span class="m">μ_A(1) = 0</span>.</p>
+    </details><div class="fb"></div>
   </div>
 
   <div class="q practice" data-hint="هر زوج (x, μ) در شکل کسری می‌شود μ/x: درجه بالا، عنصر پایین." data-yes="درست! تبدیل زوج ↔ کسر فقط جابه‌جا کردن جای دو عدد است.">
     <p><b>سؤال ۲ (مجموعه تمرین ۱).</b> <span class="m">Tall = {(0,0), (20,0.2), (40,0.4), (60,0.7), (80,1), (100,1)}</span>. آن را به شکل <span class="m">μ/x</span> بازنویسی کرده‌ایم؛ جاهای خالی را پر کن. بعد بگو چند عنصر درجه کامل ۱ دارند.</p>
     <table class="t"><tr><th>کسر</th><th>?/20</th><th>0.4/?</th><th>?/60</th><th>تعداد عنصرهای با درجه 1</th></tr>
       <tr><th>جواب</th><td><input type="text" data-k="0.2" aria-label="درجه 20"></td><td><input type="text" data-k="40" aria-label="عنصر با درجه 0.4"></td><td><input type="text" data-k="0.7" aria-label="درجه 60"></td><td><input type="text" data-k="2" aria-label="تعداد درجه یک"></td></tr></table>
-    <button class="check">بررسی</button><div class="fb"></div>
+    <button class="check">بررسی</button>
+    <details class="sol"><summary>راه‌حل</summary>
+      <p><b>قدم ۱:</b> هر زوج <span class="m">(x, μ)</span> در شکل کسری می‌شود <span class="m">μ/x</span>؛ فقط جای دو عدد عوض می‌شود:</p><div class="mb pre">(20, 0.2)  →  0.2/20
+(40, 0.4)  →  0.4/40
+(60, 0.7)  →  0.7/60</div><p><b>قدم ۲:</b> زوج‌هایی که درجه‌شان ۱ است: <span class="m">(80, 1)</span> و <span class="m">(100, 1)</span>. پس <b>2</b> عنصر درجه کامل دارند.</p>
+    </details><div class="fb"></div>
   </div>
 
   <div class="q practice" data-hint="عادی: از ۱۵ تا ۲۰ بالا می‌رود و از ۲۰ تا ۲۵ پایین می‌آید؛ پس در ۲۳ (۲۵ − ۲۳) ÷ ۵. گرم: از ۲۰ تا ۲۵ بالا می‌رود؛ پس (۲۳ − ۲۰) ÷ ۵. خنک در ۲۰ تمام شده است." data-yes="درست! ۲۳ درجه هم‌زمان عضو دو مجموعه است، درست همان چیزی که اسلاید ۲۸ می‌گوید.">
     <p><b>سؤال ۳.</b> با پنج مجموعه بخش ۲ (مرزها بالای نمودار نوشته شده‌اند)، برای دمای <span class="m">23</span> درجه حساب کن. اول خودت حساب کن و بعد با لغزنده چک کن.</p>
     <table class="t"><tr><th>μ_خنک(23)</th><th>μ_عادی(23)</th><th>μ_گرم(23)</th><th>عضو چند مجموعه است؟</th></tr>
       <tr><td><input type="text" data-k="0" aria-label="خنک 23"></td><td><input type="text" data-k="0.4" aria-label="عادی 23"></td><td><input type="text" data-k="0.6" aria-label="گرم 23"></td><td><input type="text" data-k="2" aria-label="تعداد مجموعه"></td></tr></table>
-    <button class="check">بررسی</button><div class="fb"></div>
+    <button class="check">بررسی</button>
+    <details class="sol"><summary>راه‌حل</summary>
+      <p><b>قدم ۱ — خنک (۱۰/۱۵/۲۰):</b> خنک در ۲۰ به صفر رسیده و ۲۳ بعد از آن است، پس درجه خنک = <span class="m">0</span>.</p><p><b>قدم ۲ — عادی (۱۵/۲۰/۲۵):</b> ۲۳ بین ۲۰ و ۲۵ است، یعنی روی ضلع پایین‌رونده:</p><div class="mb pre">(25 − 23)/(25 − 20) = 2/5 = 0.4</div><p><b>قدم ۳ — گرم (۲۰/۲۵/۳۰):</b> ۲۳ بین ۲۰ و ۲۵ است، یعنی روی ضلع بالارونده:</p><div class="mb pre">(23 − 20)/(25 − 20) = 3/5 = 0.6</div><p><b>قدم ۴:</b> سرد و داغ هم در ۲۳ صفرند. فقط عادی و گرم بیشتر از صفرند، پس ۲۳ درجه عضو <b>2</b> مجموعه است.</p>
+    </details><div class="fb"></div>
   </div>
 
   <div class="q mcq" data-yes="درست! 0.5/2 یعنی عنصر ۲ با درجه ۰٫۵. خط کسری تقسیم نیست." data-no="نه. در نماد اسلاید، خط کسری فقط درجه (بالا) را به عنصر (پایین) می‌چسباند و هیچ تقسیمی انجام نمی‌شود.">
@@ -261,6 +284,7 @@ document.querySelectorAll('.stepper').forEach(function(s){
   if(al)al.addEventListener('click',function(){n=st.length;upd()});
   upd();
 });
+window.addEventListener('beforeprint',function(){document.querySelectorAll('details.sol').forEach(function(d){d.open=true})});
 })();
 /* ===== END SHARED JS ===== */
 </script>

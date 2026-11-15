@@ -60,6 +60,14 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
 .given b{color:var(--text)}
 [id]{scroll-margin-top:16px}
 h3:target,.card:target{outline:2px solid var(--accent);outline-offset:6px;border-radius:8px}
+details.sol{margin-top:10px;border:1px dashed var(--border-strong);border-radius:10px;padding:6px 12px;background:var(--surface)}
+details.sol summary{cursor:pointer;color:var(--accent);font-weight:500}
+details.sol[open] summary{margin-bottom:6px}
+.q>details.sol:not([open]){display:inline-block;vertical-align:middle;margin:0;padding:0;border:0;background:none}
+.q>details.sol summary{list-style:none;display:inline-block;font-size:14px;border:1px solid var(--border-strong);border-radius:8px;padding:5px 14px;background:var(--surface)}
+.q>details.sol summary::-webkit-details-marker{display:none}
+.q>details.sol summary:hover{background:var(--surface-1)}
+@media print{details.sol{border-style:solid}}
 /* ===== END SHARED STYLE ===== */
 </style>
 <style>
@@ -162,7 +170,14 @@ xlabel('trimf, P=[3 6 8]')</div>
     <div class="given"><b>اسلاید ۸۴ چه می‌گوید؟</b> در <span class="m">trimf(x,[a b c])</span> منحنی از <span class="m">a</span> بالا می‌رود، در <span class="m">b</span> به ۱ می‌رسد و تا <span class="m">c</span> پایین می‌آید؛ بیرون از این بازه صفر است. تکه بالارونده <span class="m">(x−a)/(b−a)</span> و تکه پایین‌رونده <span class="m">(c−x)/(c−b)</span>. <a href="#tri">↑ فرمول کامل در بخش ۱</a></div>
     <table class="t"><tr><th>x</th><th>4</th><th>5</th><th>6</th><th>7.5</th><th>9</th></tr>
       <tr><th>μ(x)</th><td><input type="text" data-k="0.3333" data-tol="0.01" aria-label="mu at 4"></td><td><input type="text" data-k="0.6667" data-tol="0.01" aria-label="mu at 5"></td><td><input type="text" data-k="1" aria-label="mu at 6"></td><td><input type="text" data-k="0.25" aria-label="mu at 7.5"></td><td><input type="text" data-k="0" aria-label="mu at 9"></td></tr></table>
-    <button class="check" type="button">بررسی</button><div class="fb"></div>
+    <button class="check" type="button">بررسی</button>
+    <details class="sol"><summary>راه‌حل</summary>
+      <p>گوشه‌ها: a=3، b=6، c=8. اول ببین x در کدام بازه است:</p><div class="mb pre">x=4   (3..6, rising):   (4 − 3)/3   = 1/3 ≈ 0.33
+x=5   (3..6, rising):   (5 − 3)/3   = 2/3 ≈ 0.67
+x=6   (peak, x = b):    1
+x=7.5 (6..8, falling):  (8 − 7.5)/2 = 0.25
+x=9   (x ≥ c = 8):      0</div>
+    </details><div class="fb"></div>
   </div>
 
   <div class="q practice" data-hint="گوشه‌ها a=1، b=5، c=7، d=8. بین ۵ و ۷ همیشه ۱. بالارونده (x−1)/4، پایین‌رونده (8−x)/1." data-yes="عالی! دقت کن شیب راست (پهنای ۱) خیلی تندتر از شیب چپ (پهنای ۴) است.">
@@ -170,7 +185,14 @@ xlabel('trimf, P=[3 6 8]')</div>
     <div class="given"><b>اسلاید ۸۶ چه می‌گوید؟</b> در <span class="m">trapmf(x,[a b c d])</span> منحنی از <span class="m">a</span> بالا می‌رود، از <span class="m">b</span> تا <span class="m">c</span> روی ۱ صاف می‌ماند و تا <span class="m">d</span> پایین می‌آید؛ بیرون از این بازه صفر است. تکه بالارونده <span class="m">(x−a)/(b−a)</span> و تکه پایین‌رونده <span class="m">(d−x)/(d−c)</span>. <a href="#trap">↑ فرمول کامل در بخش ۱</a></div>
     <table class="t"><tr><th>x</th><th>2</th><th>4</th><th>6</th><th>7.25</th><th>8.5</th></tr>
       <tr><th>μ(x)</th><td><input type="text" data-k="0.25" aria-label="mu at 2"></td><td><input type="text" data-k="0.75" aria-label="mu at 4"></td><td><input type="text" data-k="1" aria-label="mu at 6"></td><td><input type="text" data-k="0.75" aria-label="mu at 7.25"></td><td><input type="text" data-k="0" aria-label="mu at 8.5"></td></tr></table>
-    <button class="check" type="button">بررسی</button><div class="fb"></div>
+    <button class="check" type="button">بررسی</button>
+    <details class="sol"><summary>راه‌حل</summary>
+      <p>گوشه‌ها: a=1، b=5، c=7، d=8. اول ببین x در کدام بازه است:</p><div class="mb pre">x=2    (1..5, rising):   (2 − 1)/4    = 0.25
+x=4    (1..5, rising):   (4 − 1)/4    = 0.75
+x=6    (5..7, flat top): 1
+x=7.25 (7..8, falling):  (8 − 7.25)/1 = 0.75
+x=8.5  (x ≥ d = 8):      0</div>
+    </details><div class="fb"></div>
   </div>
 
   <div class="q practice" data-hint="گوشه‌ها نقطه‌هایی هستند که شکل می‌شکند: کجا از ۰ جدا می‌شود، کجا به ۱ می‌رسد، کجا از ۱ جدا می‌شود و کجا دوباره ۰ می‌شود.">
@@ -185,7 +207,10 @@ xlabel('trimf, P=[3 6 8]')</div>
       <span>b=</span><input type="text" data-k="4" data-tol="0" aria-label="b">
       <span>c=</span><input type="text" data-k="6" data-tol="0" aria-label="c">
       <span>d=</span><input type="text" data-k="9" data-tol="0" aria-label="d"><span class="m">])</span></div>
-    <button class="check" type="button">بررسی</button><div class="fb"></div>
+    <button class="check" type="button">بررسی</button>
+    <details class="sol"><summary>راه‌حل</summary>
+      <p>روی شکل از چپ به راست برو و چهار جایی را که خط می‌شکند پیدا کن:</p><ol style="margin:0 0 6px;padding-right:22px"><li>a = 2: جایی که خط از صفر جدا می‌شود و بالا می‌رود.</li><li>b = 4: جایی که به ۱ می‌رسد.</li><li>c = 6: جایی که سقف صاف تمام می‌شود و پایین آمدن شروع می‌شود.</li><li>d = 9: جایی که دوباره به صفر می‌رسد.</li></ol><p>پس <span class="m">trapmf(x,[2 4 6 9])</span>.</p>
+    </details><div class="fb"></div>
   </div>
 
   <div class="q practice" data-hint="Cold بین ۱۰ و ۳۰ پایین می‌آید: (30−x)/(30−10). Medium از ۲۵ بالا می‌رود: (x−25)/(45−25). AND = min و OR = max (درس ۴)." data-yes="عالی! این دقیقاً قدم اول تمرین ۳ است: اول μ هر مجموعه را از روی شکل حساب کن، بعد AND/OR را با min/max.">
@@ -193,7 +218,13 @@ xlabel('trimf, P=[3 6 8]')</div>
     <p style="font-size:14px;color:var(--text-2)">(در Cold چون <span class="m">a = b = 0</span>، شیب چپ ندارد و از ۰ تا ۱۰ مقدارش ۱ است — به این «شانه چپ» می‌گویند.)</p>
     <table class="t"><tr><th>μ_Cold(27)</th><th>μ_Medium(27)</th><th>Cold AND Medium</th><th>Cold OR Medium</th></tr>
       <tr><td><input type="text" data-k="0.15" aria-label="cold"></td><td><input type="text" data-k="0.1" aria-label="medium"></td><td><input type="text" data-k="0.1" aria-label="and"></td><td><input type="text" data-k="0.15" aria-label="or"></td></tr></table>
-    <button class="check" type="button">بررسی</button><div class="fb"></div>
+    <button class="check" type="button">بررسی</button>
+    <details class="sol"><summary>راه‌حل</summary>
+      <div class="mb pre">Cold(27)   = (30 − 27)/(30 − 10) = 3/20 = 0.15   (falling side)
+Medium(27) = (27 − 25)/(45 − 25) = 2/20 = 0.1    (rising side)
+AND = min(0.15, 0.1) = 0.1
+OR  = max(0.15, 0.1) = 0.15</div>
+    </details><div class="fb"></div>
   </div>
 
   <div class="q mcq" data-yes="درست! 6 بین b=5 و c=9 است، پس روی شیب پایین‌رونده‌ایم: (9−6)/(9−5) = 0.75." data-no="نه. اول ببین x=6 بین کدام دو گوشه است. b=5 و c=9، پس شیب پایین‌رونده.">
@@ -289,6 +320,7 @@ document.querySelectorAll('.stepper').forEach(function(s){
   if(al)al.addEventListener('click',function(){n=st.length;upd()});
   upd();
 });
+window.addEventListener('beforeprint',function(){document.querySelectorAll('details.sol').forEach(function(d){d.open=true})});
 })();
 /* ===== END SHARED JS ===== */
 </script>

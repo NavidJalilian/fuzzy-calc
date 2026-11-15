@@ -60,6 +60,14 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
 .given b{color:var(--text)}
 [id]{scroll-margin-top:16px}
 h3:target,.card:target{outline:2px solid var(--accent);outline-offset:6px;border-radius:8px}
+details.sol{margin-top:10px;border:1px dashed var(--border-strong);border-radius:10px;padding:6px 12px;background:var(--surface)}
+details.sol summary{cursor:pointer;color:var(--accent);font-weight:500}
+details.sol[open] summary{margin-bottom:6px}
+.q>details.sol:not([open]){display:inline-block;vertical-align:middle;margin:0;padding:0;border:0;background:none}
+.q>details.sol summary{list-style:none;display:inline-block;font-size:14px;border:1px solid var(--border-strong);border-radius:8px;padding:5px 14px;background:var(--surface)}
+.q>details.sol summary::-webkit-details-marker{display:none}
+.q>details.sol summary:hover{background:var(--surface-1)}
+@media print{details.sol{border-style:solid}}
 /* ===== END SHARED STYLE ===== */
 </style>
 <style>
@@ -67,9 +75,6 @@ h3:target,.card:target{outline:2px solid var(--accent);outline-offset:6px;border
 .pb{margin:0 0 22px}
 .pb h3{margin-top:0}
 .pre{white-space:pre}
-details.sol{margin-top:10px;border:1px dashed var(--border-strong);border-radius:10px;padding:6px 12px;background:var(--surface)}
-details.sol summary{cursor:pointer;color:var(--accent);font-weight:500}
-details.sol[open] summary{margin-bottom:6px}
 .tag{display:inline-block;font-size:12px;color:var(--text-3);border:1px solid var(--border);border-radius:999px;padding:0 8px;margin-inline-start:6px}
 .timer{font-size:22px;font-weight:500;direction:ltr;unicode-bidi:isolate;min-width:80px;display:inline-block;text-align:center}
 table.plan td,table.plan th{text-align:right}
@@ -77,7 +82,6 @@ table.plan td,table.plan th{text-align:right}
 #scoreOut ul{margin:6px 0 0}
 .bar{height:10px;border-radius:999px;background:var(--surface-1);overflow:hidden;margin:6px 0}
 .bar span{display:block;height:100%;background:var(--c2)}
-@media print{details.sol{border-style:solid}}
 </style>
 </head>
 <body>
@@ -518,11 +522,12 @@ document.querySelectorAll('.stepper').forEach(function(s){
   if(al)al.addEventListener('click',function(){n=st.length;upd()});
   upd();
 });
+window.addEventListener('beforeprint',function(){document.querySelectorAll('details.sol').forEach(function(d){d.open=true})});
 })();
 /* ===== END SHARED JS ===== */
 </script>
 <script>
-/* lesson-specific: timer, score summary, open solutions when printing */
+/* lesson-specific: timer, score summary */
 (function(){
 function fa(n){return String(n).replace(/\d/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'[d]})}
 
@@ -573,8 +578,6 @@ btn.addEventListener('click',function(){
   out.innerHTML=h;
 });
 
-/* print: open all solutions */
-window.addEventListener('beforeprint',function(){document.querySelectorAll('details.sol').forEach(function(d){d.open=true})});
 })();
 </script>
 </body>
