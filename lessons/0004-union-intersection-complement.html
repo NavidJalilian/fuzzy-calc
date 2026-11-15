@@ -117,10 +117,28 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
     <button class="op" data-op="AnA"></button>
     <button class="op" data-op="AuA"></button>
   </div>
+  <div class="soft" id="opsIntro" style="margin-top:10px"></div>
   <div class="legend" id="opsLegend"></div>
   <svg id="opsSvg" viewBox="0 0 600 262" role="img" aria-labelledby="opsTitle"><title id="opsTitle">نمودار درجه عضویت دو مجموعه فازی و حاصل عمل انتخاب‌شده</title></svg>
+  <div id="opsSlide" hidden>
+    <label for="opsX" style="font-size:14px;color:var(--text-2)">نقطه را روی محور افقی جابه‌جا کن و ببین حاصل در همان نقطه چطور حساب می‌شود:</label>
+    <input type="range" id="opsX">
+    <div class="mb" id="opsRead"></div>
+  </div>
   <div class="mb" id="opsSet"></div>
   <p id="opsNote" style="margin:6px 0 0"></p>
+  <div id="opsHow" hidden>
+    <h3>این نمودار را چطور بخوانی</h3>
+    <ol style="margin:0 0 6px;padding-right:22px">
+      <li>یک نقطه روی محور افقی انتخاب کن.</li>
+      <li>از آن نقطه مستقیم بالا برو تا به خط <b>بنفش</b> برسی. ارتفاعِ آن نقطه، درجه عضویت در مجموعه اول است.</li>
+      <li>همین کار را برای <b>خط‌چین سبز</b> بکن. ارتفاعش درجه عضویت در مجموعه دوم است.</li>
+      <li>قانون عمل را روی این دو عدد اجرا کن: اجتماع = بزرگ‌تر (max)، اشتراک = کوچک‌تر (min)، مکمل = 1 − μ. عددی که به دست می‌آید، ارتفاعِ خط <b>نارنجی</b> در همان نقطه است.</li>
+      <li>این کار را برای همه نقطه‌ها تکرار کن و نقطه‌ها را به هم وصل کن: خط نارنجی همین است. یعنی همان حساب بخش گسسته، فقط برای بی‌نهایت نقطه.</li>
+    </ol>
+    <p style="margin:0">جدول زیر همین کار را برای چند نقطه انجام داده (با عوض کردن عمل، جدول هم عوض می‌شود):</p>
+    <table class="t" id="opsTable"></table>
+  </div>
 </div>
 
 <div class="card" style="margin-top:10px">
@@ -129,7 +147,14 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
   <p><span class="m">D</span> = مجموعه ماشین‌های ایرانی و <span class="m">F</span> = مجموعه ماشین‌های خارجی:</p>
   <div class="mb pre">μ_D(x) = p(x)
 μ_F(x) = 1 − p(x)</div>
-  <p>دقت کن که <span class="m">F</span> همان مکمل <span class="m">D</span> است. اسلاید ۶۰ نتیجه را تکه‌تکه نوشته:</p>
+  <p>دقت کن که <span class="m">F</span> همان مکمل <span class="m">D</span> است.</p>
+  <p><b>چرا جواب دو تکه می‌شود؟</b> اشتراک یعنی کوچک‌ترِ <span class="m">p</span> و <span class="m">1 − p</span>. این دو عدد فقط وقتی برابرند که <span class="m">p = 1 − p</span>، یعنی <span class="m">p = 0.5</span>. قبل از ۵۰٪ عدد <span class="m">p</span> کوچک‌تر است و بعد از آن <span class="m">1 − p</span>. دو ماشین را ببین:</p>
+  <table class="t">
+    <tr><th>ماشین</th><th>μ_D = p</th><th>μ_F = 1 − p</th><th>اشتراک = min</th><th>اجتماع = max</th></tr>
+    <tr><td>۲۰٪ قطعه ایرانی</td><td>0.2</td><td>0.8</td><td>0.2 ← همان μ_D</td><td>0.8 ← همان μ_F</td></tr>
+    <tr><td>۷۰٪ قطعه ایرانی</td><td>0.7</td><td>0.3</td><td>0.3 ← همان μ_F</td><td>0.7 ← همان μ_D</td></tr>
+  </table>
+  <p>برای ماشین ۲۰٪، کوچک‌تر μ_D بود؛ برای ماشین ۷۰٪، کوچک‌تر μ_F شد. اسلاید ۶۰ همین را به شکل یک فرمول تکه‌تکه نوشته:</p>
   <div class="mb pre">μ_F∩D(x) = min[μ_F, μ_D] = { μ_D(x)   if 0 ≤ p(x) ≤ 0.5
                               { μ_F(x)   if 0.5 ≤ p(x) ≤ 1
 
@@ -306,18 +331,47 @@ function Y(v){return B-(B-T)*v}
 function fmt(v){return String(Math.round(v*100)/100)}
 function trap(a,b,c,d){return function(x){if(x<=a||x>=d)return 0;if(x<b)return (x-a)/(b-a);if(x<=c)return 1;return (d-x)/(d-c)}}
 var TABS={
-  bars:{a:'A',b:'B',A:[0.2,0.6,1,0.4],B:[0.5,0.3,0.8,0.9]},
-  trap:{a:'A',b:'B',fa:trap(1.5,3,4.5,5.8),fb:trap(4.5,5.6,7.2,8.5),x0:0,x1:10,ticks:[],xl:'x'},
-  cars:{a:'D',b:'F',fa:function(p){return p/100},fb:function(p){return 1-p/100},x0:0,x1:100,ticks:[0,50,100],xl:'p(x) %'}
+  bars:{a:'A',b:'B',A:[0.2,0.6,1,0.4],B:[0.5,0.3,0.8,0.9],
+    intro:'دو مجموعه گسسته با چهار عضو (همان مثال حل‌شده بخش ۳). برای هر x سه ستون می‌بینی: درجه در A، درجه در B، و حاصل.'},
+  trap:{a:'A',b:'B',fa:trap(1,3,4,6),fb:trap(4,6,7,9),x0:0,x1:10,step:0.1,start:4.5,ticks:[0,1,2,3,4,5,6,7,8,9,10],xl:'x',
+    pts:[2,4.5,5,5.5,8],px:function(x){return 'x = '+x},
+    intro:'<p style="margin:0 0 6px">اینجا مجموعه‌ها <b>پیوسته</b>‌اند: x می‌تواند هر عددی بین ۰ تا ۱۰ باشد، پس به جای چند ستون، یک منحنی داریم. هر منحنی شکل <b>ذوزنقه</b> دارد: از ۰ بالا می‌رود، مدتی روی ۱ صاف می‌ماند، بعد دوباره تا ۰ پایین می‌آید.</p>'+
+      '<ul style="margin:0;padding-right:22px"><li><b>A</b> (بنفش): از x = 1 بالا می‌رود، بین ۳ و ۴ برابر ۱ است، و در x = 6 به صفر می‌رسد.</li>'+
+      '<li><b>B</b> (خط‌چین سبز): از x = 4 بالا می‌رود، بین ۶ و ۷ برابر ۱ است، و در x = 9 به صفر می‌رسد.</li>'+
+      '<li>بین ۴ و ۶ هر دو بالای صفرند؛ A پایین می‌آید و B بالا می‌رود و در x = 5 هر دو 0.5 هستند. بیشترِ اتفاق‌های جالب همین‌جاست.</li></ul>'+
+      '<p style="margin:6px 0 0;font-size:14px;color:var(--text-2)">فرمول دقیق ذوزنقه را در درس ۹ می‌بینی. اینجا کافی است ارتفاع را از روی نمودار بخوانی؛ مثلاً A در x = 2 دقیقاً وسط شیب است، پس 0.5.</p>',
+    notes:{
+      union:'اجتماع = بزرگ‌تر. سمت چپِ ۴ فقط A بالای صفر است، پس نارنجی روی A می‌افتد. سمت راستِ ۶ فقط B، پس نارنجی روی B می‌افتد. بین ۴ و ۶ نارنجی هر کدام را که بالاتر است دنبال می‌کند، پس در x = 5 (جایی که دو خط به هم می‌رسند) تا 0.5 پایین می‌آید و دوباره بالا می‌رود.',
+      inter:'اشتراک = کوچک‌تر. هر جا یکی از دو مجموعه صفر باشد، کوچک‌تر هم صفر است؛ پس بیرونِ بازه ۴ تا ۶ حاصل صفر است. فقط در همپوشانی هر دو مثبت‌اند، و حاصل یک مثلث کوچک می‌شود که بالاترین نقطه‌اش 0.5 در x = 5 است.',
+      notA:'مکمل = 1 − μ_A. جایی که A برابر ۱ است (۳ تا ۴) مکمل صفر است؛ جایی که A صفر است (قبل از ۱ و بعد از ۶) مکمل ۱ است. یعنی A وارونه. B در این عمل نقشی ندارد.',
+      AnA:'min(μ_A, 1 − μ_A). جایی که A صفر یا یک است، یکی از دو عدد صفر است، پس حاصل صفر است. ولی روی شیب‌های A هر دو عدد مثبت‌اند؛ وسط هر شیب (x = 2 و x = 5) هر دو 0.5 هستند. پس دو برآمدگی کوچک با ارتفاع 0.5 می‌بینی: A ∩ Ā تهی نیست.',
+      AuA:'max(μ_A, 1 − μ_A). جایی که A صفر یا یک است، حاصل ۱ است. ولی روی شیب‌ها حاصل پایین می‌آید و وسط هر شیب به 0.5 می‌رسد. پس A ∪ Ā همه‌جا ۱ نیست، یعنی برابر X نیست.'
+    }},
+  cars:{a:'D',b:'F',fa:function(p){return p/100},fb:function(p){return 1-p/100},x0:0,x1:100,step:1,start:20,ticks:[0,25,50,75,100],xl:'p(x) %',
+    pts:[0,20,50,70,100],px:function(p){return 'p = '+p+'%'},
+    intro:'<p style="margin:0 0 6px">اینجا هر نقطه روی محور افقی <b>یک ماشین</b> است که با درصد قطعات ایرانی‌اش مشخص می‌شود: ۰٪ یعنی کاملاً خارجی، ۱۰۰٪ یعنی کاملاً ایرانی.</p>'+
+      '<ul style="margin:0;padding-right:22px"><li><b>D</b> (بنفش) = «چقدر ایرانی است» = همان درصد. ماشینِ ۲۰٪ ایرانی، درجه 0.2 در D دارد.</li>'+
+      '<li><b>F</b> (خط‌چین سبز) = «چقدر خارجی است» = ۱ منهای آن. همان ماشین درجه 0.8 در F دارد.</li>'+
+      '<li>هر چه به راست بروی D بالا می‌رود و F پایین می‌آید. در ۵۰٪ دو خط هم را قطع می‌کنند و هر دو 0.5 هستند.</li></ul>',
+    notes:{
+      union:'اجتماع = بزرگ‌تر. سمت چپِ ۵۰٪ ماشین بیشتر خارجی است، پس F بزرگ‌تر است و نارنجی روی F می‌افتد. سمت راست D بزرگ‌تر است. پایین‌ترین نقطه 0.5 در ۵۰٪ است: شکل V.',
+      inter:'اشتراک = کوچک‌تر. سمت چپِ ۵۰٪ نارنجی روی D است و سمت راست روی F. بالاترین نقطه 0.5 در ۵۰٪ است: شکل Λ. یعنی ماشین ۵۰-۵۰ «تا حد 0.5 هم ایرانی و هم خارجی» است، پس F ∩ D تهی نیست.',
+      notA:'مکمل D یعنی 1 − p، که دقیقاً همان F است: خط نارنجی روی خط‌چینِ F می‌افتد.',
+      AnA:'چون D̄ همان F است، D ∩ D̄ همان F ∩ D است: شکل Λ با بیشینه 0.5. پس تهی نیست.',
+      AuA:'چون D̄ همان F است، D ∪ D̄ همان F ∪ D است: شکل V با کمینه 0.5. پس همه‌جا ۱ نیست.'
+    }}
 };
-var tab='bars',op='union';
+var tab='bars',op='union',rng=document.getElementById('opsX');
 function bar(n){return n+'̄'}
 function lbl(o,n){return {union:n.a+' ∪ '+n.b,inter:n.a+' ∩ '+n.b,notA:bar(n.a),AnA:n.a+' ∩ '+bar(n.a),AuA:n.a+' ∪ '+bar(n.a)}[o]}
 function f(o,a,b){return o==='union'?Math.max(a,b):o==='inter'?Math.min(a,b):o==='notA'?1-a:o==='AnA'?Math.min(a,1-a):Math.max(a,1-a)}
 function usesB(o){return o==='union'||o==='inter'}
+function calc(o,a,b){var A=fmt(a),Bv=fmt(b),r=fmt(f(o,a,b)),c=fmt(1-a);
+  return o==='union'?'max('+A+', '+Bv+') = '+r:o==='inter'?'min('+A+', '+Bv+') = '+r:o==='notA'?'1 − '+A+' = '+r:
+    o==='AnA'?'min('+A+', 1 − '+A+') = min('+A+', '+c+') = '+r:'max('+A+', 1 − '+A+') = max('+A+', '+c+') = '+r}
 var NOTE={
-  union:'اجتماع = بزرگ‌ترِ دو درجه در هر نقطه. خط نارنجی همیشه روی بالاترین منحنی است.',
-  inter:'اشتراک = کوچک‌ترِ دو درجه در هر نقطه. فقط جایی که هر دو مجموعه با هم بالا هستند، حاصل بالا می‌رود.',
+  union:'اجتماع = بزرگ‌ترِ دو درجه در هر نقطه. ستون نارنجی همیشه هم‌قدِ بلندترین ستون است.',
+  inter:'اشتراک = کوچک‌ترِ دو درجه در هر نقطه. ستون نارنجی همیشه هم‌قدِ کوتاه‌ترین ستون است.',
   notA:'مکمل = 1 − μ. جایی که مجموعه بالاست، مکملش پایین است و برعکس. مجموعه دوم در این عمل نقشی ندارد.',
   AnA:'اگر قانون طرد شق ثالث برقرار بود، این باید همه‌جا صفر می‌شد؛ ولی بیشینه‌اش ',
   AuA:'اگر قانون طرد شق ثالث برقرار بود، این باید همه‌جا ۱ می‌شد؛ ولی کمینه‌اش '
@@ -329,11 +383,19 @@ function grid(){
   s+='<text x="14" y="'+(T+6)+'" text-anchor="middle">μ</text>';
   return s;
 }
+function setTab(t){
+  tab=t;var n=TABS[t];
+  if(n.fa){rng.min=n.x0;rng.max=n.x1;rng.step=n.step;rng.value=n.start}
+}
 function draw(){
-  var n=TABS[tab],s=grid(),res=[],nb=usesB(op);
+  var n=TABS[tab],s=grid(),res=[],nb=usesB(op),cont=!!n.fa;
   document.querySelectorAll('#opBtns .op').forEach(function(b){b.textContent=lbl(b.dataset.op,n);b.classList.toggle('on',b.dataset.op===op)});
   document.getElementById('opsLegend').innerHTML='<span><i style="background:var(--c1)"></i>'+n.a+'</span><span style="opacity:'+(nb?1:0.4)+'"><i style="background:var(--c2)"></i>'+n.b+'</span><span><i style="background:var(--c3)"></i>حاصل: <span class="m">'+lbl(op,n)+'</span></span>';
-  if(tab==='bars'){
+  document.getElementById('opsIntro').innerHTML=n.intro;
+  document.getElementById('opsSlide').hidden=!cont;
+  document.getElementById('opsHow').hidden=!cont;
+  document.getElementById('opsSet').hidden=cont;
+  if(!cont){
     var gw=(R-L)/4;
     for(var i=0;i<4;i++){
       var cx=L+gw*(i+0.5),a=n.A[i],b=n.B[i],r=f(op,a,b);res.push(r);
@@ -345,12 +407,15 @@ function draw(){
       s+='<text x="'+cx+'" y="'+(B+18)+'" text-anchor="middle">x = '+(i+1)+'</text>';
     }
     document.getElementById('opsSet').textContent=lbl(op,n)+' = {'+res.map(function(v,i){return fmt(v)+'/'+(i+1)}).join(', ')+'}';
+    var note=NOTE[op];
+    if(op==='AnA')note+=fmt(Math.max.apply(null,res))+' است، پس تهی نیست.';
+    if(op==='AuA')note+=fmt(Math.min.apply(null,res))+' است، پس برابر X نیست.';
+    document.getElementById('opsNote').textContent=note;
   }else{
-    var N=240,pa='',pb='',pr='',mx=0,mn=1;
+    var N=240,pa='',pb='',pr='';
     function X(x){return L+(R-L)*(x-n.x0)/(n.x1-n.x0)}
     for(var k=0;k<=N;k++){
       var x=n.x0+(n.x1-n.x0)*k/N,a2=n.fa(x),b2=n.fb(x),r2=f(op,a2,b2);
-      mx=Math.max(mx,r2);mn=Math.min(mn,r2);
       var c=(k?'L':'M');pa+=c+X(x).toFixed(1)+' '+Y(a2).toFixed(1);pb+=c+X(x).toFixed(1)+' '+Y(b2).toFixed(1);pr+=c+X(x).toFixed(1)+' '+Y(r2).toFixed(1);
     }
     s+='<path d="'+pr+'" fill="none" stroke="var(--c3)" stroke-width="7" stroke-linejoin="round" opacity="0.85"/>';
@@ -358,21 +423,24 @@ function draw(){
     s+='<path d="'+pb+'" fill="none" stroke="var(--c2)" stroke-width="2" stroke-dasharray="6 4" opacity="'+(nb?1:0.3)+'"/>';
     n.ticks.forEach(function(t){s+='<text x="'+X(t)+'" y="'+(B+18)+'" text-anchor="middle">'+t+'</text>'});
     s+='<text x="'+R+'" y="'+(B+36)+'" text-anchor="end">'+n.xl+'</text>';
-    res=[mx,mn];
-    document.getElementById('opsSet').textContent=tab==='cars'?
-      ('μ_D(x) = p(x),  μ_F(x) = 1 − p(x)   →   '+lbl(op,n)+': max = '+fmt(mx)+', min = '+fmt(mn)):
-      (lbl(op,n)+':  max = '+fmt(mx)+',  min = '+fmt(mn));
+    /* marker at the slider point */
+    var sx=+rng.value,sa=n.fa(sx),sb=n.fb(sx),sr=f(op,sa,sb),mx=X(sx);
+    s+='<line x1="'+mx+'" x2="'+mx+'" y1="'+T+'" y2="'+B+'" stroke="var(--text-2)" stroke-dasharray="3 3"/>';
+    s+='<circle cx="'+mx+'" cy="'+Y(sa)+'" r="5" fill="var(--c1)"/>';
+    if(nb)s+='<circle cx="'+mx+'" cy="'+Y(sb)+'" r="5" fill="var(--c2)"/>';
+    s+='<circle cx="'+mx+'" cy="'+Y(sr)+'" r="7" fill="none" stroke="var(--c3)" stroke-width="3"/>';
+    document.getElementById('opsRead').textContent=n.px(sx)+'   →   μ_'+n.a+' = '+fmt(sa)+(nb?',  μ_'+n.b+' = '+fmt(sb):'')+'   →   '+calc(op,sa,sb);
+    var tb='<tr><th>نقطه</th><th>μ_'+n.a+'</th><th>μ_'+n.b+'</th><th>حساب '+lbl(op,n)+'</th></tr>';
+    n.pts.forEach(function(x){var a=n.fa(x),b=n.fb(x);
+      tb+='<tr><td>'+n.px(x)+'</td><td>'+fmt(a)+'</td><td style="opacity:'+(nb?1:0.35)+'">'+fmt(b)+'</td><td>'+calc(op,a,b)+'</td></tr>'});
+    document.getElementById('opsTable').innerHTML=tb;
+    document.getElementById('opsNote').textContent=n.notes[op];
   }
-  var note=NOTE[op];
-  if(op==='AnA')note+=fmt(tab==='bars'?Math.max.apply(null,res):res[0])+' است، پس تهی نیست.';
-  if(op==='AuA')note+=fmt(tab==='bars'?Math.min.apply(null,res):res[1])+' است، پس برابر X نیست.';
-  if(tab==='cars'&&(op==='inter'||op==='union'))note+=' در p = 50٪ هر دو منحنی 0.5 هستند و حاصل همان‌جا می‌شکند.';
-  if(tab==='cars'&&op==='notA')note='مکمل D یعنی 1 − p(x)، که دقیقاً همان F است: خط نارنجی روی خط‌چینِ F می‌افتد.';
-  document.getElementById('opsNote').textContent=note;
   svg.innerHTML=s;
 }
-document.querySelectorAll('.tab').forEach(function(b){b.addEventListener('click',function(){tab=b.dataset.tab;document.querySelectorAll('.tab').forEach(function(x){x.classList.toggle('on',x===b)});draw()})});
+document.querySelectorAll('.tab').forEach(function(b){b.addEventListener('click',function(){setTab(b.dataset.tab);document.querySelectorAll('.tab').forEach(function(x){x.classList.toggle('on',x===b)});draw()})});
 document.querySelectorAll('#opBtns .op').forEach(function(b){b.addEventListener('click',function(){op=b.dataset.op;draw()})});
+rng.addEventListener('input',draw);
 draw();
 })();
 </script>
