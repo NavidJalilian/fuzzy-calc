@@ -27,7 +27,7 @@ p{margin:0 0 10px}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
 .soft{background:var(--surface-1);border-radius:12px;padding:12px 14px}
 .m{direction:ltr;unicode-bidi:isolate;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14.5px;white-space:nowrap}
-@media (max-width:700px){.m{white-space:normal}}
+@media (max-width:700px){.m{white-space:normal;display:inline-block;max-width:100%}}
 .mb{direction:ltr;text-align:left;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14.5px;background:var(--surface-1);border-radius:8px;padding:8px 12px;margin:6px 0;overflow-x:auto;line-height:1.8}
 .en{direction:ltr;unicode-bidi:isolate;font-size:13px;color:var(--text-2)}
 b,strong{font-weight:500}
@@ -114,7 +114,7 @@ f(x)  =  ⎨ 1,                      c1 ≤ x ≤ c2
     <li><span class="m">smf(x,[a b])</span>: قرینه آینه‌ای Z، «باز از سمت راست» — چپ ۰، بین a و b بالا می‌رود، راست ۱.</li>
     <li><span class="m">pimf(x,[a b c d])</span>: در دو انتها ۰ و در وسط ۱؛ از a تا b بالا می‌رود، از b تا c برابر ۱، از c تا d پایین می‌آید (مثل ذوزنقهٔ نرم).</li>
   </ul>
-  <div class="tip">اسلایدها برای Z/S/Pi فرمول نداده‌اند. نکته کلیدی (از MathWorks): S و Z از دو تکه سهمی ساخته می‌شوند و درست وسط، در <span class="m">x = (a+b)/2</span>، مقدارشان <span class="m">0.5</span> است. مثلاً smf برای <span class="m">a ≤ x ≤ (a+b)/2</span> برابر <span class="m">2((x−a)/(b−a))²</span> است، و <span class="m">zmf = 1 − smf</span> با همان a و b.</div>
+  <div class="tip">اسلایدها برای Z/S/Pi فرمول نداده‌اند. نکته کلیدی (از MathWorks): S و Z از دو تکه سهمی ساخته می‌شوند و درست وسط، در <span class="m">x = (a+b)/2</span>، مقدارشان <span class="m">0.5</span> است. فرمول کامل smf چهار حالت دارد:<table class="t" style="direction:rtl;margin:4px auto"><tr><th>حالت</th><th>وقتی</th><th>فرمول</th></tr><tr><td>۱</td><td><span class="m" style="white-space:nowrap">x ≤ a</span></td><td><span class="m" style="white-space:nowrap">0</span></td></tr><tr><td>۲</td><td><span class="m" style="white-space:nowrap">a ≤ x ≤ (a+b)/2</span></td><td><span class="m" style="white-space:nowrap">2((x−a)/(b−a))²</span></td></tr><tr><td>۳</td><td><span class="m" style="white-space:nowrap">(a+b)/2 ≤ x ≤ b</span></td><td><span class="m" style="white-space:nowrap">1 − 2((x−b)/(b−a))²</span></td></tr><tr><td>۴</td><td><span class="m" style="white-space:nowrap">x ≥ b</span></td><td><span class="m" style="white-space:nowrap">1</span></td></tr></table>و <span class="m">zmf = 1 − smf</span> با همان a و b.</div>
 
   <h3 id="sig">سیگموئید <span class="en">(Sigmoid function)</span> (اسلاید ۹۳)</h3>
   <p>تابعی حقیقی، <b>یکنوا</b> <span class="en">(monotonic)</span> (فقط بالا می‌رود)، <b>کران‌دار</b> (بین ۰ و ۱ می‌ماند) و مشتق‌پذیر که برای همه اعداد حقیقی تعریف شده و مشتقش همه‌جا نامنفی است.</p>

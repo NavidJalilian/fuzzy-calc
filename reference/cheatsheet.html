@@ -27,7 +27,7 @@ p{margin:0 0 10px}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
 .soft{background:var(--surface-1);border-radius:12px;padding:12px 14px}
 .m{direction:ltr;unicode-bidi:isolate;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14.5px;white-space:nowrap}
-@media (max-width:700px){.m{white-space:normal}}
+@media (max-width:700px){.m{white-space:normal;display:inline-block;max-width:100%}}
 .mb{direction:ltr;text-align:left;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14.5px;background:var(--surface-1);border-radius:8px;padding:8px 12px;margin:6px 0;overflow-x:auto;line-height:1.8}
 .en{direction:ltr;unicode-bidi:isolate;font-size:13px;color:var(--text-2)}
 b,strong{font-weight:500}
@@ -151,10 +151,10 @@ table.rtl td,table.rtl th{text-align:right}
 <table class="t s"><tr><th>hedge</th><th>فارسی</th><th>نام</th><th>فرمول</th><th>μ = 0.6 →</th></tr>
   <tr><td>not</td><td>نه</td><td>complement</td><td>1 − μ</td><td>0.4</td></tr>
   <tr><td>very</td><td>خیلی</td><td>CON (تمرکز)</td><td>μ²</td><td>0.36</td></tr>
-  <tr><td>very very</td><td>خیلی خیلی</td><td>POW</td><td>μ³ <b>(جزوه)</b> · کتاب‌ها μ⁴</td><td>0.216 · (μ⁴: 0.1296)</td></tr>
+  <tr><td>very very</td><td>خیلی خیلی</td><td>POW</td><td dir="rtl"><div><b>جزوه:</b> <span class="m" style="white-space:nowrap">μ³</span></div><div>کتاب‌ها: <span class="m" style="white-space:nowrap">μ⁴</span></div></td><td dir="rtl"><div><b>جزوه:</b> <span class="m" style="white-space:nowrap">0.216</span></div><div>کتاب‌ها: <span class="m" style="white-space:nowrap">0.1296</span></div></td></tr>
   <tr><td>not very</td><td>نه خیلی</td><td>—</td><td>1 − μ²</td><td>0.64</td></tr>
   <tr><td>somewhat / more or less</td><td>تا حدی</td><td>DIL (اتساع)</td><td>μ^0.5</td><td>0.775</td></tr>
-  <tr><td>indeed</td><td>واقعاً</td><td>INT (تشدید)</td><td>2μ² if μ ≤ 0.5 · 1 − 2(1−μ)² if μ ≥ 0.5</td><td>0.68</td></tr>
+  <tr><td>indeed</td><td>واقعاً</td><td>INT (تشدید)</td><td><table class="t" style="direction:rtl;margin:4px auto"><tr><th>حالت</th><th>وقتی</th><th>فرمول</th></tr><tr><td>۱</td><td><span class="m" style="white-space:nowrap">μ ≤ 0.5</span></td><td><span class="m" style="white-space:nowrap">2μ²</span></td></tr><tr><td>۲</td><td><span class="m" style="white-space:nowrap">μ ≥ 0.5</span></td><td><span class="m" style="white-space:nowrap">1 − 2(1−μ)²</span></td></tr></table></td><td>0.68</td></tr>
   <tr><td>very not (تله)</td><td>خیلی نه</td><td>—</td><td>(1 − μ)²</td><td>0.16</td></tr></table>
 <p>ترکیب: «نه خیلی کوتاه و نه خیلی بلند» = <span class="m">min(1 − μ_short², 1 − μ_tall²)</span>. توان بیشتر ← سخت‌گیرتر؛ جذر ← آسان‌گیرتر. <span class="m">0</span> و <span class="m">1</span> با توان عوض نمی‌شوند؛ indeed درجه <span class="m">0.5</span> را ثابت نگه می‌دارد. slightly فرمول ندارد.</p>
 </section>

@@ -27,7 +27,7 @@ p{margin:0 0 10px}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
 .soft{background:var(--surface-1);border-radius:12px;padding:12px 14px}
 .m{direction:ltr;unicode-bidi:isolate;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14.5px;white-space:nowrap}
-@media (max-width:700px){.m{white-space:normal}}
+@media (max-width:700px){.m{white-space:normal;display:inline-block;max-width:100%}}
 .mb{direction:ltr;text-align:left;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14.5px;background:var(--surface-1);border-radius:8px;padding:8px 12px;margin:6px 0;overflow-x:auto;line-height:1.8}
 .en{direction:ltr;unicode-bidi:isolate;font-size:13px;color:var(--text-2)}
 b,strong{font-weight:500}
@@ -196,7 +196,7 @@ table.plan td,table.plan th{text-align:right}
     </div><div class="fb"></div>
   </div>
 
-  <div class="q mcq" data-l="0005" data-yes="درست! 0.8 از 0.5 بزرگ‌تر است، پس شاخه دوم: 1 − 2(1 − 0.8)² = 1 − 2(0.04) = 0.92." data-no="نه. indeed دو شاخه دارد. چون 0.8 ≥ 0.5، فرمول 1 − 2(1 − μ)² را بزن: 1 − 2×0.04. (0.64 جواب very است و 0.89 جواب somewhat.)">
+  <div class="q mcq" data-l="0005" data-yes="درست! 0.8 از 0.5 بزرگ‌تر است، پس حالت ۲: 1 − 2(1 − 0.8)² = 1 − 2(0.04) = 0.92." data-no="نه. indeed دو حالت دارد. چون 0.8 ≥ 0.5، فرمول 1 − 2(1 − μ)² را بزن: 1 − 2×0.04. (0.64 جواب very است و 0.89 جواب somewhat.)">
     <p><b>الف۸.</b> <span class="tag">فصل ۲</span> اگر <span class="m">μ_A(x) = 0.8</span> باشد، درجه «indeed A» در همین x چند است؟</p>
     <div class="opts">
       <button><span class="m">0.64</span></button>
@@ -305,7 +305,7 @@ A = {0.3/1, 0.8/2, 1/3, 0.5/5} ,  B = {0.6/2, 0.2/3, 0.9/4, 0.4/5, 1/6}</div>
     <button class="check">بررسی</button><div class="fb"></div>
   </div>
 
-  <div class="q practice" data-l="0005" data-hint="somewhat = جذر μ (مثلاً √0.3 ≈ 0.548). indeed: اگر μ ≤ 0.5 ← 2μ²؛ اگر μ ≥ 0.5 ← 1 − 2(1−μ)². برای μ = 0.5 هر دو شاخه 0.5 می‌دهند." data-yes="عالی! دیدی که indeed درجه 0.5 را ثابت نگه داشت، زیرش را پایین برد و بالایش را بالا.">
+  <div class="q practice" data-l="0005" data-hint="somewhat = جذر μ (مثلاً √0.3 ≈ 0.548). indeed دو حالت دارد: (۱) وقتی ⁦μ ≤ 0.5⁩ باشد، جواب ⁦2μ²⁩ است. (۲) وقتی ⁦μ ≥ 0.5⁩ باشد، جواب ⁦1 − 2(1 − μ)²⁩ است. برای μ = 0.5 هر دو حالت 0.5 می‌دهند." data-yes="عالی! دیدی که indeed درجه 0.5 را ثابت نگه داشت، زیرش را پایین برد و بالایش را بالا.">
     <p><b>۲-ب)</b> (سه رقم اعشار)</p>
     <table class="t"><tr><th></th><th>15</th><th>20</th><th>25</th><th>30</th><th>35</th><th>40</th></tr>
       <tr><th>somewhat</th><td><input type="text" data-k="0" data-tol="0.005" aria-label="somewhat در 15"></td><td><input type="text" data-k="0.548" data-tol="0.005" aria-label="somewhat در 20"></td><td><input type="text" data-k="0.707" data-tol="0.005" aria-label="somewhat در 25"></td><td><input type="text" data-k="0.775" data-tol="0.005" aria-label="somewhat در 30"></td><td><input type="text" data-k="0.949" data-tol="0.005" aria-label="somewhat در 35"></td><td><input type="text" data-k="1" data-tol="0.005" aria-label="somewhat در 40"></td></tr>
@@ -315,7 +315,8 @@ A = {0.3/1, 0.8/2, 1/3, 0.5/5} ,  B = {0.6/2, 0.2/3, 0.9/4, 0.4/5, 1/6}</div>
   </div>
 
   <details class="sol"><summary>راه‌حل کامل</summary>
-    <p><b>فرمول‌ها (اسلایدهای ۵۲ و ۵۳):</b> very = <span class="m">μ²</span> · very very = <span class="m">μ³</span> · not very = <span class="m">1 − μ²</span> · somewhat = <span class="m">μ^0.5</span> · indeed = <span class="m">2μ²</span> اگر <span class="m">μ ≤ 0.5</span>، وگرنه <span class="m">1 − 2(1−μ)²</span>.</p>
+    <p><b>فرمول‌ها (اسلایدهای ۵۲ و ۵۳):</b></p><table class="t" style="direction:rtl;margin:4px auto"><tr><th>قید</th><th>فرمول</th></tr><tr><td>not</td><td><span class="m" style="white-space:nowrap">1 − μ</span></td></tr><tr><td>very</td><td><span class="m" style="white-space:nowrap">μ²</span></td></tr><tr><td>very very</td><td><span class="m" style="white-space:nowrap">μ³</span></td></tr><tr><td>not very</td><td><span class="m" style="white-space:nowrap">1 − μ²</span></td></tr><tr><td>somewhat</td><td><span class="m" style="white-space:nowrap">μ^0.5</span> (همان <span class="m" style="white-space:nowrap">√μ</span>)</td></tr></table>
+    <p>indeed دو حالت دارد:</p><table class="t" style="direction:rtl;margin:4px auto"><tr><th>حالت</th><th>وقتی</th><th>فرمول</th></tr><tr><td>۱</td><td><span class="m" style="white-space:nowrap">μ ≤ 0.5</span></td><td><span class="m" style="white-space:nowrap">2μ²</span></td></tr><tr><td>۲</td><td><span class="m" style="white-space:nowrap">μ ≥ 0.5</span></td><td><span class="m" style="white-space:nowrap">1 − 2(1−μ)²</span></td></tr></table>
     <table class="t"><tr><th>x</th><th>15</th><th>20</th><th>25</th><th>30</th><th>35</th><th>40</th></tr>
       <tr><th>μ_hot</th><td>0</td><td>0.3</td><td>0.5</td><td>0.6</td><td>0.9</td><td>1</td></tr>
       <tr><th>very = μ²</th><td>0</td><td>0.09</td><td>0.25</td><td>0.36</td><td>0.81</td><td>1</td></tr>
@@ -323,7 +324,7 @@ A = {0.3/1, 0.8/2, 1/3, 0.5/5} ,  B = {0.6/2, 0.2/3, 0.9/4, 0.4/5, 1/6}</div>
       <tr><th>not very = 1−μ²</th><td>1</td><td>0.91</td><td>0.75</td><td>0.64</td><td>0.19</td><td>0</td></tr>
       <tr><th>somewhat = √μ</th><td>0</td><td>0.548</td><td>0.707</td><td>0.775</td><td>0.949</td><td>1</td></tr>
       <tr><th>indeed</th><td>0</td><td>0.18</td><td>0.5</td><td>0.68</td><td>0.98</td><td>1</td></tr></table>
-    <p><b>indeed، شاخه به شاخه:</b> <span class="m">0.3 → 2(0.09) = 0.18</span> · <span class="m">0.5 → 2(0.25) = 0.5</span> (شاخه دوم هم <span class="m">1 − 2(0.25) = 0.5</span>) · <span class="m">0.6 → 1 − 2(0.16) = 0.68</span> · <span class="m">0.9 → 1 − 2(0.01) = 0.98</span>.</p>
+    <p><b>indeed، حالت به حالت:</b> <span class="m">0.3 → 2(0.09) = 0.18</span> · <span class="m">0.5 → 2(0.25) = 0.5</span> (حالت ۲ هم <span class="m">1 − 2(0.25) = 0.5</span>) · <span class="m">0.6 → 1 − 2(0.16) = 0.68</span> · <span class="m">0.9 → 1 − 2(0.01) = 0.98</span>.</p>
     <p><b>جواب به شکل تمرین:</b></p>
     <div class="mb pre">very hot      = {(15,0), (20,0.09), (25,0.25), (30,0.36), (35,0.81), (40,1)}
 very very hot = {(15,0), (20,0.027), (25,0.125), (30,0.216), (35,0.729), (40,1)}
@@ -475,7 +476,7 @@ x = 8.5 در [6, 10] (پایین‌رونده): (10 − 8.5)/(10 − 6) = 1.5/4 
   <p style="margin-bottom:4px"><b>شب امتحان — همین را به خاطر بسپار</b></p>
   <ul style="margin:0">
     <li>عنصرِ ننوشته = درجه ۰؛ مکملش ۱ است. در <a href="#hw1-q2">تمرین ۱</a> جفت‌ها <span class="m">(x, μ)</span> هستند، در بقیه جاها <span class="m">μ/x</span>.</li>
-    <li>very = <span class="m">μ²</span>، very very = <span class="m">μ³</span> (جزوه)، not very = <span class="m">1−μ²</span>، somewhat = <span class="m">√μ</span>، indeed دو شاخه با مرز 0.5.</li>
+    <li><span class="m" style="white-space:nowrap">very = μ²</span> · <span class="m" style="white-space:nowrap">very very = μ³</span> (جزوه) · <span class="m" style="white-space:nowrap">not very = 1−μ²</span> · <span class="m" style="white-space:nowrap">somewhat = √μ</span> · indeed دو حالت دارد: وقتی <span class="m" style="white-space:nowrap">μ ≤ 0.5</span> فرمول <span class="m" style="white-space:nowrap">2μ²</span>، وقتی <span class="m" style="white-space:nowrap">μ ≥ 0.5</span> فرمول <span class="m" style="white-space:nowrap">1 − 2(1−μ)²</span>.</li>
     <li>استنتاج: <span class="m">R</span> با min (یا ضرب) ← <span class="m">A′</span> با <span class="m">μ_A(x0)</span> در جای x0 ← <span class="m">b′_j = max_i(…)</span> ← میانگین وزنی.</li>
     <li>میان‌بر چک: max-min ← <span class="m">min(α, b_j)</span>؛ max-product ← <span class="m">α²·b_j</span>.</li>
     <li>ترتیب پارامترها: trimf [a b c]، trapmf [a b c d]، gaussmf [σ c]، gbellmf [a b c]، sigmf [a c].</li>

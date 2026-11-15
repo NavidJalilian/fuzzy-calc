@@ -27,7 +27,7 @@ p{margin:0 0 10px}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
 .soft{background:var(--surface-1);border-radius:12px;padding:12px 14px}
 .m{direction:ltr;unicode-bidi:isolate;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14.5px;white-space:nowrap}
-@media (max-width:700px){.m{white-space:normal}}
+@media (max-width:700px){.m{white-space:normal;display:inline-block;max-width:100%}}
 .mb{direction:ltr;text-align:left;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14.5px;background:var(--surface-1);border-radius:8px;padding:8px 12px;margin:6px 0;overflow-x:auto;line-height:1.8}
 .en{direction:ltr;unicode-bidi:isolate;font-size:13px;color:var(--text-2)}
 b,strong{font-weight:500}
@@ -94,7 +94,7 @@ details.sol[open] summary{margin-bottom:6px}
     <tr><td>very very (خیلی خیلی)</td><td>pow(A)</td><td><span class="m">μ_pow(A)(x) = (μ_A(x))³</span></td></tr>
     <tr><td>not very (نه خیلی)</td><td>—</td><td><span class="m">μ_B(x) = 1 − (μ_A(x))²</span></td></tr>
     <tr><td>somewhat / more or less (تا حدی)</td><td>Dil(A) — اتساع <span class="en">(dilation)</span></td><td><span class="m">μ_Dil(A)(x) = (μ_A(x))^0.5</span></td></tr>
-    <tr><td>indeed (واقعاً)</td><td>int(A) — تشدید <span class="en">(intensification)</span></td><td><span class="m">2(μ_A)²</span> اگر <span class="m">0 ≤ μ_A ≤ 0.5</span><br><span class="m">1 − 2(1 − μ_A)²</span> اگر <span class="m">0.5 ≤ μ_A ≤ 1</span></td></tr>
+    <tr><td>indeed (واقعاً)</td><td>int(A) — تشدید <span class="en">(intensification)</span></td><td><table class="t" style="direction:rtl;margin:4px auto"><tr><th>حالت</th><th>وقتی</th><th>فرمول</th></tr><tr><td>۱</td><td><span class="m" style="white-space:nowrap">0 ≤ μ_A ≤ 0.5</span></td><td><span class="m" style="white-space:nowrap">2(μ_A)²</span></td></tr><tr><td>۲</td><td><span class="m" style="white-space:nowrap">0.5 ≤ μ_A ≤ 1</span></td><td><span class="m" style="white-space:nowrap">1 − 2(1 − μ_A)²</span></td></tr></table></td></tr>
   </table>
 
   <h3>شهود: چرا توان؟</h3>
@@ -135,12 +135,12 @@ details.sol[open] summary{margin-bottom:6px}
   <div class="st">قدم ۴ — somewhat tall: جذر هر درجه. <span class="m">√0.2 ≈ 0.447</span>، <span class="m">√0.4 ≈ 0.632</span>، <span class="m">√0.7 ≈ 0.837</span>.
     <div class="mb">somewhat tall = {(0,0), (20,0.447), (40,0.632), (60,0.837), (80,1), (100,1)}</div></div>
   <div class="st">قدم ۵ — indeed tall: اول ببین هر درجه از ۰٫۵ کمتر است یا بیشتر.
-    <table class="t"><tr><th>μ</th><th>کدام شاخه؟</th><th>حساب</th></tr>
-      <tr><td>0</td><td>≤ 0.5</td><td>2·0² = 0</td></tr>
-      <tr><td>0.2</td><td>≤ 0.5</td><td>2·0.04 = 0.08</td></tr>
-      <tr><td>0.4</td><td>≤ 0.5</td><td>2·0.16 = 0.32</td></tr>
-      <tr><td>0.7</td><td>≥ 0.5</td><td>1 − 2·(0.3)² = 1 − 0.18 = 0.82</td></tr>
-      <tr><td>1</td><td>≥ 0.5</td><td>1 − 2·0² = 1</td></tr></table>
+    <table class="t"><tr><th>μ</th><th>کدام حالت؟</th><th>حساب</th></tr>
+      <tr><td>0</td><td dir="rtl">حالت ۱ (<span class="m">μ ≤ 0.5</span>)</td><td>2·0² = 0</td></tr>
+      <tr><td>0.2</td><td dir="rtl">حالت ۱ (<span class="m">μ ≤ 0.5</span>)</td><td>2·0.04 = 0.08</td></tr>
+      <tr><td>0.4</td><td dir="rtl">حالت ۱ (<span class="m">μ ≤ 0.5</span>)</td><td>2·0.16 = 0.32</td></tr>
+      <tr><td>0.7</td><td dir="rtl">حالت ۲ (<span class="m">μ ≥ 0.5</span>)</td><td>1 − 2·(0.3)² = 1 − 0.18 = 0.82</td></tr>
+      <tr><td>1</td><td dir="rtl">حالت ۲ (<span class="m">μ ≥ 0.5</span>)</td><td>1 − 2·0² = 1</td></tr></table>
     <div class="mb">indeed tall = {(0,0), (20,0.08), (40,0.32), (60,0.82), (80,1), (100,1)}</div></div>
   <div class="row" style="margin-top:8px"><button class="next">قدم بعدی</button><button class="all">نمایش همه</button></div>
 </div></section>
@@ -167,14 +167,14 @@ not very  = 1−μ² 0.99    0.91    0.75    0.36    0</div><p>مثلاً در �
     </details><div class="fb"></div>
   </div>
 
-  <div class="q practice" data-hint="somewhat = جذر (√0.1 ≈ 0.316). indeed: اگر μ ≤ 0.5 → 2μ²، اگر μ ≥ 0.5 → 1 − 2(1 − μ)². در 0.5 هر دو فرمول 0.5 می‌دهند.">
+  <div class="q practice" data-hint="somewhat = جذر (√0.1 ≈ 0.316). indeed دو حالت دارد: (۱) وقتی ⁦μ ≤ 0.5⁩ باشد، جواب ⁦2μ²⁩ است. (۲) وقتی ⁦μ ≥ 0.5⁩ باشد، جواب ⁦1 − 2(1 − μ)²⁩ است. در 0.5 هر دو حالت 0.5 می‌دهند.">
     <p><b>سؤال ۲.</b> somewhat و indeed را حساب کن (برای جذرها دو رقم اعشار کافی است).</p>
     <table class="t"><tr><th></th><th>150</th><th>160</th><th>170</th><th>180</th><th>190</th></tr>
       <tr><th>somewhat</th><td><input type="text" data-k="0.316" data-tol="0.01" aria-label="somewhat در 150"></td><td><input type="text" data-k="0.548" data-tol="0.01" aria-label="somewhat در 160"></td><td><input type="text" data-k="0.707" data-tol="0.01" aria-label="somewhat در 170"></td><td><input type="text" data-k="0.894" data-tol="0.01" aria-label="somewhat در 180"></td><td><input type="text" data-k="1" data-tol="0.01" aria-label="somewhat در 190"></td></tr>
       <tr><th>indeed</th><td><input type="text" data-k="0.02" data-tol="0.005" aria-label="indeed در 150"></td><td><input type="text" data-k="0.18" data-tol="0.005" aria-label="indeed در 160"></td><td><input type="text" data-k="0.5" data-tol="0.005" aria-label="indeed در 170"></td><td><input type="text" data-k="0.92" data-tol="0.005" aria-label="indeed در 180"></td><td><input type="text" data-k="1" data-tol="0.005" aria-label="indeed در 190"></td></tr></table>
     <button class="check">بررسی</button>
     <details class="sol"><summary>راه‌حل</summary>
-      <p><b>قدم ۱ — somewhat = جذر:</b></p><div class="mb pre">√0.1 ≈ 0.316   √0.3 ≈ 0.548   √0.5 ≈ 0.707   √0.8 ≈ 0.894   √1 = 1</div><p><b>قدم ۲ — indeed:</b> اول ببین μ کمتر از ۰٫۵ است یا بیشتر، بعد شاخه درست را بزن:</p><div class="mb pre">150: μ = 0.1 ≤ 0.5  →  2·0.1²         = 0.02
+      <p><b>قدم ۱ — somewhat = جذر:</b></p><div class="mb pre">√0.1 ≈ 0.316   √0.3 ≈ 0.548   √0.5 ≈ 0.707   √0.8 ≈ 0.894   √1 = 1</div><p><b>قدم ۲ — indeed:</b> اول ببین μ کمتر از ۰٫۵ است یا بیشتر، بعد حالت درست را بزن:</p><div class="mb pre">150: μ = 0.1 ≤ 0.5  →  2·0.1²         = 0.02
 160: μ = 0.3 ≤ 0.5  →  2·0.3²         = 0.18
 170: μ = 0.5        →  2·0.5²         = 0.5
 180: μ = 0.8 ≥ 0.5  →  1 − 2·(1−0.8)² = 1 − 0.08 = 0.92
@@ -205,7 +205,7 @@ not very short = 1 − 0.5² = 1 − 0.25 = 0.75</div><p><b>قدم ۲:</b> <span
     </div><div class="fb"></div>
   </div>
 
-  <div class="q mcq" data-yes="درست! 0.3 ≤ 0.5، پس شاخه اول: 2 × 0.3² = 2 × 0.09 = 0.18." data-no="نه. 0.3 کمتر از 0.5 است، پس شاخه اول indeed: 2(μ)² = 2 × 0.09. (0.09 فقط very است، 0.55 جذر است، 0.91 هم not very.)">
+  <div class="q mcq" data-yes="درست! 0.3 ≤ 0.5، پس حالت ۱: 2 × 0.3² = 2 × 0.09 = 0.18." data-no="نه. 0.3 کمتر از 0.5 است، پس حالت ۱ indeed: 2(μ)² = 2 × 0.09. (0.09 فقط very است، 0.55 جذر است، 0.91 هم not very.)">
     <p><b>سؤال ۵.</b> اگر <span class="m">μ_A(x) = 0.3</span>، درجه «indeed A» چقدر است؟</p>
     <div class="opts">
       <button><span class="m">0.09</span></button>
@@ -239,8 +239,8 @@ not very short = 1 − 0.5² = 1 − 0.25 = 0.75</div><p><b>قدم ۲:</b> <span
 <!-- ===== 5. SUMMARY ===== -->
 <section class="sec"><p class="lab">۵. جمع‌بندی — همین را به خاطر بسپار</p>
 <div class="soft"><ul>
-  <li>قید = فرمولی روی درجه، نقطه به نقطه. <span class="m">not: 1−μ</span> · <span class="m">very: μ²</span> · <span class="m">very very: μ³</span> (جزوه؛ کتاب‌ها <span class="m">μ⁴</span>) · <span class="m">not very: 1−μ²</span> · <span class="m">somewhat: μ^0.5</span>.</li>
-  <li><span class="m">indeed</span>: زیر ۰٫۵ → <span class="m">2μ²</span>، بالای ۰٫۵ → <span class="m">1 − 2(1−μ)²</span>؛ درجه ۰٫۵ ثابت می‌ماند.</li>
+  <li>قید = فرمولی روی درجه، نقطه به نقطه:<table class="t" style="direction:rtl;margin:4px auto"><tr><th>قید</th><th>فرمول</th></tr><tr><td>not</td><td><span class="m" style="white-space:nowrap">1 − μ</span></td></tr><tr><td>very</td><td><span class="m" style="white-space:nowrap">μ²</span></td></tr><tr><td>very very</td><td><span class="m" style="white-space:nowrap">μ³</span> (جزوه؛ کتاب‌ها <span class="m" style="white-space:nowrap">μ⁴</span>)</td></tr><tr><td>not very</td><td><span class="m" style="white-space:nowrap">1 − μ²</span></td></tr><tr><td>somewhat</td><td><span class="m" style="white-space:nowrap">μ^0.5</span> (همان <span class="m" style="white-space:nowrap">√μ</span>)</td></tr></table></li>
+  <li><span class="m">indeed</span> دو حالت دارد؛ درجه ۰٫۵ ثابت می‌ماند:<table class="t" style="direction:rtl;margin:4px auto"><tr><th>حالت</th><th>وقتی</th><th>فرمول</th></tr><tr><td>۱</td><td><span class="m" style="white-space:nowrap">μ ≤ 0.5</span></td><td><span class="m" style="white-space:nowrap">2μ²</span></td></tr><tr><td>۲</td><td><span class="m" style="white-space:nowrap">μ ≥ 0.5</span></td><td><span class="m" style="white-space:nowrap">1 − 2(1−μ)²</span></td></tr></table></li>
   <li>توان بیشتر = سخت‌گیرتر (منحنی جمع‌تر)؛ جذر = آسان‌گیرتر (منحنی پهن‌تر). ۰ و ۱ با توان عوض نمی‌شوند.</li>
   <li>«not very» ≠ «very not»: اولی <span class="m">1 − μ²</span>، دومی <span class="m">(1 − μ)²</span>.</li>
   <li>«نه خیلی کوتاه و نه خیلی بلند» = <span class="m">min(1 − μ_tall², 1 − μ_short²)</span>.</li>
