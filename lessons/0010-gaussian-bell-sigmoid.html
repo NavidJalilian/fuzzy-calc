@@ -78,6 +78,44 @@ details.sol[open] summary{margin-bottom:6px}
 .mb.pre{white-space:pre}
 .shapes{display:flex;flex-wrap:wrap;gap:6px;direction:ltr}
 .shapes button{font-family:"SF Mono",Menlo,Consolas,monospace;font-size:13.5px}
+/* animated walk-through */
+.anim:focus{outline:none}
+.an-head{display:flex;gap:10px;align-items:stretch}
+.an-cap{flex:1;background:var(--surface-1);border-radius:10px;padding:8px 14px;min-height:8.2em;font-size:15px;line-height:1.85}
+.an-btns{display:flex;flex-direction:column;gap:6px;justify-content:center;min-width:104px}
+#anNext{font-size:16px;font-weight:500;padding:12px 14px}
+.an-btns .cnt{font-size:12.5px;color:var(--text-3);text-align:center}
+.an-f{direction:ltr;text-align:left;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14px;background:var(--surface);border-radius:6px;padding:3px 10px;margin:5px 0;white-space:pre-wrap;line-height:1.7}
+.an-new{margin-top:6px;font-size:13.5px;line-height:1.8;border-right:3px solid var(--warn);background:var(--warn-bg);padding:3px 10px}
+.an-new .an-from{color:var(--text-2)}
+.an-prog{height:4px;background:var(--border);border-radius:2px;margin:8px 0 4px;overflow:hidden}
+.an-prog>i{display:block;height:100%;background:var(--accent);transition:width .4s}
+.an-stage{overflow-x:auto;margin:0 -4px;direction:ltr}
+#anSvg{display:block;width:100%;min-width:500px}
+#anSvg text{font-size:13px}
+#anSvg .mono{font-family:"SF Mono",Menlo,Consolas,monospace;font-size:13px}
+#anSvg .an-ttl{font-size:14px;font-weight:700;fill:var(--text)}
+#anSvg .an-val{font-size:12px;fill:var(--text)}
+#anSvg .an-ax{font-size:11px;fill:var(--text-3)}
+#anSvg .cellt{font-size:13px;fill:var(--text)}
+#anSvg .fly{font-size:15px;font-weight:700}
+#anSvg .flash{animation:anFlash .8s ease-out}
+@keyframes anFlash{from{fill:var(--accent);font-size:17px}to{fill:var(--text)}}
+#anSvg .fd,#anSvg .fd *{transition:opacity .45s}
+#anSvg .an-bar{transition:fill .45s,opacity .45s}
+#anSvg .an-ghost{fill:none;stroke:var(--text-3);stroke-dasharray:4 3}
+#anSvg .an-hl{fill:none;stroke:var(--accent);stroke-width:2.5}
+#anSvg .an-band{fill:var(--accent-bg)}
+.an-swipe{display:none;font-size:12px;color:var(--text-3);margin:2px 0 0}
+button:disabled{opacity:.45;cursor:default}
+details.an-gld{margin-top:10px}
+details.an-gld summary{cursor:pointer;color:var(--accent);font-size:14px}
+table.an-gl{direction:rtl;font-size:14px}
+table.an-gl td,table.an-gl th{text-align:right;vertical-align:top}
+table.an-gl td:first-child{white-space:nowrap}
+@media (max-width:540px){.an-head{flex-direction:column}.an-btns{flex-direction:row;align-items:center}.an-btns #anNext{flex:1}.an-swipe{display:block}}
+@media (prefers-reduced-motion:reduce){#anSvg .fd,#anSvg .fd *,#anSvg .an-bar,.an-prog>i{transition:none}#anSvg .flash{animation:none}}
+@media print{.an-btns{display:none}}
 </style>
 </head>
 <body>
@@ -86,8 +124,28 @@ details.sol[open] summary{margin-bottom:6px}
 <h1>توابع گاوسی، زنگوله‌ای، سیگموئید و چندجمله‌ای</h1>
 <p class="goal">هدف: بعد از این درس می‌توانی μ(x) را برای تابع گاوسی، زنگوله‌ای و سیگموئید با ماشین‌حساب حساب کنی، و برای هر شکل نام دستور متلب و فهرست پارامترهایش را به‌ترتیب درست بگویی.</p>
 
+<!-- ===== 0. ANIMATED WALK-THROUGH ===== -->
+<section class="sec" id="anim"><p class="lab">از اینجا شروع کن: کل درس در یک انیمیشن قدم به قدم</p>
+<div class="card anim" id="anBox" tabindex="0" aria-label="انیمیشن قدم به قدم حساب μ برای گاوسی، زنگوله‌ای و سیگموئید">
+  <div class="an-head">
+    <div class="an-cap" id="anCap" aria-live="polite"></div>
+    <div class="an-btns">
+      <button id="anNext" class="on">بعدی ←</button>
+      <button id="anPrev">→ قبلی</button>
+      <button id="anAgain">↻ دوباره ببین</button>
+      <span class="cnt" id="anCnt"></span>
+    </div>
+  </div>
+  <div class="an-prog"><i id="anBar"></i></div>
+  <div class="an-stage"><svg id="anSvg" viewBox="0 0 640 336" role="img" aria-labelledby="anT"><title id="anT">حل قدم به قدم: μ(x) برای gaussmf، gbellmf و سیگموئید</title></svg></div>
+  <p class="an-swipe">روی گوشی: اگر تصویر جا نشد، آن را به چپ و راست بکش.</p>
+  <details class="an-gld"><summary>همه نمادها: هر کدام چیست و از کجا آمد</summary>
+    <table class="t an-gl"><tbody id="anGl"></tbody></table>
+  </details>
+</div></section>
+
 <!-- ===== 1. IDEA ===== -->
-<section class="sec"><p class="lab">۱. ایده</p>
+<section class="sec"><p class="lab">۱. ایده (همان انیمیشن بالا، به صورت متن)</p>
 <div class="card">
   <p>مثلث و ذوزنقه (درس ۹) گوشه تیز دارند. این درس توابعی است که <b>هموار</b> <span class="en">(smooth)</span> هستند: منحنی نرم، بدون شکستگی.</p>
 
@@ -460,6 +518,229 @@ function draw(){
 }
 document.getElementById('s-x').addEventListener('input',function(e){x=+e.target.value;draw()});
 setShape('gaussmf');
+})();
+</script>
+<script>
+/* ===== SHARED CURVE PLAYER — same text in lessons 9 and 10 ===== */
+function anM(s){return '<span class="m">'+s+'</span>'}
+function anF(s){return '<div class="an-f">'+s+'</div>'}
+function anPlayer(FN,GL,RAW){
+var NS='http://www.w3.org/2000/svg',svg=document.getElementById('anSvg'),box=document.getElementById('anBox');
+var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+function f(v){return String(Math.round(v*1000)/1000)}
+function el(p,tag,a,txt){var e=document.createElementNS(NS,tag);for(var k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;p.appendChild(e);return e}
+function op(e,v){e.style.opacity=v}
+function ease(p){return p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2}
+function flash(t){t.classList.remove('flash');void t.getBBox();t.classList.add('flash')}
+function clear(g){while(g.firstChild)g.removeChild(g.firstChild)}
+
+/* ---- plot geometry: x axis AX[0]..AX[1], μ from 0 (PB) to 1 (PT) ---- */
+var PX0=70,PX1=600,PB=232,PT=72,AX=null,CMDY=30;
+function px(x){return PX0+(x-AX[0])/(AX[1]-AX[0])*(PX1-PX0)}
+function py(m){return PB-m*(PB-PT)}
+var gAxis=el(svg,'g',{});
+var halfL=el(svg,'line',{x1:PX0,x2:PX1,y1:py(.5),y2:py(.5),'class':'fd',style:'opacity:0;stroke:var(--c4);stroke-dasharray:2 4'});
+var gMark=el(svg,'g',{}),gBrk=el(svg,'g',{});
+var pieceP=el(svg,'path',{'class':'fd',style:'opacity:0;fill:none;stroke:var(--c3);stroke-width:9;stroke-linecap:round;stroke-opacity:.5'});
+var curveP=el(svg,'path',{style:'fill:none;stroke:var(--c1);stroke-width:2.5;stroke-linejoin:round'});
+var xg=el(svg,'g',{'class':'fd',style:'opacity:0'});
+var xLine=el(xg,'line',{y1:PT-8,y2:PB,style:'stroke:var(--c4);stroke-width:1.5;stroke-dasharray:4 3'});
+var xArr=el(xg,'polygon',{style:'fill:var(--c4)'});
+var xTxt=el(xg,'text',{y:PT-14,'text-anchor':'middle','class':'mono',style:'fill:var(--c4);font-weight:700;font-size:14px'},'');
+var mg=el(svg,'g',{'class':'fd',style:'opacity:0'});
+var mH=el(mg,'line',{x1:PX0,style:'stroke:var(--c2);stroke-width:1.5;stroke-dasharray:4 3'});
+var mDot=el(mg,'circle',{r:6,style:'fill:var(--c2)'});
+var mTxt=el(mg,'text',{'class':'mono',style:'fill:var(--c2);font-weight:700;font-size:15px'},'');
+var cmdG=el(svg,'g',{}),cmdT=[];
+var BX=335,BYC=124,BUB=el(svg,'g',{'class':'fd',style:'opacity:0'});
+var bubR=el(BUB,'rect',{rx:12,style:'fill:var(--surface);stroke:var(--accent);stroke-width:2.5'});
+var bubT=el(BUB,'text',{x:BX,y:BYC+9,'text-anchor':'middle','class':'mono',style:'font-size:24px;font-weight:700;fill:var(--text)'},'');
+var FL=el(svg,'g',{});
+
+function drawAxis(){clear(gAxis);
+  [0,.5,1].forEach(function(m){el(gAxis,'line',{x1:PX0,x2:PX1,y1:py(m),y2:py(m),style:'stroke:var(--grid)'});el(gAxis,'text',{x:PX0-8,y:py(m)+4,'text-anchor':'end'},String(m))});
+  for(var v=AX[0];v<=AX[1];v++){el(gAxis,'line',{x1:px(v),x2:px(v),y1:PB,y2:PB+4,style:'stroke:var(--text-3)'});el(gAxis,'text',{x:px(v),y:PB+17,'text-anchor':'middle'},String(v))}
+  el(gAxis,'line',{x1:PX0,x2:PX1,y1:PB,y2:PB,style:'stroke:var(--text-3)'});
+  el(gAxis,'text',{x:PX1+12,y:PB+4,'class':'mono'},'x');
+  el(gAxis,'text',{x:PX0-8,y:PT-14,'text-anchor':'end','class':'mono'},'μ');
+}
+function pathFor(key,r){var F=FN[key],a=r?r[0]:AX[0],b=r?r[1]:AX[1],xs=[];
+  for(var i=0;i<=300;i++)xs.push(a+(b-a)*i/300);(F.k||[]).forEach(function(k){if(k>a&&k<b)xs.push(k)});
+  xs.sort(function(p,q){return p-q});return xs.map(function(x,i){return (i?'L':'M')+px(x).toFixed(1)+' '+py(F.f(x)).toFixed(1)}).join('')}
+
+/* marks (corner labels on the axis, or free labels) and brackets (measured distances) */
+var MK={},BK={};
+function key(o){return JSON.stringify(o)}
+function makeMark(m){var g=el(gMark,'g',{'class':'fd'}),lx,ly;
+  if(m.tx==null){lx=px(m.x);ly=PB+34;el(g,'line',{x1:lx,x2:lx,y1:PT,y2:PB+20,style:'stroke:var(--c2);stroke-opacity:.45;stroke-dasharray:3 4'})}
+  else{lx=m.tx;ly=m.ty}
+  var lab=el(g,'text',{x:lx,y:ly,'text-anchor':'middle','class':'mono',style:'fill:var(--c2);font-weight:700;font-size:14px'},m.t);
+  return {g:g,lab:lab,lx:lx,ly:ly}}
+function makeBrk(b){var g=el(gBrk,'g',{'class':'fd'}),y=PB+52+b.lv*26,x1=px(b.a),x2=px(b.b),c=b.col||'var(--c3)';
+  el(g,'path',{d:'M'+x1+' '+(y-5)+'V'+(y+5)+'M'+x1+' '+y+'H'+x2+'M'+x2+' '+(y-5)+'V'+(y+5),style:'fill:none;stroke-width:2;stroke:'+c});
+  var lab=el(g,'text',{x:(x1+x2)/2,y:y+15,'text-anchor':'middle','class':'mono',style:'font-size:12.5px;font-weight:700;fill:'+c},b.t);
+  return {g:g,lab:lab,lx:(x1+x2)/2,ly:y+15}}
+function sync(g,map,list,make){var want={};
+  list.forEach(function(it){var k=key(it);want[k]=1;if(!map[k])map[k]=make(it)});
+  Object.keys(map).forEach(function(k){if(!want[k]){g.removeChild(map[k].g);delete map[k]}})}
+
+/* command line at the top, one text piece per token so numbers can fly out of it */
+var cmdKey=null;
+function buildCmd(tokens){clear(cmdG);cmdT=[];if(!tokens)return;var x=0;
+  tokens.forEach(function(t,i){var isP=i%2===1&&tokens.length>1;
+    var e=el(cmdG,'text',{x:x,y:CMDY,'class':'mono',style:'font-size:19px;font-weight:700;fill:'+(isP?'var(--accent)':'var(--text)')},t.replace(/ /g,'\u00a0'));
+    var w=e.getComputedTextLength();cmdT.push({e:e,x:x,w:w});x+=w});
+  var sh=BX-x/2;cmdT.forEach(function(c){c.e.setAttribute('x',c.x+sh);c.cx=c.x+sh+c.w/2})}
+
+/* x marker and μ point */
+function setX(x){var X=px(x);xLine.setAttribute('x1',X);xLine.setAttribute('x2',X);
+  xArr.setAttribute('points',(X-6)+','+(PB+9)+' '+(X+6)+','+(PB+9)+' '+X+','+(PB+1));
+  xTxt.setAttribute('x',X);xTxt.textContent='x = '+f(x)}
+var curKey=null;
+function muPos(x){var m=FN[curKey].f(x),X=px(x),Y=py(m),right=X>PX1-120;return {X:X,Y:Y,m:m,lx:right?X-10:X+10,ly:Y-10,anchor:right?'end':'start'}}
+function setMu(x,mt){var p=muPos(x);mH.setAttribute('x2',p.X);mH.setAttribute('y1',p.Y);mH.setAttribute('y2',p.Y);
+  mDot.setAttribute('cx',p.X);mDot.setAttribute('cy',p.Y);
+  mTxt.setAttribute('x',p.lx);mTxt.setAttribute('y',p.ly);mTxt.setAttribute('text-anchor',p.anchor);mTxt.textContent='μ = '+(mt||f(p.m));return p}
+
+/* ---- steps ---- */
+var base={ax:[0,10],cmd:null,fn:null,marks:[],brk:[],piece:null,x:null,mu:0,mt:null,half:0};
+var S=[],prev=base;
+RAW.forEach(function(r){var s=Object.assign({},prev,r[0]);prev=s;S.push({s:s,gl:r[1],cap:r[2],anim:r[3]||[]})});
+var glBody=document.getElementById('anGl');
+var hr=document.createElement('tr');hr.innerHTML='<th>نماد</th><th>یعنی</th><th>از کجا آمد</th>';glBody.appendChild(hr);
+Object.keys(GL).forEach(function(g){var tr=document.createElement('tr');tr.innerHTML='<td>'+GL[g][0]+'</td><td>'+GL[g][1]+'</td><td>'+GL[g][2]+'</td>';glBody.appendChild(tr)});
+
+function snap(s){
+  if(!AX||AX[0]!==s.ax[0]||AX[1]!==s.ax[1]){AX=s.ax.slice();drawAxis();clear(gMark);clear(gBrk);MK={};BK={};curKey=null}
+  var ck=s.cmd?s.cmd.join('|'):'';if(ck!==cmdKey){cmdKey=ck;buildCmd(s.cmd)}
+  if(s.fn!==curKey){curKey=s.fn;if(s.fn)curveP.setAttribute('d',pathFor(s.fn))}
+  curveP.style.strokeDasharray='none';curveP.style.strokeDashoffset=0;op(curveP,s.fn?1:0);
+  if(s.piece&&s.fn){pieceP.setAttribute('d',pathFor(s.fn,s.piece));op(pieceP,1)}else op(pieceP,0);
+  sync(gMark,MK,s.marks,makeMark);sync(gBrk,BK,s.brk,makeBrk);
+  Object.keys(MK).forEach(function(k){op(MK[k].lab,1)});Object.keys(BK).forEach(function(k){op(BK[k].g,1)});
+  op(halfL,s.half);
+  if(s.x!=null){setX(s.x);op(xg,1)}else op(xg,0);
+  if(s.mu&&s.x!=null&&s.fn){setMu(s.x,s.mt);op(mg,1)}else op(mg,0);
+}
+
+/* ---- motions: each hides what it introduces now, reveals it from time t, returns its end time ---- */
+var T=[],FD=1100,GAP=500,RAF=[];
+function later(ms,fn){T.push(setTimeout(fn,ms))}
+function cancelAnim(){T.forEach(clearTimeout);T=[];RAF.forEach(cancelAnimationFrame);RAF=[];clear(FL);op(BUB,0)}
+function tw(dur,step,done){var t0=null;function fr(now){if(t0===null)t0=now;var p=Math.min(1,(now-t0)/dur);step(ease(p));if(p<1)RAF.push(requestAnimationFrame(fr));else if(done)done()}RAF.push(requestAnimationFrame(fr))}
+function fly(txt,x1,y1,x2,y2,at,color,done,fs0){later(at,function(){
+  var t=el(FL,'text',{x:x1,y:y1,'text-anchor':'middle','class':'mono fly',style:'fill:'+color},txt);
+  tw(FD,function(e){t.setAttribute('x',x1+(x2-x1)*e);t.setAttribute('y',y1+(y2-y1)*e-Math.sin(e*Math.PI)*28);if(fs0)t.style.fontSize=(fs0+(15-fs0)*e)+'px'},
+    function(){if(t.parentNode)FL.removeChild(t);if(done)done()})})}
+function bubbleShow(txt){bubT.textContent=txt;var w=bubT.getBBox().width+40;
+  bubR.setAttribute('x',BX-w/2);bubR.setAttribute('y',BYC-24);bubR.setAttribute('width',w);bubR.setAttribute('height',46);op(BUB,1)}
+var ANIM={
+ params:function(s,p,arg,t){arg.forEach(function(a,n){var it=a[1]==='b'?BK[key(s.brk[a[2]])]:MK[key(s.marks[a[2]])],c=cmdT[a[0]];
+     op(it.lab,0);fly(c.e.textContent,c.cx,CMDY-6,it.lx,it.ly-4,t+n*GAP,'var(--accent)',function(){op(it.lab,1);flash(it.lab)})});
+   return t+(arg.length-1)*GAP+FD},
+ draw:function(s,p,arg,t){var len=curveP.getTotalLength();curveP.style.strokeDasharray=len;curveP.style.strokeDashoffset=len;
+   later(t,function(){tw(1800,function(e){curveP.style.strokeDashoffset=len*(1-e)},function(){curveP.style.strokeDasharray='none'})});return t+1800},
+ xin:function(s,p,arg,t){var from=(p&&p.x!=null&&p.ax[0]===s.ax[0])?p.x:AX[0];op(mg,0);op(pieceP,0);setX(from);op(xg,1);
+   later(t,function(){tw(1100,function(e){setX(from+(s.x-from)*e)},function(){if(s.piece)op(pieceP,1)})});return t+1300},
+ brk:function(s,p,arg,t){var old={};(p?p.brk:[]).forEach(function(b){old[key(b)]=1});var n=0;
+   s.brk.forEach(function(b){var k=key(b);if(old[k])return;var g=BK[k].g;op(g,0);later(t+n*700,function(){op(g,1)});n++});return t+n*700+300},
+ calc:function(s,p,arg,t){op(mg,0);var L=arg.l;
+   L.forEach(function(line,i){later(t+i*1900,function(){bubbleShow(line)})});
+   var end=t+L.length*1900;later(end-200,function(){op(BUB,0)});
+   var pos=setMu(s.x,s.mt);fly(arg.r,BX,BYC+9,pos.lx+(pos.anchor==='start'?30:-30),pos.ly-4,end-200,'var(--c2)',function(){op(mg,1);flash(mTxt)},26);
+   return end+FD}
+};
+
+/* ---- controls ---- */
+var k=0;
+var cap=document.getElementById('anCap'),cnt=document.getElementById('anCnt'),bar=document.getElementById('anBar');
+var bPrev=document.getElementById('anPrev'),bNext=document.getElementById('anNext'),bAgain=document.getElementById('anAgain');
+function show(n,animate){
+  cancelAnim();k=n;var st=S[k],p=k?S[k-1].s:null;snap(st.s);
+  if(animate&&!reduce){var t=250;st.anim.forEach(function(a){t=ANIM[a[0]](st.s,p,a[1],t)+300})}
+  cap.innerHTML='<b style="color:var(--accent)">قدم '+(k+1)+'.</b> '+st.cap+st.gl.map(function(g){
+    return '<div class="an-new"><b>نماد تازه:</b> '+GL[g][0]+' — '+GL[g][1]+' <span class="an-from">· از کجا آمد: '+GL[g][2]+'</span></div>'}).join('');
+  cnt.textContent=(k+1)+' از '+S.length;bar.style.width=((k+1)/S.length*100)+'%';
+  bPrev.disabled=k===0;bAgain.disabled=!st.anim.length||reduce;bNext.textContent=k===S.length-1?'از اول ↺':'بعدی ←';
+}
+function keepInView(){var r=box.getBoundingClientRect(),sb=svg.getBoundingClientRect();
+  if(r.top<-8||(sb.bottom>innerHeight&&r.top>8))box.scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'})}
+bNext.addEventListener('click',function(){if(k===S.length-1)show(0,false);else show(k+1,true);keepInView()});
+bAgain.addEventListener('click',function(){if(S[k].anim.length)show(k,true)});
+bPrev.addEventListener('click',function(){if(k>0)show(k-1,false);keepInView()});
+box.addEventListener('keydown',function(e){if(e.key==='ArrowLeft'&&k<S.length-1){show(k+1,true);e.preventDefault()}else if(e.key==='ArrowRight'&&k>0){show(k-1,false);e.preventDefault()}});
+show(0,false);
+}
+/* ===== END SHARED CURVE PLAYER ===== */
+</script>
+<script>
+/* ===== lesson 10: animated walk-through (slides 88, 90 and 93) ===== */
+(function(){
+var M=anM,F=anF;
+var FN={
+ gauss:{f:function(x){return Math.exp(-(x-5)*(x-5)/8)}},
+ bell:{f:function(x){return 1/(1+Math.pow(Math.abs((x-6)/2),8))}},
+ sig:{f:function(x){return 1/(1+Math.exp(-x))}}
+};
+var GL={
+ gcmd:[M('gaussmf(x,[σ c])'),'دستور متلب گاوسی. <b>اول σ، بعد c</b> — برعکس نخوان.','اسلاید ۸۸'],
+ sigma:[M('σ'),'«سیگما» = پهنای منحنی. σ بزرگ‌تر ← منحنی پهن‌تر.','اولین عدد کروشه'],
+ c:[M('c'),'مرکز قله؛ آنجا μ = 1.','دومین عدد کروشه'],
+ gf:[M('e^( −(x − c)² / (2σ²) )'),'فرمول گاوسی: هرچه x از c دورتر، توان منفی‌تر، جواب کوچک‌تر.','اسلاید ۸۷'],
+ e:[M('e ≈ 2.718'),'یک عدد ثابت. روی ماشین‌حساب دکمه '+M('eˣ')+' را بزن.','فرمول گاوسی (اسلاید ۸۷)'],
+ bcmd:[M('gbellmf(x,[a b c])'),'زنگوله‌ای: a = نیم‌پهنا، b = شیب دیواره‌ها، c = مرکز.','ترتیب: اسلاید ۹۰؛ معنی هر عدد: مستندات متلب'],
+ bf:[M('1 / (1 + |(x − c)/a|^(2b))'),'فرمول زنگوله‌ای. '+M('|…|')+' = قدرمطلق (منفی را مثبت می‌کند).','اسلاید ۹۰'],
+ S:[M('S(x) = 1 / (1 + e^(−x))'),'سیگموئید: فقط بالا می‌رود، از نزدیک ۰ تا نزدیک ۱؛ پارامتر ندارد.','اسلاید ۹۳'],
+ Sm:[M('S(−x) = 1 − S(x)'),'قرینه: مقدار در −x و +x با هم ۱ می‌شوند.','اسلاید ۹۳']
+};
+var P='var(--c4)',W='var(--c1)';
+var SG={a:5,b:7,t:'σ = 2',lv:1,col:W},BA={a:6,b:8,t:'a = 2',lv:1,col:W};
+var RAW=[
+ [{cmd:['gaussmf(x,[','2',' ','5','])']},[],
+  '<b>سؤال (اسلاید ۸۸):</b> برای '+M('gaussmf(x,[2 5])')+' مقدار μ در x = 7 چقدر است؟<br><b>هدف:</b> مثل درس ۹، به هر x یک درجه بین ۰ و ۱ بدهیم. فرقش: این منحنی‌ها <b>نرم</b>اند، بدون گوشه تیز؛ پس به جای «فاصله ÷ پهنا» یک فرمول نمایی داریم. «بعدی» را بزن.'],
+ [{marks:[{x:5,t:'c=5'}],brk:[SG]},['gcmd','sigma','c'],
+  'دو عدد کروشه بیرون می‌آیند. <b>ترتیب مهم است: اول σ، بعد c</b>.<br>• σ = 2 پهناست: فاصله‌ای روی محور (بنفش).<br>• c = 5 مرکز قله است: یک نقطه روی محور (سبز).',
+  [['params',[[1,'b',0],[3,'m',0]]]]],
+ [{fn:'gauss'},['gf','e'],
+  'منحنی گاوسی کشیده می‌شود: قله ۱ در c = 5، دو طرف آینه هم. هرچه دورتر، کمتر — ولی <b>هیچ‌وقت دقیقاً صفر نمی‌شود</b>. فرمولش:'+F('μ(x) = e^( −(x − c)² / (2σ²) )'),
+  [['draw']]],
+ [{x:7,brk:[{a:5,b:7,t:'x − c = 2',lv:0,col:P},SG]},[],
+  '<b>x = 7.</b> این فرمول هم فقط به یک چیز وابسته است: <b>x چقدر از مرکز دور است؟</b> روی محور: '+M('x − c = 2')+' (صورتی).',
+  [['xin'],['brk']]],
+ [{mu:1},[],
+  'حالا فرمول را تکه‌تکه حساب کن، هر تکه وسط تصویر:'+F('(x − c)² = (7 − 5)² = 4\n2σ² = 2 × 2² = 8\n4 / 8 = 0.5\ne^(−0.5) ≈ 0.607')+'جواب روی منحنی می‌نشیند: '+M('μ(7) ≈ 0.607')+'.',
+  [['calc',{l:['(x − c)² = (7 − 5)² = 4','2σ² = 2 × 2² = 8','4 / 8 = 0.5','e^(−0.5) ≈ 0.607'],r:'0.607'}]]],
+ [{x:3,brk:[{a:3,b:5,t:'c − x = 2',lv:0,col:P},SG]},[],
+  '<b>x = 3</b>: این هم ۲ واحد از مرکز دور است، فقط از طرف چپ. چون فاصله به توان ۲ می‌رسد، علامتش مهم نیست:'+F('(3 − 5)² = (−2)² = 4  →  0.607')+'همان جواب x = 7.',
+  [['xin'],['brk'],['calc',{l:['(3 − 5)² = 4','4 / 8 = 0.5','e^(−0.5) ≈ 0.607'],r:'0.607'}]]],
+ [{x:0,brk:[{a:0,b:5,t:'c − x = 5',lv:0,col:P},SG]},[],
+  '<b>x = 0</b>، خیلی دور از مرکز:'+F('(0 − 5)² = 25    25 / 8 = 3.125    e^(−3.125) ≈ 0.044')+'خیلی کوچک، ولی <b>صفر نیست</b>. این همان مزیت «غیرصفر در همه نقاط» اسلاید ۹۴ است.',
+  [['xin'],['brk'],['calc',{l:['(0 − 5)² = 25','25 / 8 = 3.125','e^(−3.125) ≈ 0.044'],r:'0.044'}]]],
+ [{cmd:['gbellmf(x,[','2',' ','4',' ','6','])'],fn:'bell',marks:[{x:6,t:'c=6'},{tx:540,ty:100,t:'b = 4'}],brk:[BA],x:null,mu:0,half:1},['bcmd','bf'],
+  '<b>زنگوله‌ای (اسلاید ۹۰):</b> سه عدد به ترتیب a، b، c:<br>• a = 2 نیم‌پهنا (بنفش): در فاصله a از مرکز، μ همیشه 0.5 است (خط‌چین صورتی).<br>• b = 4 شیب دیواره‌ها: هرچه بزرگ‌تر، دیواره‌ها عمودتر.<br>• c = 6 مرکز.'+F('μ(x) = 1 / (1 + |(x − c)/a|^(2b))'),
+  [['params',[[1,'b',0],[3,'m',1],[5,'m',0]]],['draw']]],
+ [{x:8,mu:1,brk:[{a:6,b:8,t:'x − c = 2',lv:0,col:P},BA]},[],
+  '<b>x = 8</b>: دقیقاً a = 2 واحد از مرکز. فاصله را «بر حسب a» بشمار، بعد به توان 2b برسان:'+F('|(8 − 6) / 2| = 1\n1^(2×4) = 1^8 = 1\n1 / (1 + 1) = 0.5'),
+  [['xin'],['brk'],['calc',{l:['|(8 − 6) / 2| = 1','1^(2×4) = 1^8 = 1','1 / (1 + 1) = 0.5'],r:'0.5'}]]],
+ [{x:7,brk:[{a:6,b:7,t:'x − c = 1',lv:0,col:P},BA]},[],
+  '<b>x = 7</b>: نصفِ a از مرکز. عدد کمتر از ۱ به توان ۸ خیلی کوچک می‌شود، پس جواب تقریباً ۱ است:'+F('|(7 − 6) / 2| = 0.5\n0.5^8 ≈ 0.0039\n1 / (1 + 0.0039) ≈ 0.996')+'برای همین با b بزرگ، سقف زنگوله تقریباً صاف است.',
+  [['xin'],['brk'],['calc',{l:['|(7 − 6) / 2| = 0.5','0.5^8 ≈ 0.0039','1 / (1 + 0.0039) ≈ 0.996'],r:'0.996'}]]],
+ [{ax:[-5,5],cmd:['S(x) = 1 / (1 + e^(−x))'],fn:'sig',marks:[],brk:[],x:null,mu:0,half:1},['S'],
+  '<b>سیگموئید (اسلاید ۹۳):</b> پارامتر ندارد و محورش از −۵ تا ۵ است. فقط بالا می‌رود: چپ نزدیک ۰، راست نزدیک ۱، و درست در وسط 0.5.',
+  [['draw']]],
+ [{x:0,mu:1},[],
+  '<b>x = 0</b>:'+F('e^(−0) = 1\n1 / (1 + 1) = 0.5'),
+  [['xin'],['calc',{l:['e^(−0) = 1','1 / (1 + 1) = 0.5'],r:'0.5'}]]],
+ [{x:2},[],
+  '<b>x = 2</b>: e^(−2) را با ماشین‌حساب بزن:'+F('e^(−2) ≈ 0.135\n1 / (1 + 0.135) ≈ 0.881'),
+  [['xin'],['calc',{l:['e^(−2) ≈ 0.135','1 / (1 + 0.135) ≈ 0.881'],r:'0.881'}]]],
+ [{x:-2},['Sm'],
+  '<b>x = −2</b>: لازم نیست از اول حساب کنی. منحنی دور وسط قرینه است:'+F('S(−2) = 1 − S(2) = 1 − 0.881 = 0.119'),
+  [['xin'],['calc',{l:['S(−2) = 1 − S(2)','1 − 0.881 = 0.119'],r:'0.119'}]]],
+ [{},[],
+  '<b>خلاصه — برای هر سه شکل:</b><br>۱) پارامترها را <b>به ترتیب درست</b> از کروشه بخوان (گاوسی: اول σ بعد c).<br>۲) فاصله x از مرکز را پیدا کن.<br>۳) فرمول را تکه‌تکه حساب کن؛ توان e را اول، بعد خود e.<br>همه نمادها در جدول زیر تصویر آمده‌اند.']
+];
+anPlayer(FN,GL,RAW);
 })();
 </script>
 </body>
