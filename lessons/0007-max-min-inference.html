@@ -79,6 +79,9 @@ details.sol[open] summary{margin-bottom:6px}
 .sl{display:grid;grid-template-columns:70px 1fr 44px;gap:8px;align-items:center;direction:ltr;font-size:14px}
 .sl span{font-family:"SF Mono",Menlo,Consolas,monospace}
 .cell{cursor:pointer}
+.wstep{border-top:1px dashed var(--border);padding-top:10px;margin-top:12px}
+.wstep svg{max-width:520px;display:block;margin:6px auto 0}
+.wstep .num{display:inline-block;min-width:1.8em;text-align:center;background:var(--accent-bg);color:var(--accent);border-radius:999px;margin-left:6px;font-weight:500}
 table.t.pair{direction:rtl}
 .pair td.win{background:var(--ok-bg);font-weight:500}
 .who{margin:6px 0;padding-inline-start:20px}
@@ -103,23 +106,27 @@ table.t.pair{direction:rtl}
   <h3>ضرب بردار در ماتریس — نسخه معمولی و نسخه فازی</h3>
   <p>در ضرب معمولی بردار در ماتریس <span class="en">(vector-matrix multiplication)</span> داریم <span class="en">(slide 70)</span>:</p>
   <div class="mb">X(1×n) · A(n×p) = Y(1×p)        y_j = Σ_{i=1..n} x_i · a_ij</div>
+  <div class="given"><b>به زبان ساده:</b><br>• <span class="m">1×n</span> یعنی «یک ردیف با n عدد». <span class="m">n×p</span> یعنی «جدولی با n سطر و p ستون». پس یک ردیف n تایی ضرب در جدول، یک ردیف p تایی می‌دهد: <b>به تعداد ستون‌های جدول جواب داریم.</b><br>• حرف کوچک پایین‌نویس شماره است: <span class="m">i</span> = شماره سطر، <span class="m">j</span> = شماره ستون. <span class="m">x_i</span> = عدد i ام ورودی؛ <span class="m">a_ij</span> = عدد جدول در سطر i و ستون j.<br>• <span class="m">Σ_{i=1..n}</span> یعنی «برای همه سطرها از ۱ تا n حساب کن و همه را جمع بزن».<br>• پس <span class="m">y_j</span> را این‌طور بخوان: «ستون j جدول را بردار، هر عددش را در عدد هم‌ردیفش در ورودی ضرب کن، و حاصل‌ها را جمع بزن».<br>مثال: ورودی <span class="m">(1, 2)</span> و ستون <span class="m">(3, 4) → 1·3 + 2·4 = 11</span>.</div>
   <p>نسخه فازی، که به آن ترکیب max-min <span class="en">(max-min composition)</span> می‌گویند و با علامت <span class="m">∘</span> نشان می‌دهند، همان کار را می‌کند با دو جابه‌جایی:</p>
   <ul>
     <li>به جای <b>ضرب</b> دوبه‌دو ← <b>min</b> دوبه‌دو</li>
     <li>به جای <b>جمع</b> ← <b>max</b></li>
   </ul>
   <div class="mb">A(1×n) ∘ M(n×p) = B(1×p)        b_j = max_{1≤i≤n} { min(a_i , m_ij) }</div>
+  <div class="given"><b>به زبان ساده:</b> درست همان جمله قبلی است، فقط با دو کلمه عوض‌شده: «ستون j جدول را بردار، هر عددش را با عدد هم‌ردیفش در ورودی <b>مقایسه کن و کوچک‌تر را بردار</b> (به جای ضرب)، و از این‌ها <b>بزرگ‌ترین را بردار</b> (به جای جمع)».<br>• <span class="m">∘</span> فقط اسم این عملیات است؛ بخوان «ترکیب max-min».<br>• <span class="m">max_{1≤i≤n}</span> یعنی «بین همه سطرها، از ۱ تا n، بزرگ‌ترین».<br>مثال با همان عددهای بالا ولی فازی: ورودی <span class="m">(0.2, 0.4)</span> و ستون <span class="m">(0.1, 0.6)</span> ← کوچک‌ترها <span class="m">0.1</span> و <span class="m">0.4</span> ← بزرگ‌ترین <span class="m">0.4</span>.</div>
   <p><span class="key">دستور کار برای b_j:</span> ستون j ماتریس را از بالا به پایین بخوان؛ هر عدد ستون را با عدد هم‌ردیفش در A جفت کن و min بگیر؛ از این minها، بزرگ‌ترین (max) را بردار.</p>
   <div class="tip">یادآوری از درس ۴: <span class="m">min</span> همان اشتراک <span class="en">(intersection, AND)</span> است و <span class="m">max</span> همان اجتماع <span class="en">(union, OR)</span>. پس b_j یعنی: «یا (x1 و ستون) یا (x2 و ستون) یا …».</div>
 
   <h3>ساختن ماتریس قانون از A و B</h3>
   <p>اگر <span class="m">A = (a_1, …, a_n)</span> با <span class="m">a_i = μ_A(x_i)</span> و <span class="m">B = (b_1, …, b_p)</span> با <span class="m">b_j = μ_B(y_j)</span> باشد، ماتریس فازی <span class="m">M(n×p)</span> این‌طور ساخته می‌شود <span class="en">(slide 71)</span>:</p>
   <div class="mb">m_ij = min(a_i , b_j)</div>
+  <div class="given"><b>به زبان ساده:</b> «خانه سطر i و ستون j جدول = کوچک‌ترِ دو عدد: عضویت نقطه i ام در A و عضویت نقطه j ام در B».<br>• معنی: این خانه می‌گوید «چقدر درست است که <b>هم</b> x برابر x_i باشد <b>و هم</b> y برابر y_j». «و» در فازی یعنی min (درس ۴).<br>مثال (قانون «دمای نرمال ← سرعت متوسط»): دمای ۱۲۵ با درجه <span class="m">0.5</span> نرمال است و سرعت ۳۰ با درجه <span class="m">1</span> متوسط ← خانه آن‌ها <span class="m">min(0.5, 1) = 0.5</span>.</div>
   <p>هر <b>سطر</b> یک نقطه از x است و هر <b>ستون</b> یک نقطه از y.</p>
 
   <h3>قاعده ترکیبی استنتاج زاده</h3>
   <p>پروفسور لطفی‌زاده: اگر اطلاعاتی درباره A داشته باشیم و اسمش را <span class="m">A′</span> بگذاریم، با کمک ماتریس قانون می‌توانیم اطلاعاتی درباره B به دست بیاوریم و اسمش را <span class="m">B′</span> بگذاریم. به این روش قاعده ترکیبی استنتاج <span class="en">(compositional rule of inference)</span> می‌گویند <span class="en">(slide 73)</span>:</p>
   <div class="mb">B′ = A′ ∘ μ_AB</div>
+  <div class="given"><b>به زبان ساده:</b> «آنچه الان درباره ورودی می‌دانیم (A′) را از جدول قانون (μ_AB) رد کن (با ∘، یعنی همان max-min بالا)؛ چیزی که بیرون می‌آید (B′) چیزی است که قانون درباره خروجی می‌گوید».<br>• علامت ′ (پریم) یعنی «نسخه تازه»: A قسمت «اگر» قانون است، A′ چیزی است که الان واقعاً دیده‌ایم.<br>• μ_AB همان جدول M است که با <span class="m">m_ij = min(a_i , b_j)</span> ساخته شد.<br>مثال: قانون «اگر دما نرمال است، سرعت متوسط است». امروز دما ۱۲۵ است (A′). از جدول قانون ردش می‌کنیم و B′ می‌گوید سرعت «تا درجه 0.5 متوسط» است. قدم به قدمش در بخش ۲ (دکمه «قانون دما ← سرعت») آمده.</div>
   <div class="tip">نام‌گذاری اسلایدها: یک ماتریس قانون با سه اسم آمده — <span class="m">M</span> (در فرمول ساختن ماتریس، بالا)، <span class="m">μ_AB</span> (در فرمول زاده، همین بالا) و <span class="m">μ_ij</span> (در <a href="#ex74">مثال دما و سرعت</a>، بخش ۳). هر سه یکی‌اند. در کتاب‌ها معمولاً <span class="m">R</span> (رابطه، <span class="en">relation</span>) می‌نویسند.</div>
   <div class="trap">دو نکته اگر جزوه را می‌خوانی:
     (۱) در <a href="#ex72">مثال اسلاید ۷۲</a> (بخش ۳)، ماتریس M از هیچ A و B ساخته نشده؛ فقط چند عدد دلخواه است تا عملگر ∘ را تمرین کنیم.
@@ -135,11 +142,12 @@ table.t.pair{direction:rtl}
     <button data-p="1">قانون دما ← سرعت، ورودی ۱۲۵</button>
   </div>
   <div class="soft" id="cmpCtx" style="margin-top:10px"></div>
-  <div class="soft" id="cmpOut" aria-live="polite" style="margin-top:10px;border-right:3px solid var(--accent);border-radius:0 12px 12px 0;min-height:4.5em"></div>
-  <div class="row" style="margin:8px 0"><button id="cmpPrev">→ قدم قبلی</button><button id="cmpNext">قدم بعدی ←</button><button id="cmpRestart">از اول</button><span id="cmpCount" style="font-size:14px;color:var(--text-2)"></span></div>
+  <div id="cmpWalk"></div>
+  <h3 style="margin-top:18px">حالا خودت امتحان کن</h3>
+  <div class="soft" id="cmpOut" aria-live="polite" style="margin-top:6px"></div>
   <svg id="cmpSvg" viewBox="0 0 600 320" role="img" aria-labelledby="cmpTitle"><title id="cmpTitle">ترکیب max-min: بردار A کنار ماتریس M؛ برای ستون انتخاب‌شده، minهای دوبه‌دو و بزرگ‌ترین آن‌ها نشان داده می‌شود</title></svg>
-  <div id="cmpFree" hidden>
-    <p style="font-size:14px;color:var(--text-2)">حالا خودت امتحان کن: روی هر ستون جدول (یا دکمه‌های زیر) کلیک کن، یا عددهای بردار ورودی را با لغزنده‌ها عوض کن و ببین کدام سطر «برنده» max می‌شود.</p>
+  <div id="cmpFree">
+    <p style="font-size:14px;color:var(--text-2)">روی هر ستون جدول (یا دکمه‌های زیر) کلیک کن، یا عددهای بردار ورودی را با لغزنده‌ها عوض کن و ببین کدام سطر «برنده» max می‌شود.</p>
     <div class="row" id="cmpPick"></div>
     <div id="cmpSliders"></div>
   </div>
@@ -397,7 +405,7 @@ b′(30) = max( min(0.6,0.2), min(0,0.2), min(0.3,0.2) ) = max(0.2, 0, 0.2) = 0.
   <li>اندازه‌ها: <span class="m">(1×n) ∘ (n×p) = (1×p)</span>.</li>
   <li>قاعده ترکیبی استنتاج زاده: <span class="m">B′ = A′ ∘ μ_AB</span> — از اطلاعات تازه درباره A، اطلاعات درباره B به دست می‌آید.</li>
   <li>سطری از ماتریس که <span class="m">a_i = 1</span> دارد، خود B است؛ سطر با <span class="m">a_i = 0</span> تمام صفر است.</li>
-  <li><a href="#ex72">مثال اسلاید ۷۲</a>: <span class="m">A=(0.2,0.4,0.6,1)</span> ← <span class="m">B=(0.6,0.6,0.5)</span>.</li>
+  <li><a href="#ex72">مثال اسلاید ۷۲</a>: <span class="m">A=(0.2,0.4,0.6,1) → B=(0.6,0.6,0.5)</span>.</li>
 </ul></div></section>
 
 <!-- ===== 6. SOURCE + ASK ===== -->
@@ -467,7 +475,7 @@ var CTX=[
   '<li><b>ماتریس از کجا آمد؟</b> همان ماتریس قانون است که در بخش «ب» پایین خانه به خانه ساخته می‌شود.</li></ul>'
 ];
 var P=0,A=presets[0].a.slice(),J=0,S=0,steps=[];
-var svg=document.getElementById('cmpSvg'),out=document.getElementById('cmpOut'),pick=document.getElementById('cmpPick'),sl=document.getElementById('cmpSliders');
+var mainSvg=document.getElementById('cmpSvg'),out=document.getElementById('cmpOut'),pick=document.getElementById('cmpPick'),sl=document.getElementById('cmpSliders');
 var cw=62,ch=36,xA=56,xM=140,y0=46;
 function comp(){var p=presets[P],res=[];for(var j=0;j<p.M[0].length;j++){var m=0;for(var i=0;i<A.length;i++)m=Math.max(m,Math.min(A[i],p.M[i][j]));res.push(m)}return res}
 function makeSteps(){var q=presets[P].M[0].length;steps=[{k:'q'},{k:'sym'}];for(var j=0;j<q;j++){steps.push({k:'col',j:j},{k:'min',j:j},{k:'max',j:j})}steps.push({k:'done'})}
@@ -477,17 +485,17 @@ function narrate(st,B,mins,best){
   var col=function(jj){return '('+A.map(function(a,i){return f(p.M[i][jj])}).join(', ')+')'};
   var vec=function(v){return '('+v.map(f).join(', ')+')'};
   var M='<span class="m">',E='</span>';
-  if(st.k==='q')return '<b>قدم ۱ — سؤال را ببین.</b> چیزهای داده‌شده: '+M+An+' = '+vec(A)+E+' و جدول M (شکل زیر). خواسته: ردیف پایین، یعنی '+M+Bn+E+'. فعلاً همه خانه‌هایش «؟» است.';
-  if(st.k==='sym')return '<b>قدم ۲ — هر چیز چیست؟</b><br>• <b>ستون بنفش سمت چپ</b> = '+M+An+E+'، ورودی. برای هر سطر جدول یک عدد دارد ('+A.map(function(a,i){return M+an+(i+1)+' = '+f(a)+E}).join('، ')+').<br>• <b>جدول وسط</b> = M، با '+n+' سطر و '+q+' ستون. سطر i جدول همیشه با عدد i ام بردار ورودی جفت می‌شود.<br>• <b>ردیف پایین</b> = '+M+Bn+E+'، جواب. به تعداد <b>ستون‌های</b> M عدد دارد، یعنی '+q+' عدد. <b>هر ستون M دقیقاً یک عدد جواب را می‌سازد.</b> از ستون ۱ شروع می‌کنیم.';
+  if(st.k==='q')return '<b>سؤال را ببین.</b> چیزهای داده‌شده: '+M+An+' = '+vec(A)+E+' و جدول M (شکل زیر). خواسته: ردیف پایین، یعنی '+M+Bn+E+'. فعلاً همه خانه‌هایش «؟» است. قدم‌ها را از بالا به پایین دنبال کن.';
+  if(st.k==='sym')return '<b>هر چیز چیست؟</b><br>• <b>ستون بنفش سمت چپ</b> = '+M+An+E+'، ورودی. برای هر سطر جدول یک عدد دارد: '+M+A.map(function(a,i){return an+(i+1)+' = '+f(a)}).join(', ')+E+'.<br>• <b>جدول وسط</b> = M، با '+n+' سطر و '+q+' ستون. سطر i جدول همیشه با عدد i ام بردار ورودی جفت می‌شود.<br>• <b>ردیف پایین</b> = '+M+Bn+E+'، جواب. به تعداد <b>ستون‌های</b> M عدد دارد، یعنی '+q+' عدد. <b>هر ستون M دقیقاً یک عدد جواب را می‌سازد.</b> از ستون ۱ شروع می‌کنیم.';
   var head='<b>'+bn+(j+1)+(P?' (سرعت '+p.cl[j]+')':'')+' — ';
-  if(st.k==='col')return head+'قدم الف: ستون '+(j+1)+' را جدا کن.</b> ستون رنگی: '+M+col(j)+E+'. حالا هر عدد این ستون را کنار عدد بنفشِ <b>همان سطر</b> بگذار: '+A.map(function(a,i){return M+'('+f(a)+' و '+f(p.M[i][j])+')'+E}).join('، ')+'. ستون min سمت راست هنوز خالی است.';
-  if(st.k==='min')return head+'قدم ب: از هر جفت، کوچک‌تر را بردار (min).</b> '+A.map(function(a,i){return M+'min('+f(a)+', '+f(p.M[i][j])+') = '+f(mins[i])+E}).join('، ')+'. این عددها در ستون min سمت راست نوشته شدند.';
+  if(st.k==='col')return head+'قدم الف: ستون '+(j+1)+' را جدا کن.</b> ستون رنگی: '+M+col(j)+E+'. حالا هر عدد این ستون را کنار عدد بنفشِ <b>همان سطر</b> بگذار: '+M+A.map(function(a,i){return '('+f(a)+', '+f(p.M[i][j])+')'}).join('  ')+E+'. ستون min سمت راست هنوز خالی است.';
+  if(st.k==='min')return head+'قدم ب: از هر جفت، کوچک‌تر را بردار (min).</b><br>'+A.map(function(a,i){return M+'min('+f(a)+', '+f(p.M[i][j])+') = '+f(mins[i])+E}).join('<br>')+'<br> این عددها در ستون min سمت راست نوشته شدند.';
   if(st.k==='max'){var w=A.map(function(a,i){return mins[i]===best?rowName(i):null}).filter(Boolean).join(' و ');
-    return head+'قدم ج: از ستون min، بزرگ‌ترین را بردار (max).</b> '+M+'max{'+mins.map(f).join(', ')+'} = '+f(best)+E+'. پس '+M+bn+(j+1)+' = '+f(best)+E+' (سطر برنده: '+w+'، خانه سبز). این عدد در ردیف پایین زیر ستون '+(j+1)+' نوشته شد.'+(j<q-1?' حالا همین سه کار را برای ستون '+(j+2)+' تکرار می‌کنیم.':'')}
+    return head+'قدم ج: از ستون min، بزرگ‌ترین را بردار (max).</b> '+M+'max{'+mins.map(f).join(', ')+'} = '+f(best)+E+'. پس '+M+bn+(j+1)+' = '+f(best)+E+' (سطر برنده: '+w+'، خانه سبز). این عدد در ردیف پایین زیر ستون '+(j+1)+' نوشته شد.'+(j<q-1?' حالا همین سه کار را برای ستون '+(j+2)+' تکرار می‌کنیم.':' همه خانه‌های '+Bn+' پر شد: '+M+Bn+' = '+vec(B)+E+'.')}
   return '<b>تمام شد.</b> جواب: '+M+Bn+' = '+vec(B)+E+'. خلاصه کار: برای هر ستون (۱) جفت کن، (۲) از هر جفت min، (۳) از minها max.'+(P?' سطر ۱۲۵ همیشه برنده است چون بقیه ورودی‌ها صفرند؛ پس '+M+Bn+E+' همان سطر ۱۲۵ ماتریس است. معنی: «سرعت متوسط است، ولی فقط تا درجه 0.5».':'');
 }
-function draw(){
-  var p=presets[P],n=A.length,q=p.M[0].length,B=comp(),st=steps[S],k=st.k,free=k==='done';clear(svg);
+function draw(svgT,si){
+  var main=!svgT,svg=svgT||mainSvg,p=presets[P],n=A.length,q=p.M[0].length,B=comp(),st=steps[main?steps.length-1:si],k=st.k,free=k==='done';clear(svg);
   if(!free&&st.j!==undefined)J=st.j;
   var hl=k!=='q'&&k!=='sym',showMin=k==='min'||k==='max'||free,showWin=k==='max'||free;
   var known=function(jj){return free||(st.j!==undefined&&(jj<st.j||(jj===st.j&&k==='max')))};
@@ -528,15 +536,25 @@ function draw(){
     el(svg,'text',{x:xMin+28,y:yB+21,'text-anchor':'middle',style:'fill:var(--ok)'},'max ↑');
     el(svg,'text',{x:300,y:yB+ch+20,'text-anchor':'middle'},'هر b_j = بزرگ‌ترینِ ستون min — خانه سبز پررنگ، سطر برنده است');
   }
-  out.innerHTML=narrate(st,B,mins,best);
-  document.getElementById('cmpCount').textContent='قدم '+(S+1)+' از '+steps.length;
-  document.getElementById('cmpPrev').disabled=S===0;
-  document.getElementById('cmpNext').disabled=free;
-  document.getElementById('cmpFree').hidden=!free;
+  if(!main)return narrate(st,B,mins,best);
+  var bn=P?"b′":'b',Bn=P?"B′":'B';
+  out.innerHTML='<span class="m">'+bn+(J+1)+' = max{'+A.map(function(a,i){return 'min('+f(a)+', '+f(p.M[i][J])+')'}).join(', ')+'} = max{'+mins.map(f).join(', ')+'} = '+f(best)+'</span><br>سطر برنده: '+A.map(function(a,i){return mins[i]===best?rowName(i):null}).filter(Boolean).join(' و ')+' · کل جواب: <span class="m">'+Bn+' = ('+B.map(f).join(', ')+')</span>';
   Array.prototype.forEach.call(pick.children,function(b,kk){b.classList.toggle('on',kk===J)});
 }
+function buildWalk(){
+  var w=document.getElementById('cmpWalk');w.innerHTML='';
+  for(var i=0;i<steps.length-1;i++){
+    var d=document.createElement('div');d.className='wstep';
+    var t=document.createElement('div');d.appendChild(t);
+    if(steps[i].k!=='sym'){
+      var sv=document.createElementNS(NS,'svg');sv.setAttribute('viewBox','0 0 600 320');sv.setAttribute('role','img');sv.setAttribute('aria-label','قدم '+(i+1));
+      d.appendChild(sv);t.innerHTML='<span class="num">'+(i+1)+'</span>'+draw(sv,i);
+    }else t.innerHTML='<span class="num">'+(i+1)+'</span>'+narrate(steps[i]);
+    w.appendChild(d);
+  }
+}
 function build(){
-  var p=presets[P];A=p.a.slice();J=0;S=0;makeSteps();
+  var p=presets[P];A=p.a.slice();J=0;makeSteps();buildWalk();J=0;
   document.getElementById('cmpCtx').innerHTML=CTX[P];
   pick.innerHTML='';sl.innerHTML='';
   for(var j=0;j<p.M[0].length;j++){var b=document.createElement('button');b.textContent=(P?"b′":'b')+(j+1)+(P?' (y='+p.cl[j]+')':'');b.addEventListener('click',(function(jj){return function(){J=jj;draw()}})(j));pick.appendChild(b)}
@@ -550,10 +568,6 @@ function build(){
   });
   draw();
 }
-document.getElementById('cmpNext').addEventListener('click',function(){if(S<steps.length-1){S++;draw()}});
-document.getElementById('cmpPrev').addEventListener('click',function(){if(S>0){S--;if(steps[S].k!=='done')A=presets[P].a.slice();build2()}});
-document.getElementById('cmpRestart').addEventListener('click',function(){build()});
-function build2(){var keep=S;build();S=keep;draw()}
 Array.prototype.forEach.call(document.querySelectorAll('#cmpPreset button'),function(b){b.addEventListener('click',function(){
   P=+b.dataset.p;Array.prototype.forEach.call(document.querySelectorAll('#cmpPreset button'),function(x){x.classList.toggle('on',x===b)});build()})});
 build();

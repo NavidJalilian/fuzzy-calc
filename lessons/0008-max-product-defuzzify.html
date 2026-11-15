@@ -81,6 +81,9 @@ details.sol[open] summary{margin-bottom:6px}
 .charts h3{margin:4px 0 0}
 .sl{display:grid;grid-template-columns:auto 1fr 52px;gap:10px;align-items:center;font-size:14px}
 .sl span{font-family:"SF Mono",Menlo,Consolas,monospace;direction:ltr}
+.wstep{border-top:1px dashed var(--border);padding-top:10px;margin-top:12px}
+.wstep svg{max-width:400px;display:block;margin:6px auto 0}
+.wstep .num{display:inline-block;min-width:1.8em;text-align:center;background:var(--accent-bg);color:var(--accent);border-radius:999px;margin-left:6px;font-weight:500}
 </style>
 </head>
 <body>
@@ -97,6 +100,7 @@ details.sol[open] summary{margin-bottom:6px}
   <p class="soft">«برای محاسبه <span class="m">A′</span>، مقدار معادل عددی که در صورت مسئله داده شده را قرار داده و بقیه را صفر می‌گذاریم.»</p>
   <p>یعنی در جای ۱۲۵ همان عضویت ۱۲۵ در A را می‌گذاریم (<span class="m">μ_A(125) = 0.5</span>) و بقیه نقطه‌ها صفر:</p>
   <div class="mb">A′ = {0/100 , 0.5/125 , 0/150 , 0/175 , 0/200}  =  [0  0.5  0  0  0]</div>
+  <div class="given"><b>به زبان ساده:</b> «یک ردیف پنج‌تایی بساز، یک خانه برای هر دما. در خانه ۱۲۵ عدد 0.5 را بگذار (چون ۱۲۵ با درجه 0.5 نرمال است) و بقیه را صفر».<br>• <span class="m">0.5/125</span> یعنی «دمای ۱۲۵ با درجه 0.5»؛ خط کج تقسیم نیست.<br>• دو نوشتن یک چیزند: شکل آکولاد اسم هر خانه را هم می‌گوید، شکل کروشه فقط عددها را به ترتیب.</div>
 
   <h3>قدم ۲: B′ = A′ ∘ μ_AB</h3>
   <p>حالا همان ترکیب درس ۷: <span class="m">b′_j = max_i { min(a′_i , m_ij) }</span>. چون همه عددهای A′ به جز یکی صفرند، فقط <b>یک سطر</b> ماتریس (سطر ۱۲۵) در نتیجه اثر دارد؛ بقیه minها صفر می‌شوند.</p>
@@ -107,13 +111,14 @@ details.sol[open] summary{margin-bottom:6px}
   <div class="mb">         Σ_{j=1..p} b_j * μ_B′(b_j)
 B*  =  ───────────────────────────
            Σ_{j=1..p} μ_B′(b_j)</div>
-  <p>به زبان ساده: هر نقطه y را در عضویتش ضرب کن، همه را جمع کن، و تقسیم بر جمع عضویت‌ها کن. نقطه‌ای که عضویت بیشتری دارد، جواب را بیشتر به سمت خودش می‌کشد.</p>
+  <div class="given"><b>به زبان ساده:</b> «هر سرعت را در عضویتش ضرب کن و همه را جمع بزن (بالای کسر)؛ بعد تقسیم کن بر جمع عضویت‌ها (پایین کسر)».<br>• <span class="m">Σ_{j=1..p}</span> یعنی «برای همه نقطه‌ها، از اولی تا آخری، جمع بزن».<br>• مثل معدل کلاس است: هر نمره در تعداد واحدش ضرب می‌شود. نقطه‌ای که عضویت بیشتری دارد، جواب را بیشتر به سمت خودش می‌کشد.<br>مثال: سرعت ۲۰ با عضویت 1 و سرعت ۴۰ با عضویت 0.5 ← <span class="m">(20×1 + 40×0.5) / (1 + 0.5) = 40 / 1.5 ≈ 26.7</span>؛ به ۲۰ نزدیک‌تر است، چون ۲۰ وزن بیشتری دارد.</div>
   <div class="tip">در این فرمول، <span class="m">b_j</span> خود <b>نقطه</b> روی محور y است (۱۰، ۲۰، ۳۰، …) و <span class="m">μ_B′(b_j)</span> عضویت آن. اسلایدها حرف b را هم برای نقطه و هم برای عضویت به کار برده‌اند؛ گیج نشو.</div>
 
   <h3>max-product: همه چیز مثل قبل، فقط min ← ضرب</h3>
   <p>اسلاید ۸۰: «این روش در تمامی موارد شبیه روش قبلی است، با این تفاوت که به جای عملگر min از عملگر ضرب استفاده می‌شود.» با خواندن کلمه‌به‌کلمه، هر دو جایی که min داشتیم ضرب می‌شود:</p>
   <div class="mb">r_ij = a_i · b_j                 (ساختن ماتریس قانون)
 b′_j = max_i { a′_i · r_ij }      (ترکیب max-product)</div>
+  <div class="given"><b>به زبان ساده:</b><br>• خط اول: «خانه سطر i و ستون j جدول قانون = عضویت نقطه i در A <b>ضربدر</b> عضویت نقطه j در B» (در درس ۷ به جای ضرب، کوچک‌تر را برمی‌داشتیم).<br>• خط دوم: «ستون j جدول را بردار، هر عددش را در عدد هم‌ردیفش در ورودی ضرب کن، و از حاصل‌ها <b>بزرگ‌ترین</b> را بردار».<br>• چرا <span class="m">α²</span>؟ ورودی فقط یک خانه غیرصفر دارد (α). سطر همان خانه در جدول <span class="m">α·b_j</span> است، و ورودی یک بار دیگر α ضربش می‌کند: <span class="m">α·α·b_j</span>.<br>مثال: <span class="m">α = 0.5, b_j = 0.6 → 0.5 × 0.5 × 0.6 = 0.15</span>. با max-min همین خانه <span class="m">min(0.5, 0.6) = 0.5</span> می‌شد.</div>
   <p>برای یک ورودی قطعی با عضویت α: <span class="m">b′_j = α · (α · b_j) = α² · b_j</span>. یعنی B <b>کوچک</b> می‌شود ولی شکلش حفظ می‌شود (به جای اینکه از بالا بریده شود).</p>
 
   <div class="trap"><b>ابهام ۱ — عدد α یا عدد ۱؟</b> اسلایدها در A′ همان عضویت ورودی (۰٫۵) را می‌گذارند، نه ۱. در بسیاری از کتاب‌ها ورودی قطعی را با ۱ نشان می‌دهند (<span class="m">1/125</span>). در max-min فرقی نمی‌کند (سطر ماتریس از قبل حداکثر ۰٫۵ است). در max-product عضویت‌های B′ فرق می‌کنند (<span class="m">α²·b_j</span> به جای <span class="m">α·b_j</span>) ولی عدد قطعی نهایی یکی است. در امتحان روش اسلاید را بنویس.</div>
@@ -124,6 +129,9 @@ b′_j = max_i { a′_i · r_ij }      (ترکیب max-product)</div>
 <!-- ===== 2. SEE IT ===== -->
 <section class="sec"><p class="lab">۲. ببین چه اتفاقی می‌افتد</p>
 <div class="card">
+  <h3>الف) یک مثال کامل، قدم به قدم</h3>
+  <div id="walk"></div>
+  <h3 style="margin-top:18px">ب) حالا خودت امتحان کن</h3>
   <p>α عضویت ورودی قطعی در A است (مثلاً برای دمای ۱۲۵، <span class="m">α = 0.5</span>). خط‌چین = B اصلی؛ ستون‌های رنگی = B′؛ خط عمودی = عدد قطعی <span class="m">y*</span> از میانگین وزنی.</p>
   <div class="row" id="bPreset">
     <button class="on" data-p="0">B = سرعت متوسط (اسلاید ۷۴)</button>
@@ -389,7 +397,7 @@ var X0=40,X1=320,Y0=190,Y1=40;
 function xs(v){return X0+(v/60)*(X1-X0)}
 function ys(m){return Y0-m*(Y0-Y1)}
 function wavg(y,m){var s=0,t=0;for(var i=0;i<y.length;i++){s+=m[i];t+=y[i]*m[i]}return s>1e-12?t/s:null}
-function chart(svg,bp,color,showClip){
+function chart(svg,bp,color,showClip,noY){
   var st=sets[S];clear(svg);
   [0,0.5,1].forEach(function(g){el(svg,'line',{x1:X0,x2:X1,y1:ys(g),y2:ys(g),style:'stroke:var(--grid)'});el(svg,'text',{x:X0-6,y:ys(g)+4,'text-anchor':'end'},String(g))});
   st.y.forEach(function(v,i){
@@ -401,7 +409,8 @@ function chart(svg,bp,color,showClip){
   });
   if(showClip){el(svg,'line',{x1:X0,x2:X1,y1:ys(al),y2:ys(al),style:'stroke:var(--c1);stroke-dasharray:6 4'});el(svg,'text',{x:X1+4,y:ys(al)+4,'text-anchor':'start',style:'font-size:11px'},'α')}
   var c=wavg(st.y,bp);
-  if(c===null){el(svg,'text',{x:(X0+X1)/2,y:22,'text-anchor':'middle',style:'fill:var(--bad)'},'B′ = 0 ← y* تعریف نشده (0/0)')}
+  if(noY){}
+  else if(c===null){el(svg,'text',{x:(X0+X1)/2,y:22,'text-anchor':'middle',style:'fill:var(--bad)'},'B′ = 0 ← y* تعریف نشده (0/0)')}
   else{var x=xs(c);el(svg,'line',{x1:x,x2:x,y1:28,y2:Y0,style:'stroke:var(--c4);stroke-width:2.5'});
     el(svg,'polygon',{points:(x-6)+','+(Y0+2)+' '+(x+6)+','+(Y0+2)+' '+x+','+(Y0-8),style:'fill:var(--c4)'});
     el(svg,'text',{x:x,y:22,'text-anchor':'middle',style:'fill:var(--c4);font-weight:700'},'y* = '+(Math.round(c*100)/100))}
@@ -428,6 +437,29 @@ function draw(){
   }
   document.getElementById('ysCalc').textContent=calc('max-min:',mm,c1)+'\n\n'+calc('max-product:',mp,c2);
 }
+
+function walk(){
+  var w=document.getElementById('walk'),b=sets[0].b,y=sets[0].y,a=0.5,M='<span class="m">',E='</span>';
+  var mm=b.map(function(v){return Math.min(a,v)}),mp=b.map(function(v){return a*a*v});
+  function sum(bp){var n=0,d=0;bp.forEach(function(m,i){n+=y[i]*m;d+=m});return [n,d]}
+  function avgTxt(bp){var nd=sum(bp);return 'صورت (بالای کسر): '+M+bp.map(function(m,i){return y[i]+'×'+f(m)}).join(' + ')+' = '+f(nd[0])+E+'<br>مخرج (پایین کسر): '+M+bp.map(f).join(' + ')+' = '+f(nd[1])+E+'<br>'+M+'y* = '+f(nd[0])+' / '+f(nd[1])+' = '+f(nd[0]/nd[1])+E}
+  var steps=[
+    ['<b>سؤال:</b> قانون می‌گوید «اگر دما نرمال است، سرعت متوسط است». دما ۱۲۵ است. سرعت چند است؟ شکل زیر خود B، یعنی «سرعت متوسط» است: پنج سرعت ۱۰ تا ۵۰، و ارتفاع هر ستون عضویت آن سرعت ('+M+'0, 0.6, 1, 0.6, 0'+E+').',[b,'var(--text-3)',false]],
+    ['<b>α را پیدا کن.</b> α یعنی «ورودی چقدر در قسمت «اگر» قانون صدق می‌کند». دمای ۱۲۵ با درجه '+M+'0.5'+E+' نرمال است، پس '+M+'α = 0.5'+E+'. یعنی قانون «نیمه‌روشن» است.',null],
+    ['<b>max-min = بریدن.</b> هر ستون را با α مقایسه کن و کوچک‌تر را نگه دار:<br>'+y.map(function(v,i){return M+'min(0.5, '+f(b[i])+') = '+f(mm[i])+E}).join('<br>')+'<br> ستون‌های بلندتر از خط α بریده شدند؛ خط‌چین شکل اصلی است.',[mm,'var(--c1)',true]],
+    ['<b>عدد نهایی max-min (میانگین وزنی).</b> هر سرعت را در ارتفاع ستونش ضرب کن و جمع بزن (صورت)، بعد تقسیم بر جمع ارتفاع‌ها (مخرج):<br>'+avgTxt(mm)+'<br>خط صورتی همین y* است: نقطه تعادل ستون‌ها.',[mm,'var(--c1)',true,true]],
+    ['<b>max-product = کوچک کردن.</b> به جای min، ضرب: هر ستون در '+M+'α·α = 0.25'+E+' ضرب می‌شود:<br>'+y.map(function(v,i){return M+'0.25×'+f(b[i])+' = '+f(mp[i])+E}).join('<br>')+'<br> همه ستون‌ها به یک نسبت کوتاه شدند و شکل حفظ شد.',[mp,'var(--c3)',false]],
+    ['<b>عدد نهایی max-product.</b> همان میانگین وزنی:<br>'+avgTxt(mp)+'<br>هر دو روش اینجا ۳۰ دادند، چون «سرعت متوسط» دو طرف یکسان دارد. در بخش «ب» با «سرعت کم» (نامتقارن) فرقشان را ببین.',[mp,'var(--c3)',false,true]]
+  ];
+  steps.forEach(function(st,i){
+    var d=document.createElement('div');d.className='wstep';
+    var t=document.createElement('div');t.innerHTML='<span class="num">'+(i+1)+'</span>'+st[0];d.appendChild(t);
+    if(st[1]){var sv=document.createElementNS(NS,'svg');sv.setAttribute('viewBox','0 0 340 230');sv.setAttribute('role','img');sv.setAttribute('aria-label','قدم '+(i+1));d.appendChild(sv);
+      chart(sv,st[1][0],st[1][1],st[1][2],!st[1][3])}
+    w.appendChild(d);
+  });
+}
+walk();
 var r=document.getElementById('alpha'),v=document.getElementById('alphaV');
 r.addEventListener('input',function(){al=+r.value;v.textContent=f(al);draw()});
 Array.prototype.forEach.call(document.querySelectorAll('#bPreset button'),function(b){b.addEventListener('click',function(){
