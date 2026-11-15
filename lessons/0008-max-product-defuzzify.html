@@ -117,6 +117,18 @@ b′_j = max_i { a′_i · r_ij }      (ترکیب max-product)</div>
     <button class="on" data-p="0">B = سرعت متوسط (اسلاید ۷۴)</button>
     <button data-p="1">B = سرعت کم (نامتقارن)</button>
   </div>
+  <div class="soft" style="margin-top:10px">
+    <p style="margin:0 0 4px"><b>این دو نمودار را چطور بخوانی:</b></p>
+    <ul style="margin:0;padding-right:22px">
+      <li><b>محور افقی</b> پنج سرعت است (۱۰ تا ۵۰) و <b>ارتفاع</b> هر ستون، عضویت آن سرعت است.</li>
+      <li><b>جعبه خط‌چین</b> = B اصلی، یعنی خود «سرعت متوسط» قبل از اینکه قانون اجرا شود.</li>
+      <li><b>ستون رنگی</b> = ′B، یعنی خروجی قانون برای این ورودی.</li>
+      <li><b>اسلایدر α</b> = ورودی چقدر در A عضو است (برای دمای ۱۲۵، α = 0.5). هر چه α کمتر، قانون ضعیف‌تر «روشن» می‌شود و ستون‌ها کوتاه‌تر می‌شوند.</li>
+      <li><b>چپ، max-min (بریدن):</b> هر ستون بلندتر از α تا ارتفاع α بریده می‌شود؛ ستون‌های کوتاه‌تر دست نمی‌خورند. خط‌چین بنفش افقی همان ارتفاع α است.</li>
+      <li><b>راست، max-product (کوچک کردن):</b> همه ستون‌ها در یک عدد (α²) ضرب می‌شوند، پس همه به یک نسبت کوتاه می‌شوند و شکل حفظ می‌شود.</li>
+      <li><b>خط عمودی صورتی</b> = y*، عدد قطعی نهایی. ستون‌ها را مثل وزنه روی یک خط‌کش تصور کن: y* نقطه‌ای است که خط‌کش در آن تعادل دارد. ستون بلندتر، y* را بیشتر به سمت خودش می‌کشد.</li>
+    </ul>
+  </div>
   <div class="sl" style="margin:10px 0"><label for="alpha">α = μ_A(x0)</label><input type="range" id="alpha" min="0" max="1" step="0.05" value="0.5"><span id="alphaV">0.5</span></div>
   <div class="charts">
     <div><h3>max-min: بریدن</h3>
@@ -126,6 +138,8 @@ b′_j = max_i { a′_i · r_ij }      (ترکیب max-product)</div>
       <svg id="mpSvg" viewBox="0 0 340 230" role="img" aria-labelledby="mpT"><title id="mpT">خروجی max-product: B در α به توان دو ضرب و کوچک می‌شود</title></svg>
       <div class="mb" id="mpOut"></div></div>
   </div>
+  <p style="margin:10px 0 0"><b>y* دقیقاً چطور حساب شد؟</b> میانگین وزنی: هر سرعت ضربدر عضویتش، جمع؛ تقسیم بر جمع عضویت‌ها.</p>
+  <div class="mb" id="ysCalc"></div>
   <p style="font-size:14px;color:var(--text-2)">آزمایش کن: با B نامتقارن، α را کم و زیاد کن. y* در max-min جابه‌جا می‌شود، ولی در max-product ثابت می‌ماند — چون همه عضویت‌ها در یک عدد ضرب می‌شوند و این عدد از صورت و مخرج فرمول ساده می‌شود. با B متقارن اسلاید، هر دو همیشه ۳۰ می‌دهند.</p>
 </div></section>
 
@@ -356,11 +370,18 @@ function draw(){
   var mp=st.b.map(function(b){return al*al*b});
   var c1=chart(document.getElementById('mmSvg'),mm,'var(--c1)',true);
   var c2=chart(document.getElementById('mpSvg'),mp,'var(--c3)',false);
-  function line(bp,c){return "B′ = "+bp.map(function(m,i){return f(m)+'/'+st.y[i]}).join(' + ')+'\ny* = '+(c===null?'undefined':f(c))}
   var o1=document.getElementById('mmOut'),o2=document.getElementById('mpOut');
   o1.style.whiteSpace=o2.style.whiteSpace='pre';
-  o1.textContent='b′_j = min(α, b_j)\n'+line(mm,c1);
-  o2.textContent='b′_j = α·(α·b_j) = '+f(al*al)+'·b_j\n'+line(mp,c2);
+  o1.textContent='b′_j = min(α, b_j)\n'+st.y.map(function(y,i){return 'y='+y+': min('+f(al)+', '+f(st.b[i])+') = '+f(mm[i])}).join('\n');
+  o2.textContent='b′_j = α·α·b_j = '+f(al*al)+'·b_j\n'+st.y.map(function(y,i){return 'y='+y+': '+f(al*al)+'·'+f(st.b[i])+' = '+f(mp[i])}).join('\n');
+  function calc(name,bp,c){
+    var num=0,den=0;bp.forEach(function(m,i){num+=st.y[i]*m;den+=m});
+    return name+'\n  B′ = '+bp.map(function(m,i){return f(m)+'/'+st.y[i]}).join(' + ')+
+      '\n  Σ y·μ = '+bp.map(function(m,i){return st.y[i]+'·'+f(m)}).join(' + ')+' = '+f(num)+
+      '\n  Σ μ   = '+bp.map(f).join(' + ')+' = '+f(den)+
+      '\n  y*    = '+(c===null?'0 / 0 → تعریف نشده':f(num)+' / '+f(den)+' = '+f(c));
+  }
+  document.getElementById('ysCalc').textContent=calc('max-min:',mm,c1)+'\n\n'+calc('max-product:',mp,c2);
 }
 var r=document.getElementById('alpha'),v=document.getElementById('alphaV');
 r.addEventListener('input',function(){al=+r.value;v.textContent=f(al);draw()});

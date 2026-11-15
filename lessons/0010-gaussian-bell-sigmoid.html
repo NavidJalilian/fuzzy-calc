@@ -328,13 +328,13 @@ var half=document.getElementById('half');half.setAttribute('x1',X(0));half.setAt
 
 function gs(x,s,c){return Math.exp(-(x-c)*(x-c)/(2*s*s))}
 function smf(x,a,b){if(a>=b)return x>=(a+b)/2?1:0;var m=(a+b)/2;if(x<=a)return 0;if(x<=m)return 2*Math.pow((x-a)/(b-a),2);if(x<=b)return 1-2*Math.pow((x-b)/(b-a),2);return 1}
-function smfT(x,a,b,name){
-  var m=(a+b)/2;
-  if(a>=b)return name+': a ≥ b → پله در (a+b)/2';
-  if(x<=a)return 'x ≤ a → smf = 0';
-  if(x<=m)return 'a ≤ x ≤ (a+b)/2 → smf = 2((x−a)/(b−a))² = 2(('+f(x)+'−'+f(a)+')/'+f(b-a)+')² = '+f(smf(x,a,b));
-  if(x<=b)return '(a+b)/2 ≤ x ≤ b → smf = 1 − 2((x−b)/(b−a))² = 1 − 2(('+f(x)+'−'+f(b)+')/'+f(b-a)+')² = '+f(smf(x,a,b));
-  return 'x ≥ b → smf = 1';
+function smfT(x,a,b,name,la,lb){
+  var m=(a+b)/2,A=la||'a',B=lb||'b';
+  if(a>=b)return name+': '+A+' ≥ '+B+' → پله در ('+A+'+'+B+')/2';
+  if(x<=a)return 'x ≤ '+A+' → smf = 0';
+  if(x<=m)return A+' ≤ x ≤ ('+A+'+'+B+')/2 → smf = 2((x−'+A+')/('+B+'−'+A+'))² = 2(('+f(x)+'−'+f(a)+')/'+f(b-a)+')² = '+f(smf(x,a,b));
+  if(x<=b)return '('+A+'+'+B+')/2 ≤ x ≤ '+B+' → smf = 1 − 2((x−'+B+')/('+B+'−'+A+'))² = 1 − 2(('+f(x)+'−'+f(b)+')/'+f(b-a)+')² = '+f(smf(x,a,b));
+  return 'x ≥ '+B+' → smf = 1';
 }
 var SH={
  gaussmf:{ps:[['sigma',0.3,4,0.1,2],['c',0,10,0.1,5]],
@@ -366,7 +366,7 @@ var SH={
   note:'قرینه Z، باز از سمت راست. وسط بازه، x = (a+b)/2، مقدار 0.5.'},
  pimf:{ps:[['a',0,10,0.1,1],['b',0,10,0.1,4],['c',0,10,0.1,6],['d',0,10,0.1,9]],
   mu:function(x,q){return x<=q.b?smf(x,q.a,q.b):(x>=q.c?1-smf(x,q.c,q.d):1)},
-  txt:function(x,q){if(x<=q.b)return 'x ≤ b → نیمه S با [a b]:\n'+smfT(x,q.a,q.b,'smf');if(x>=q.c)return 'x ≥ c → نیمه Z با [c d]:\n'+smfT(x,q.c,q.d,'smf')+'\nμ = 1 − smf = '+f(1-smf(x,q.c,q.d));return 'b ≤ x ≤ c → μ = 1 (سقف)'},
+  txt:function(x,q){if(x<=q.b)return 'x ≤ b → نیمه S با [a b]:\n'+smfT(x,q.a,q.b,'smf');if(x>=q.c)return 'x ≥ c → نیمه Z با [c d]:\n'+smfT(x,q.c,q.d,'smf','c','d')+'\nμ = 1 − smf = '+f(1-smf(x,q.c,q.d));return 'b ≤ x ≤ c → μ = 1 (سقف)'},
   note:'دو سر ۰، وسط ۱ — مثل ذوزنقه‌ای که گوشه‌هایش نرم شده.'}
 };
 var cur='gaussmf',Q={},x=7;

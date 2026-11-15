@@ -117,6 +117,17 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
     <button class="on" data-p="0">مثال اسلاید ۷۲</button>
     <button data-p="1">قانون دما ← سرعت، ورودی ۱۲۵</button>
   </div>
+  <div class="soft" id="cmpCtx" style="margin-top:10px"></div>
+  <div class="soft" style="margin-top:8px">
+    <p style="margin:0 0 4px"><b>این شکل را چطور بخوانی</b> (از چپ به راست):</p>
+    <ol style="margin:0;padding-right:22px;white-space:normal">
+      <li><b>ستون بنفش سمت چپ</b> = بردار ورودی؛ برای هر سطر یک عدد.</li>
+      <li><b>جدول وسط</b> = ماتریس. ستونی که دورش رنگی است، ستونی است که الان حسابش می‌کنیم (با دکمه‌های زیر شکل یا کلیک روی ستون عوضش کن).</li>
+      <li><b>ستون «min» سمت راست</b> = برای هر سطر، کوچک‌ترِ دو عدد: عدد بنفشِ همان سطر و عددِ همان سطر در ستون رنگی. مثلاً در سطر <span class="m">x1</span>: <span class="m">min(0.2, 0.1) = 0.1</span>.</li>
+      <li><b>خانه سبز پررنگ</b> = بزرگ‌ترین عدد ستون min. این عدد جواب است و پایین، در ردیف B، زیر همان ستون نوشته می‌شود.</li>
+      <li>این کار را برای هر ستون تکرار کن تا همه خانه‌های ردیف B پر شوند.</li>
+    </ol>
+  </div>
   <svg id="cmpSvg" viewBox="0 0 600 320" role="img" aria-labelledby="cmpTitle"><title id="cmpTitle">ترکیب max-min: بردار A کنار ماتریس M؛ برای ستون انتخاب‌شده، minهای دوبه‌دو و بزرگ‌ترین آن‌ها نشان داده می‌شود</title></svg>
   <div class="row" id="cmpPick"></div>
   <div class="mb" id="cmpOut"></div>
@@ -125,6 +136,15 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
 
   <h3 style="margin-top:20px">ب) ساختن ماتریس قانون خانه به خانه (مثال اسلاید ۷۴)</h3>
   <p style="font-size:14px">A = دمای نرمال روی x، و B = سرعت متوسط روی y. هر خانه: <span class="m">min(a_i , b_j)</span>.</p>
+  <div class="soft">
+    <p style="margin:0 0 4px"><b>این شکل را چطور بخوانی:</b></p>
+    <ul style="margin:0;padding-right:22px">
+      <li><b>ردیف نارنجی بالا</b> = عضویت هر سرعت در «سرعت متوسط» (b_j). هر ستون یک سرعت است: ۱۰، ۲۰، … ۵۰.</li>
+      <li><b>ستون بنفش چپ</b> = عضویت هر دما در «دمای نرمال» (a_i). هر سطر یک دما است: ۱۰۰، ۱۲۵، … ۲۰۰.</li>
+      <li><b>هر خانه</b> = کوچک‌ترِ عدد بنفشِ سطرش و عدد نارنجیِ ستونش. وقتی روی «خانه بعدی» می‌زنی، آن سطر و ستون پررنگ می‌شوند تا ببینی کدام دو عدد با هم مقایسه شدند.</li>
+      <li>معنی هر خانه: «این دما و این سرعت تا چه حد با هم با قانون جور درمی‌آیند». مثلاً x=150 کاملاً نرمال است و y=30 کاملاً متوسط، پس خانه‌شان ۱ است.</li>
+    </ul>
+  </div>
   <svg id="relSvg" viewBox="0 0 480 280" role="img" aria-labelledby="relTitle"><title id="relTitle">ساخت ماتریس قانون: هر خانه کمینه عضویت سطر و ستون است</title></svg>
   <div class="row"><button id="relNext">خانه بعدی</button><button id="relAll">پر کردن همه</button><button id="relReset">پاک کردن</button></div>
   <div class="mb" id="relOut">روی «خانه بعدی» یا روی هر خانه جدول کلیک کن.</div>
@@ -309,6 +329,14 @@ var presets=[
   {a:[0.2,0.4,0.6,1],M:[[0.1,0.6,0.8],[0.6,0.8,0.6],[0.8,0.6,0.5],[0.0,0.5,0.5]],rl:['x1','x2','x3','x4'],cl:['b1','b2','b3'],an:'a'},
   {a:[0,0.5,0,0,0],M:MU,rl:['100','125','150','175','200'],cl:['10','20','30','40','50'],an:"a′"}
 ];
+var CTX=[
+  '<b>مثال اسلاید ۷۲:</b> بردار A و ماتریس M فقط عددهای داده‌شده‌اند تا عملگر ∘ را تمرین کنیم؛ از قانون خاصی نیامده‌اند. جواب: <span class="m">B = (0.6, 0.6, 0.5)</span>.',
+  '<p style="margin:0 0 6px"><b>سؤال:</b> قانون می‌گوید «اگر دما نرمال است، سرعت متوسط است». دما ۱۲۵ است؛ سرعت چقدر است؟</p>'+
+  '<ul style="margin:0;padding-right:22px"><li><b>بردار ورودی <span class="m">A′</span> از کجا آمد؟</b> عضویت ۱۲۵ در «دمای نرمال» 0.5 است. پس در سطر ۱۲۵ عدد 0.5 می‌گذاریم و بقیه سطرها صفر: <span class="m">A′ = (0, 0.5, 0, 0, 0)</span> (جزئیاتش در درس ۸).</li>'+
+  '<li><b>ماتریس از کجا آمد؟</b> همان ماتریس قانون است که در بخش «ب» پایین خانه به خانه ساخته می‌شود.</li>'+
+  '<li><b>چه انتظاری داریم؟</b> چون فقط سطر ۱۲۵ عدد غیرصفر دارد، min بقیه سطرها صفر می‌شود و همیشه سطر ۱۲۵ برنده است. پس <span class="m">B′</span> همان سطر ۱۲۵ ماتریس است: <span class="m">B′ = (0, 0.5, 0.5, 0.5, 0)</span>.</li>'+
+  '<li><b>معنی جواب:</b> «سرعت متوسط است، ولی فقط تا درجه 0.5» — یعنی همان شکل سرعت متوسط که از ارتفاع 0.5 بریده شده.</li></ul>'
+];
 var P=0,A=presets[0].a.slice(),J=0;
 var svg=document.getElementById('cmpSvg'),out=document.getElementById('cmpOut'),pick=document.getElementById('cmpPick'),sl=document.getElementById('cmpSliders');
 var cw=62,ch=36,xA=56,xM=140,y0=46;
@@ -348,12 +376,14 @@ function draw(){
   el(svg,'text',{x:xMin+28,y:yB+21,'text-anchor':'middle',style:'fill:var(--ok)'},'max ↑');
   el(svg,'text',{x:300,y:yB+ch+20,'text-anchor':'middle'},'هر b_j = بزرگ‌ترینِ ستون سبز (min) — خانه سبز پررنگ، سطر برنده است');
   var bn=P?"b′":'b',an=P?"a′":'a';
-  out.textContent=bn+'_'+(J+1)+' = max{'+A.map(function(a,i){return 'min('+f(a)+','+f(p.M[i][J])+')'}).join(', ')+'}\n     = max{'+mins.map(f).join(', ')+'} = '+f(best);
+  out.textContent=bn+'_'+(J+1)+' = max{'+A.map(function(a,i){return 'min('+f(a)+','+f(p.M[i][J])+')'}).join(', ')+'}\n     = max{'+mins.map(f).join(', ')+'} = '+f(best)+
+    '\nبرنده: '+A.map(function(a,i){return mins[i]===best?(P?'x='+p.rl[i]:p.rl[i]):null}).filter(Boolean).join(' و ');
   out.style.whiteSpace='pre';
   Array.prototype.forEach.call(pick.children,function(b,k){b.classList.toggle('on',k===J)});
 }
 function build(){
   var p=presets[P];A=p.a.slice();J=P?1:0;
+  document.getElementById('cmpCtx').innerHTML=CTX[P];
   pick.innerHTML='';sl.innerHTML='';
   for(var j=0;j<p.M[0].length;j++){var b=document.createElement('button');b.textContent=(P?"b′":'b')+(j+1)+(P?' (y='+p.cl[j]+')':'');b.addEventListener('click',(function(jj){return function(){J=jj;draw()}})(j));pick.appendChild(b)}
   A.forEach(function(v,i){
