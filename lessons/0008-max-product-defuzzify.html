@@ -135,6 +135,7 @@ table.an-gl td:first-child{white-space:nowrap}
     <div class="an-btns">
       <button id="anNext" class="on">بعدی ←</button>
       <button id="anPrev">→ قبلی</button>
+      <button id="anAgain">↻ دوباره ببین</button>
       <span class="cnt" id="anCnt"></span>
     </div>
   </div>
@@ -541,6 +542,7 @@ function chart(cx,lbls,axis){
 var CA=chart(ax,XS,'محور: دما'),CB=chart(bx,YS,'محور: سرعت');
 CA.ghosts.forEach(function(r,i){r.setAttribute('y',vy(A[i]));r.setAttribute('height',A[i]*H)});
 CB.ghosts.forEach(function(r,i){r.setAttribute('y',vy(B[i]));r.setAttribute('height',B[i]*H)});
+CB.bars2=YS.map(function(v,j){return el(CB.G,'rect',{x:bx(j)+1,width:14,y:vy(BPmp[j]),height:BPmp[j]*H,'class':'an-bar',style:'opacity:0;fill:var(--c3)'})});
 var x0g=el(svg,'g',{'class':'fd',style:'opacity:0'});
 el(x0g,'text',{x:ax(1),y:58,'text-anchor':'middle','class':'mono',style:'fill:var(--c4);font-weight:700'},'x0 = 125');
 el(x0g,'line',{x1:ax(1),x2:ax(1),y1:63,y2:80,style:'stroke:var(--c4);stroke-width:2'});
@@ -584,6 +586,9 @@ for(var i=0;i<5;i++){
 var cellHL=el(MG,'rect',{width:58,height:26,rx:5,'class':'an-hl',style:'opacity:0'});
 var bpLab=el(MG,'text',{x:274,y:my(5)+5,'text-anchor':'middle','class':'mono fd',style:'opacity:0;font-weight:700'},'b′_j');
 var bpT=YS.map(function(v,j){return el(MG,'text',{x:mx(j),y:my(5)+5,'text-anchor':'middle','class':'mono',style:'font-weight:700'},'')});
+var BX=320,BYC=192,BUB=el(svg,'g',{'class':'fd',style:'opacity:0'});
+var bubR=el(BUB,'rect',{rx:12,style:'fill:var(--surface);stroke:var(--accent);stroke-width:2.5'});
+var bubT=el(BUB,'text',{x:BX,y:BYC+9,'text-anchor':'middle','class':'mono',style:'font-size:24px;font-weight:700;fill:var(--text)'},'');
 var FL=el(svg,'g',{});
 
 /* ---- symbols: [symbol, meaning, where it came from] ---- */
@@ -607,28 +612,31 @@ var GL={
 /* ---- steps: [changes, new symbols, caption, animation] ---- */
 var base={aOp:.35,aVals:0,aH:A,aGhost:0,aDim:0,aTtl:'دمای نرمال (A)',x0:0,alA:0,
   bOp:.35,bVals:0,bH:B,bCol:'var(--c2)',bGhost:0,alB:0,bTtl:'سرعت متوسط (B)',ys:0,
-  mat:0,aHead:0,bHead:0,mode:null,aPr:0,dim:0,bp:null,row:-1,col:-1,cell:null,hl:[]};
+  mat:0,cmp:0,aHead:0,bHead:0,mode:null,aPr:0,dim:0,bp:null,row:-1,col:-1,cell:null,hl:[]};
 var RAW=[
- [{},[],'<b>سؤال (اسلاید ۷۴):</b> قانون می‌گوید «اگر دما <b>نرمال</b> باشد، سرعت <b>متوسط</b> است». دما ۱۲۵ است. سرعت چقدر است؟<br>«بعدی» را بزن؛ هر بار یک تکه به تصویر پایین اضافه می‌شود.'],
+ [{},[],'<b>سؤال (اسلاید ۷۴):</b> قانون می‌گوید «اگر دما <b>نرمال</b> باشد، سرعت <b>متوسط</b> است». دما ۱۲۵ است. سرعت چقدر است؟<br><b>هدف این انیمیشن:</b> از یک عدد دما (۱۲۵) برسیم به یک عدد سرعت. «بعدی» را بزن؛ هر بار یک تکه به تصویر اضافه می‌شود.'],
  [{aOp:1,aVals:1,hl:['A']},['A','sl'],'نمودار چپ <b>A = دمای نرمال</b> است. هر ستون یک دما؛ ارتفاعش = آن دما چقدر نرمال است. ۱۵۰ کاملاً نرمال (1)، ۱۲۵ نیمه (0.5).'],
  [{bOp:1,bVals:1,hl:['B']},['B'],'نمودار راست <b>B = سرعت متوسط</b> است. جواب آخر کار یک عدد روی همین محور سرعت است.'],
+ [{hl:['B']},[],'<b>نقشه کلی، و چرا دو روش داریم.</b> دمای ۱۲۵ فقط <b>نیمه</b> نرمال است، پس قانون هم فقط نیمه درست است. یعنی جواب نباید خود B باشد، بلکه یک <b>B ضعیف‌شده</b>.<br>B را دو جور می‌شود ضعیف کرد (نمودار راست را ببین):<br>• <b style="color:var(--c1)">max-min = بریدن</b>: یک سقف در ارتفاع 0.5 می‌گذارد؛ هر ستون بلندتر، بریده می‌شود.<br>• <b style="color:var(--c3)">max-product = کوچک کردن</b>: همه ستون‌ها به یک نسبت کوتاه می‌شوند؛ شکل می‌ماند.<br>هر دو را قدم به قدم می‌سازیم و آخر کار کنار هم می‌گذاریم.','preview'],
  [{mat:1,aHead:1,hl:['mat']},['ai'],'<b>ساختن جدول قانون.</b> <b>چرا جدول؟</b> قانون باید برای <b>هر</b> دمایی جواب بدهد، نه فقط ۱۲۵. جدول برای هر جفت (دما، سرعت) می‌گوید قانون چقدر آن جفت را قبول دارد.<br>اول عددهای A پایین می‌آیند و کنار جدول می‌نشینند: <b>هر سطر = یک دما</b>.','flyA'],
  [{bHead:1,hl:['mat']},['bj0'],'عددهای B هم پایین می‌آیند و بالای جدول می‌نشینند: <b>هر ستون = یک سرعت</b>.','flyB'],
- [{mode:'one',row:1,col:2,cell:[1,2]},['m'],'هر خانه = <b>کوچک‌ترِ</b> عدد سطرش و عدد ستونش. خانه قاب‌دار: سطر ۱۲۵ (0.5) و ستون ۳۰ (1):'+F('min(0.5, 1) = 0.5'),'cell1'],
- [{mode:'min'},[],'بقیه خانه‌ها با همین قانون <b>یکی‌یکی</b> پر می‌شوند. قاب را دنبال کن: هر خانه = min(عدد سطرش، عدد ستونش).','fill'],
- [{x0:1,aDim:1,hl:['A']},['x0'],'حالا <b>ورودی</b>: دمای ۱۲۵ (پیکان صورتی روی نمودار A). این تنها عدد معمولی سؤال است.'],
+ [{mode:'one',row:1,col:2,cell:[1,2]},['m'],'هر خانه = <b>کوچک‌ترِ</b> عدد سطرش و عدد ستونش. اولین خانه: سطر ۱۲۵ (0.5) و ستون ۳۰ (1). حساب، بزرگ وسط تصویر می‌آید؛ بعد جوابش به خانه قاب‌دار می‌رود.'+F('min(0.5, 1) = 0.5'),'cell1'],
+ [{mode:'zero'},[],'اول خانه‌های آسان: هر سطر یا ستونی که عددش <b>0</b> است. کوچک‌ترِ 0 و هر عددی همیشه 0 است:'+F('min(0, 0.6) = 0')+'پس همه این خانه‌ها یکجا 0 می‌شوند.','zeros'],
+ [{mode:'min'},[],'حالا ۸ خانه باقی‌مانده، <b>یکی‌یکی</b>. برای هر خانه، قاب نشان می‌دهد عدد سطر و عدد ستون از کجا می‌آیند؛ حساب بزرگ وسط تصویر می‌آید؛ بعد جواب به خانه خودش می‌رود.','rest'],
+ [{x0:1,aDim:1,hl:['A']},['x0'],'جدول قانون آماده است. حالا <b>ورودی</b>: دمای ۱۲۵ (پیکان صورتی روی نمودار A). این تنها عدد معمولی سؤال است.'],
  [{alA:1},['al'],'از بالای ستون ۱۲۵ به چپ برو تا محور: ارتفاعش 0.5 است. پس '+M('α = 0.5')+'؛ یعنی قانون فقط <b>نیمه‌روشن</b> است.'],
  [{aH:AP,aGhost:1,aDim:0,aTtl:'ورودی (A′)',hl:['A']},['ap'],'ورودی را به شکل یک ردیف می‌نویسیم: در خانه ۱۲۵ عدد α، بقیه صفر (اسلاید ۷۷). <b>چرا؟</b> جدول با یک ردیف پنج‌تایی کار می‌کند، نه با یک عدد تنها. خط‌چین = A اصلی.'+F('A′ = [0  0.5  0  0  0]')],
  [{aPr:1,dim:1,row:1},[],'عددهای A′ کنار جدول می‌روند (ستون صورتی). سطرهایی که a′ آن‌ها صفر است همیشه صفر می‌دهند، پس کم‌رنگ شدند. <b>فقط سطر ۱۲۵ مهم است.</b>','flyAp'],
- [{bp:[null,.5,null,null,null],col:1},['bj'],'<b>ستون ۲۰:</b> هر خانه را با a′ هم‌سطرش مقایسه کن، کوچک‌تر را بردار؛ بعد از همه بزرگ‌ترین:'+F('min(0,0) min(0.5,0.5) min(0,0.6) min(0,0.5) min(0,0)\n= 0, 0.5, 0, 0, 0   →   max = 0.5'),'col'],
- [{bp:BPmm},[],'همین کار برای بقیه ستون‌ها، یکی‌یکی:'+F('b′ = [0  0.5  0.5  0.5  0]'),'bpRest'],
+ [{bp:[null,.5,null,null,null],col:1},['bj'],'<b>ستون ۲۰:</b> قاب از بالا به پایین می‌رود؛ هر خانه با a′ هم‌سطرش مقایسه می‌شود و کوچک‌تر برداشته می‌شود (وسط تصویر). آخر سر <b>بزرگ‌ترینِ</b> این‌ها به ردیف b′ می‌رود:'+F('min(0,0) min(0.5,0.5) min(0,0.6) min(0,0.5) min(0,0)\n= 0, 0.5, 0, 0, 0   →   max = 0.5'),'col'],
+ [{bp:BPmm},[],'بقیه ستون‌ها، یکی‌یکی. سطرهای کم‌رنگ همیشه 0 می‌دهند، پس فقط سطر ۱۲۵ حساب می‌شود: min(0.5، عدد خانه).'+F('b′ = [0  0.5  0.5  0.5  0]'),'bpRest'],
  [{bH:BPmm,bCol:'var(--c1)',bGhost:1,alB:1,bTtl:'جواب max-min (B′)',hl:['B']},['Bp'],'این عددها به نمودار سرعت برمی‌گردند: B از ارتفاع α = 0.5 <b>بریده</b> شد. این جواب فازی، B′ است.','up'],
- [{ys:1},['ys'],'<b>یک عدد بساز.</b> <b>چرا؟</b> B′ می‌گوید «۲۰، ۳۰ و ۴۰ هر کدام تا حدی خوب‌اند»، ولی ماشین فقط با <b>یک</b> سرعت می‌تواند برود. میانگین وزنی: هر سرعت × عضویتش، جمع؛ تقسیم بر جمع عضویت‌ها:'+F('(20×0.5 + 30×0.5 + 40×0.5) / (0.5 + 0.5 + 0.5)\n= 45 / 1.5 = 30')+'<b>جواب max-min: سرعت ۳۰</b> (خط صورتی).'],
- [{mode:'prod',dim:0,bp:null,bH:B,bCol:'var(--c2)',bGhost:0,alB:0,ys:0,bTtl:'سرعت متوسط (B)',cell:[1,1],hl:['mat']},['r'],'<b>حالا روش دوم: max-product. چرا؟</b> دو دلیل: (۱) تمرین ۲ همین روش را می‌خواهد. (۲) max-min یک عیب دارد: قله B را <b>می‌بُرد</b>. نگاه کن: ۲۰، ۳۰ و ۴۰ همه شدند 0.5، پس دیگر معلوم نیست ۳۰ بهترین سرعت بود. max-product به جای بریدن، <b>کوچک</b> می‌کند و شکل را نگه می‌دارد.<br><b>چه عوض می‌شود؟</b> فقط یک چیز: هر جا min بود، ضرب (اسلاید ۸۰). اول جدول از نو پر می‌شود؛ مثلاً خانه قاب‌دار (با min اینجا 0.5 بود):'+F('0.5 × 0.6 = 0.3'),'prod'],
- [{dim:1,row:1,bp:BPmp},['a2'],'ترکیب هم با ضرب: سطر ۱۲۵ را در a′ = 0.5 ضرب کن (بقیه سطرها × 0 = 0):'+F('0.5 × [0  0.3  0.5  0.3  0] = [0  0.15  0.25  0.15  0]'),'bpProd'],
+ [{ys:1},['ys'],'<b>یک عدد بساز.</b> <b>چرا؟</b> B′ می‌گوید «۲۰، ۳۰ و ۴۰ هر کدام تا حدی خوب‌اند»، ولی ماشین فقط با <b>یک</b> سرعت می‌تواند برود. میانگین وزنی: بالای کسر = هر سرعت × عضویتش، جمع؛ پایین کسر = جمع عضویت‌ها. حساب‌ها وسط تصویر می‌آیند:'+F('(20×0.5 + 30×0.5 + 40×0.5) / (0.5 + 0.5 + 0.5)\n= 45 / 1.5 = 30')+'<b>جواب max-min: سرعت ۳۰</b> (خط صورتی).','avg'],
+ [{mode:'prod',dim:0,bp:null,bH:B,bCol:'var(--c2)',bGhost:0,alB:0,ys:0,bTtl:'سرعت متوسط (B)',hl:['mat']},['r'],'<b>حالا روش دوم: max-product.</b> یادت هست چرا؟ max-min قله را بُرید: ۲۰، ۳۰ و ۴۰ همه شدند 0.5، و دیگر معلوم نیست ۳۰ بهترین بود. (تمرین ۲ هم همین روش را می‌خواهد.)<br><b>فقط یک چیز عوض می‌شود:</b> هر جا min بود، ضرب (اسلاید ۸۰). صفرها صفر می‌مانند (× 0 = 0)؛ ۹ خانه وسط یکی‌یکی از نو حساب می‌شوند.','prod'],
+ [{dim:1,row:1,bp:BPmp},['a2'],'ترکیب هم با ضرب: هر خانه سطر ۱۲۵ ضربدر a′ = 0.5، یکی‌یکی (بقیه سطرها × 0 = 0):'+F('0.5 × [0  0.3  0.5  0.3  0] = [0  0.15  0.25  0.15  0]'),'bpProd'],
  [{bH:BPmp,bCol:'var(--c3)',bGhost:1,bTtl:'جواب max-product (B′)',hl:['B']},[],'برمی‌گردند به نمودار: B <b>کوچک</b> شد ولی شکلش ماند (هر ستون × α² = 0.25). بریده نشد. <b>۳۰ هنوز بلندترین ستون است</b>؛ همان اطلاعاتی که max-min گم کرده بود.','up'],
- [{ys:1},[],'همان میانگین وزنی:'+F('(20×0.15 + 30×0.25 + 40×0.15) / (0.15 + 0.25 + 0.15)\n= 16.5 / 0.55 = 30')+'<b>جواب max-product هم ۳۰.</b>'],
- [{},[],'<b>خلاصه:</b> '+M('x0 → α → A′ → جدول → B′ → y*')+'<br>هر دو ۳۰ دادند چون «سرعت متوسط» دو طرف یکسان دارد. فرق: max-min <b>می‌بُرد</b>، max-product <b>کوچک می‌کند</b>. در <a href="#alpha">بخش ۲</a> با «سرعت کم» فرقشان را ببین.']
+ [{ys:1},[],'همان میانگین وزنی، حساب‌ها وسط تصویر:'+F('(20×0.15 + 30×0.25 + 40×0.15) / (0.15 + 0.25 + 0.15)\n= 16.5 / 0.55 = 30')+'<b>جواب max-product هم ۳۰.</b>','avg'],
+ [{cmp:1,bH:BPmm,bCol:'var(--c1)',bGhost:1,alB:1,bVals:0,bTtl:'مقایسه دو جواب',hl:['B']},[],'<b>مقایسه.</b> <b style="color:var(--c1)">بنفش = max-min</b>، <b style="color:var(--c3)">نارنجی = max-product</b>، خط‌چین = B اصلی. هر دو یک حرف می‌زنند: «قانون نیمه درست است، پس جواب هم ضعیف‌تر است». فرق فقط در <b>طرز ضعیف کردن</b> است:<br>• max-min سقف می‌گذارد (هیچ ستونی بالاتر از α = 0.5 نمی‌رود) ← قله صاف شد.<br>• max-product همه را × 0.25 می‌کند ← قله سر جایش ماند؛ ۳۰ هنوز بهترین است.<br>اینجا y* هر دو ۳۰ شد چون B دو طرف یکسان دارد؛ با B نامتقارن (<a href="#alpha">بخش ۲</a>) جوابشان فرق می‌کند.'],
+ [{},[],'<b>خلاصه:</b> '+M('x0 → α → A′ → جدول → B′ → y*')+'<br>هر دو روش همین مسیر را می‌روند؛ تنها فرق: max-min <b>min</b> می‌گیرد (می‌بُرد)، max-product <b>ضرب</b> می‌کند (کوچک می‌کند). همه نمادها در جدول زیر تصویر آمده‌اند.']
 ];
 var S=[],prev=base;
 RAW.forEach(function(r){var s=Object.assign({},prev,{hl:[],row:-1,col:-1,cell:null},r[0]);prev=s;S.push({s:s,gl:r[1],cap:r[2],anim:r[3]})});
@@ -661,7 +669,8 @@ function snap(s){
   CA.vals.forEach(function(t,i){t.textContent=f(s.aH[i]);op(t,s.aVals)});
   CB.vals.forEach(function(t,i){t.textContent=f(s.bH[i]);op(t,s.bVals)});
   CA.bars.forEach(function(r,i){r.style.fill='var(--c2)';op(r,s.aDim&&i!==1?.3:1)});
-  CB.bars.forEach(function(r){r.style.fill=s.bCol});
+  CB.bars.forEach(function(r){r.style.fill=s.bCol;r.setAttribute('width',s.cmp?14:30)});
+  CB.bars2.forEach(function(r){op(r,s.cmp)});
   CA.ghosts.forEach(function(r){op(r,s.aGhost)});CB.ghosts.forEach(function(r){op(r,s.bGhost)});
   op(CA.frame,s.hl.indexOf('A')>=0?1:0);op(CB.frame,s.hl.indexOf('B')>=0?1:0);
   op(x0g,s.x0);op(alAg,s.alA);op(alBg,s.alB);op(ysg,s.ys);
@@ -669,7 +678,8 @@ function snap(s){
   aHeadT.forEach(function(t){op(t,s.aHead)});bHeadT.forEach(function(t){op(t,s.bHead)});
   var Mx=s.mode==='prod'?MP:MM;
   cells.forEach(function(rw,i){rw.forEach(function(t,j){t.classList.remove('flash');
-    t.textContent=(s.mode==='min'||s.mode==='prod'||(s.mode==='one'&&i===1&&j===2))?f(Mx[i][j]):''})});
+    var on=s.mode==='min'||s.mode==='prod'||(i===1&&j===2&&(s.mode==='one'||s.mode==='zero'))||(s.mode==='zero'&&isZero(i,j));
+    t.textContent=on?f(Mx[i][j]):''})});
   mMode.textContent=s.mode==='prod'?'max-product':'max-min';
   mForm.textContent=s.mode==='prod'?'r = a × b':'m = min(a, b)';
   op(apHead,s.aPr);apT.forEach(function(t){op(t,s.aPr)});
@@ -681,55 +691,98 @@ function snap(s){
 }
 
 /* ---- the motions inside a step ---- */
-var T=[];
+var T=[],FD=1100,GAP=450;
 function later(ms,fn){T.push(setTimeout(fn,ms))}
-function cancelAnim(){T.forEach(clearTimeout);T=[];while(FL.firstChild)FL.removeChild(FL.firstChild)}
-function fly(txt,x1,y1,x2,y2,delay,color,done){later(delay,function(){
-  var t=el(FL,'text',{x:x1,y:y1,'text-anchor':'middle','class':'mono fly',style:'fill:'+color},txt),t0=null,D=750;
-  function fr(now){if(!t.parentNode)return;if(t0===null)t0=now;var p=Math.min(1,(now-t0)/D),e=ease(p);
-    t.setAttribute('x',x1+(x2-x1)*e);t.setAttribute('y',y1+(y2-y1)*e-Math.sin(p*Math.PI)*24);
+function cancelAnim(){T.forEach(clearTimeout);T=[];while(FL.firstChild)FL.removeChild(FL.firstChild);op(BUB,0)}
+/* a number flies from (x1,y1) to (x2,y2); fs0 = start size for numbers leaving the big calculation box */
+function fly(txt,x1,y1,x2,y2,delay,color,done,fs0){later(delay,function(){
+  var t=el(FL,'text',{x:x1,y:y1,'text-anchor':'middle','class':'mono fly',style:'fill:'+color},txt),t0=null;
+  function fr(now){if(!t.parentNode)return;if(t0===null)t0=now;var p=Math.min(1,(now-t0)/FD),e=ease(p);
+    t.setAttribute('x',x1+(x2-x1)*e);t.setAttribute('y',y1+(y2-y1)*e-Math.sin(p*Math.PI)*28);
+    if(fs0)t.style.fontSize=(fs0+(15-fs0)*e)+'px';
     if(p<1)requestAnimationFrame(fr);else{FL.removeChild(t);if(done)done()}}
   requestAnimationFrame(fr)})}
-function seqCells(list,val,gap,s){ /* fill cells one at a time, frame follows */
-  list.forEach(function(c,n){later(300+n*gap,function(){mark(c[0],c[1]);var t=cells[c[0]][c[1]];t.textContent=f(val[c[0]][c[1]]);flash(t)})});
-  later(300+list.length*gap+250,function(){bands(s)});
-}
+/* big calculation box in the middle of the picture */
+function bubbleShow(txt){bubT.textContent=txt;var w=bubT.getBBox().width+40;
+  bubR.setAttribute('x',BX-w/2);bubR.setAttribute('y',BYC-24);bubR.setAttribute('width',w);bubR.setAttribute('height',46);op(BUB,1)}
+function bubble(txt,at,dur){later(at,function(){bubbleShow(txt)});later(at+dur,function(){op(BUB,0)})}
+/* show "calc" big, then fly "res" from the box to (tx,ty) */
+function calc(txt,res,at,tx,ty,color,done){bubble(txt,at,1300);fly(res,BX,BYC+9,tx,ty,at+1300,color,done,26)}
+var PER=2300; /* time per calculated cell */
+function putCell(i,j,v){var t=cells[i][j];t.textContent=f(v);flash(t)}
+function isZero(i,j){return A[i]===0||B[j]===0}
+var MID=[[1,1],[1,2],[1,3],[2,1],[2,2],[2,3],[3,1],[3,2],[3,3]];
 var ANIM={
- flyA:function(){aHeadT.forEach(function(t,i){op(t,0);fly(f(A[i]),ax(i),vy(A[i])-5,222,my(i)+4,250+i*170,'var(--c2)',function(){op(t,1);flash(t)})})},
- flyB:function(){bHeadT.forEach(function(t,j){op(t,0);fly(f(B[j]),bx(j),vy(B[j])-5,mx(j),232,250+j*170,'var(--c2)',function(){op(t,1);flash(t)})})},
- cell1:function(k,s){var t=cells[1][2];t.textContent='';op(cellHL,0);later(650,function(){op(cellHL,1);t.textContent='0.5';flash(t)})},
- fill:function(k,s){var L=[];for(var i=0;i<5;i++)for(var j=0;j<5;j++)if(!(i===1&&j===2)){L.push([i,j]);cells[i][j].textContent=''}seqCells(L,MM,120,s)},
- flyAp:function(){rows.forEach(function(R){op(R,1)});apT.forEach(function(t,i){op(t,0);fly(f(AP[i]),ax(i),vy(AP[i])-5,274,my(i)+4,250+i*170,'var(--c4)',function(){op(t,1);flash(t)})});
-   later(250+5*170+900,function(){rows.forEach(function(R,i){op(R,i===1?1:.28)})})},
- col:function(k,s){var t=bpT[1];t.textContent='';op(rowBand,0);
-   for(var i=0;i<5;i++)(function(i){later(300+i*420,function(){cellHL.setAttribute('x',mx(1)-29);cellHL.setAttribute('y',my(i)-13);op(cellHL,1)})})(i);
-   later(300+5*420,function(){op(cellHL,0);t.textContent='0.5';flash(t)})},
- bpRest:function(k,s){[0,2,3,4].forEach(function(j,n){var t=bpT[j];t.textContent='';
-   later(300+n*480,function(){colBand.setAttribute('x',mx(j)-29);op(colBand,1);t.textContent=f(BPmm[j]);flash(t)})});later(300+4*480+300,function(){bands(s)})},
+ preview:function(k,s){CB.vals.forEach(function(t){op(t,0)});
+   later(500,function(){bubbleShow('max-min');CB.bars.forEach(function(r){r.style.fill='var(--c1)'});op(alBg,1);CB.ghosts.forEach(function(r){op(r,1)});tween(s.aH,BPmm)});
+   later(3300,function(){op(BUB,0);op(alBg,0);CB.bars.forEach(function(r){r.style.fill='var(--c2)'});tween(s.aH,B)});
+   later(4600,function(){bubbleShow('max-product');CB.bars.forEach(function(r){r.style.fill='var(--c3)'});tween(s.aH,BPmp)});
+   later(7400,function(){op(BUB,0);CB.ghosts.forEach(function(r){op(r,0)});CB.bars.forEach(function(r){r.style.fill=s.bCol});tween(s.aH,s.bH)});
+   later(8300,function(){CB.vals.forEach(function(t){op(t,s.bVals)})})},
+ flyA:function(){aHeadT.forEach(function(t,i){op(t,0);fly(f(A[i]),ax(i),vy(A[i])-5,222,my(i)+4,300+i*GAP,'var(--c2)',function(){op(t,1);flash(t)})})},
+ flyB:function(){bHeadT.forEach(function(t,j){op(t,0);fly(f(B[j]),bx(j),vy(B[j])-5,mx(j),232,300+j*GAP,'var(--c2)',function(){op(t,1);flash(t)})})},
+ cell1:function(k,s){cells[1][2].textContent='';
+   calc('min(0.5, 1) = 0.5','0.5',400,mx(2),my(1)+5,'var(--text)',function(){putCell(1,2,.5)})},
+ zeros:function(k,s){var Z=[];for(var i=0;i<5;i++)for(var j=0;j<5;j++)if(isZero(i,j)){cells[i][j].textContent='';if(!(i===0&&j===1))Z.push([i,j])}
+   mark(0,1);calc('min(0, 0.6) = 0','0',400,mx(1),my(0)+5,'var(--text)',function(){putCell(0,1,0)});
+   var st=400+1300+FD+300;
+   Z.forEach(function(c,n){later(st+n*110,function(){mark(c[0],c[1]);putCell(c[0],c[1],0)})});
+   later(st+Z.length*110+300,function(){bands(s)})},
+ rest:function(k,s){var L=MID.filter(function(c){return !(c[0]===1&&c[1]===2)});
+   L.forEach(function(c){cells[c[0]][c[1]].textContent=''});
+   L.forEach(function(c,n){var i=c[0],j=c[1],at=300+n*PER;
+     later(at,function(){mark(i,j)});
+     calc('min('+f(A[i])+', '+f(B[j])+') = '+f(MM[i][j]),f(MM[i][j]),at,mx(j),my(i)+5,'var(--text)',function(){putCell(i,j,MM[i][j])})});
+   later(300+L.length*PER,function(){bands(s)})},
+ flyAp:function(){rows.forEach(function(R){op(R,1)});apT.forEach(function(t,i){op(t,0);fly(f(AP[i]),ax(i),vy(AP[i])-5,274,my(i)+4,300+i*GAP,'var(--c4)',function(){op(t,1);flash(t)})});
+   later(300+5*GAP+FD+400,function(){rows.forEach(function(R,i){op(R,i===1?1:.28)})})},
+ col:function(k,s){bpT[1].textContent='';op(rowBand,0);
+   for(var i=0;i<5;i++)(function(i){var at=300+i*1500;
+     later(at,function(){cellHL.setAttribute('x',mx(1)-29);cellHL.setAttribute('y',my(i)-13);op(cellHL,1)});
+     bubble('min('+f(AP[i])+', '+f(MM[i][1])+') = '+f(Math.min(AP[i],MM[i][1])),at,1200)})(i);
+   var at=300+5*1500;later(at,function(){op(cellHL,0)});
+   bubble('max{0, 0.5, 0, 0, 0} = 0.5',at,1500);
+   fly('0.5',BX,BYC+9,mx(1),my(5)+5,at+1500,'var(--c1)',function(){putBp(1,.5)},26)},
+ bpRest:function(k,s){[0,2,3,4].forEach(function(j,n){bpT[j].textContent='';var at=300+n*PER;
+   later(at,function(){mark(1,j)});
+   calc('min(0.5, '+f(MM[1][j])+') = '+f(BPmm[j]),f(BPmm[j]),at,mx(j),my(5)+5,'var(--c1)',function(){putBp(j,BPmm[j])})});
+   later(300+4*PER,function(){bands(s)})},
  up:function(k,s){var ps=S[k-1].s;if(raf)cancelAnimationFrame(raf);curB=ps.bH.slice();setBars(CB,curB);
    CB.bars.forEach(function(r){r.style.fill=ps.bCol});CB.vals.forEach(function(t){op(t,0)});op(alBg,0);
-   s.bH.forEach(function(v,j){fly(f(v),mx(j),my(5)+5,bx(j),vy(v)-5,250+j*170,s.bCol,j<4?null:function(){
+   s.bH.forEach(function(v,j){fly(f(v),mx(j),my(5)+5,bx(j),vy(v)-5,300+j*GAP,s.bCol,j<4?null:function(){
      CB.bars.forEach(function(r){r.style.fill=s.bCol});tween(s.aH,s.bH);CB.vals.forEach(function(t){op(t,1)});op(alBg,s.alB)})})},
- prod:function(k,s){var L=[];for(var i=0;i<5;i++)for(var j=0;j<5;j++){L.push([i,j]);cells[i][j].textContent=f(MM[i][j])}seqCells(L,MP,100,s)},
+ avg:function(k,s){var P=s.mode==='prod',c=P?'var(--c3)':'var(--c1)';op(ysg,0);
+   var L=P?['20×0.15 + 30×0.25 + 40×0.15 = 16.5','0.15 + 0.25 + 0.15 = 0.55','16.5 / 0.55 = 30']:['20×0.5 + 30×0.5 + 40×0.5 = 45','0.5 + 0.5 + 0.5 = 1.5','45 / 1.5 = 30'];
+   bubble(L[0],300,2300);bubble(L[1],2900,2000);bubble(L[2],5200,1500);
+   fly('30',BX,BYC+9,ysx,46,6700,'var(--c4)',function(){op(ysg,1)},26)},
+ prod:function(k,s){MID.forEach(function(c){cells[c[0]][c[1]].textContent=f(MM[c[0]][c[1]])});
+   MID.forEach(function(c,n){var i=c[0],j=c[1],at=300+n*PER;
+     later(at,function(){mark(i,j)});
+     calc(f(A[i])+' × '+f(B[j])+' = '+f(MP[i][j]),f(MP[i][j]),at,mx(j),my(i)+5,'var(--text)',function(){putCell(i,j,MP[i][j])})});
+   later(300+MID.length*PER,function(){bands(s)})},
  bpProd:function(k,s){bpT.forEach(function(t){t.textContent=''});op(colBand,0);
-   BPmp.forEach(function(v,j){later(300+j*480,function(){mark(1,j);bpT[j].textContent=f(v);flash(bpT[j])})});later(300+5*480+250,function(){bands(s)})}
+   BPmp.forEach(function(v,j){var at=300+j*PER;later(at,function(){mark(1,j)});
+     calc('0.5 × '+f(MP[1][j])+' = '+f(v),f(v),at,mx(j),my(5)+5,'var(--c3)',function(){putBp(j,v)})});
+   later(300+5*PER,function(){bands(s)})}
 };
+function putBp(j,v){var t=bpT[j];t.textContent=f(v);flash(t)}
 
 /* ---- controls ---- */
 var k=0;
 var cap=document.getElementById('anCap'),cnt=document.getElementById('anCnt'),bar=document.getElementById('anBar');
-var bPrev=document.getElementById('anPrev'),bNext=document.getElementById('anNext');
+var bPrev=document.getElementById('anPrev'),bNext=document.getElementById('anNext'),bAgain=document.getElementById('anAgain');
 function show(n,animate){
   cancelAnim();k=n;var st=S[k];snap(st.s);
   if(animate&&st.anim&&!reduce)ANIM[st.anim](k,st.s);
   cap.innerHTML='<b style="color:var(--accent)">قدم '+(k+1)+'.</b> '+st.cap+st.gl.map(function(g){
     return '<div class="an-new"><b>نماد تازه:</b> '+GL[g][0]+' — '+GL[g][1]+' <span class="an-from">· از کجا آمد: '+GL[g][2]+'</span></div>'}).join('');
   cnt.textContent=(k+1)+' از '+S.length;bar.style.width=((k+1)/S.length*100)+'%';
-  bPrev.disabled=k===0;bNext.textContent=k===S.length-1?'از اول ↺':'بعدی ←';
+  bPrev.disabled=k===0;bAgain.disabled=!st.anim||reduce;bNext.textContent=k===S.length-1?'از اول ↺':'بعدی ←';
 }
 function keepInView(){var r=box.getBoundingClientRect(),sb=svg.getBoundingClientRect();
   if(r.top<-8||(sb.bottom>innerHeight&&r.top>8))box.scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'})}
 bNext.addEventListener('click',function(){if(k===S.length-1)show(0,false);else show(k+1,true);keepInView()});
+bAgain.addEventListener('click',function(){if(S[k].anim)show(k,true)});
 bPrev.addEventListener('click',function(){if(k>0)show(k-1,false);keepInView()});
 box.addEventListener('keydown',function(e){if(e.key==='ArrowLeft'&&k<S.length-1){show(k+1,true);e.preventDefault()}else if(e.key==='ArrowRight'&&k>0){show(k-1,false);e.preventDefault()}});
 show(0,false);
