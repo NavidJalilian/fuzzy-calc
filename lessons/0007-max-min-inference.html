@@ -226,7 +226,7 @@ b3 = max( min(0.3,0.4), min(0.9,0.8), min(0.5,0.3) ) = max(0.3, 0.8, 0.3) = 0.8<
     </div><div class="fb"></div>
   </div>
 
-  <div class="q practice" data-hint="هر خانه = min(عضویت سطر، عضویت ستون). سطری که عضویتش ۱ است، خود B را کپی می‌کند." data-yes="عالی! ماتریس قانون درست ساخته شد. ستون آخر همه 0.2 است چون b3=0.2 از همه aها کوچک‌تر است.">
+  <div class="q practice" id="pq3" data-hint="هر خانه = min(عضویت سطر، عضویت ستون). سطری که عضویتش ۱ است، خود B را کپی می‌کند." data-yes="عالی! ماتریس قانون درست ساخته شد. ستون آخر همه 0.2 است چون b3=0.2 از همه aها کوچک‌تر است.">
     <p>۳) قانون «اگر x برابر A است آنگاه y برابر B است» را در نظر بگیر. ماتریس قانون <span class="m">R</span> را با <span class="m">r_ij = min(a_i , b_j)</span> پر کن.</p>
     <div class="mb">A = {0.4/1 , 1/2 , 0.7/3}        B = {0.5/10 , 1/20 , 0.2/30}</div>
     <table class="t"><tr><th></th><th>y=10</th><th>y=20</th><th>y=30</th></tr>
@@ -254,6 +254,7 @@ x=3 (0.7)    0.5          0.7        0.2</div><p>مثلاً خانه x=3، y=20:
 
   <div class="q practice" data-hint="اول مکمل را حساب کن: 1 − a. بعد برای هر ستون R سه min بگیر و max را بنویس. یادت باشد min(0, هر چیز) = 0." data-yes="عالی! B′ = (0.4, 0.4, 0.2). «نه A» تقریباً چیزی درباره B نمی‌گوید، پس عضویت‌ها پایین ماندند.">
     <p>۵) (ترکیب با درس ۴) ورودی این بار «نه A» است: <span class="m">A′ = ¬A</span> برای همان A سؤال ۳. اول <span class="m">A′</span> را بنویس، بعد <span class="m">B′ = A′ ∘ R</span> را با ماتریس سؤال ۳ حساب کن.</p>
+    <div class="given"><b>سؤال ۳ چه بود؟</b> <span class="m">A = {0.4/1 , 1/2 , 0.7/3}</span> و <span class="m">B = {0.5/10 , 1/20 , 0.2/30}</span>؛ ماتریس <span class="m">R</span> را با <span class="m">r_ij = min(a_i , b_j)</span> ساختی. سطرهای <span class="m">R</span> (x = 1، 2، 3): <span class="m">(0.4, 0.4, 0.2)</span>، <span class="m">(0.5, 1, 0.2)</span>، <span class="m">(0.5, 0.7, 0.2)</span>. <a href="#pq3">↑ سؤال ۳</a></div>
     <table class="t"><tr><th></th><th>1</th><th>2</th><th>3</th></tr>
       <tr><th>A′ = ¬A</th><td><input type="text" data-k="0.6" aria-label="A' در 1"></td><td><input type="text" data-k="0" aria-label="A' در 2"></td><td><input type="text" data-k="0.3" aria-label="A' در 3"></td></tr></table>
     <table class="t"><tr><th></th><th>y=10</th><th>y=20</th><th>y=30</th></tr>
@@ -267,7 +268,7 @@ b′(30) = max( min(0.6,0.2), min(0,0.2), min(0.3,0.2) ) = max(0.2, 0, 0.2) = 0.
   </div>
 
   <div class="q mcq" data-yes="درست! وقتی A′ = A و A یک عضویت ۱ دارد، همان سطر B را کپی می‌کند و بقیه سطرها از B کوچک‌ترند؛ پس B′ = B. قانون «همان چیزی را که گفتی» برمی‌گرداند." data-no="نه. سطری از R که a_i = 1 دارد خود B است، و هیچ خانه R از b_j بزرگ‌تر نیست. پس max دقیقاً b_j می‌شود.">
-    <p>۶) فرض کن ورودی دقیقاً خود A باشد (<span class="m">A′ = A</span>) و A حداقل یک عضویت برابر ۱ داشته باشد (مثل سؤال ۳). حاصل <span class="m">A ∘ R</span> چیست؟</p>
+    <p>۶) فرض کن ورودی دقیقاً خود A باشد (<span class="m">A′ = A</span>) و A حداقل یک عضویت برابر ۱ داشته باشد (مثل A <a href="#pq3">سؤال ۳</a>: <span class="m">{0.4/1 , 1/2 , 0.7/3}</span>). حاصل <span class="m">A ∘ R</span> چیست؟</p>
     <div class="opts">
       <button><span class="m">B′ = A</span></button>
       <button><span class="m">B′ = 0</span></button>

@@ -111,7 +111,7 @@ details.sol[open] summary{margin-bottom:6px}
 <!-- ===== 2. SEE IT ===== -->
 <section class="sec"><p class="lab">۲. ببین چه اتفاقی می‌افتد</p>
 <div class="card">
-  <p>منحنی ضخیم همان <span class="m">Tall</span> تمرین ۱ است (نقطه‌ها را خطی به هم وصل کرده‌ایم). قیدها را روشن و خاموش کن و با لغزنده <span class="m">x</span> را جابه‌جا کن.</p>
+  <p>منحنی ضخیم همان <span class="m">Tall</span> <a href="#hw1-q2">تمرین ۱</a> است (نقطه‌ها را خطی به هم وصل کرده‌ایم). قیدها را روشن و خاموش کن و با لغزنده <span class="m">x</span> را جابه‌جا کن.</p>
   <div class="row" id="hedgeBtns" role="group" aria-label="قیدها"></div>
   <svg id="hedgeSvg" viewBox="0 0 600 270" role="img" aria-labelledby="hedgeTitle"><title id="hedgeTitle">منحنی بلند و منحنی‌های قیدها</title></svg>
   <label for="hx" class="row" style="justify-content:space-between"><span>x = <span class="m" id="hxv">60</span></span><span style="font-size:13px;color:var(--text-3)">۰ تا ۱۰۰</span></label>
@@ -122,7 +122,7 @@ details.sol[open] summary{margin-bottom:6px}
 <!-- ===== 3. WORKED EXAMPLE ===== -->
 <section class="sec"><p class="lab">۳. مثال حل‌شده، قدم به قدم — دقیقاً سؤال ۲ تمرین ۱</p>
 <div class="card stepper">
-  <div class="mb">Tall = {(0,0), (20,0.2), (40,0.4), (60,0.7), (80,1), (100,1)}</div>
+  <div class="given" id="hw1-q2"><b>صورت تمرین ۱، سؤال ۲:</b> «اگر مجموعه فازی tall به صورت زیر باشد، آنگاه مجموعه‌های فازی <span class="m">somewhat tall</span>، <span class="m">indeed tall</span>، <span class="m">very tall</span>، <span class="m">very very tall</span> و <span class="m">not very tall</span> را به دست آورید.»<br><span class="m">Tall = {(0,0), (20,0.2), (40,0.4), (60,0.7), (80,1), (100,1)}</span></div>
   <div class="tip">در این تمرین هر جفت به شکل <span class="m">(x, μ)</span> است: اول عنصر، بعد درجه. این <b>برعکسِ</b> نوشتار <span class="m">μ/x</span> است. پس <span class="m">(60,0.7)</span> یعنی «عنصر ۶۰ با درجه ۰٫۷». جواب‌ها را هم با همین شکل بنویس.</div>
   <div class="st">قدم ۱ — very tall: هر درجه را به توان ۲ برسان.
     <table class="t"><tr><th>x</th><th>0</th><th>20</th><th>40</th><th>60</th><th>80</th><th>100</th></tr><tr><th>μ_tall</th><td>0</td><td>0.2</td><td>0.4</td><td>0.7</td><td>1</td><td>1</td></tr><tr><th>μ²</th><td>0</td><td>0.04</td><td>0.16</td><td>0.49</td><td>1</td><td>1</td></tr></table>
@@ -244,12 +244,12 @@ not very short = 1 − 0.5² = 1 − 0.25 = 0.75</div><p><b>قدم ۲:</b> <span
   <li>توان بیشتر = سخت‌گیرتر (منحنی جمع‌تر)؛ جذر = آسان‌گیرتر (منحنی پهن‌تر). ۰ و ۱ با توان عوض نمی‌شوند.</li>
   <li>«not very» ≠ «very not»: اولی <span class="m">1 − μ²</span>، دومی <span class="m">(1 − μ)²</span>.</li>
   <li>«نه خیلی کوتاه و نه خیلی بلند» = <span class="m">min(1 − μ_tall², 1 − μ_short²)</span>.</li>
-  <li>در تمرین ۱ جفت‌ها <span class="m">(x, μ)</span> هستند، نه <span class="m">μ/x</span>.</li>
+  <li>در <a href="#hw1-q2">تمرین ۱</a> جفت‌ها <span class="m">(x, μ)</span> هستند، نه <span class="m">μ/x</span>.</li>
 </ul></div></section>
 
 <!-- ===== 6. SOURCE + ASK ===== -->
 <section class="sec"><p class="lab">منبع اصلی</p>
-<p>جزوه درس، اسلایدهای ۵۱ تا ۵۳ · تمرین ۱، سؤال ۲ · <a href="https://www.wiley.com/en-us/Fuzzy+Logic+with+Engineering+Applications%2C+4th+Edition-p-9781119235866">Ross, <i>Fuzzy Logic with Engineering Applications</i></a> — بخش «linguistic hedges» (concentration، dilation، intensification).</p>
+<p>جزوه درس، اسلایدهای ۵۱ تا ۵۳ · <a href="#hw1-q2">تمرین ۱، سؤال ۲</a> · <a href="https://www.wiley.com/en-us/Fuzzy+Logic+with+Engineering+Applications%2C+4th+Edition-p-9781119235866">Ross, <i>Fuzzy Logic with Engineering Applications</i></a> — بخش «linguistic hedges» (concentration، dilation، intensification).</p>
 <p><a href="../reference/cheatsheet.html">برگه فرمول‌ها</a> · <a href="../reference/glossary.html">واژه‌نامه</a></p>
 </section>
 

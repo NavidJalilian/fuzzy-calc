@@ -188,7 +188,7 @@ warm(24) = (24 − 18)/8 = 0.75    (rising side)</div><p><b>قدم ۲ — رطو
     </details><div class="fb"></div>
   </div>
 
-  <div class="q practice" data-hint="اول فازی‌سازی: سرد = (۱۸ − ۱۲) ÷ ۸، خنک = (۱۲ − ۱۰) ÷ ۸، مرطوب = (۶۰ − ۴۰) ÷ ۴۰. بعد برای قاعده ۳ کمینه سرد و مرطوب را بگیر." data-yes="درست! قاعده ۳ با min(0.75, 0.5) = 0.5 فعال شد.">
+  <div class="q practice" id="pq2" data-hint="اول فازی‌سازی: سرد = (۱۸ − ۱۲) ÷ ۸، خنک = (۱۲ − ۱۰) ÷ ۸، مرطوب = (۶۰ − ۴۰) ÷ ۴۰. بعد برای قاعده ۳ کمینه سرد و مرطوب را بگیر." data-yes="درست! قاعده ۳ با min(0.75, 0.5) = 0.5 فعال شد.">
     <p><b>سؤال ۲ (استنتاج).</b> برای <span class="m">T = 12</span> و <span class="m">H = 60</span>، درجه درستی سه قاعده را پیدا کن.</p>
     <table class="t"><tr><th>w1 (گرم ← زیاد)</th><th>w2 (خنک ← خاموش)</th><th>w3 (سرد و مرطوب ← کم)</th></tr>
       <tr><td><input type="text" data-k="0" aria-label="w1"></td><td><input type="text" data-k="0.25" aria-label="w2"></td><td><input type="text" data-k="0.5" aria-label="w3"></td></tr></table>
@@ -205,6 +205,7 @@ w3 = min(cold, humid) = min(0.75, 0.5) = 0.5</div>
 
   <div class="q practice" data-hint="y = (0·w2 + 40·w3 + 100·w1) ÷ (w1 + w2 + w3). با جواب‌های سؤال ۲: (0 + 40·0.5 + 0) ÷ 0.75." data-yes="درست! 20 ÷ 0.75 ≈ 26.7٪.">
     <p><b>سؤال ۳ (غیرفازی‌سازی).</b> با جواب سؤال ۲ و همان عددهای نماینده (خاموش = ۰، کم = ۴۰، زیاد = ۱۰۰)، سرعت هوا چند درصد است؟ (تا یک رقم اعشار)</p>
+    <div class="given"><b>سؤال ۲ چه بود؟</b> برای <span class="m">T = 12</span> و <span class="m">H = 60</span> درجه درستی سه قاعده را پیدا کردی: <span class="m">w1</span> (گرم ← زیاد)، <span class="m">w2</span> (خنک ← خاموش) و <span class="m">w3</span> (سرد و مرطوب ← کم). همان سه عدد را اینجا به کار ببر. <a href="#pq2">↑ سؤال ۲</a></div>
     <p>y = <span style="display:inline-block;border-radius:8px;padding:2px"><input type="text" data-k="26.67" data-tol="0.05" aria-label="سرعت هوا درصد"></span> %</p>
     <button class="check">بررسی</button>
     <details class="sol"><summary>راه‌حل</summary>

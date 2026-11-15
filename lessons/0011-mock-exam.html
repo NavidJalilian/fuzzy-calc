@@ -109,10 +109,10 @@ table.plan td,table.plan th{text-align:right}
   <table class="t plan" style="direction:rtl">
     <tr><th>بخش</th><th>چه چیزی</th><th>زمان</th></tr>
     <tr><td>بخش الف</td><td>۱۱ پرسش چندگزینه‌ای از هر سه فصل</td><td>۱۰ دقیقه</td></tr>
-    <tr><td>مسئله ۱</td><td>اجتماع، اشتراک، مکمل (مثل تمرین ۱، سؤال ۱)</td><td>۸ دقیقه</td></tr>
-    <tr><td>مسئله ۲</td><td>قیدهای زبانی (مثل تمرین ۱، سؤال ۲)</td><td>۸ دقیقه</td></tr>
+    <tr><td>مسئله ۱</td><td>اجتماع، اشتراک، مکمل (مثل <a href="#hw1-q1">تمرین ۱، سؤال ۱</a>)</td><td>۸ دقیقه</td></tr>
+    <tr><td>مسئله ۲</td><td>قیدهای زبانی (مثل <a href="#hw1-q2">تمرین ۱، سؤال ۲</a>)</td><td>۸ دقیقه</td></tr>
     <tr><td>مسئله ۳</td><td>ماتریس قانون + max-min + میانگین وزنی</td><td>۱۰ دقیقه</td></tr>
-    <tr><td>مسئله ۴</td><td>max-product (مثل تمرین ۲)</td><td>۸ دقیقه</td></tr>
+    <tr><td>مسئله ۴</td><td>max-product (مثل <a href="#hw2">تمرین ۲</a>)</td><td>۸ دقیقه</td></tr>
     <tr><td>مسئله ۵</td><td>مقدار توابع عضویت متلب در چند نقطه</td><td>۸ دقیقه</td></tr>
   </table>
   <div class="row" style="margin-top:8px"><span class="timer" id="tmv" aria-live="off">00:00</span><button id="tmStart">شروع زمان‌سنج</button><button id="tmReset">صفر کن</button></div>
@@ -243,6 +243,7 @@ table.plan td,table.plan th{text-align:right}
 <!-- Problem 1 -->
 <div class="card pb">
   <h3>مسئله ۱ — اجتماع، اشتراک و مکمل <span class="tag">مثل تمرین ۱، سؤال ۱</span></h3>
+  <div class="given" id="hw1-q1"><b>صورت تمرین ۱، سؤال ۱:</b> «فرض کنید مجموعه جهانی X و مجموعه‌های فازی A و B به صورت زیر تعریف شده باشند. آنگاه مجموعه‌های فازی زیر را به دست آورید: ۱) <span class="m">A∪B</span> ۲) <span class="m">A∩B</span> ۳) <span class="m">Ā</span> ۴) <span class="m">B̄</span> ۵) <span class="m">A∪Ā</span> ۶) <span class="m">B∪Ā</span>»<br><span class="m">X = {1,2,3,4,5,6}</span> · <span class="m">A = {0.5/2, 0.7/3, 1/4, 0.6/5, 1/6}</span> · <span class="m">B = {0.4/1, 0.8/2, 1/3, 0.7/4, 0.3/5}</span><br><i>مسئله زیر همین شکل را با عددهای تازه دارد.</i></div>
   <p>فرض کنید مجموعه جهانی <span class="m">X</span> و مجموعه‌های فازی <span class="m">A</span> و <span class="m">B</span> به صورت زیر تعریف شده باشند. آنگاه مجموعه‌های فازی زیر را به دست آورید:</p>
   <p><span class="m">(1) A∪B   (2) A∩B   (3) Ā   (4) B̄   (5) A∩Ā   (6) B∪Ā</span></p>
   <div class="mb pre">X = {1,2,3,4,5,6}
@@ -289,6 +290,7 @@ A = {0.3/1, 0.8/2, 1/3, 0.5/5} ,  B = {0.6/2, 0.2/3, 0.9/4, 0.4/5, 1/6}</div>
 <!-- Problem 2 -->
 <div class="card pb">
   <h3>مسئله ۲ — قیدهای زبانی <span class="tag">مثل تمرین ۱، سؤال ۲</span></h3>
+  <div class="given" id="hw1-q2"><b>صورت تمرین ۱، سؤال ۲:</b> «اگر مجموعه فازی tall به صورت زیر باشد، آنگاه مجموعه‌های فازی <span class="m">somewhat tall</span>، <span class="m">indeed tall</span>، <span class="m">very tall</span>، <span class="m">very very tall</span> و <span class="m">not very tall</span> را به دست آورید.»<br><span class="m">Tall = {(0,0), (20,0.2), (40,0.4), (60,0.7), (80,1), (100,1)}</span><br><i>مسئله زیر همین شکل را با عددهای تازه دارد.</i></div>
   <p>اگر مجموعه فازی <span class="m">hot</span> به صورت زیر باشد، آنگاه مجموعه‌های فازی <span class="m">very hot</span>، <span class="m">very very hot</span>، <span class="m">not very hot</span>، <span class="m">somewhat hot</span> و <span class="m">indeed hot</span> را به دست آورید.</p>
   <div class="mb">Hot = {(15,0), (20,0.3), (25,0.5), (30,0.6), (35,0.9), (40,1)}</div>
   <div class="tip">مثل تمرین ۱، هر جفت به شکل <span class="m">(x, μ)</span> است: اول عنصر (دما)، بعد درجه. جواب‌ها را تا سه رقم اعشار بنویس.</div>
@@ -384,6 +386,7 @@ b′4 = max{min(0,0), min(0,0.4), min(0,0.5), min(0.7,0.5), min(0,0.2)} = 0.5</d
 <!-- Problem 4 -->
 <div class="card pb">
   <h3>مسئله ۴ — استنتاج max-product <span class="tag">مثل تمرین ۲</span></h3>
+  <div class="given" id="hw2"><b>صورت تمرین ۲:</b> «قاعده فازی "اگر بارندگی زیاد باشد آنگاه رطوبت زیاد است" را در نظر بگیرید. فرض کنید x متغیر زبانی میزان بارندگی و H مجموعه فازی زیاد، y متغیر زبانی میزان رطوبت و HN مجموعه فازی زیاد باشند. در این صورت قاعده اگر–آنگاه را می‌توان به صورت <span class="m">if x is H then y is HN</span> نوشت. حال با توجه به مجموعه‌های فازی و قانون بالا اگر میزان بارندگی ۸۰ باشد، آنگاه میزان رطوبت چقدر است؟ (از روش Max-product inference استفاده کنید.)»<br><span class="m">H = 0.2/20 + 0.4/40 + 0.6/60 + 0.8/80 + 1/100</span> · <span class="m">HN = 0.1/25 + 0.6/50 + 0.8/75 + 1/100</span><br><i>مسئله زیر همین شکل را با عددهای تازه دارد.</i></div>
   <p>قاعده فازی «اگر باد شدید باشد آنگاه ارتفاع موج زیاد است» را در نظر بگیرید. فرض کنید x متغیر زبانی سرعت باد (km/h) و W مجموعه فازی «شدید»، y متغیر زبانی ارتفاع موج (متر) و H مجموعه فازی «زیاد» باشد. در این صورت قاعده را می‌توان به صورت زیر نوشت:</p>
   <div class="mb">if x is W then y is H</div>
   <div class="mb pre">W = 0.1/10 + 0.3/20 + 0.6/30 + 0.9/40 + 1/50
@@ -471,7 +474,7 @@ x = 8.5 در [6, 10] (پایین‌رونده): (10 − 8.5)/(10 − 6) = 1.5/4 
 <div class="soft" style="margin-top:12px">
   <p style="margin-bottom:4px"><b>شب امتحان — همین را به خاطر بسپار</b></p>
   <ul style="margin:0">
-    <li>عنصرِ ننوشته = درجه ۰؛ مکملش ۱ است. در تمرین ۱ جفت‌ها <span class="m">(x, μ)</span> هستند، در بقیه جاها <span class="m">μ/x</span>.</li>
+    <li>عنصرِ ننوشته = درجه ۰؛ مکملش ۱ است. در <a href="#hw1-q2">تمرین ۱</a> جفت‌ها <span class="m">(x, μ)</span> هستند، در بقیه جاها <span class="m">μ/x</span>.</li>
     <li>very = <span class="m">μ²</span>، very very = <span class="m">μ³</span> (جزوه)، not very = <span class="m">1−μ²</span>، somewhat = <span class="m">√μ</span>، indeed دو شاخه با مرز 0.5.</li>
     <li>استنتاج: <span class="m">R</span> با min (یا ضرب) ← <span class="m">A′</span> با <span class="m">μ_A(x0)</span> در جای x0 ← <span class="m">b′_j = max_i(…)</span> ← میانگین وزنی.</li>
     <li>میان‌بر چک: max-min ← <span class="m">min(α, b_j)</span>؛ max-product ← <span class="m">α²·b_j</span>.</li>

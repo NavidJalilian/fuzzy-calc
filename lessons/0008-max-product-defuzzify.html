@@ -180,6 +180,7 @@ b5 = max{min(0,0), min(0.5,0), min(0,0), min(0,0), min(0,0)}       = 0</div></di
 
 <div class="card stepper" style="margin-top:12px">
   <h3>ب) مسئله تازه، هم‌شکل تمرین ۲ (max-product)</h3>
+  <div class="given" id="hw2"><b>صورت تمرین ۲:</b> «قاعده فازی "اگر بارندگی زیاد باشد آنگاه رطوبت زیاد است" را در نظر بگیرید. فرض کنید x متغیر زبانی میزان بارندگی و H مجموعه فازی زیاد، y متغیر زبانی میزان رطوبت و HN مجموعه فازی زیاد باشند. در این صورت قاعده اگر–آنگاه را می‌توان به صورت <span class="m">if x is H then y is HN</span> نوشت. حال با توجه به مجموعه‌های فازی و قانون بالا اگر میزان بارندگی ۸۰ باشد، آنگاه میزان رطوبت چقدر است؟ (از روش Max-product inference استفاده کنید.)»<br><span class="m">H = 0.2/20 + 0.4/40 + 0.6/60 + 0.8/80 + 1/100</span> · <span class="m">HN = 0.1/25 + 0.6/50 + 0.8/75 + 1/100</span><br><i>عددهای مسئله زیر فرق دارد؛ خود تمرین ۲ را در سؤال ۸ بخش ۴ حل می‌کنی.</i></div>
   <p>قانون: «اگر ترافیک سنگین باشد، آنگاه زمان چراغ سبز طولانی است.» x = تعداد ماشین در دقیقه، T = ترافیک سنگین؛ y = ثانیه‌های چراغ سبز، G = زمان طولانی.</p>
   <div class="mb">T = 0.1/10 + 0.4/20 + 0.7/30 + 0.9/40 + 1/50
 G = 0.25/20 + 0.5/40 + 0.75/60 + 1/80</div>
@@ -210,7 +211,7 @@ b′4 = max{0, 0.4×0.4, 0, 0, 0} = 0.16</div></div>
 <!-- ===== 4. PRACTICE ===== -->
 <section class="sec"><p class="lab">۴. نوبت توست</p>
 <div class="card">
-  <div class="q practice" data-hint="μ_A(2) = 0.6. پس A′ = [0 0.6 0 0] و هر b′_j = min(0.6, b_j). برای y* هر نقطه را در عضویتش ضرب کن و تقسیم بر جمع عضویت‌ها کن." data-yes="عالی! B′ = (0.6, 0.6, 0.3, 0.1) و y* = 31 / 1.6 = 19.375.">
+  <div class="q practice" id="pq1" data-hint="μ_A(2) = 0.6. پس A′ = [0 0.6 0 0] و هر b′_j = min(0.6, b_j). برای y* هر نقطه را در عضویتش ضرب کن و تقسیم بر جمع عضویت‌ها کن." data-yes="عالی! B′ = (0.6, 0.6, 0.3, 0.1) و y* = 31 / 1.6 = 19.375.">
     <p>۱) (max-min) قانون «اگر x برابر A است آنگاه y برابر B است» با این مجموعه‌ها داده شده. اگر <span class="m">x = 2</span> باشد، B′ و عدد قطعی y* را حساب کن.</p>
     <div class="mb">A = {0.2/1 , 0.6/2 , 1/3 , 0.4/4}        B = {1/10 , 0.6/20 , 0.3/30 , 0.1/40}</div>
     <table class="t"><tr><th></th><th>y=10</th><th>y=20</th><th>y=30</th><th>y=40</th><th>y*</th></tr>
@@ -239,6 +240,7 @@ min(0.6, 0.1) = 0.1</div><p><b>قدم ۳ — میانگین وزنی:</b></p><di
 
   <div class="q practice" data-hint="ماتریس با ضرب: سطر x=2 برابر 0.6 × B است. بعد دوباره در a′ = 0.6 ضرب کن: b′_j = 0.36 × b_j." data-yes="عالی! B′ = (0.36, 0.216, 0.108, 0.036) و y* = 17.5 — همان مرکز خود B، چون فقط کوچک شد.">
     <p>۳) (max-product) همان داده‌های سؤال ۱ و همان ورودی <span class="m">x = 2</span>، این بار با روش max-product (هر دو min ← ضرب). B′ (با سه رقم اعشار) و y* را حساب کن.</p>
+    <div class="given"><b>سؤال ۱ چه بود؟</b> قانون «اگر x برابر A است آنگاه y برابر B است» با <span class="m">A = {0.2/1 , 0.6/2 , 1/3 , 0.4/4}</span> و <span class="m">B = {1/10 , 0.6/20 , 0.3/30 , 0.1/40}</span>، و ورودی <span class="m">x = 2</span>. <a href="#pq1">↑ سؤال ۱</a></div>
     <table class="t"><tr><th></th><th>y=10</th><th>y=20</th><th>y=30</th><th>y=40</th><th>y*</th></tr>
       <tr><th>B′</th><td><input type="text" data-k="0.36" data-tol="0.002" aria-label="B' در 10"></td><td><input type="text" data-k="0.216" data-tol="0.002" aria-label="B' در 20"></td><td><input type="text" data-k="0.108" data-tol="0.002" aria-label="B' در 30"></td><td><input type="text" data-k="0.036" data-tol="0.002" aria-label="B' در 40"></td><td><input type="text" data-k="17.5" data-tol="0.03" aria-label="y*"></td></tr></table>
     <button class="check">بررسی</button>
@@ -330,7 +332,7 @@ HN = 0.1/25 + 0.6/50 + 0.8/75 + 1/100</div>
 
 <!-- ===== 6. SOURCE + ASK ===== -->
 <section class="sec"><p class="lab">منبع اصلی</p>
-<p>جزوه درس، اسلایدهای ۷۳ و ۷۷ تا ۸۰ (شماره صفحه PDF؛ روی خود اسلاید ۲۶ و ۳۰ تا ۳۳) و برگه تمرین ۲ · <a href="https://www.wiley.com/en-us/Fuzzy+Logic+with+Engineering+Applications%2C+4th+Edition-p-9781119235866">Timothy J. Ross, Fuzzy Logic with Engineering Applications</a> — بخش‌های ترکیب max-product و روش‌های غیرفازی‌سازی (میانگین وزنی).</p>
+<p>جزوه درس، اسلایدهای ۷۳ و ۷۷ تا ۸۰ (شماره صفحه PDF؛ روی خود اسلاید ۲۶ و ۳۰ تا ۳۳) و <a href="#hw2">برگه تمرین ۲</a> · <a href="https://www.wiley.com/en-us/Fuzzy+Logic+with+Engineering+Applications%2C+4th+Edition-p-9781119235866">Timothy J. Ross, Fuzzy Logic with Engineering Applications</a> — بخش‌های ترکیب max-product و روش‌های غیرفازی‌سازی (میانگین وزنی).</p>
 <p><a href="../reference/cheatsheet.html">برگه فرمول‌ها</a> · <a href="../reference/glossary.html">واژه‌نامه</a></p>
 </section>
 
