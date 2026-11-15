@@ -56,6 +56,10 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
 .nav{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:14px;border-top:1px solid var(--border);padding-top:14px;margin-top:28px}
 .ask{font-size:14px;color:var(--text-2)}
 @media print{body{background:#fff}.card,.soft{break-inside:avoid}.stepper .st{display:block}button{display:none}}
+.given{font-size:14px;color:var(--text-2);background:var(--surface-1);border-right:3px solid var(--border-strong);border-radius:0 8px 8px 0;padding:6px 12px;margin:2px 0 10px}
+.given b{color:var(--text)}
+[id]{scroll-margin-top:16px}
+h3:target,.card:target{outline:2px solid var(--accent);outline-offset:6px;border-radius:8px}
 /* ===== END SHARED STYLE ===== */
 </style>
 <style>
@@ -75,11 +79,11 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
 <div class="card">
   <p>فرض کن <span class="m">A</span> و <span class="m">B</span> دو مجموعه فازی روی <b>یک مجموعه جهانی یکسان</b> <span class="m">U</span> هستند. همه عملیات‌ها <span class="key">عنصر به عنصر</span> انجام می‌شوند: برای هر <span class="m">x</span> فقط دو عدد <span class="m">μ_A(x)</span> و <span class="m">μ_B(x)</span> را نگاه می‌کنی و یک عدد جدید می‌سازی.</p>
 
-  <h3>تساوی و زیرمجموعه</h3>
+  <h3 id="subset">تساوی و زیرمجموعه</h3>
   <p><b>تساوی</b>: <span class="m">A = B</span> اگر و فقط اگر برای <b>همه</b> <span class="m">x∈U</span> داشته باشیم <span class="m">μ_A(x) = μ_B(x)</span>.</p>
   <p><b>زیرمجموعه</b> <span class="en">(subset)</span>: <span class="m">A ⊆ B</span> اگر و فقط اگر برای <b>همه</b> <span class="m">x∈U</span> داشته باشیم <span class="m">μ_A(x) ≤ μ_B(x)</span>. کافی است فقط در یک نقطه این شرط خراب شود تا <span class="m">A</span> زیرمجموعه <span class="m">B</span> نباشد.</p>
 
-  <h3>سه عمل اصلی (اسلاید ۴۹)</h3>
+  <h3 id="ops">سه عمل اصلی (اسلاید ۴۹)</h3>
   <table class="t">
     <tr><th>عمل</th><th>نماد</th><th>فرمول</th><th>به زبان ساده</th></tr>
     <tr><td>مکمل <span class="en">(complement)</span></td><td><span class="m">Ā</span></td><td><span class="m">μ_Ā(x) = 1 − μ_A(x)</span></td><td>از ۱ کم کن</td></tr>
@@ -141,7 +145,7 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
   </div>
 </div>
 
-<div class="card" style="margin-top:10px">
+<div class="card" id="cars" style="margin-top:10px">
   <h3 style="margin-top:0">مثال ماشین‌های ایرانی و خارجی (اسلایدهای ۵۹ و ۶۰)</h3>
   <p><span class="m">p(x)</span> = سهم قطعات ایرانیِ ماشین <span class="m">x</span> (در اسلاید به صورت درصد روی محور، ولی در فرمول‌ها به صورت عددی بین ۰ و ۱؛ یعنی ۵۰٪ همان <span class="m">0.5</span>).</p>
   <p><span class="m">D</span> = مجموعه ماشین‌های ایرانی و <span class="m">F</span> = مجموعه ماشین‌های خارجی:</p>
@@ -220,6 +224,7 @@ B = {0.6/1, 0.2/2, 1/3, 0.5/4, 0.7/5}</div>
 
   <div class="q practice" data-hint="μ_D = p و μ_F = 1 − p. اشتراک = کوچک‌ترِ این دو، اجتماع = بزرگ‌تر.">
     <p><b>سؤال ۳ (اسلاید ۵۹).</b> برای دو ماشین درجه‌ها را بنویس: ماشین اول ۳۰٪ قطعه ایرانی دارد (<span class="m">p = 0.3</span>)، ماشین دوم ۸۰٪ (<span class="m">p = 0.8</span>).</p>
+    <div class="given"><b>اسلاید ۵۹ چه می‌گوید؟</b> <span class="m">p</span> = سهم قطعات ایرانیِ یک ماشین، به صورت عدد بین ۰ و ۱ (۳۰٪ یعنی <span class="m">0.3</span>). <span class="m">D</span> = مجموعه «ماشین ایرانی» و <span class="m">F</span> = مجموعه «ماشین خارجی»، با این درجه‌ها: <span class="m">μ_D = p</span> و <span class="m">μ_F = 1 − p</span>. <span class="m">F∩D</span> اشتراک است (کوچک‌تر، min) و <span class="m">F∪D</span> اجتماع (بزرگ‌تر، max). <a href="#cars">↑ جدول و فرمول ماشین‌ها در بخش ۲</a>؛ نمودارش هم در همان بخش است (دکمه «ماشین‌ها (اسلاید ۵۹)»).</div>
     <table class="t"><tr><th></th><th>μ_D</th><th>μ_F</th><th>μ_F∩D</th><th>μ_F∪D</th></tr>
       <tr><th>p = 0.3</th><td><input type="text" data-k="0.3" aria-label="μ_D برای p=0.3"></td><td><input type="text" data-k="0.7" aria-label="μ_F برای p=0.3"></td><td><input type="text" data-k="0.3" aria-label="اشتراک برای p=0.3"></td><td><input type="text" data-k="0.7" aria-label="اجتماع برای p=0.3"></td></tr>
       <tr><th>p = 0.8</th><td><input type="text" data-k="0.8" aria-label="μ_D برای p=0.8"></td><td><input type="text" data-k="0.2" aria-label="μ_F برای p=0.8"></td><td><input type="text" data-k="0.2" aria-label="اشتراک برای p=0.8"></td><td><input type="text" data-k="0.8" aria-label="اجتماع برای p=0.8"></td></tr></table>
@@ -238,6 +243,7 @@ B = {0.6/1, 0.2/2, 1/3, 0.5/4, 0.7/5}</div>
 
   <div class="q mcq" data-yes="درست! کافی است در یک نقطه μ_A > μ_B باشد تا A زیرمجموعه B نباشد: 0.9 > 0.7." data-no="نه. شرط زیرمجموعه باید برای همه x برقرار باشد: μ_A(x) ≤ μ_B(x). در x=3 داریم 0.9 > 0.7.">
     <p><b>سؤال ۵ (اسلاید ۴۹).</b> <span class="m">A = {0.2/1, 0.5/2, 0.9/3}</span> و <span class="m">B = {0.4/1, 0.5/2, 0.7/3}</span>. آیا <span class="m">A ⊆ B</span>؟</p>
+    <div class="given"><b>اسلاید ۴۹ چه می‌گوید؟</b> <span class="m">A ⊆ B</span> (A زیرمجموعه B است) یعنی برای <b>همه</b> <span class="m">x</span> داشته باشیم <span class="m">μ_A(x) ≤ μ_B(x)</span>. <a href="#subset">↑ بخش ۱، «تساوی و زیرمجموعه»</a></div>
     <div class="opts">
       <button data-ok>نه؛ چون در x=3 درجه A از B بیشتر است</button>
       <button>بله؛ چون در x=2 درجه‌های A و B برابرند</button>
@@ -248,6 +254,8 @@ B = {0.6/1, 0.2/2, 1/3, 0.5/4, 0.7/5}</div>
 
   <div class="q mcq" data-yes="درست! هر ستون را نگاه کن: 1−0=1، 1−0.2=0.8، 1−0.5=0.5، … پس S = T̄." data-no="نه. ستون به ستون 1 − μ_T را حساب کن: (1, 0.8, 0.5, 0.2, 0) که دقیقاً درجه‌های S است.">
     <p><b>سؤال ۶.</b> در مثال اسلاید ۵۰، رابطه <span class="m">S</span> با <span class="m">T</span> چیست؟</p>
+    <div class="given"><b>اسلاید ۵۰ چه می‌گوید؟</b> این دو مجموعه فازی را می‌دهد (اسلاید پرانتز می‌گذارد؛ معنی‌اش همان آکولاد است):<div class="mb pre">T = (0/5, 0.2/5.5, 0.5/6, 0.8/6.5, 1/7)
+S = (1/5, 0.8/5.5, 0.5/6, 0.2/6.5, 0/7)</div>درجه‌های هر ستون را با هم مقایسه کن. <a href="#ops">↑ سه عمل اصلی در بخش ۱</a></div>
     <div class="opts">
       <button>S همان اجتماع T با خودش است</button>
       <button>S همان اشتراک T با خودش است</button>

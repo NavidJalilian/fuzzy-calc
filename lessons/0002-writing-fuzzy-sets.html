@@ -56,6 +56,10 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
 .nav{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:14px;border-top:1px solid var(--border);padding-top:14px;margin-top:28px}
 .ask{font-size:14px;color:var(--text-2)}
 @media print{body{background:#fff}.card,.soft{break-inside:avoid}.stepper .st{display:block}button{display:none}}
+.given{font-size:14px;color:var(--text-2);background:var(--surface-1);border-right:3px solid var(--border-strong);border-radius:0 8px 8px 0;padding:6px 12px;margin:2px 0 10px}
+.given b{color:var(--text)}
+[id]{scroll-margin-top:16px}
+h3:target,.card:target{outline:2px solid var(--accent);outline-offset:6px;border-radius:8px}
 /* ===== END SHARED STYLE ===== */
 </style>
 <style>
@@ -82,7 +86,7 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
   <p>مجموعه جهانی <span class="en">(universe of discourse)</span>، که با <span class="m">U</span> یا <span class="m">X</span> نشانش می‌دهند، یعنی <b>همه مقدارهایی که درباره‌شان حرف می‌زنیم</b>. مثلاً قدها از ۱ تا ۲٫۲ متر، دماها از ۰ تا ۴۰ درجه، یا در تمرین ۱: <span class="m">X = {1,2,3,4,5,6}</span>. یک مجموعه فازی <span class="m">A</span> به <b>هر</b> عضو <span class="m">U</span> یک درجه می‌دهد.</p>
   <p><span class="m">U</span> می‌تواند <b>گسسته</b> باشد، یعنی چند مقدار جدا از هم مثل <span class="m">{1,2,…,6}</span>، یا <b>پیوسته</b>، یعنی همه اعداد یک بازه مثل دمای ۰ تا ۴۰.</p>
 
-  <h3>سه شکل نوشتن (اسلاید ۲۳)</h3>
+  <h3 id="notation">سه شکل نوشتن (اسلاید ۲۳)</h3>
   <p><b>شکل ۱، زوج مرتب:</b> هر عنصر را کنار درجه‌اش می‌نویسیم؛ <b>اول x، بعد درجه</b>.</p>
   <div class="mb">A = { (x, μ_A(x)) | x ∈ U }        e.g.  {(1, 0), (1.5, 0.5), (2, 1)}</div>
   <p><b>شکل ۲، وقتی U گسسته است:</b></p>
@@ -92,7 +96,7 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
   <div class="trap">دام بزرگ: در این نمادها <b>هیچ حسابی انجام نمی‌شود</b>. <span class="m">/</span> تقسیم نیست؛ <span class="m">0.5/2</span> یعنی «عنصر ۲ با درجه ۰٫۵» و <b>نه</b> ۰٫۲۵. <span class="m">+</span> و <span class="m">Σ</span> جمع نیستند و <span class="m">∫</span> انتگرال نیست؛ همه فقط یعنی «همه این عنصرها را با درجه‌شان کنار هم بگذار» (اسلاید می‌گوید «اجتماع همه نقاط»). در کسر <span class="m">μ/x</span> اول درجه می‌آید، ولی در زوج مرتب <span class="m">(x, μ)</span> اول خود عنصر. جای این دو را عوض نکن.</div>
   <div class="tip">در تمرین ۱، مجموعه‌ها به شکل کسر داخل آکولاد نوشته شده‌اند، مثلاً <span class="m">A = {0.5/2, 0.7/3, 1/4, 0.6/5, 1/6}</span> که در آن درجه صورت کسر است و عنصر مخرج. این همان شکل ۲ است که به جای <span class="m">+</span> با ویرگول نوشته شده. <b>عنصری از U که در فهرست نیامده درجه‌اش ۰ است</b>؛ مثلاً اینجا <span class="m">μ_A(1) = 0</span>.</div>
 
-  <h3>یک مقدار، چند مجموعه (اسلایدهای ۲۲ و ۲۷–۲۸)</h3>
+  <h3 id="many">یک مقدار، چند مجموعه (اسلایدهای ۲۲ و ۲۷–۲۸)</h3>
   <p>اسلاید ۲۲ می‌گوید در منطق فازی دمای ۲۵ «تا حدی گرم» است (مثلاً ۰٫۵) و دمای ۳۵ «خیلی گرم» (۰٫۹). با نماد این درس، این دو تکه از مجموعه «گرم» می‌شوند <span class="m">0.5/25 + 0.9/35</span>.</p>
   <p>اسلاید ۲۷ متغیر «دمای هوا» را با پنج مجموعه فازی پوشش می‌دهد: <b>سرد، خنک، عادی، گرم، داغ</b>. اسلاید ۲۸ نکته مهم را می‌گوید: <b>یک دمای معین ممکن است هم‌زمان عضو یک یا دو مجموعه باشد</b>، با درجه‌های متفاوت. دمای بین <span class="m">T1</span> و <span class="m">T2</span> هم «سرد» است و هم «خنک»؛ نزدیک <span class="m">T2</span> فقط چند صدم «سرد» است ولی نزدیک ۹۰٪ «خنک». این را در بخش بعد با چشم ببین.</p>
 </div></section>
@@ -195,6 +199,7 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
 
   <div class="q mcq" data-yes="درست! برای U پیوسته از ∫ استفاده می‌شود که آن هم انتگرال نیست." data-no="نه. اسلاید ۲۳: U پیوسته ← ∫ و U گسسته ← Σ.">
     <p><b>سؤال ۷.</b> مجموعه جهانی <span class="m">U</span> همه دماهای ۰ تا ۴۰ (پیوسته) است. اسلاید ۲۳ مجموعه فازی <span class="m">A</span> را معمولاً چطور می‌نویسد؟</p>
+    <div class="given"><b>اسلاید ۲۳ چه می‌گوید؟</b> سه شکل برای نوشتن یک مجموعه فازی: زوج مرتب، یک شکل برای مجموعه جهانی گسسته و یک شکل برای مجموعه جهانی پیوسته. <a href="#notation">↑ هر سه شکل در بخش ۱، «سه شکل نوشتن»</a></div>
     <div class="opts">
       <button><span class="m">A = Σ_U μ_A(x)/x</span></button>
       <button><span class="m">A = Π_U μ_A(x)/x</span></button>

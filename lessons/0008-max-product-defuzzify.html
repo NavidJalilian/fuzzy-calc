@@ -56,6 +56,10 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
 .nav{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:14px;border-top:1px solid var(--border);padding-top:14px;margin-top:28px}
 .ask{font-size:14px;color:var(--text-2)}
 @media print{body{background:#fff}.card,.soft{break-inside:avoid}.stepper .st{display:block}button{display:none}}
+.given{font-size:14px;color:var(--text-2);background:var(--surface-1);border-right:3px solid var(--border-strong);border-radius:0 8px 8px 0;padding:6px 12px;margin:2px 0 10px}
+.given b{color:var(--text)}
+[id]{scroll-margin-top:16px}
+h3:target,.card:target{outline:2px solid var(--accent);outline-offset:6px;border-radius:8px}
 /* ===== END SHARED STYLE ===== */
 </style>
 <style>
@@ -80,7 +84,7 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
 <!-- ===== 1. IDEA ===== -->
 <section class="sec"><p class="lab">۱. ایده</p>
 <div class="card">
-  <h3>قدم ۱: ورودی قطعی را به بردار A′ تبدیل کن</h3>
+  <h3 id="aprime">قدم ۱: ورودی قطعی را به بردار A′ تبدیل کن</h3>
   <p>سؤال اسلاید ۷۴ این است: «اگر درجه ۱۲۵ باشد، سرعت چقدر است؟». عدد ۱۲۵ فازی نیست؛ برای استفاده از ماتریس قانون، اول باید یک بردار <span class="m">A′</span> بسازیم. دستور اسلایدها <span class="en">(slides 73, 77)</span>:</p>
   <p class="soft">«برای محاسبه <span class="m">A′</span>، مقدار معادل عددی که در صورت مسئله داده شده را قرار داده و بقیه را صفر می‌گذاریم.»</p>
   <p>یعنی در جای ۱۲۵ همان عضویت ۱۲۵ در A را می‌گذاریم (<span class="m">μ_A(125) = 0.5</span>) و بقیه نقطه‌ها صفر:</p>
@@ -208,6 +212,7 @@ b′4 = max{0, 0.4×0.4, 0, 0, 0} = 0.16</div></div>
 
   <div class="q mcq" data-yes="درست! طبق اسلاید ۷۷، در جای ۱۲۵ عضویت آن در A (یعنی 0.5) قرار می‌گیرد و بقیه صفر می‌شوند." data-no="نه. دستور اسلاید: «مقدار معادل عددی داده‌شده را قرار داده و بقیه را صفر می‌گذاریم». عضویت ۱۲۵ در دمای نرمال 0.5 است.">
     <p>۲) با قرارداد اسلایدها، برای دمای ورودی ۱۲۵ (با A = دمای نرمال) بردار <span class="m">A′</span> کدام است؟</p>
+    <div class="given"><b>اسلایدهای ۷۴ و ۷۷ چه می‌گویند؟</b> مجموعه «دمای نرمال» این است: <span class="m">A = {0/100, 0.5/125, 1/150, 0.5/175, 0/200}</span>. قرارداد اسلایدها برای ساختن <span class="m">A′</span> از روی یک عدد ورودی در بخش ۱ آمده. <a href="#aprime">↑ بخش ۱، «قدم ۱»</a></div>
     <div class="opts">
       <button><span class="m">{0/100, 1/125, 0/150, 0/175, 0/200}</span></button>
       <button data-ok><span class="m">{0/100, 0.5/125, 0/150, 0/175, 0/200}</span></button>

@@ -56,6 +56,10 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
 .nav{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:14px;border-top:1px solid var(--border);padding-top:14px;margin-top:28px}
 .ask{font-size:14px;color:var(--text-2)}
 @media print{body{background:#fff}.card,.soft{break-inside:avoid}.stepper .st{display:block}button{display:none}}
+.given{font-size:14px;color:var(--text-2);background:var(--surface-1);border-right:3px solid var(--border-strong);border-radius:0 8px 8px 0;padding:6px 12px;margin:2px 0 10px}
+.given b{color:var(--text)}
+[id]{scroll-margin-top:16px}
+h3:target,.card:target{outline:2px solid var(--accent);outline-offset:6px;border-radius:8px}
 /* ===== END SHARED STYLE ===== */
 </style>
 </head>
@@ -91,6 +95,8 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
 <div class="card">
   <div class="q practice" data-hint="راهنمایی وقتی جواب غلط است">
     <p>سؤال ...</p>
+    <!-- If the question cites a slide, add right after its <p>: what the slide shows (all data needed to solve it, never the answer) + a link to where this lesson explains it. Students do not have the slides. -->
+    <div class="given"><b>اسلاید N چه می‌گوید؟</b> ... <a href="#anchor">↑ توضیحش در بخش ۱</a></div>
     <table class="t"><tr><th></th><th>x=1</th></tr>
       <tr><th>C ∪ D</th><td><input type="text" data-k="0.6"></td></tr></table>
     <button class="check">بررسی</button><div class="fb"></div>

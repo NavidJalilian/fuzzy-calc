@@ -56,6 +56,10 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
 .nav{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:14px;border-top:1px solid var(--border);padding-top:14px;margin-top:28px}
 .ask{font-size:14px;color:var(--text-2)}
 @media print{body{background:#fff}.card,.soft{break-inside:avoid}.stepper .st{display:block}button{display:none}}
+.given{font-size:14px;color:var(--text-2);background:var(--surface-1);border-right:3px solid var(--border-strong);border-radius:0 8px 8px 0;padding:6px 12px;margin:2px 0 10px}
+.given b{color:var(--text)}
+[id]{scroll-margin-top:16px}
+h3:target,.card:target{outline:2px solid var(--accent);outline-offset:6px;border-radius:8px}
 /* ===== END SHARED STYLE ===== */
 </style>
 <style>
@@ -81,7 +85,7 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
   <h3>مجموعه قطعی: «یا هست یا نیست»</h3>
   <p>در مجموعه قطعی یا کلاسیک <span class="en">(crisp / classical set)</span> هر چیز <b>یا عضو است (۱) یا نیست (۰)</b>. مثال اسلاید: مجموعه «روزهای هفته» = شنبه، یکشنبه، دوشنبه، … . «کتاب» یا «قلم» اصلاً عضو آن نیستند. حالت سومی وجود ندارد.</p>
 
-  <h3>مجموعه فازی: «تا چه اندازه عضو است؟»</h3>
+  <h3 id="weekend">مجموعه فازی: «تا چه اندازه عضو است؟»</h3>
   <p>در مجموعه فازی <span class="en">(fuzzy set)</span> هر عنصر با یک <span class="key">درجه عضویت</span> <span class="en">(degree of membership)</span> عضو است؛ عددی از ۰ تا ۱ (خود ۰ و ۱ هم مجازند). مثال اسلاید برای مجموعه «آخر هفته»:</p>
   <table class="t"><tr><th>روز</th><th>جمعه</th><th>پنجشنبه</th><th>یکشنبه</th></tr>
     <tr><th>درجه عضویت در «آخر هفته»</th><td>1</td><td>0.8</td><td>0</td></tr></table>
@@ -98,7 +102,7 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
   <h3>تاریخچه (اسلاید ۹)</h3>
   <p>منطق فازی را اولین بار در سال <span class="m">1965</span> پروفسور <b>لطفعلی عسگرزاده</b>، مشهور به <b>لطفی‌زاده</b> <span class="en">(Lotfi A. Zadeh)</span>، مطرح کرد. او ایرانی‌الاصل و استاد علوم کامپیوتر دانشگاه برکلی کالیفرنیا بود و در ۱۶ شهریور ۱۳۹۶ <span class="en">(Sep 7, 2017)</span> در ۹۶ سالگی درگذشت.</p>
 
-  <h3>چرا سیستم فازی؟ دو توجیه اسلاید ۱۲</h3>
+  <h3 id="why">چرا سیستم فازی؟ دو توجیه اسلاید ۱۲</h3>
   <ol>
     <li><b>دنیای واقعی خیلی پیچیده است.</b> نمی‌شود آن را دقیق تعریف کرد. پس یک <b>توصیف تقریبی</b> (یعنی فازی) لازم است که هنوز بشود آن را تحلیل کرد.</li>
     <li><b>در عصر اطلاعات، دانش بشری مهم شده است.</b> نظریه‌ای لازم داریم که دانش انسان را <b>به شکل سیستماتیک فرمول‌بندی کند</b> و کنار مدل‌های ریاضی در <b>سیستم‌های مهندسی</b> بگذارد.</li>
@@ -108,7 +112,7 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
 
 <!-- ===== 2. SEE IT ===== -->
 <section class="sec"><p class="lab">۲. ببین چه اتفاقی می‌افتد</p>
-<div class="card">
+<div class="card" id="see">
   <p>دو نفر درباره «قدبلند» حرف می‌زنند. نفر اول قطعی فکر می‌کند: «از ۱۸۰ سانت به بالا بلند است، وگرنه نه». نفر دوم فازی فکر می‌کند: «زیر ۱۶۰ اصلاً بلند نیست، از ۱۸۵ به بالا کاملاً بلند است، و بینشان کم‌کم بلندتر می‌شود». قد را با لغزنده عوض کن و دو جواب را مقایسه کن.</p>
   <svg id="h-svg" viewBox="0 0 640 290" role="img" aria-labelledby="h-title">
     <title id="h-title">نمودار درجه عضویت در مجموعه قدبلند: تابع پله‌ای قطعی و تابع پیوسته فازی بر حسب قد</title>
@@ -168,6 +172,7 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
 
   <div class="q practice" data-hint="قطعی: «بالاتر از ۳۰» یعنی خود ۳۰ حساب نیست. فازی: (T − 12.5) ÷ 25." data-yes="درست! دقت کن خود ۳۰ «بالاتر از ۳۰» نیست، پس قطعی‌اش ۰ است.">
     <p><b>سؤال ۲ (از اسلاید ۲۲).</b> قاعده کلاسیک اسلاید: «اگر دما <b>بالاتر از</b> ۳۰ باشد هوا گرم است (۱)، وگرنه گرم نیست (۰)». برای حالت فازی، تابعی ساخته‌ایم که با دو عدد اسلاید (۲۵ → ۰٫۵ و ۳۵ → ۰٫۹) جور است: <span class="m">μ_warm(T) = (T − 12.5)/25</span> (بین ۰ و ۱ بریده می‌شود).</p>
+    <div class="given"><b>اسلاید ۲۲ چه می‌گوید؟</b> همان چیزهایی که در صورت سؤال آمده: قاعده قطعی «بالاتر از ۳۰ = گرم» و دو نمونه فازی (دمای ۲۵ «تا حدی گرم» با درجه ۰٫۵ و دمای ۳۵ «خیلی گرم» با درجه ۰٫۹). برای حل، چیز دیگری از اسلاید لازم نیست. <a href="0002-writing-fuzzy-sets.html#many" target="_blank" rel="noopener">توضیح بیشتر در درس ۲ ←</a></div>
     <table class="t"><tr><th>دما T</th><th>20</th><th>25</th><th>30</th><th>35</th></tr>
       <tr><th>قطعی</th><td>—</td><td><input type="text" data-k="0" aria-label="قطعی 25"></td><td><input type="text" data-k="0" aria-label="قطعی 30"></td><td><input type="text" data-k="1" aria-label="قطعی 35"></td></tr>
       <tr><th>فازی <span class="m">μ_warm</span></th><td><input type="text" data-k="0.3" aria-label="فازی 20"></td><td>0.5</td><td><input type="text" data-k="0.7" aria-label="فازی 30"></td><td>0.9</td></tr></table>
@@ -176,6 +181,7 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
 
   <div class="q practice" data-hint="در مثال قد اسلاید ۱۵، دو درجه «بلند» و «کوتاه» با هم ۱ شدند (۰٫۶ + ۰٫۴). همین ایده را برای «آخر هفته / نه آخر هفته» به کار ببر. «۷۰ درصد» را به عدد اعشاری بنویس." data-yes="عالی! (این «یک منهای درجه» همان «مکمل» است که در درس ۴ رسمی می‌شود.)">
     <p><b>سؤال ۳.</b> درجه‌ها را بنویس.</p>
+    <div class="given"><b>اسلاید ۱۵ چه می‌گوید؟</b> کسی با قد ۱۷۵ سانتی‌متر هم‌زمان «تا حدی بلند» و «تا حدی کوتاه» است، و درجه «بلند» و درجه «کوتاه» او با هم ۱ می‌شوند. <a href="#see">↑ نمودار قد در بخش ۲ (دکمه نمایش «کوتاه» هم را بزن)</a></div>
     <table class="t"><tr><th>جمله</th><th>درجه</th></tr>
       <tr><th style="text-align:right">رضا با درجه 0.6 بلند است؛ درجه «کوتاه» بودنش (مثل اسلاید ۱۵)</th><td><input type="text" data-k="0.4" aria-label="درجه کوتاهی"></td></tr>
       <tr><th style="text-align:right">پنجشنبه با درجه 0.8 آخر هفته است؛ درجه «آخر هفته نبودن» آن</th><td><input type="text" data-k="0.2" aria-label="درجه آخر هفته نبودن"></td></tr>
@@ -205,6 +211,7 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
 
   <div class="q mcq" data-yes="درست! این توجیه اول اسلاید ۱۲ است. توجیه دوم: فرمول‌بندی سیستماتیک دانش بشری برای سیستم‌های مهندسی." data-no="نه. اسلاید ۱۲ دو توجیه دارد: پیچیدگی دنیای واقعی (پس توصیف تقریبی لازم است) و فرمول‌بندی دانش بشری برای سیستم‌های مهندسی.">
     <p><b>سؤال ۶.</b> کدام جمله یکی از دو توجیه اسلاید برای نظریه سیستم‌های فازی است؟</p>
+    <div class="given"><b>اسلاید ۱۲ چه می‌گوید؟</b> دو دلیل می‌آورد که چرا به نظریه سیستم‌های فازی نیاز داریم. <a href="#why">↑ هر دو دلیل در بخش ۱، «چرا سیستم فازی؟»</a></div>
     <div class="opts">
       <button>کامپیوترها فقط با صفر و یک کار می‌کنند</button>
       <button>منطق کلاسیک برای مسئله‌های ساده کند است</button>
@@ -225,6 +232,7 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
 
   <div class="q mcq" data-yes="درست! پنجشنبه نه کاملاً آخر هفته است نه کاملاً نیست؛ اسلاید ۱۸ به آن ۰٫۸ می‌دهد." data-no="نه. ۰ و ۱ جواب قطعی‌اند. اسلاید ۱۸ برای پنجشنبه یک عدد بین آن دو می‌دهد.">
     <p><b>سؤال ۸.</b> در مثال اسلاید ۱۸، جواب فازی سؤال «آیا پنجشنبه آخر هفته است؟» چیست؟</p>
+    <div class="given"><b>اسلاید ۱۸ چه می‌گوید؟</b> برای مجموعه فازی «آخر هفته» به چند روز (جمعه، پنجشنبه، یکشنبه) یک درجه عضویت می‌دهد. <a href="#weekend">↑ جدول این روزها در بخش ۱، «مجموعه فازی»</a></div>
     <div class="opts">
       <button><span class="m">0.0</span></button>
       <button><span class="m">0.2</span></button>

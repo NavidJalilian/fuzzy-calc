@@ -56,6 +56,10 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
 .nav{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:14px;border-top:1px solid var(--border);padding-top:14px;margin-top:28px}
 .ask{font-size:14px;color:var(--text-2)}
 @media print{body{background:#fff}.card,.soft{break-inside:avoid}.stepper .st{display:block}button{display:none}}
+.given{font-size:14px;color:var(--text-2);background:var(--surface-1);border-right:3px solid var(--border-strong);border-radius:0 8px 8px 0;padding:6px 12px;margin:2px 0 10px}
+.given b{color:var(--text)}
+[id]{scroll-margin-top:16px}
+h3:target,.card:target{outline:2px solid var(--accent);outline-offset:6px;border-radius:8px}
 /* ===== END SHARED STYLE ===== */
 </style>
 <style>
@@ -72,7 +76,7 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
 
 <!-- ===== 1. IDEA ===== -->
 <section class="sec"><p class="lab">۱. ایده</p>
-<div class="card">
+<div class="card" id="hedges">
   <p>در زبان روزمره فقط نمی‌گوییم «بلند»؛ می‌گوییم «<b>خیلی</b> بلند»، «<b>تا حدی</b> بلند»، «<b>کمی</b> سرد». به این کلمه‌ها <b>قید زبانی</b> <span class="en">(linguistic hedge)</span> می‌گویند. اسلاید ۵۱ مثال «هوا سرد است؟» را می‌زند: در منطق بولی جواب فقط «بله/۱» یا «نه/۰» است، اما در فازی می‌توان گفت «خیلی زیاد/0.9»، «کمی/0.25»، «خیلی کم/0.1».</p>
   <p>قید یک <b>مجموعه فازی جدید</b> از روی مجموعه قبلی می‌سازد، و این کار را <span class="key">نقطه به نقطه</span> با یک فرمول ساده روی <span class="m">μ_A(x)</span> انجام می‌دهد:</p>
   <table class="t">
@@ -91,7 +95,7 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
   <div class="trap"><b>تله «خیلی خیلی»:</b> اسلاید ۵۲ برای very very نوشته <span class="m">(μ_A)³</span> و اسمش را <span class="m">pow(A)</span> گذاشته. در بیشتر کتاب‌ها (مثلاً Ross و Negnevitsky) «خیلی خیلی» یعنی دو بار «خیلی»: <span class="m">((μ_A)²)² = (μ_A)⁴</span>؛ Negnevitsky توان ۳ را برای قید دیگری به نام extremely (به‌شدت) به کار می‌برد. چون امتحان از جزوه استاد است، <b>در این درس توان ۳ را جواب اصلی گرفته‌ایم</b>. در امتحان فرمول را هم بنویس (مثلاً «very very = μ³ طبق جزوه») تا اگر تصحیح‌کننده μ⁴ می‌خواست، روشت معلوم باشد.</div>
   <div class="tip"><b>slightly (کمی):</b> اسلاید ۵۱ اسمش را آورده ولی هیچ فرمولی برایش در جزوه نیست؛ پس در امتحان انتظار محاسبه‌اش را نداشته باش.</div>
 
-  <h3>ترکیب قیدها: «نه خیلی کوتاه و نه خیلی بلند» (اسلاید ۵۳)</h3>
+  <h3 id="combo">ترکیب قیدها: «نه خیلی کوتاه و نه خیلی بلند» (اسلاید ۵۳)</h3>
   <div class="mb">[1 − (μ_tall(x))²] ∧ [1 − (μ_short(x))²]</div>
   <p><span class="m">∧</span> یعنی AND، و از درس ۴ می‌دانی AND در فازی همان <span class="m">min</span> است. پس اول «نه خیلی بلند» و «نه خیلی کوتاه» را جدا حساب کن، بعد کوچک‌تر را بردار.</p>
 </div></section>
@@ -158,6 +162,7 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
 
   <div class="q practice" data-hint="اول هر کروشه را جدا حساب کن: 1 − 0.4² و 1 − 0.5². بعد ∧ یعنی min (درس ۴).">
     <p><b>سؤال ۳ (اسلاید ۵۳ + درس ۴).</b> قد علی طوری است که <span class="m">μ_tall = 0.4</span> و <span class="m">μ_short = 0.5</span>. درجه «نه خیلی کوتاه و نه خیلی بلند» چقدر است؟</p>
+    <div class="given"><b>اسلاید ۵۳ چه می‌گوید؟</b> «نه خیلی کوتاه و نه خیلی بلند» = <span class="m">[1 − (μ_tall)²] ∧ [1 − (μ_short)²]</span>. علامت <span class="m">∧</span> یعنی «و» (AND) که در فازی همان <span class="m">min</span> است (درس ۴). <a href="#combo">↑ بخش ۱، «ترکیب قیدها»</a></div>
     <table class="t"><tr><th>1 − (μ_tall)²</th><th>1 − (μ_short)²</th><th>حاصل نهایی</th></tr>
       <tr><td><input type="text" data-k="0.84" data-tol="0.005" aria-label="نه خیلی بلند"></td><td><input type="text" data-k="0.75" data-tol="0.005" aria-label="نه خیلی کوتاه"></td><td><input type="text" data-k="0.75" data-tol="0.005" aria-label="حاصل نهایی"></td></tr></table>
     <button class="check">بررسی</button><div class="fb"></div>
@@ -165,6 +170,7 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
 
   <div class="q mcq" data-yes="درست! اسلاید ۵۲: μ_pow(A)(x) = (μ_A(x))³. فقط یادت باشد بیشتر کتاب‌ها μ⁴ می‌نویسند." data-no="نه. اسلاید ۵۲ برای very very نوشته μ_pow(A) = (μ_A)³. توان ۲ مال very است و 0.5 مال somewhat.">
     <p><b>سؤال ۴.</b> طبق اسلاید ۵۲ جزوه، فرمول «very very» کدام است؟</p>
+    <div class="given"><b>اسلاید ۵۲ چه می‌گوید؟</b> جدول فرمول قیدهاست: برای هر قید (very، very very، somewhat و …) می‌گوید درجه <span class="m">μ_A</span> را به چه توانی برسانی. <a href="#hedges">↑ همین جدول در بخش ۱</a></div>
     <div class="opts">
       <button><span class="m">(μ_A)^0.5</span></button>
       <button><span class="m">(μ_A)^2.0</span></button>

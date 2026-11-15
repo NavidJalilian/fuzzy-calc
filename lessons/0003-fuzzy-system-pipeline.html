@@ -56,6 +56,10 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
 .nav{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:14px;border-top:1px solid var(--border);padding-top:14px;margin-top:28px}
 .ask{font-size:14px;color:var(--text-2)}
 @media print{body{background:#fff}.card,.soft{break-inside:avoid}.stepper .st{display:block}button{display:none}}
+.given{font-size:14px;color:var(--text-2);background:var(--surface-1);border-right:3px solid var(--border-strong);border-radius:0 8px 8px 0;padding:6px 12px;margin:2px 0 10px}
+.given b{color:var(--text)}
+[id]{scroll-margin-top:16px}
+h3:target,.card:target{outline:2px solid var(--accent);outline-offset:6px;border-radius:8px}
 /* ===== END SHARED STYLE ===== */
 </style>
 <style>
@@ -111,7 +115,7 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
   </table>
   <div class="tip">فازی‌ساز <span class="en">(fuzzifier)</span> عدد حقیقی ورودی را به مجموعه فازی تبدیل می‌کند. غیرفازی‌ساز <span class="en">(defuzzifier)</span> مجموعه فازی خروجی را دوباره به عدد حقیقی برمی‌گرداند. اسلاید ۳۳ این‌ها را «Fuzzier» و «Defuzzier» نوشته؛ اسم استاندارد انگلیسی fuzzifier و defuzzifier است. بین این دو، «ماشین رابط فازی» (موتور استنتاج) با کمک قوانین پایه کار می‌کند.</div>
 
-  <h3>چهار مرحله (اسلایدهای ۳۴–۳۹)</h3>
+  <h3 id="steps">چهار مرحله (اسلایدهای ۳۴–۳۹)</h3>
   <ol>
     <li><b>فازی‌سازی</b> <span class="en">(fuzzification)</span>: عدد حقیقی ورودی به درجه عضویت در مجموعه‌های فازی تبدیل می‌شود.</li>
     <li><b>استنتاج</b> <span class="en">(inference)</span>: همه قواعد اگر-آنگاه ارزیابی می‌شوند و <b>«درجه درستی»</b> هر قاعده معلوم می‌شود.</li>
@@ -193,6 +197,7 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
 
   <div class="q practice" data-hint="لباسشویی: نوع کثیفی، مقدار کثیفی، حجم لباس ← تعداد دورها. کوره سیمان: اکسیژن، دمای گاز، گشتاور آسیاب، وزن کلینکر ← زغال‌سنگ و جریان هوا." data-yes="درست! لباسشویی «چند ورودی، یک خروجی» است و کوره سیمان «چند ورودی، چند خروجی».">
     <p><b>سؤال ۵ (اسلایدهای ۴۲–۴۳).</b> تعداد ورودی‌ها و خروجی‌ها را بنویس.</p>
+    <div class="given"><b>اسلایدهای ۴۲ و ۴۳ چه می‌گویند؟</b> <br><b>ماشین لباسشویی فازی:</b> با سنسور نوری و سنسور بار، نوع کثیفی، مقدار کثیفی و حجم لباس را اندازه می‌گیرد و تعداد دورهای مناسب شستشو را تعیین می‌کند.<br><b>کنترل فازی کوره سیمان:</b> میزان اکسیژن، دمای گاز، گشتاور آسیاب و وزن کلینکر را اندازه می‌گیرد و میزان زغال‌سنگ و میزان جریان هوا را تنظیم می‌کند.<br>هر چیزی که <b>اندازه گرفته می‌شود</b> ورودی است و هر چیزی که <b>تعیین یا تنظیم می‌شود</b> خروجی.</div>
     <table class="t" style="direction:rtl"><tr><th>سیستم</th><th>تعداد ورودی</th><th>تعداد خروجی</th></tr>
       <tr><th>ماشین لباسشویی فازی</th><td><input type="text" data-k="3" aria-label="ورودی لباسشویی"></td><td><input type="text" data-k="1" aria-label="خروجی لباسشویی"></td></tr>
       <tr><th>کنترل فازی کوره سیمان</th><td><input type="text" data-k="4" aria-label="ورودی کوره"></td><td><input type="text" data-k="2" aria-label="خروجی کوره"></td></tr></table>
@@ -241,6 +246,7 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
 
   <div class="q mcq" data-yes="درست! تبدیل 0.7 به یک فرمان قابل اجرا، کار مرحله آخر است." data-no="نه. اسلاید ۳۹ این را «مثالی برای بازگرداندن از حالت فازی» می‌نامد.">
     <p><b>سؤال ۱۰.</b> در اسلاید ۳۹، عدد <span class="m">0.7</span> باید به یکی از فرمان‌های «کم، زیاد، خاموش» تبدیل شود. این کار کدام مرحله است؟</p>
+    <div class="given"><b>اسلاید ۳۹ چه می‌گوید؟</b> ادامه مثال دستگاه تهویه است: دستگاه دما و رطوبت اتاق را می‌سنجد و باید جریان هوا را روی یکی از سه حالت «خاموش، کم، زیاد» بگذارد. مرحله‌های قبلی به عدد ۰٫۷ رسیده‌اند، ولی دستگاه با خودِ عدد ۰٫۷ کاری نمی‌تواند بکند. <a href="#steps">↑ چهار مرحله و همین مثال در بخش ۱، «چهار مرحله»</a></div>
     <div class="opts">
       <button>فازی‌سازی</button>
       <button>استنتاج</button>

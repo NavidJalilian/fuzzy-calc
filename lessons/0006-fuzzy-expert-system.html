@@ -56,6 +56,10 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
 .nav{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:14px;border-top:1px solid var(--border);padding-top:14px;margin-top:28px}
 .ask{font-size:14px;color:var(--text-2)}
 @media print{body{background:#fff}.card,.soft{break-inside:avoid}.stepper .st{display:block}button{display:none}}
+.given{font-size:14px;color:var(--text-2);background:var(--surface-1);border-right:3px solid var(--border-strong);border-radius:0 8px 8px 0;padding:6px 12px;margin:2px 0 10px}
+.given b{color:var(--text)}
+[id]{scroll-margin-top:16px}
+h3:target,.card:target{outline:2px solid var(--accent);outline-offset:6px;border-radius:8px}
 /* ===== END SHARED STYLE ===== */
 </style>
 <style>
@@ -86,7 +90,7 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
     <li><b>استنتاج فازی</b> <span class="en">(fuzzy inference)</span> (اسلاید ۶۶): فرایند نگاشت ورودی به خروجی با منطق فازی.</li>
   </ol>
 
-  <h3>متغیر زبانی، مقدار زبانی، مجموعه فازی</h3>
+  <h3 id="vars">متغیر زبانی، مقدار زبانی، مجموعه فازی</h3>
   <table class="t">
     <tr><th>Fuzzy variable (متغیر زبانی)</th><th>value (مقدارهای زبانی)</th></tr>
     <tr><td>temp</td><td>hot, cold</td></tr>
@@ -242,6 +246,7 @@ tall   : 0 for x ≤ 170,  rises linearly to 1 at x = 190</div>
 
   <div class="q mcq" data-yes="درست! temp و pressure در شرط، speed در نتیجه. very فقط قید است، نه متغیر." data-no="نه. متغیرها را بشمار: temp و pressure (در شرط) و speed (در نتیجه). low، medium و very slow مقدار هستند، نه متغیر.">
     <p><b>سؤال ۹ (اسلاید ۶۴).</b> در Rule3 «If temp is low and pressure is medium then make speed very slow» چند <b>متغیر زبانی</b> هست؟</p>
+    <div class="given"><b>اسلاید ۶۴ چه می‌گوید؟</b> شکل کلی قانون فازی <span class="m">If A = a and B = b then C = c</span> است. <span class="m">A, B, C</span> متغیر زبانی‌اند (اسم یک کمیت، مثل height) و <span class="m">a, b, c</span> مقدار زبانی (یک کلمه برای آن کمیت، مثل tall). <a href="#vars">↑ فرق این دو در بخش ۱</a></div>
     <div class="opts">
       <button><span class="m">1</span></button>
       <button><span class="m">2</span></button>

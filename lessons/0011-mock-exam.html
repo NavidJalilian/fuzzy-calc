@@ -56,6 +56,10 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
 .nav{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:14px;border-top:1px solid var(--border);padding-top:14px;margin-top:28px}
 .ask{font-size:14px;color:var(--text-2)}
 @media print{body{background:#fff}.card,.soft{break-inside:avoid}.stepper .st{display:block}button{display:none}}
+.given{font-size:14px;color:var(--text-2);background:var(--surface-1);border-right:3px solid var(--border-strong);border-radius:0 8px 8px 0;padding:6px 12px;margin:2px 0 10px}
+.given b{color:var(--text)}
+[id]{scroll-margin-top:16px}
+h3:target,.card:target{outline:2px solid var(--accent);outline-offset:6px;border-radius:8px}
 /* ===== END SHARED STYLE ===== */
 </style>
 <style>
@@ -137,6 +141,7 @@ table.plan td,table.plan th{text-align:right}
 
   <div class="q mcq" data-l="0010" data-yes="درست! در متلب gaussmf(x,[sigma c]): اول sigma بعد مرکز. این دقیقاً مثال اسلاید ۸۸ است." data-no="نه. ترتیب پارامترهای gaussmf در متلب [sigma c] است — اول پهنا، بعد مرکز (اسلاید ۸۸، درس ۱۰).">
     <p><b>الف۳.</b> <span class="tag">فصل ۳</span> در دستور متلب <span class="m">y = gaussmf(x,[2 5])</span> (مثال اسلاید ۸۸)، پارامترها چه هستند؟</p>
+    <div class="given"><b>اسلاید ۸۸ چه می‌گوید؟</b> یک نمونه دستور گاوسی در متلب است: <span class="m">y = gaussmf(x,[2 5])</span>. <a href="0010-gaussian-bell-sigmoid.html#gauss" target="_blank" rel="noopener">مرور: درس ۱۰، «گاوسی» ←</a></div>
     <div class="opts">
       <button data-ok><span class="m">σ = 2 , c = 5</span></button>
       <button><span class="m">σ = 5 , c = 2</span></button>
@@ -147,6 +152,7 @@ table.plan td,table.plan th{text-align:right}
 
   <div class="q mcq" data-l="0001" data-yes="درست! درجه عضویت یک واقعیت ثابت نیست؛ به تابع عضویتی بستگی دارد که طراح انتخاب کرده. اسلاید ۱۵ و ۱۹ دو تابع متفاوت دارند." data-no="نه. هر دو اسلاید درست‌اند؛ فقط تابع عضویت «بلند» را متفاوت تعریف کرده‌اند. عدد درجه به تابع انتخاب‌شده بستگی دارد (درس ۱).">
     <p><b>الف۴.</b> <span class="tag">فصل ۱</span> برای قد ۱۷۵ سانتی‌متر، اسلاید ۱۵ درجه عضویت در «بلند» را <span class="m">0.6</span> و اسلاید ۱۹ آن را <span class="m">0.75</span> می‌دهد. چرا؟</p>
+    <div class="given"><b>اسلایدهای ۱۵ و ۱۹ چه می‌گویند؟</b> هر دو عددِ لازم (۰٫۶ و ۰٫۷۵) در صورت سؤال آمده؛ چیز دیگری از اسلاید لازم نیست. <a href="0001-crisp-vs-fuzzy.html#see" target="_blank" rel="noopener">مرور: درس ۱، نمودار قد ←</a></div>
     <div class="opts">
       <button>چون یکی از دو اسلاید اشتباه دارد</button>
       <button>چون مجموعه فازی همیشه دو جواب دارد</button>
@@ -157,6 +163,7 @@ table.plan td,table.plan th{text-align:right}
 
   <div class="q mcq" data-l="0005" data-yes="درست! اسلاید ۵۲: very very A = pow(A) با توان ۳. در کتاب‌ها اغلب توان ۴ است؛ در امتحان فرمول را هم بنویس." data-no="نه. طبق اسلاید ۵۲ (جزوه استاد)، very very توان ۳ است. very توان ۲ است و somewhat توان ۰٫۵ (درس ۵).">
     <p><b>الف۵.</b> <span class="tag">فصل ۲</span> طبق جزوه درس، <span class="m">μ</span> مجموعه «very very A» کدام است؟</p>
+    <div class="given"><b>جزوه (اسلاید ۵۲) چه می‌گوید؟</b> جدول فرمول قیدهاست: برای هر قید می‌گوید درجه <span class="m">μ_A</span> را به چه توانی برسانی. <a href="0005-hedges.html#hedges" target="_blank" rel="noopener">مرور: درس ۵، جدول قیدها ←</a></div>
     <div class="opts">
       <button><span class="m">(μ_A)^2</span></button>
       <button data-ok><span class="m">(μ_A)^3</span></button>

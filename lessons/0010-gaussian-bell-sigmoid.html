@@ -56,6 +56,10 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
 .nav{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:14px;border-top:1px solid var(--border);padding-top:14px;margin-top:28px}
 .ask{font-size:14px;color:var(--text-2)}
 @media print{body{background:#fff}.card,.soft{break-inside:avoid}.stepper .st{display:block}button{display:none}}
+.given{font-size:14px;color:var(--text-2);background:var(--surface-1);border-right:3px solid var(--border-strong);border-radius:0 8px 8px 0;padding:6px 12px;margin:2px 0 10px}
+.given b{color:var(--text)}
+[id]{scroll-margin-top:16px}
+h3:target,.card:target{outline:2px solid var(--accent);outline-offset:6px;border-radius:8px}
 /* ===== END SHARED STYLE ===== */
 </style>
 <style>
@@ -79,7 +83,7 @@ svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12
 <div class="card">
   <p>مثلث و ذوزنقه (درس ۹) گوشه تیز دارند. این درس توابعی است که <b>هموار</b> <span class="en">(smooth)</span> هستند: منحنی نرم، بدون شکستگی.</p>
 
-  <h3>۳) گاوسی <span class="en">(Gaussian)</span> — <span class="m">gaussmf</span> (اسلاید ۸۷–۸۸)</h3>
+  <h3 id="gauss">۳) گاوسی <span class="en">(Gaussian)</span> — <span class="m">gaussmf</span> (اسلاید ۸۷–۸۸)</h3>
   <p>از منحنی توزیع گاوسی ساخته می‌شود و دو پارامتر دارد: میانگین <span class="m">c</span> (مرکز قله) و انحراف معیار <span class="m">σ</span> <span class="en">(sigma)</span> که پهنای منحنی را تعیین می‌کند.</p>
   <div class="mb">f(x; σ, c) = e^( −(x−c)² / (2σ²) )      MATLAB:  y = gaussmf(x,[sigma c])</div>
   <div class="trap"><b>دام ۱ — ترتیب پارامترها:</b> در متلب اول <span class="m">sigma</span> می‌آید، بعد <span class="m">c</span>. پس <span class="m">gaussmf(x,[2 5])</span> یعنی σ=2 و مرکز c=5 (اسلاید ۸۸)، نه برعکس.</div>
@@ -104,7 +108,7 @@ f(x)  =  ⎨ 1,                      c1 ≤ x ≤ c2
   </ul>
   <div class="tip">اسلایدها برای Z/S/Pi فرمول نداده‌اند. نکته کلیدی (از MathWorks): S و Z از دو تکه سهمی ساخته می‌شوند و درست وسط، در <span class="m">x = (a+b)/2</span>، مقدارشان <span class="m">0.5</span> است. مثلاً smf برای <span class="m">a ≤ x ≤ (a+b)/2</span> برابر <span class="m">2((x−a)/(b−a))²</span> است، و <span class="m">zmf = 1 − smf</span> با همان a و b.</div>
 
-  <h3>سیگموئید <span class="en">(Sigmoid function)</span> (اسلاید ۹۳)</h3>
+  <h3 id="sig">سیگموئید <span class="en">(Sigmoid function)</span> (اسلاید ۹۳)</h3>
   <p>تابعی حقیقی، <b>یکنوا</b> <span class="en">(monotonic)</span> (فقط بالا می‌رود)، <b>کران‌دار</b> (بین ۰ و ۱ می‌ماند) و مشتق‌پذیر که برای همه اعداد حقیقی تعریف شده و مشتقش همه‌جا نامنفی است.</p>
   <div class="mb">S(x) = 1/(1 + e^(−x)) = e^x/(e^x + 1) = 1 − S(−x)          S(0) = 0.5</div>
   <div class="trap"><b>دام ۳ — اسلاید بدون پارامتر است:</b> اسلاید ۹۳ فقط شکل پایه <span class="m">S(x)</span> را می‌دهد و نام دستور متلب را نمی‌گوید. در متلب دستور <span class="m">sigmf(x,[a c])</span> است با فرمول <span class="m">1/(1+e^(−a(x−c)))</span>: <span class="m">c</span> نقطه‌ای است که <span class="m">μ = 0.5</span>، و <span class="m">a</span> شیب است (a مثبت: باز از راست/بالارونده، a منفی: باز از چپ/پایین‌رونده). S(x) اسلاید همان <span class="m">sigmf(x,[1 0])</span> است.</div>
@@ -160,6 +164,7 @@ y = gaussmf(x,[sigma c]);</div>
 
   <div class="q practice" data-hint="σ=2، c=5، پس μ = e^(−(x−5)²/8). مثلاً x=9: (9−5)²=16، 16/8=2، e^(−2)." data-yes="عالی! دیدی که در x=0 هنوز μ صفر نیست — همان «غیرصفر در همه نقاط» اسلاید ۹۴.">
     <p><b>سؤال ۱ (گاوسی اسلاید ۸۸).</b> برای <span class="m">gaussmf(x,[2 5])</span> مقدار μ را حساب کن.</p>
+    <div class="given"><b>اسلاید ۸۸ چه می‌گوید؟</b> دستور متلب <span class="m">gaussmf(x,[σ c])</span> است: اول پهنا <span class="m">σ</span>، بعد مرکز <span class="m">c</span>. فرمول: <span class="m">μ(x) = e^(−(x−c)² / (2σ²))</span>. <a href="#gauss">↑ بخش ۱، «گاوسی»</a></div>
     <table class="t"><tr><th>x</th><th>5</th><th>6</th><th>7</th><th>9</th><th>0</th></tr>
       <tr><th>μ(x)</th><td><input type="text" data-k="1" data-tol="0.01" aria-label="mu at 5"></td><td><input type="text" data-k="0.8825" data-tol="0.01" aria-label="mu at 6"></td><td><input type="text" data-k="0.6065" data-tol="0.01" aria-label="mu at 7"></td><td><input type="text" data-k="0.1353" data-tol="0.01" aria-label="mu at 9"></td><td><input type="text" data-k="0.0439" data-tol="0.01" aria-label="mu at 0"></td></tr></table>
     <button class="check" type="button">بررسی</button><div class="fb"></div>
@@ -174,6 +179,7 @@ y = gaussmf(x,[sigma c]);</div>
 
   <div class="q practice" data-hint="e^(−2) ≈ 0.1353 و e^(2) ≈ 7.389. برای sigmf(x,[2 4]) توان برابر −2·(x−4) است. از S(−x) = 1 − S(x) هم کمک بگیر." data-yes="عالی! sigmf در x=c همیشه 0.5 است، درست مثل S(0) = 0.5.">
     <p><b>سؤال ۳ (سیگموئید).</b> اول سیگموئید پایه اسلاید ۹۳، <span class="m">S(x) = 1/(1+e^(−x))</span>، بعد نسخه متلب <span class="m">sigmf(x,[2 4]) = 1/(1+e^(−2(x−4)))</span>.</p>
+    <div class="given"><b>اسلاید ۹۳ چه می‌گوید؟</b> فقط شکل پایه <span class="m">S(x)</span> را می‌دهد که فرمولش در صورت سؤال آمده. دستور <span class="m">sigmf</span> متلب در اسلاید نیست؛ فرمولش را هم در سؤال نوشته‌ایم. <a href="#sig">↑ بخش ۱، «سیگموئید»</a></div>
     <table class="t"><tr><th>S(0)</th><th>S(2)</th><th>S(−2)</th><th>sigmf(4,[2 4])</th><th>sigmf(5,[2 4])</th></tr>
       <tr><td><input type="text" data-k="0.5" data-tol="0.01" aria-label="S0"></td><td><input type="text" data-k="0.8808" data-tol="0.01" aria-label="S2"></td><td><input type="text" data-k="0.1192" data-tol="0.01" aria-label="S-2"></td><td><input type="text" data-k="0.5" data-tol="0.01" aria-label="sigmf 4"></td><td><input type="text" data-k="0.8808" data-tol="0.01" aria-label="sigmf 5"></td></tr></table>
     <button class="check" type="button">بررسی</button><div class="fb"></div>
