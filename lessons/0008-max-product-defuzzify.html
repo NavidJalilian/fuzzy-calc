@@ -81,9 +81,44 @@ details.sol[open] summary{margin-bottom:6px}
 .charts h3{margin:4px 0 0}
 .sl{display:grid;grid-template-columns:auto 1fr 52px;gap:10px;align-items:center;font-size:14px}
 .sl span{font-family:"SF Mono",Menlo,Consolas,monospace;direction:ltr}
-.wstep{border-top:1px dashed var(--border);padding-top:10px;margin-top:12px}
-.wstep svg{max-width:400px;display:block;margin:6px auto 0}
-.wstep .num{display:inline-block;min-width:1.8em;text-align:center;background:var(--accent-bg);color:var(--accent);border-radius:999px;margin-left:6px;font-weight:500}
+/* animated walk-through */
+.anim:focus{outline:none}
+.an-head{display:flex;gap:10px;align-items:stretch}
+.an-cap{flex:1;background:var(--surface-1);border-radius:10px;padding:8px 14px;min-height:8.2em;font-size:15px;line-height:1.85}
+.an-btns{display:flex;flex-direction:column;gap:6px;justify-content:center;min-width:104px}
+#anNext{font-size:16px;font-weight:500;padding:12px 14px}
+.an-btns .cnt{font-size:12.5px;color:var(--text-3);text-align:center}
+.an-f{direction:ltr;text-align:left;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14px;background:var(--surface);border-radius:6px;padding:3px 10px;margin:5px 0;white-space:pre-wrap;line-height:1.7}
+.an-new{margin-top:6px;font-size:13.5px;line-height:1.8;border-right:3px solid var(--warn);background:var(--warn-bg);padding:3px 10px}
+.an-new .an-from{color:var(--text-2)}
+.an-prog{height:4px;background:var(--border);border-radius:2px;margin:8px 0 4px;overflow:hidden}
+.an-prog>i{display:block;height:100%;background:var(--accent);transition:width .4s}
+.an-stage{overflow-x:auto;margin:0 -4px;direction:ltr}
+#anSvg{display:block;width:100%;min-width:500px}
+#anSvg text{font-size:13px}
+#anSvg .mono{font-family:"SF Mono",Menlo,Consolas,monospace;font-size:13px}
+#anSvg .an-ttl{font-size:14px;font-weight:700;fill:var(--text)}
+#anSvg .an-val{font-size:12px;fill:var(--text)}
+#anSvg .an-ax{font-size:11px;fill:var(--text-3)}
+#anSvg .cellt{font-size:13px;fill:var(--text)}
+#anSvg .fly{font-size:15px;font-weight:700}
+#anSvg .flash{animation:anFlash .8s ease-out}
+@keyframes anFlash{from{fill:var(--accent);font-size:17px}to{fill:var(--text)}}
+#anSvg .fd,#anSvg .fd *{transition:opacity .45s}
+#anSvg .an-bar{transition:fill .45s,opacity .45s}
+#anSvg .an-ghost{fill:none;stroke:var(--text-3);stroke-dasharray:4 3}
+#anSvg .an-hl{fill:none;stroke:var(--accent);stroke-width:2.5}
+#anSvg .an-band{fill:var(--accent-bg)}
+.an-swipe{display:none;font-size:12px;color:var(--text-3);margin:2px 0 0}
+button:disabled{opacity:.45;cursor:default}
+details.an-gld{margin-top:10px}
+details.an-gld summary{cursor:pointer;color:var(--accent);font-size:14px}
+table.an-gl{direction:rtl;font-size:14px}
+table.an-gl td,table.an-gl th{text-align:right;vertical-align:top}
+table.an-gl td:first-child{white-space:nowrap}
+@media (max-width:540px){.an-head{flex-direction:column}.an-btns{flex-direction:row;align-items:center}.an-btns #anNext{flex:1}.an-swipe{display:block}#anSvg{min-width:440px}.an-cap{min-height:7em}}
+@media (prefers-reduced-motion:reduce){#anSvg .fd,#anSvg .fd *,#anSvg .an-bar,.an-prog>i{transition:none}#anSvg .flash{animation:none}}
+@media print{.an-btns{display:none}}
 </style>
 </head>
 <body>
@@ -92,8 +127,27 @@ details.sol[open] summary{margin-bottom:6px}
 <h1>استنتاج max-product و غیرفازی‌سازی</h1>
 <p class="goal">هدف: بعد از این درس می‌توانی برای یک ورودی قطعی (مثل «دما ۱۲۵» یا «بارندگی ۸۰») مجموعه خروجی B′ را با max-min و با max-product حساب کنی و آن را با فرمول میانگین وزنی به یک عدد قطعی تبدیل کنی — یعنی دقیقاً تمرین ۲.</p>
 
+<!-- ===== 0. ANIMATED WALK-THROUGH ===== -->
+<section class="sec" id="anim"><p class="lab">از اینجا شروع کن: کل درس در یک انیمیشن قدم به قدم</p>
+<div class="card anim" id="anBox" tabindex="0" aria-label="انیمیشن قدم به قدم حل سؤال اسلاید ۷۴">
+  <div class="an-head">
+    <div class="an-cap" id="anCap" aria-live="polite"></div>
+    <div class="an-btns">
+      <button id="anNext" class="on">بعدی ←</button>
+      <button id="anPrev">→ قبلی</button>
+      <span class="cnt" id="anCnt"></span>
+    </div>
+  </div>
+  <div class="an-prog"><i id="anBar"></i></div>
+  <div class="an-stage"><svg id="anSvg" viewBox="0 0 640 404" role="img" aria-labelledby="anT"><title id="anT">حل قدم به قدم: دمای ۱۲۵ ← سرعت، با max-min و max-product</title></svg></div>
+  <p class="an-swipe">روی گوشی: اگر تصویر جا نشد، آن را به چپ و راست بکش.</p>
+  <details class="an-gld"><summary>همه نمادها: هر کدام چیست و از کجا آمد</summary>
+    <table class="t an-gl"><tbody id="anGl"></tbody></table>
+  </details>
+</div></section>
+
 <!-- ===== 1. IDEA ===== -->
-<section class="sec"><p class="lab">۱. ایده</p>
+<section class="sec"><p class="lab">۱. ایده (همان انیمیشن بالا، به صورت متن)</p>
 <div class="card">
   <h3 id="aprime">قدم ۱: ورودی قطعی را به بردار A′ تبدیل کن</h3>
   <p>سؤال اسلاید ۷۴ این است: «اگر درجه ۱۲۵ باشد، سرعت چقدر است؟». عدد ۱۲۵ فازی نیست؛ برای استفاده از ماتریس قانون، اول باید یک بردار <span class="m">A′</span> بسازیم. دستور اسلایدها <span class="en">(slides 73, 77)</span>:</p>
@@ -129,9 +183,8 @@ b′_j = max_i { a′_i · r_ij }      (ترکیب max-product)</div>
 <!-- ===== 2. SEE IT ===== -->
 <section class="sec"><p class="lab">۲. ببین چه اتفاقی می‌افتد</p>
 <div class="card">
-  <h3>الف) یک مثال کامل، قدم به قدم</h3>
-  <div id="walk"></div>
-  <h3 style="margin-top:18px">ب) حالا خودت امتحان کن</h3>
+  <h3>حالا خودت امتحان کن</h3>
+  <p style="font-size:14px;color:var(--text-2)">مثال کامل را در <a href="#anim">انیمیشن بالای صفحه</a> دیدی. اینجا خودت عددها را عوض کن.</p>
   <p>α عضویت ورودی قطعی در A است (مثلاً برای دمای ۱۲۵، <span class="m">α = 0.5</span>). خط‌چین = B اصلی؛ ستون‌های رنگی = B′؛ خط عمودی = عدد قطعی <span class="m">y*</span> از میانگین وزنی.</p>
   <div class="row" id="bPreset">
     <button class="on" data-p="0">B = سرعت متوسط (اسلاید ۷۴)</button>
@@ -438,33 +491,248 @@ function draw(){
   document.getElementById('ysCalc').textContent=calc('max-min:',mm,c1)+'\n\n'+calc('max-product:',mp,c2);
 }
 
-function walk(){
-  var w=document.getElementById('walk'),b=sets[0].b,y=sets[0].y,a=0.5,M='<span class="m">',E='</span>';
-  var mm=b.map(function(v){return Math.min(a,v)}),mp=b.map(function(v){return a*a*v});
-  function sum(bp){var n=0,d=0;bp.forEach(function(m,i){n+=y[i]*m;d+=m});return [n,d]}
-  function avgTxt(bp){var nd=sum(bp);return 'صورت (بالای کسر): '+M+bp.map(function(m,i){return y[i]+'×'+f(m)}).join(' + ')+' = '+f(nd[0])+E+'<br>مخرج (پایین کسر): '+M+bp.map(f).join(' + ')+' = '+f(nd[1])+E+'<br>'+M+'y* = '+f(nd[0])+' / '+f(nd[1])+' = '+f(nd[0]/nd[1])+E}
-  var steps=[
-    ['<b>سؤال:</b> قانون می‌گوید «اگر دما نرمال است، سرعت متوسط است». دما ۱۲۵ است. سرعت چند است؟ شکل زیر خود B، یعنی «سرعت متوسط» است: پنج سرعت ۱۰ تا ۵۰، و ارتفاع هر ستون عضویت آن سرعت ('+M+'0, 0.6, 1, 0.6, 0'+E+').',[b,'var(--text-3)',false]],
-    ['<b>α را پیدا کن.</b> α یعنی «ورودی چقدر در قسمت «اگر» قانون صدق می‌کند». دمای ۱۲۵ با درجه '+M+'0.5'+E+' نرمال است، پس '+M+'α = 0.5'+E+'. یعنی قانون «نیمه‌روشن» است.',null],
-    ['<b>max-min = بریدن.</b> هر ستون را با α مقایسه کن و کوچک‌تر را نگه دار:<br>'+y.map(function(v,i){return M+'min(0.5, '+f(b[i])+') = '+f(mm[i])+E}).join('<br>')+'<br> ستون‌های بلندتر از خط α بریده شدند؛ خط‌چین شکل اصلی است.',[mm,'var(--c1)',true]],
-    ['<b>عدد نهایی max-min (میانگین وزنی).</b> هر سرعت را در ارتفاع ستونش ضرب کن و جمع بزن (صورت)، بعد تقسیم بر جمع ارتفاع‌ها (مخرج):<br>'+avgTxt(mm)+'<br>خط صورتی همین y* است: نقطه تعادل ستون‌ها.',[mm,'var(--c1)',true,true]],
-    ['<b>max-product = کوچک کردن.</b> به جای min، ضرب: هر ستون در '+M+'α·α = 0.25'+E+' ضرب می‌شود:<br>'+y.map(function(v,i){return M+'0.25×'+f(b[i])+' = '+f(mp[i])+E}).join('<br>')+'<br> همه ستون‌ها به یک نسبت کوتاه شدند و شکل حفظ شد.',[mp,'var(--c3)',false]],
-    ['<b>عدد نهایی max-product.</b> همان میانگین وزنی:<br>'+avgTxt(mp)+'<br>هر دو روش اینجا ۳۰ دادند، چون «سرعت متوسط» دو طرف یکسان دارد. در بخش «ب» با «سرعت کم» (نامتقارن) فرقشان را ببین.',[mp,'var(--c3)',false,true]]
-  ];
-  steps.forEach(function(st,i){
-    var d=document.createElement('div');d.className='wstep';
-    var t=document.createElement('div');t.innerHTML='<span class="num">'+(i+1)+'</span>'+st[0];d.appendChild(t);
-    if(st[1]){var sv=document.createElementNS(NS,'svg');sv.setAttribute('viewBox','0 0 340 230');sv.setAttribute('role','img');sv.setAttribute('aria-label','قدم '+(i+1));d.appendChild(sv);
-      chart(sv,st[1][0],st[1][1],st[1][2],!st[1][3])}
-    w.appendChild(d);
-  });
-}
-walk();
 var r=document.getElementById('alpha'),v=document.getElementById('alphaV');
 r.addEventListener('input',function(){al=+r.value;v.textContent=f(al);draw()});
 Array.prototype.forEach.call(document.querySelectorAll('#bPreset button'),function(b){b.addEventListener('click',function(){
   S=+b.dataset.p;Array.prototype.forEach.call(document.querySelectorAll('#bPreset button'),function(x){x.classList.toggle('on',x===b)});draw()})});
 draw();
+})();
+</script>
+<script>
+/* ===== lesson 8: animated walk-through (slide 74: temperature 125 → speed) ===== */
+(function(){
+var NS='http://www.w3.org/2000/svg',svg=document.getElementById('anSvg'),box=document.getElementById('anBox');
+var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+function f(v){return String(Math.round(v*1000)/1000)}
+function el(p,tag,a,txt){var e=document.createElementNS(NS,tag);for(var k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;p.appendChild(e);return e}
+function M(s){return '<span class="m">'+s+'</span>'}
+function F(s){return '<div class="an-f">'+s+'</div>'}
+function op(e,v){e.style.opacity=v}
+function ease(p){return p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2}
+function flash(t){t.classList.remove('flash');void t.getBBox();t.classList.add('flash')}
+var A=[0,.5,1,.5,0],B=[0,.6,1,.6,0],XS=[100,125,150,175,200],YS=[10,20,30,40,50],AP=[0,.5,0,0,0];
+var BPmm=[0,.5,.5,.5,0],BPmp=[0,.15,.25,.15,0];
+var MM=A.map(function(a){return B.map(function(b){return Math.min(a,b)})});
+var MP=A.map(function(a){return B.map(function(b){return Math.round(a*b*1000)/1000})});
+var BY=150,H=100;
+function vy(m){return BY-m*H}
+function ax(i){return 70+i*50}
+function bx(j){return 370+j*50}
+function mx(j){return 330+j*62}
+function my(i){return 252+i*27}
+
+/* ---- two bar charts ---- */
+function chart(cx,lbls,axis){
+  var G=el(svg,'g',{'class':'fd'});
+  var frame=el(G,'rect',{x:cx(0)-58,y:2,width:292,height:BY+42,rx:10,'class':'an-hl fd',style:'opacity:0'});
+  [0,.5,1].forEach(function(m){el(G,'line',{x1:cx(0)-28,x2:cx(4)+28,y1:vy(m),y2:vy(m),style:'stroke:var(--grid)'});el(G,'text',{x:cx(0)-32,y:vy(m)+4,'text-anchor':'end'},String(m))});
+  var ttl=el(G,'text',{x:cx(2),y:22,'text-anchor':'middle',direction:'rtl','class':'an-ttl'},'');
+  var ghosts=[],bars=[],vals=[];
+  for(var i=0;i<5;i++){var x=cx(i);
+    ghosts.push(el(G,'rect',{x:x-15,width:30,y:BY,height:0,'class':'an-ghost fd',style:'opacity:0'}));
+    bars.push(el(G,'rect',{x:x-15,width:30,y:BY,height:0,'class':'an-bar'}));
+    vals.push(el(G,'text',{x:x,y:BY-5,'text-anchor':'middle','class':'an-val fd',style:'opacity:0'},''));
+    el(G,'text',{x:x,y:BY+17,'text-anchor':'middle'},String(lbls[i]));
+  }
+  el(G,'line',{x1:cx(0)-28,x2:cx(4)+28,y1:BY,y2:BY,style:'stroke:var(--text-3)'});
+  el(G,'text',{x:cx(2),y:BY+34,'text-anchor':'middle',direction:'rtl','class':'an-ax'},axis);
+  return {G:G,frame:frame,ttl:ttl,ghosts:ghosts,bars:bars,vals:vals};
+}
+var CA=chart(ax,XS,'محور: دما'),CB=chart(bx,YS,'محور: سرعت');
+CA.ghosts.forEach(function(r,i){r.setAttribute('y',vy(A[i]));r.setAttribute('height',A[i]*H)});
+CB.ghosts.forEach(function(r,i){r.setAttribute('y',vy(B[i]));r.setAttribute('height',B[i]*H)});
+var x0g=el(svg,'g',{'class':'fd',style:'opacity:0'});
+el(x0g,'text',{x:ax(1),y:58,'text-anchor':'middle','class':'mono',style:'fill:var(--c4);font-weight:700'},'x0 = 125');
+el(x0g,'line',{x1:ax(1),x2:ax(1),y1:63,y2:80,style:'stroke:var(--c4);stroke-width:2'});
+el(x0g,'polygon',{points:(ax(1)-5)+',78 '+(ax(1)+5)+',78 '+ax(1)+',86',style:'fill:var(--c4)'});
+var alAg=el(svg,'g',{'class':'fd',style:'opacity:0'});
+el(alAg,'line',{x1:42,x2:ax(1)-15,y1:vy(.5),y2:vy(.5),style:'stroke:var(--c1);stroke-width:2;stroke-dasharray:5 3'});
+el(alAg,'text',{x:44,y:vy(.5)-6,'class':'mono',style:'fill:var(--c1);font-weight:700'},'α=0.5');
+var alBg=el(svg,'g',{'class':'fd',style:'opacity:0'});
+el(alBg,'line',{x1:342,x2:598,y1:vy(.5),y2:vy(.5),style:'stroke:var(--c1);stroke-dasharray:6 4'});
+el(alBg,'text',{x:602,y:vy(.5)+4,'class':'mono',style:'fill:var(--c1)'},'α');
+var ysg=el(svg,'g',{'class':'fd',style:'opacity:0'}),ysx=320+5*30;
+el(ysg,'line',{x1:ysx,x2:ysx,y1:44,y2:BY,style:'stroke:var(--c4);stroke-width:2.5'});
+el(ysg,'polygon',{points:(ysx-6)+','+(BY+2)+' '+(ysx+6)+','+(BY+2)+' '+ysx+','+(BY-8),style:'fill:var(--c4)'});
+el(ysg,'text',{x:ysx+6,y:42,'class':'mono',style:'fill:var(--c4);font-weight:700'},'y* = 30');
+
+/* ---- rule table ---- */
+var ph=el(svg,'text',{x:320,y:300,'text-anchor':'middle',direction:'rtl','class':'fd',style:'fill:var(--text-3)'},'(جدول قانون بعداً اینجا ساخته می‌شود)');
+var MG=el(svg,'g',{'class':'fd',style:'opacity:0'});
+var mFrame=el(MG,'rect',{x:4,y:196,width:632,height:206,rx:10,'class':'an-hl fd',style:'opacity:0'});
+var colBand=el(MG,'rect',{y:200,width:58,height:200,rx:6,'class':'an-band fd',style:'opacity:0'});
+var rowBand=el(MG,'rect',{x:146,width:464,height:26,rx:6,'class':'an-band fd',style:'opacity:0'});
+el(MG,'text',{x:72,y:246,'text-anchor':'middle',direction:'rtl',style:'fill:var(--text);font-weight:700'},'جدول قانون');
+var mMode=el(MG,'text',{x:72,y:272,'text-anchor':'middle','class':'mono',style:'fill:var(--accent)'},'');
+var mForm=el(MG,'text',{x:72,y:296,'text-anchor':'middle','class':'mono'},'');
+el(MG,'text',{x:72,y:320,'text-anchor':'middle',direction:'rtl',style:'font-size:11px;fill:var(--text-3)'},'سطر = دما، ستون = سرعت');
+el(MG,'text',{x:172,y:232,'text-anchor':'middle','class':'mono'},'x');
+el(MG,'text',{x:222,y:214,'text-anchor':'middle','class':'mono',style:'fill:var(--text-3)'},'a_i');
+var apHead=el(MG,'text',{x:274,y:214,'text-anchor':'middle','class':'mono fd',style:'opacity:0;fill:var(--c4)'},'a′_i');
+var bHeadT=YS.map(function(v,j){el(MG,'text',{x:mx(j),y:214,'text-anchor':'middle','class':'mono'},'y='+v);
+  return el(MG,'text',{x:mx(j),y:232,'text-anchor':'middle','class':'mono',style:'opacity:0;font-weight:700;fill:var(--c2)'},'b='+f(B[j]))});
+var rows=[],cells=[],aHeadT=[],apT=[];
+for(var i=0;i<5;i++){
+  var R=el(MG,'g',{'class':'fd'});rows.push(R);
+  el(R,'text',{x:172,y:my(i)+4,'text-anchor':'middle','class':'mono'},String(XS[i]));
+  aHeadT.push(el(R,'text',{x:222,y:my(i)+4,'text-anchor':'middle','class':'mono',style:'opacity:0;font-weight:700;fill:var(--c2)'},f(A[i])));
+  apT.push(el(R,'text',{x:274,y:my(i)+4,'text-anchor':'middle','class':'mono',style:'opacity:0;font-weight:700;fill:var(--c4)'},f(AP[i])));
+  cells.push([]);
+  for(var j=0;j<5;j++){el(R,'rect',{x:mx(j)-28,y:my(i)-12,width:56,height:24,rx:4,style:'fill:none;stroke:var(--border)'});
+    cells[i].push(el(R,'text',{x:mx(j),y:my(i)+5,'text-anchor':'middle','class':'mono cellt'},''))}
+}
+var cellHL=el(MG,'rect',{width:58,height:26,rx:5,'class':'an-hl',style:'opacity:0'});
+var bpLab=el(MG,'text',{x:274,y:my(5)+5,'text-anchor':'middle','class':'mono fd',style:'opacity:0;font-weight:700'},'b′_j');
+var bpT=YS.map(function(v,j){return el(MG,'text',{x:mx(j),y:my(5)+5,'text-anchor':'middle','class':'mono',style:'font-weight:700'},'')});
+var FL=el(svg,'g',{});
+
+/* ---- symbols: [symbol, meaning, where it came from] ---- */
+var GL={
+ A:[M('A'),'مجموعه فازی «دمای نرمال». هر ستون یک دما؛ ارتفاعش = آن دما چقدر نرمال است.','داده سؤال (اسلاید ۷۴)'],
+ sl:[M('0.5/125'),'یعنی «دمای ۱۲۵ با درجه 0.5». خط کج تقسیم نیست.','نوشتن مجموعه فازی (درس ۲)'],
+ B:[M('B'),'مجموعه فازی «سرعت متوسط»: پنج سرعت ۱۰ تا ۵۰.','داده سؤال (اسلاید ۷۴)'],
+ ai:[M('a_i'),'عدد سطر i جدول = عضویت آن دما در A. '+M('i')+' = شماره سطر.','عددهای بالای ستون‌های نمودار A'],
+ bj0:[M('b_j'),'عدد ستون j جدول = عضویت آن سرعت در B. '+M('j')+' = شماره ستون.','عددهای بالای ستون‌های نمودار B'],
+ m:[M('m_ij = min(a_i , b_j)'),'عدد خانه سطر i و ستون j: کوچک‌ترِ عدد سطر و عدد ستون.','ساختن جدول با max-min (درس ۷)'],
+ x0:[M('x0 = 125'),'عدد ورودی؛ یک عدد معمولی، نه مجموعه فازی.','متن سؤال: «اگر درجه ۱۲۵ باشد»'],
+ al:[M('α = μ_A(125) = 0.5'),'ارتفاع ستون ۱۲۵ در A. '+M('μ_A(125)')+' را بخوان «عضویت ۱۲۵ در A».','از روی نمودار A خوانده شد'],
+ ap:[M('A′'),'ورودی به شکل ردیف: خانه ۱۲۵ = α، بقیه صفر. ′ یعنی «ساخته‌شده از ورودی».','دستور اسلاید ۷۷'],
+ bj:[M('b′_j = max_i { min(a′_i , m_ij) }'),'عضویت سرعت j در جواب: ستون j را با A′ جفت کن، از هر جفت کوچک‌تر، از همه بزرگ‌ترین.','ترکیب max-min (درس ۷)'],
+ Bp:[M('B′'),'همه b′_jها کنار هم = جواب فازی (سرعت برای دمای ۱۲۵).','نتیجه ترکیب'],
+ ys:[M('y*'),'عدد قطعی نهایی = Σ(سرعت × عضویت) ÷ Σ(عضویت). '+M('Σ')+' = «همه را جمع بزن».','میانگین وزنی (اسلایدهای ۷۳ و ۷۹)'],
+ r:[M('r_ij = a_i × b_j'),'خانه جدول در max-product: به جای min، ضرب.','اسلاید ۸۰'],
+ a2:[M('α² · b_j'),'ورودی دو بار ضرب می‌شود: یک بار در جدول، یک بار در ترکیب.','نتیجه دو ضرب (اسلاید ۸۰)']
+};
+
+/* ---- steps: [changes, new symbols, caption, animation] ---- */
+var base={aOp:.35,aVals:0,aH:A,aGhost:0,aDim:0,aTtl:'دمای نرمال (A)',x0:0,alA:0,
+  bOp:.35,bVals:0,bH:B,bCol:'var(--c2)',bGhost:0,alB:0,bTtl:'سرعت متوسط (B)',ys:0,
+  mat:0,aHead:0,bHead:0,mode:null,aPr:0,dim:0,bp:null,row:-1,col:-1,cell:null,hl:[]};
+var RAW=[
+ [{},[],'<b>سؤال (اسلاید ۷۴):</b> قانون می‌گوید «اگر دما <b>نرمال</b> باشد، سرعت <b>متوسط</b> است». دما ۱۲۵ است. سرعت چقدر است؟<br>«بعدی» را بزن؛ هر بار یک تکه به تصویر پایین اضافه می‌شود.'],
+ [{aOp:1,aVals:1,hl:['A']},['A','sl'],'نمودار چپ <b>A = دمای نرمال</b> است. هر ستون یک دما؛ ارتفاعش = آن دما چقدر نرمال است. ۱۵۰ کاملاً نرمال (1)، ۱۲۵ نیمه (0.5).'],
+ [{bOp:1,bVals:1,hl:['B']},['B'],'نمودار راست <b>B = سرعت متوسط</b> است. جواب آخر کار یک عدد روی همین محور سرعت است.'],
+ [{mat:1,aHead:1,hl:['mat']},['ai'],'<b>ساختن جدول قانون.</b> عددهای A پایین می‌آیند و کنار جدول می‌نشینند: <b>هر سطر = یک دما</b>.','flyA'],
+ [{bHead:1,hl:['mat']},['bj0'],'عددهای B هم پایین می‌آیند و بالای جدول می‌نشینند: <b>هر ستون = یک سرعت</b>.','flyB'],
+ [{mode:'one',row:1,col:2,cell:[1,2]},['m'],'هر خانه = <b>کوچک‌ترِ</b> عدد سطرش و عدد ستونش. خانه قاب‌دار: سطر ۱۲۵ (0.5) و ستون ۳۰ (1):'+F('min(0.5, 1) = 0.5'),'cell1'],
+ [{mode:'min'},[],'بقیه خانه‌ها با همین قانون <b>یکی‌یکی</b> پر می‌شوند. قاب را دنبال کن: هر خانه = min(عدد سطرش، عدد ستونش).','fill'],
+ [{x0:1,aDim:1,hl:['A']},['x0'],'حالا <b>ورودی</b>: دمای ۱۲۵ (پیکان صورتی روی نمودار A). این تنها عدد معمولی سؤال است.'],
+ [{alA:1},['al'],'از بالای ستون ۱۲۵ به چپ برو تا محور: ارتفاعش 0.5 است. پس '+M('α = 0.5')+'؛ یعنی قانون فقط <b>نیمه‌روشن</b> است.'],
+ [{aH:AP,aGhost:1,aDim:0,aTtl:'ورودی (A′)',hl:['A']},['ap'],'ورودی را به شکل یک ردیف می‌نویسیم: در خانه ۱۲۵ عدد α، بقیه صفر (اسلاید ۷۷). خط‌چین = A اصلی.'+F('A′ = [0  0.5  0  0  0]')],
+ [{aPr:1,dim:1,row:1},[],'عددهای A′ کنار جدول می‌روند (ستون صورتی). سطرهایی که a′ آن‌ها صفر است همیشه صفر می‌دهند، پس کم‌رنگ شدند. <b>فقط سطر ۱۲۵ مهم است.</b>','flyAp'],
+ [{bp:[null,.5,null,null,null],col:1},['bj'],'<b>ستون ۲۰:</b> هر خانه را با a′ هم‌سطرش مقایسه کن، کوچک‌تر را بردار؛ بعد از همه بزرگ‌ترین:'+F('min(0,0) min(0.5,0.5) min(0,0.6) min(0,0.5) min(0,0)\n= 0, 0.5, 0, 0, 0   →   max = 0.5'),'col'],
+ [{bp:BPmm},[],'همین کار برای بقیه ستون‌ها، یکی‌یکی:'+F('b′ = [0  0.5  0.5  0.5  0]'),'bpRest'],
+ [{bH:BPmm,bCol:'var(--c1)',bGhost:1,alB:1,bTtl:'جواب max-min (B′)',hl:['B']},['Bp'],'این عددها به نمودار سرعت برمی‌گردند: B از ارتفاع α = 0.5 <b>بریده</b> شد. این جواب فازی، B′ است.','up'],
+ [{ys:1},['ys'],'<b>یک عدد بساز</b> (میانگین وزنی): هر سرعت × عضویتش، جمع؛ تقسیم بر جمع عضویت‌ها:'+F('(20×0.5 + 30×0.5 + 40×0.5) / (0.5 + 0.5 + 0.5)\n= 45 / 1.5 = 30')+'<b>جواب max-min: سرعت ۳۰</b> (خط صورتی).'],
+ [{mode:'prod',dim:0,bp:null,bH:B,bCol:'var(--c2)',bGhost:0,alB:0,ys:0,bTtl:'سرعت متوسط (B)',cell:[1,1],hl:['mat']},['r'],'<b>حالا max-product:</b> همه چیز مثل قبل، فقط به جای min <b>ضرب</b> (اسلاید ۸۰). جدول یکی‌یکی از نو پر می‌شود؛ مثلاً خانه قاب‌دار (با min اینجا 0.5 بود):'+F('0.5 × 0.6 = 0.3'),'prod'],
+ [{dim:1,row:1,bp:BPmp},['a2'],'ترکیب هم با ضرب: سطر ۱۲۵ را در a′ = 0.5 ضرب کن (بقیه سطرها × 0 = 0):'+F('0.5 × [0  0.3  0.5  0.3  0] = [0  0.15  0.25  0.15  0]'),'bpProd'],
+ [{bH:BPmp,bCol:'var(--c3)',bGhost:1,bTtl:'جواب max-product (B′)',hl:['B']},[],'برمی‌گردند به نمودار: B <b>کوچک</b> شد ولی شکلش ماند (هر ستون × α² = 0.25). بریده نشد.','up'],
+ [{ys:1},[],'همان میانگین وزنی:'+F('(20×0.15 + 30×0.25 + 40×0.15) / (0.15 + 0.25 + 0.15)\n= 16.5 / 0.55 = 30')+'<b>جواب max-product هم ۳۰.</b>'],
+ [{},[],'<b>خلاصه:</b> '+M('x0 → α → A′ → جدول → B′ → y*')+'<br>هر دو ۳۰ دادند چون «سرعت متوسط» دو طرف یکسان دارد. فرق: max-min <b>می‌بُرد</b>، max-product <b>کوچک می‌کند</b>. در <a href="#alpha">بخش ۲</a> با «سرعت کم» فرقشان را ببین.']
+];
+var S=[],prev=base;
+RAW.forEach(function(r){var s=Object.assign({},prev,{hl:[],row:-1,col:-1,cell:null},r[0]);prev=s;S.push({s:s,gl:r[1],cap:r[2],anim:r[3]})});
+
+/* glossary table (review) */
+var glBody=document.getElementById('anGl');
+var hr=document.createElement('tr');hr.innerHTML='<th>نماد</th><th>یعنی</th><th>از کجا آمد</th>';glBody.appendChild(hr);
+Object.keys(GL).forEach(function(g){var tr=document.createElement('tr');tr.innerHTML='<td>'+GL[g][0]+'</td><td>'+GL[g][1]+'</td><td>'+GL[g][2]+'</td>';glBody.appendChild(tr)});
+
+/* ---- drawing the final state of a step ---- */
+var curA=base.aH.slice(),curB=base.bH.slice(),raf=null;
+function setBars(C,h){C.bars.forEach(function(r,i){r.setAttribute('y',vy(h[i]));r.setAttribute('height',Math.max(0,h[i]*H))});C.vals.forEach(function(t,i){t.setAttribute('y',vy(h[i])-5)})}
+function tween(tA,tB){
+  if(raf)cancelAnimationFrame(raf);
+  var fA=curA.slice(),fB=curB.slice(),t0=null,D=reduce?0:800;
+  function fr(now){if(t0===null)t0=now;var p=D?Math.min(1,(now-t0)/D):1,e=ease(p);
+    curA=fA.map(function(v,i){return v+(tA[i]-v)*e});curB=fB.map(function(v,i){return v+(tB[i]-v)*e});
+    setBars(CA,curA);setBars(CB,curB);raf=p<1?requestAnimationFrame(fr):null}
+  raf=requestAnimationFrame(fr);
+}
+function mark(i,j){cellHL.setAttribute('x',mx(j)-29);cellHL.setAttribute('y',my(i)-13);op(cellHL,1);
+  rowBand.setAttribute('y',my(i)-13);op(rowBand,1);colBand.setAttribute('x',mx(j)-29);op(colBand,1)}
+function bands(s){
+  if(s.cell){cellHL.setAttribute('x',mx(s.cell[1])-29);cellHL.setAttribute('y',my(s.cell[0])-13);op(cellHL,1)}else op(cellHL,0);
+  if(s.row>=0){rowBand.setAttribute('y',my(s.row)-13);op(rowBand,1)}else op(rowBand,0);
+  if(s.col>=0){colBand.setAttribute('x',mx(s.col)-29);op(colBand,1)}else op(colBand,0);
+}
+function snap(s){
+  op(CA.G,s.aOp);op(CB.G,s.bOp);CA.ttl.textContent=s.aTtl;CB.ttl.textContent=s.bTtl;
+  CA.vals.forEach(function(t,i){t.textContent=f(s.aH[i]);op(t,s.aVals)});
+  CB.vals.forEach(function(t,i){t.textContent=f(s.bH[i]);op(t,s.bVals)});
+  CA.bars.forEach(function(r,i){r.style.fill='var(--c2)';op(r,s.aDim&&i!==1?.3:1)});
+  CB.bars.forEach(function(r){r.style.fill=s.bCol});
+  CA.ghosts.forEach(function(r){op(r,s.aGhost)});CB.ghosts.forEach(function(r){op(r,s.bGhost)});
+  op(CA.frame,s.hl.indexOf('A')>=0?1:0);op(CB.frame,s.hl.indexOf('B')>=0?1:0);
+  op(x0g,s.x0);op(alAg,s.alA);op(alBg,s.alB);op(ysg,s.ys);
+  op(ph,s.mat?0:1);op(MG,s.mat);op(mFrame,s.hl.indexOf('mat')>=0?1:0);
+  aHeadT.forEach(function(t){op(t,s.aHead)});bHeadT.forEach(function(t){op(t,s.bHead)});
+  var Mx=s.mode==='prod'?MP:MM;
+  cells.forEach(function(rw,i){rw.forEach(function(t,j){t.classList.remove('flash');
+    t.textContent=(s.mode==='min'||s.mode==='prod'||(s.mode==='one'&&i===1&&j===2))?f(Mx[i][j]):''})});
+  mMode.textContent=s.mode==='prod'?'max-product':'max-min';
+  mForm.textContent=s.mode==='prod'?'r = a × b':'m = min(a, b)';
+  op(apHead,s.aPr);apT.forEach(function(t){op(t,s.aPr)});
+  rows.forEach(function(R,i){op(R,s.dim&&i!==1?.28:1)});
+  op(bpLab,s.bp?1:0);
+  bpT.forEach(function(t,j){t.classList.remove('flash');t.textContent=s.bp&&s.bp[j]!=null?f(s.bp[j]):'';t.style.fill=s.mode==='prod'?'var(--c3)':'var(--c1)'});
+  bands(s);
+  tween(s.aH,s.bH);
+}
+
+/* ---- the motions inside a step ---- */
+var T=[];
+function later(ms,fn){T.push(setTimeout(fn,ms))}
+function cancelAnim(){T.forEach(clearTimeout);T=[];while(FL.firstChild)FL.removeChild(FL.firstChild)}
+function fly(txt,x1,y1,x2,y2,delay,color,done){later(delay,function(){
+  var t=el(FL,'text',{x:x1,y:y1,'text-anchor':'middle','class':'mono fly',style:'fill:'+color},txt),t0=null,D=750;
+  function fr(now){if(!t.parentNode)return;if(t0===null)t0=now;var p=Math.min(1,(now-t0)/D),e=ease(p);
+    t.setAttribute('x',x1+(x2-x1)*e);t.setAttribute('y',y1+(y2-y1)*e-Math.sin(p*Math.PI)*24);
+    if(p<1)requestAnimationFrame(fr);else{FL.removeChild(t);if(done)done()}}
+  requestAnimationFrame(fr)})}
+function seqCells(list,val,gap,s){ /* fill cells one at a time, frame follows */
+  list.forEach(function(c,n){later(300+n*gap,function(){mark(c[0],c[1]);var t=cells[c[0]][c[1]];t.textContent=f(val[c[0]][c[1]]);flash(t)})});
+  later(300+list.length*gap+250,function(){bands(s)});
+}
+var ANIM={
+ flyA:function(){aHeadT.forEach(function(t,i){op(t,0);fly(f(A[i]),ax(i),vy(A[i])-5,222,my(i)+4,250+i*170,'var(--c2)',function(){op(t,1);flash(t)})})},
+ flyB:function(){bHeadT.forEach(function(t,j){op(t,0);fly(f(B[j]),bx(j),vy(B[j])-5,mx(j),232,250+j*170,'var(--c2)',function(){op(t,1);flash(t)})})},
+ cell1:function(k,s){var t=cells[1][2];t.textContent='';op(cellHL,0);later(650,function(){op(cellHL,1);t.textContent='0.5';flash(t)})},
+ fill:function(k,s){var L=[];for(var i=0;i<5;i++)for(var j=0;j<5;j++)if(!(i===1&&j===2)){L.push([i,j]);cells[i][j].textContent=''}seqCells(L,MM,120,s)},
+ flyAp:function(){rows.forEach(function(R){op(R,1)});apT.forEach(function(t,i){op(t,0);fly(f(AP[i]),ax(i),vy(AP[i])-5,274,my(i)+4,250+i*170,'var(--c4)',function(){op(t,1);flash(t)})});
+   later(250+5*170+900,function(){rows.forEach(function(R,i){op(R,i===1?1:.28)})})},
+ col:function(k,s){var t=bpT[1];t.textContent='';op(rowBand,0);
+   for(var i=0;i<5;i++)(function(i){later(300+i*420,function(){cellHL.setAttribute('x',mx(1)-29);cellHL.setAttribute('y',my(i)-13);op(cellHL,1)})})(i);
+   later(300+5*420,function(){op(cellHL,0);t.textContent='0.5';flash(t)})},
+ bpRest:function(k,s){[0,2,3,4].forEach(function(j,n){var t=bpT[j];t.textContent='';
+   later(300+n*480,function(){colBand.setAttribute('x',mx(j)-29);op(colBand,1);t.textContent=f(BPmm[j]);flash(t)})});later(300+4*480+300,function(){bands(s)})},
+ up:function(k,s){var ps=S[k-1].s;if(raf)cancelAnimationFrame(raf);curB=ps.bH.slice();setBars(CB,curB);
+   CB.bars.forEach(function(r){r.style.fill=ps.bCol});CB.vals.forEach(function(t){op(t,0)});op(alBg,0);
+   s.bH.forEach(function(v,j){fly(f(v),mx(j),my(5)+5,bx(j),vy(v)-5,250+j*170,s.bCol,j<4?null:function(){
+     CB.bars.forEach(function(r){r.style.fill=s.bCol});tween(s.aH,s.bH);CB.vals.forEach(function(t){op(t,1)});op(alBg,s.alB)})})},
+ prod:function(k,s){var L=[];for(var i=0;i<5;i++)for(var j=0;j<5;j++){L.push([i,j]);cells[i][j].textContent=f(MM[i][j])}seqCells(L,MP,100,s)},
+ bpProd:function(k,s){bpT.forEach(function(t){t.textContent=''});op(colBand,0);
+   BPmp.forEach(function(v,j){later(300+j*480,function(){mark(1,j);bpT[j].textContent=f(v);flash(bpT[j])})});later(300+5*480+250,function(){bands(s)})}
+};
+
+/* ---- controls ---- */
+var k=0;
+var cap=document.getElementById('anCap'),cnt=document.getElementById('anCnt'),bar=document.getElementById('anBar');
+var bPrev=document.getElementById('anPrev'),bNext=document.getElementById('anNext');
+function show(n,animate){
+  cancelAnim();k=n;var st=S[k];snap(st.s);
+  if(animate&&st.anim&&!reduce)ANIM[st.anim](k,st.s);
+  cap.innerHTML='<b style="color:var(--accent)">قدم '+(k+1)+'.</b> '+st.cap+st.gl.map(function(g){
+    return '<div class="an-new"><b>نماد تازه:</b> '+GL[g][0]+' — '+GL[g][1]+' <span class="an-from">· از کجا آمد: '+GL[g][2]+'</span></div>'}).join('');
+  cnt.textContent=(k+1)+' از '+S.length;bar.style.width=((k+1)/S.length*100)+'%';
+  bPrev.disabled=k===0;bNext.textContent=k===S.length-1?'از اول ↺':'بعدی ←';
+}
+function keepInView(){var r=box.getBoundingClientRect(),sb=svg.getBoundingClientRect();
+  if(r.top<-8||(sb.bottom>innerHeight&&r.top>8))box.scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'})}
+bNext.addEventListener('click',function(){if(k===S.length-1)show(0,false);else show(k+1,true);keepInView()});
+bPrev.addEventListener('click',function(){if(k>0)show(k-1,false);keepInView()});
+box.addEventListener('keydown',function(e){if(e.key==='ArrowLeft'&&k<S.length-1){show(k+1,true);e.preventDefault()}else if(e.key==='ArrowRight'&&k>0){show(k-1,false);e.preventDefault()}});
+show(0,false);
 })();
 </script>
 </body>
