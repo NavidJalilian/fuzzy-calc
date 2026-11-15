@@ -79,17 +79,22 @@ details.sol[open] summary{margin-bottom:6px}
 .sl{display:grid;grid-template-columns:70px 1fr 44px;gap:8px;align-items:center;direction:ltr;font-size:14px}
 .sl span{font-family:"SF Mono",Menlo,Consolas,monospace}
 .cell{cursor:pointer}
+table.t.pair{direction:rtl}
+.pair td.win{background:var(--ok-bg);font-weight:500}
+.who{margin:6px 0;padding-inline-start:20px}
+.who li{margin:4px 0}
 </style>
 </head>
 <body>
 <main>
 <div class="top"><a href="../index.html">← فهرست درس‌ها</a><span>درس ۷ از ۱۱ · فصل ۲ · حدود ۱۵ دقیقه</span></div>
 <h1>استنتاج max-min</h1>
-<p class="goal">هدف: بعد از این درس می‌توانی یک قانون «اگر x برابر A است آنگاه y برابر B است» را به یک ماتریس تبدیل کنی، و با ترکیب max-min خروجی را برای هر ورودی حساب کنی — درست مثل مثال اسلاید ۷۲.</p>
+<p class="goal">هدف: بعد از این درس می‌توانی یک قانون «اگر x برابر A است آنگاه y برابر B است» را به یک ماتریس تبدیل کنی، و با ترکیب max-min خروجی را برای هر ورودی حساب کنی — درست مثل <a href="#ex72">مثال اسلاید ۷۲</a> (در بخش ۳ کامل آمده).</p>
 
 <!-- ===== 1. IDEA ===== -->
 <section class="sec"><p class="lab">۱. ایده</p>
 <div class="card">
+  <div class="given"><b>شماره اسلایدها برای چیست؟</b> فقط برای اینکه اگر جزوه را داری، جایش را پیدا کنی. هرچه هر اسلاید می‌گوید (قانون، فرمول، عددها) همین‌جا کنار شماره‌اش آمده و برای فهمیدن درس به خود اسلاید نیازی نیست.</div>
   <h3>قانون فازی و ماتریس آن</h3>
   <p>در سیستم خبره فازی، دانش به شکل قانون نوشته می‌شود <span class="en">(slide 69)</span>:</p>
   <div class="mb">If x is A then y is B</div>
@@ -115,36 +120,29 @@ details.sol[open] summary{margin-bottom:6px}
   <h3>قاعده ترکیبی استنتاج زاده</h3>
   <p>پروفسور لطفی‌زاده: اگر اطلاعاتی درباره A داشته باشیم و اسمش را <span class="m">A′</span> بگذاریم، با کمک ماتریس قانون می‌توانیم اطلاعاتی درباره B به دست بیاوریم و اسمش را <span class="m">B′</span> بگذاریم. به این روش قاعده ترکیبی استنتاج <span class="en">(compositional rule of inference)</span> می‌گویند <span class="en">(slide 73)</span>:</p>
   <div class="mb">B′ = A′ ∘ μ_AB</div>
-  <div class="tip">نام‌گذاری اسلایدها: یک ماتریس قانون با سه اسم آمده — <span class="m">M</span> (اسلاید ۷۱)، <span class="m">μ_AB</span> (اسلاید ۷۳) و <span class="m">μ_ij</span> (اسلاید ۷۵). هر سه یکی‌اند. در کتاب‌ها معمولاً <span class="m">R</span> (رابطه، <span class="en">relation</span>) می‌نویسند.</div>
-  <div class="trap">دو نکته درباره اسلایدها:
-    (۱) در اسلاید ۷۲ ماتریس M از A و B ساخته نشده؛ فقط یک ماتریس دلخواه است تا عملگر ∘ را تمرین کنیم.
-    (۲) در اسلاید ۷۱ نوشته شده <span class="m">b_i = μ_B(y_i)</span>؛ منظور <span class="m">b_j = μ_B(y_j)</span> است. و در اسلاید ۷۵–۷۶ آخرین خانه ماتریس <span class="m">min(0,0.6)</span> نوشته شده، در حالی که درستش <span class="m">min(0,0)</span> است (چون عضویت B در ۵۰ صفر است). جواب هر دو صفر است، پس نتیجه عوض نمی‌شود.</div>
+  <div class="tip">نام‌گذاری اسلایدها: یک ماتریس قانون با سه اسم آمده — <span class="m">M</span> (در فرمول ساختن ماتریس، بالا)، <span class="m">μ_AB</span> (در فرمول زاده، همین بالا) و <span class="m">μ_ij</span> (در <a href="#ex74">مثال دما و سرعت</a>، بخش ۳). هر سه یکی‌اند. در کتاب‌ها معمولاً <span class="m">R</span> (رابطه، <span class="en">relation</span>) می‌نویسند.</div>
+  <div class="trap">دو نکته اگر جزوه را می‌خوانی:
+    (۱) در <a href="#ex72">مثال اسلاید ۷۲</a> (بخش ۳)، ماتریس M از هیچ A و B ساخته نشده؛ فقط چند عدد دلخواه است تا عملگر ∘ را تمرین کنیم.
+    (۲) دو غلط تایپی در جزوه: در فرمول ساختن ماتریس (اسلاید ۷۱) نوشته شده <span class="m">b_i = μ_B(y_i)</span>؛ منظور <span class="m">b_j = μ_B(y_j)</span> است. و در <a href="#ex74">مثال دما و سرعت</a> (اسلاید ۷۵–۷۶)، خانه آخر ماتریس (سطر دمای ۲۰۰، ستون سرعت ۵۰) به شکل <span class="m">min(0,0.6)</span> نوشته شده، در حالی که درستش <span class="m">min(0,0)</span> است، چون عضویت B در سرعت ۵۰ صفر است. جواب هر دو صفر است، پس نتیجه عوض نمی‌شود.</div>
 </div></section>
 
 <!-- ===== 2. SEE IT ===== -->
 <section class="sec"><p class="lab">۲. ببین چه اتفاقی می‌افتد</p>
 <div class="card">
-  <h3>الف) ترکیب max-min: روی هر b_j کلیک کن</h3>
+  <h3>الف) ترکیب max-min، قدم به قدم</h3>
   <div class="row" id="cmpPreset">
     <button class="on" data-p="0">مثال اسلاید ۷۲</button>
     <button data-p="1">قانون دما ← سرعت، ورودی ۱۲۵</button>
   </div>
   <div class="soft" id="cmpCtx" style="margin-top:10px"></div>
-  <div class="soft" style="margin-top:8px">
-    <p style="margin:0 0 4px"><b>این شکل را چطور بخوانی</b> (از چپ به راست):</p>
-    <ol style="margin:0;padding-right:22px;white-space:normal">
-      <li><b>ستون بنفش سمت چپ</b> = بردار ورودی؛ برای هر سطر یک عدد.</li>
-      <li><b>جدول وسط</b> = ماتریس. ستونی که دورش رنگی است، ستونی است که الان حسابش می‌کنیم (با دکمه‌های زیر شکل یا کلیک روی ستون عوضش کن).</li>
-      <li><b>ستون «min» سمت راست</b> = برای هر سطر، کوچک‌ترِ دو عدد: عدد بنفشِ همان سطر و عددِ همان سطر در ستون رنگی. مثلاً در سطر <span class="m">x1</span>: <span class="m">min(0.2, 0.1) = 0.1</span>.</li>
-      <li><b>خانه سبز پررنگ</b> = بزرگ‌ترین عدد ستون min. این عدد جواب است و پایین، در ردیف B، زیر همان ستون نوشته می‌شود.</li>
-      <li>این کار را برای هر ستون تکرار کن تا همه خانه‌های ردیف B پر شوند.</li>
-    </ol>
-  </div>
+  <div class="soft" id="cmpOut" aria-live="polite" style="margin-top:10px;border-right:3px solid var(--accent);border-radius:0 12px 12px 0;min-height:4.5em"></div>
+  <div class="row" style="margin:8px 0"><button id="cmpPrev">→ قدم قبلی</button><button id="cmpNext">قدم بعدی ←</button><button id="cmpRestart">از اول</button><span id="cmpCount" style="font-size:14px;color:var(--text-2)"></span></div>
   <svg id="cmpSvg" viewBox="0 0 600 320" role="img" aria-labelledby="cmpTitle"><title id="cmpTitle">ترکیب max-min: بردار A کنار ماتریس M؛ برای ستون انتخاب‌شده، minهای دوبه‌دو و بزرگ‌ترین آن‌ها نشان داده می‌شود</title></svg>
-  <div class="row" id="cmpPick"></div>
-  <div class="mb" id="cmpOut"></div>
-  <p style="font-size:14px;color:var(--text-2)">عددهای بردار ورودی را تغییر بده و ببین کدام سطر «برنده» max می‌شود:</p>
-  <div id="cmpSliders"></div>
+  <div id="cmpFree" hidden>
+    <p style="font-size:14px;color:var(--text-2)">حالا خودت امتحان کن: روی هر ستون جدول (یا دکمه‌های زیر) کلیک کن، یا عددهای بردار ورودی را با لغزنده‌ها عوض کن و ببین کدام سطر «برنده» max می‌شود.</p>
+    <div class="row" id="cmpPick"></div>
+    <div id="cmpSliders"></div>
+  </div>
 
   <h3 style="margin-top:20px">ب) ساختن ماتریس قانون خانه به خانه (مثال اسلاید ۷۴)</h3>
   <p style="font-size:14px">A = دمای نرمال روی x، و B = سرعت متوسط روی y. هر خانه: <span class="m">min(a_i , b_j)</span>.</p>
@@ -164,39 +162,142 @@ details.sol[open] summary{margin-bottom:6px}
 
 <!-- ===== 3. WORKED EXAMPLE ===== -->
 <section class="sec"><p class="lab">۳. مثال حل‌شده، قدم به قدم</p>
-<div class="card stepper">
+<div class="card stepper" id="ex72">
   <h3>مثال اسلاید ۷۲: B = A ∘ M را حساب کن</h3>
+  <p>صورت سؤال اسلاید: «فرض کنید A و M به صورت زیر داده شده است؛ B را محاسبه نمایید.»</p>
   <div class="mb">A = (0.2 , 0.4 , 0.6 , 1)</div>
   <div class="matw"><span>M =</span><table class="mat"><tr><td>0.1</td><td>0.6</td><td>0.8</td></tr><tr><td>0.6</td><td>0.8</td><td>0.6</td></tr><tr><td>0.8</td><td>0.6</td><td>0.5</td></tr><tr><td>0.0</td><td>0.5</td><td>0.5</td></tr></table></div>
-  <div class="st">قدم ۱ — اندازه‌ها: A یک بردار <span class="m">1×4</span> است و M یک ماتریس <span class="m">4×3</span>؛ پس B یک بردار <span class="m">1×3</span> است (سه عدد: b1، b2، b3).</div>
-  <div class="st">قدم ۲ — b1 از ستون اول <span class="m">(0.1, 0.6, 0.8, 0.0)</span>:
-    <div class="mb">b1 = max{min(0.2,0.1), min(0.4,0.6), min(0.6,0.8), min(1,0)}
-   = max{0.1, 0.4, 0.6, 0} = 0.6</div></div>
-  <div class="st">قدم ۳ — b2 از ستون دوم <span class="m">(0.6, 0.8, 0.6, 0.5)</span>:
-    <div class="mb">b2 = max{min(0.2,0.6), min(0.4,0.8), min(0.6,0.6), min(1,0.5)}
-   = max{0.2, 0.4, 0.6, 0.5} = 0.6</div></div>
-  <div class="st">قدم ۴ — b3 از ستون سوم <span class="m">(0.8, 0.6, 0.5, 0.5)</span>:
-    <div class="mb">b3 = max{min(0.2,0.8), min(0.4,0.6), min(0.6,0.5), min(1,0.5)}
-   = max{0.2, 0.4, 0.5, 0.5} = 0.5</div></div>
-  <div class="st">قدم ۵ — جواب: <span class="m">B = (0.6 , 0.6 , 0.5)</span> — دقیقاً همان جواب اسلاید ۷۲. نکته: هیچ b_j نمی‌تواند از بزرگ‌ترین عدد A یا بزرگ‌ترین عدد ستونش بیشتر شود، چون min همیشه از هر دو طرف کوچک‌تر یا مساوی است.</div>
+  <p class="ask">روی «قدم بعدی» بزن تا قدم به قدم جلو برویم.</p>
+
+  <div class="st"><b>قدم ۱ — هر حرف چیست؟</b>
+    <ul class="who">
+      <li><span class="m">A</span> = <b>ورودی</b>. چهار عدد است.</li>
+      <li><span class="m">M</span> = <b>یک جدول عدد که صورت سؤال به تو داده</b> (۴ سطر، ۳ ستون). اینجا آن را نمی‌سازی؛ فقط از آن استفاده می‌کنی.</li>
+      <li><span class="m">B</span> = <b>جوابی که باید پیدا کنی</b>.</li>
+    </ul>
+    <div class="trap">چرا گیج‌کننده است: در اسلاید قبل (۷۱) حرف B بخش «آنگاه» قانون بود و M از روی A و B <b>ساخته</b> می‌شد. اینجا نه: M از هیچ قانونی نیامده و B فقط اسم جواب است. این مثال فقط برای تمرین عملگر ∘ است. ساختن M از یک قانون را در <a href="#ex74">مثال بعدی</a> می‌بینی.</div></div>
+
+  <div class="st"><b>قدم ۲ — جواب چند عدد دارد؟</b>
+    <ul class="who">
+      <li>A چهار عدد دارد و M چهار سطر؛ پس <b>هر عدد A کنار یک سطر M</b> می‌نشیند (عدد اول کنار سطر اول، …).</li>
+      <li>M سه ستون دارد؛ پس B سه عدد دارد: <span class="m">b1, b2, b3</span>.</li>
+      <li><b>هر ستون M یک عدد B می‌سازد</b>: ستون ۱ ← b1، ستون ۲ ← b2، ستون ۳ ← b3. کادرهایی که در اسلاید دور ستون‌ها کشیده شده همین را نشان می‌دهد.</li>
+    </ul></div>
+
+  <div class="st"><b>قدم ۳ — b1 را از ستون ۱ بساز.</b> ستون ۱ را کنار A بگذار. در هر سطر، از دو عدد <b>کوچک‌تر</b> را بردار (min):
+    <table class="t pair"><tr><th>سطر</th><th>عدد A</th><th>عدد ستون ۱</th><th>کوچک‌تر (min)</th></tr>
+      <tr><td>1</td><td>0.2</td><td>0.1</td><td>0.1</td></tr>
+      <tr><td>2</td><td>0.4</td><td>0.6</td><td>0.4</td></tr>
+      <tr><td>3</td><td>0.6</td><td>0.8</td><td class="win">0.6</td></tr>
+      <tr><td>4</td><td>1</td><td>0.0</td><td>0</td></tr></table>
+    حالا از ستون آخر <b>بزرگ‌ترین</b> را بردار (max): <span class="m">max(0.1, 0.4, 0.6, 0) = 0.6</span>. پس <span class="key"><span class="m">b1 = 0.6</span></span>.</div>
+
+  <div class="st"><b>قدم ۴ — b2 را از ستون ۲ بساز.</b> همان کار، با ستون ۲:
+    <table class="t pair"><tr><th>سطر</th><th>عدد A</th><th>عدد ستون ۲</th><th>کوچک‌تر (min)</th></tr>
+      <tr><td>1</td><td>0.2</td><td>0.6</td><td>0.2</td></tr>
+      <tr><td>2</td><td>0.4</td><td>0.8</td><td>0.4</td></tr>
+      <tr><td>3</td><td>0.6</td><td>0.6</td><td class="win">0.6</td></tr>
+      <tr><td>4</td><td>1</td><td>0.5</td><td>0.5</td></tr></table>
+    بزرگ‌ترین: <span class="m">max(0.2, 0.4, 0.6, 0.5) = 0.6</span>. پس <span class="key"><span class="m">b2 = 0.6</span></span>.</div>
+
+  <div class="st"><b>قدم ۵ — b3 را از ستون ۳ بساز.</b>
+    <table class="t pair"><tr><th>سطر</th><th>عدد A</th><th>عدد ستون ۳</th><th>کوچک‌تر (min)</th></tr>
+      <tr><td>1</td><td>0.2</td><td>0.8</td><td>0.2</td></tr>
+      <tr><td>2</td><td>0.4</td><td>0.6</td><td>0.4</td></tr>
+      <tr><td>3</td><td>0.6</td><td>0.5</td><td class="win">0.5</td></tr>
+      <tr><td>4</td><td>1</td><td>0.5</td><td class="win">0.5</td></tr></table>
+    بزرگ‌ترین: <span class="m">max(0.2, 0.4, 0.5, 0.5) = 0.5</span>. پس <span class="key"><span class="m">b3 = 0.5</span></span>.</div>
+
+  <div class="st"><b>قدم ۶ — جواب.</b> <span class="m">B = (0.6 , 0.6 , 0.5)</span>، همان جواب اسلاید ۷۲.
+    <div class="tip">خلاصه کل کار در یک جمله: <b>برای هر ستون، در هر سطر کوچک‌تر را بردار، بعد بزرگ‌ترینِ آن‌ها را.</b> درست مثل ضرب بردار در ماتریس، فقط «ضرب» شده «کوچک‌تر» و «جمع» شده «بزرگ‌ترین».</div></div>
   <div class="row" style="margin-top:8px"><button class="next">قدم بعدی</button><button class="all">نمایش همه</button></div>
 </div>
 
-<div class="card stepper" style="margin-top:12px">
+<div class="card" style="margin-top:12px">
+  <div class="q practice" id="try72" data-hint="در هر سطر فقط دو عدد را مقایسه کن و کوچک‌تر را بنویس؛ بعد از ستون «کوچک‌تر» بزرگ‌ترین را بردار." data-yes="عالی! B = (0.7, 0.5). دیدی که برنده b1 سطر ۲ بود و برنده b2 سطر ۱.">
+    <h3>حالا تو: همین کار را با عددهای تازه انجام بده</h3>
+    <p><span class="m">A</span> ورودی است و <span class="m">M</span> جدول داده‌شده. <span class="m">B = A ∘ M</span> را حساب کن. M دو ستون دارد، پس B دو عدد دارد.</p>
+    <div class="mb">A = (0.5 , 1 , 0.3)</div>
+    <div class="matw"><span>M =</span><table class="mat"><tr><td>0.4</td><td>0.9</td></tr><tr><td>0.7</td><td>0.2</td></tr><tr><td>1.0</td><td>0.6</td></tr></table></div>
+    <p><b>b1 از ستون ۱:</b></p>
+    <table class="t pair"><tr><th>سطر</th><th>عدد A</th><th>عدد ستون ۱</th><th>کوچک‌تر (min)</th></tr>
+      <tr><td>1</td><td>0.5</td><td>0.4</td><td><input type="text" data-k="0.4" aria-label="سطر ۱ ستون ۱"></td></tr>
+      <tr><td>2</td><td>1</td><td>0.7</td><td><input type="text" data-k="0.7" aria-label="سطر ۲ ستون ۱"></td></tr>
+      <tr><td>3</td><td>0.3</td><td>1.0</td><td><input type="text" data-k="0.3" aria-label="سطر ۳ ستون ۱"></td></tr>
+      <tr><th colspan="3">b1 = بزرگ‌ترین (max)</th><td><input type="text" data-k="0.7" aria-label="b1"></td></tr></table>
+    <p><b>b2 از ستون ۲:</b></p>
+    <table class="t pair"><tr><th>سطر</th><th>عدد A</th><th>عدد ستون ۲</th><th>کوچک‌تر (min)</th></tr>
+      <tr><td>1</td><td>0.5</td><td>0.9</td><td><input type="text" data-k="0.5" aria-label="سطر ۱ ستون ۲"></td></tr>
+      <tr><td>2</td><td>1</td><td>0.2</td><td><input type="text" data-k="0.2" aria-label="سطر ۲ ستون ۲"></td></tr>
+      <tr><td>3</td><td>0.3</td><td>0.6</td><td><input type="text" data-k="0.3" aria-label="سطر ۳ ستون ۲"></td></tr>
+      <tr><th colspan="3">b2 = بزرگ‌ترین (max)</th><td><input type="text" data-k="0.5" aria-label="b2"></td></tr></table>
+    <button class="check">بررسی</button>
+    <details class="sol"><summary>راه‌حل</summary><div class="mb pre">b1 = max( min(0.5,0.4), min(1,0.7), min(0.3,1.0) ) = max(0.4, 0.7, 0.3) = 0.7
+b2 = max( min(0.5,0.9), min(1,0.2), min(0.3,0.6) ) = max(0.5, 0.2, 0.3) = 0.5</div></details><div class="fb"></div>
+  </div>
+</div>
+
+<div class="card stepper" id="ex74" style="margin-top:12px">
   <h3>مثال اسلاید ۷۴–۷۵: ماتریس قانون «اگر دما نرمال باشد، سرعت متوسط است»</h3>
+  <p>این بار <b>خودمان M را از روی یک قانون می‌سازیم</b> (کاری که در مثال قبل لازم نبود).</p>
   <div class="mb">Normal temperature (A) = {0/100 , 0.5/125 , 1/150 , 0.5/175 , 0/200}
 Medium velocity (B)    = {0/10 , 0.6/20 , 1/30 , 0.6/40 , 0/50}</div>
-  <div class="tip">یادآوری نوشتار (درس ۲): در <span class="m">0.5/125</span> عدد بالا عضویت است و عدد پایین خود نقطه؛ خط کج یعنی «مال»، نه تقسیم.</div>
-  <div class="st">قدم ۱ — سطرها پنج نقطه دما (۱۰۰ تا ۲۰۰) و ستون‌ها پنج نقطه سرعت (۱۰ تا ۵۰) هستند؛ پس <span class="m">μ_AB</span> یک ماتریس <span class="m">5×5</span> است با <span class="m">m_ij = min(a_i , b_j)</span>.</div>
-  <div class="st">قدم ۲ — سطر ۱ (x=100، a=0) و سطر ۵ (x=200، a=0): min هر عددی با صفر، صفر است ← <span class="m">(0, 0, 0, 0, 0)</span>.</div>
-  <div class="st">قدم ۳ — سطر ۲ (x=125، a=0.5):
-    <div class="mb">min(0.5,0), min(0.5,0.6), min(0.5,1), min(0.5,0.6), min(0.5,0) = (0, 0.5, 0.5, 0.5, 0)</div>
-    سطر ۴ (x=175) هم a=0.5 دارد، پس همین سطر تکرار می‌شود.</div>
-  <div class="st">قدم ۴ — سطر ۳ (x=150، a=1): <span class="m">min(1, b_j) = b_j</span>، پس این سطر خود B است ← <span class="m">(0, 0.6, 1, 0.6, 0)</span>.</div>
-  <div class="st">قدم ۵ — ماتریس کامل (همان اسلاید ۷۵):
-    <div class="matw"><span>μ_ij =</span><table class="mat"><tr><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr><tr><td>0</td><td>0.5</td><td>0.5</td><td>0.5</td><td>0</td></tr><tr><td>0</td><td>0.6</td><td>1</td><td>0.6</td><td>0</td></tr><tr><td>0</td><td>0.5</td><td>0.5</td><td>0.5</td><td>0</td></tr><tr><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr></table></div>
-    الگو را ببین: هر سطر همان B است که از ارتفاع <span class="m">a_i</span> «بریده» شده. در درس بعد با همین ماتریس، سرعت را برای دمای ۱۲۵ حساب می‌کنیم.</div>
+  <p class="ask">روی «قدم بعدی» بزن.</p>
+
+  <div class="st"><b>قدم ۱ — هر چیز چیست؟</b>
+    <ul class="who">
+      <li>قانون: «<b>اگر</b> دما نرمال باشد، <b>آنگاه</b> سرعت متوسط است.»</li>
+      <li><span class="m">A</span> = بخش «اگر»: پنج دما، و کنار هر کدام اینکه چقدر «نرمال» است.</li>
+      <li><span class="m">B</span> = بخش «آنگاه»: پنج سرعت، و کنار هر کدام اینکه چقدر «متوسط» است.</li>
+      <li><span class="m">μ_AB</span> = ماتریس قانون، یعنی همان M با یک اسم دیگر. <b>این را باید بسازیم.</b></li>
+    </ul>
+    <div class="tip">خواندن نماد (درس ۲): <span class="m">0.5/125</span> یعنی «دمای ۱۲۵ با درجه ۰٫۵ نرمال است». عدد بالا درجه است و عدد پایین خود دما؛ خط کج تقسیم نیست.</div></div>
+
+  <div class="st"><b>قدم ۲ — شکل جدول را بکش.</b> سطرها = دماها، ستون‌ها = سرعت‌ها. کنار هر دما و هر سرعت درجه‌اش را بنویس (داخل پرانتز):
+    <table class="t"><tr><th></th><th>10 (0)</th><th>20 (0.6)</th><th>30 (1)</th><th>40 (0.6)</th><th>50 (0)</th></tr>
+      <tr><th>100 (0)</th><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td></tr>
+      <tr><th>125 (0.5)</th><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td></tr>
+      <tr><th>150 (1)</th><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td></tr>
+      <tr><th>175 (0.5)</th><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td></tr>
+      <tr><th>200 (0)</th><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td></tr></table>
+    پس جدول <span class="m">5×5</span> است.</div>
+
+  <div class="st"><b>قدم ۳ — قانون پر کردن هر خانه.</b> هر خانه = <b>کوچک‌ترِ</b> درجه سطرش و درجه ستونش: <span class="m">m_ij = min(a_i , b_j)</span>.
+    <p>مثال: خانه دمای ۱۲۵ و سرعت ۳۰. درجه سطر ۰٫۵ است و درجه ستون ۱؛ پس <span class="m">min(0.5, 1) = 0.5</span>. به زبان ساده: «دما ۱۲۵ نرمال است <b>و</b> سرعت ۳۰ متوسط است» حداکثر به اندازه ضعیف‌ترینِ این دو درست است.</p></div>
+
+  <div class="st"><b>قدم ۴ — یک سطر کامل: دمای ۱۲۵ (درجه ۰٫۵).</b>
+    <table class="t pair"><tr><th>سرعت</th><th>درجه سطر</th><th>درجه ستون</th><th>کوچک‌تر = خانه</th></tr>
+      <tr><td>10</td><td>0.5</td><td>0</td><td>0</td></tr>
+      <tr><td>20</td><td>0.5</td><td>0.6</td><td>0.5</td></tr>
+      <tr><td>30</td><td>0.5</td><td>1</td><td>0.5</td></tr>
+      <tr><td>40</td><td>0.5</td><td>0.6</td><td>0.5</td></tr>
+      <tr><td>50</td><td>0.5</td><td>0</td><td>0</td></tr></table>
+    سطر ۱۲۵ = <span class="m">(0, 0.5, 0.5, 0.5, 0)</span>. دمای ۱۷۵ هم درجه ۰٫۵ دارد، پس سطرش دقیقاً همین است.</div>
+
+  <div class="st"><b>قدم ۵ — بقیه سطرها با دو میان‌بر.</b>
+    <ul class="who">
+      <li>دمای ۱۵۰ درجه ۱ دارد. کوچک‌ترِ ۱ و هر عدد، خود آن عدد است؛ پس این سطر <b>خود B</b> است: <span class="m">(0, 0.6, 1, 0.6, 0)</span>.</li>
+      <li>دماهای ۱۰۰ و ۲۰۰ درجه ۰ دارند. کوچک‌ترِ ۰ و هر عدد، ۰ است؛ پس این سطرها <b>همه صفر</b>اند.</li>
+    </ul></div>
+
+  <div class="st"><b>قدم ۶ — ماتریس کامل</b> (همان اسلاید ۷۵):
+    <div class="matw"><span>μ_AB =</span><table class="mat"><tr><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr><tr><td>0</td><td>0.5</td><td>0.5</td><td>0.5</td><td>0</td></tr><tr><td>0</td><td>0.6</td><td>1</td><td>0.6</td><td>0</td></tr><tr><td>0</td><td>0.5</td><td>0.5</td><td>0.5</td><td>0</td></tr><tr><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr></table></div>
+    الگو: هر سطر همان B است که از ارتفاع درجه آن سطر «بریده» شده. در درس بعد با همین ماتریس، سرعت را برای دمای ۱۲۵ حساب می‌کنیم.</div>
   <div class="row" style="margin-top:8px"><button class="next">قدم بعدی</button><button class="all">نمایش همه</button></div>
+</div>
+
+<div class="card" style="margin-top:12px">
+  <div class="q practice" id="try74" data-hint="هر خانه = کوچک‌ترِ درجه سطر (کنار x) و درجه ستون (کنار y). سطری که درجه‌اش ۱ است، خود B را کپی می‌کند." data-yes="عالی! ماتریس قانون را خودت ساختی. سطر x=2 (درجه ۱) دقیقاً خود B شد.">
+    <h3>حالا تو: ماتریس یک قانون را بساز</h3>
+    <p>قانون: «اگر x برابر A است، آنگاه y برابر B است.» <span class="m">A</span> بخش «اگر» است و <span class="m">B</span> بخش «آنگاه». جدول را پر کن؛ هر خانه = کوچک‌ترِ درجه سطر و درجه ستون.</p>
+    <div class="mb">A = {0.6/1 , 1/2}        B = {0.5/10 , 1/20 , 0.4/30}</div>
+    <table class="t"><tr><th></th><th>y=10 (0.5)</th><th>y=20 (1)</th><th>y=30 (0.4)</th></tr>
+      <tr><th>x=1 (0.6)</th><td><input type="text" data-k="0.5" aria-label="x1 y10"></td><td><input type="text" data-k="0.6" aria-label="x1 y20"></td><td><input type="text" data-k="0.4" aria-label="x1 y30"></td></tr>
+      <tr><th>x=2 (1)</th><td><input type="text" data-k="0.5" aria-label="x2 y10"></td><td><input type="text" data-k="1" aria-label="x2 y20"></td><td><input type="text" data-k="0.4" aria-label="x2 y30"></td></tr></table>
+    <button class="check">بررسی</button>
+    <details class="sol"><summary>راه‌حل</summary><div class="mb pre">x=1 (0.6):  min(0.6,0.5)=0.5   min(0.6,1)=0.6   min(0.6,0.4)=0.4
+x=2 (1):    min(1,0.5)=0.5     min(1,1)=1       min(1,0.4)=0.4</div></details><div class="fb"></div>
+  </div>
 </div></section>
 
 <!-- ===== 4. PRACTICE ===== -->
@@ -296,7 +397,7 @@ b′(30) = max( min(0.6,0.2), min(0,0.2), min(0.3,0.2) ) = max(0.2, 0, 0.2) = 0.
   <li>اندازه‌ها: <span class="m">(1×n) ∘ (n×p) = (1×p)</span>.</li>
   <li>قاعده ترکیبی استنتاج زاده: <span class="m">B′ = A′ ∘ μ_AB</span> — از اطلاعات تازه درباره A، اطلاعات درباره B به دست می‌آید.</li>
   <li>سطری از ماتریس که <span class="m">a_i = 1</span> دارد، خود B است؛ سطر با <span class="m">a_i = 0</span> تمام صفر است.</li>
-  <li>مثال اسلاید ۷۲: <span class="m">A=(0.2,0.4,0.6,1)</span> ← <span class="m">B=(0.6,0.6,0.5)</span>.</li>
+  <li><a href="#ex72">مثال اسلاید ۷۲</a>: <span class="m">A=(0.2,0.4,0.6,1)</span> ← <span class="m">B=(0.6,0.6,0.5)</span>.</li>
 </ul></div></section>
 
 <!-- ===== 6. SOURCE + ASK ===== -->
@@ -360,59 +461,82 @@ var presets=[
   {a:[0,0.5,0,0,0],M:MU,rl:['100','125','150','175','200'],cl:['10','20','30','40','50'],an:"a′"}
 ];
 var CTX=[
-  '<b>مثال اسلاید ۷۲:</b> بردار A و ماتریس M فقط عددهای داده‌شده‌اند تا عملگر ∘ را تمرین کنیم؛ از قانون خاصی نیامده‌اند. جواب: <span class="m">B = (0.6, 0.6, 0.5)</span>.',
+  '<b>سؤال (اسلاید ۷۲):</b> بردار A و ماتریس M داده شده‌اند. <span class="m">B = A ∘ M</span> را حساب کن. (M از هیچ قانونی ساخته نشده؛ فقط چند عدد داده‌شده است تا عملگر ∘ را تمرین کنیم.)',
   '<p style="margin:0 0 6px"><b>سؤال:</b> قانون می‌گوید «اگر دما نرمال است، سرعت متوسط است». دما ۱۲۵ است؛ سرعت چقدر است؟</p>'+
   '<ul style="margin:0;padding-right:22px"><li><b>بردار ورودی <span class="m">A′</span> از کجا آمد؟</b> عضویت ۱۲۵ در «دمای نرمال» 0.5 است. پس در سطر ۱۲۵ عدد 0.5 می‌گذاریم و بقیه سطرها صفر: <span class="m">A′ = (0, 0.5, 0, 0, 0)</span> (جزئیاتش در درس ۸).</li>'+
-  '<li><b>ماتریس از کجا آمد؟</b> همان ماتریس قانون است که در بخش «ب» پایین خانه به خانه ساخته می‌شود.</li>'+
-  '<li><b>چه انتظاری داریم؟</b> چون فقط سطر ۱۲۵ عدد غیرصفر دارد، min بقیه سطرها صفر می‌شود و همیشه سطر ۱۲۵ برنده است. پس <span class="m">B′</span> همان سطر ۱۲۵ ماتریس است: <span class="m">B′ = (0, 0.5, 0.5, 0.5, 0)</span>.</li>'+
-  '<li><b>معنی جواب:</b> «سرعت متوسط است، ولی فقط تا درجه 0.5» — یعنی همان شکل سرعت متوسط که از ارتفاع 0.5 بریده شده.</li></ul>'
+  '<li><b>ماتریس از کجا آمد؟</b> همان ماتریس قانون است که در بخش «ب» پایین خانه به خانه ساخته می‌شود.</li></ul>'
 ];
-var P=0,A=presets[0].a.slice(),J=0;
+var P=0,A=presets[0].a.slice(),J=0,S=0,steps=[];
 var svg=document.getElementById('cmpSvg'),out=document.getElementById('cmpOut'),pick=document.getElementById('cmpPick'),sl=document.getElementById('cmpSliders');
 var cw=62,ch=36,xA=56,xM=140,y0=46;
 function comp(){var p=presets[P],res=[];for(var j=0;j<p.M[0].length;j++){var m=0;for(var i=0;i<A.length;i++)m=Math.max(m,Math.min(A[i],p.M[i][j]));res.push(m)}return res}
+function makeSteps(){var q=presets[P].M[0].length;steps=[{k:'q'},{k:'sym'}];for(var j=0;j<q;j++){steps.push({k:'col',j:j},{k:'min',j:j},{k:'max',j:j})}steps.push({k:'done'})}
+function rowName(i){var p=presets[P];return P?'x='+p.rl[i]:p.rl[i]}
+function narrate(st,B,mins,best){
+  var p=presets[P],n=A.length,q=p.M[0].length,an=P?"a′":'a',bn=P?"b′":'b',Bn=P?"B′":'B',An=P?"A′":'A',j=st.j;
+  var col=function(jj){return '('+A.map(function(a,i){return f(p.M[i][jj])}).join(', ')+')'};
+  var vec=function(v){return '('+v.map(f).join(', ')+')'};
+  var M='<span class="m">',E='</span>';
+  if(st.k==='q')return '<b>قدم ۱ — سؤال را ببین.</b> چیزهای داده‌شده: '+M+An+' = '+vec(A)+E+' و جدول M (شکل زیر). خواسته: ردیف پایین، یعنی '+M+Bn+E+'. فعلاً همه خانه‌هایش «؟» است.';
+  if(st.k==='sym')return '<b>قدم ۲ — هر چیز چیست؟</b><br>• <b>ستون بنفش سمت چپ</b> = '+M+An+E+'، ورودی. برای هر سطر جدول یک عدد دارد ('+A.map(function(a,i){return M+an+(i+1)+' = '+f(a)+E}).join('، ')+').<br>• <b>جدول وسط</b> = M، با '+n+' سطر و '+q+' ستون. سطر i جدول همیشه با عدد i ام بردار ورودی جفت می‌شود.<br>• <b>ردیف پایین</b> = '+M+Bn+E+'، جواب. به تعداد <b>ستون‌های</b> M عدد دارد، یعنی '+q+' عدد. <b>هر ستون M دقیقاً یک عدد جواب را می‌سازد.</b> از ستون ۱ شروع می‌کنیم.';
+  var head='<b>'+bn+(j+1)+(P?' (سرعت '+p.cl[j]+')':'')+' — ';
+  if(st.k==='col')return head+'قدم الف: ستون '+(j+1)+' را جدا کن.</b> ستون رنگی: '+M+col(j)+E+'. حالا هر عدد این ستون را کنار عدد بنفشِ <b>همان سطر</b> بگذار: '+A.map(function(a,i){return M+'('+f(a)+' و '+f(p.M[i][j])+')'+E}).join('، ')+'. ستون min سمت راست هنوز خالی است.';
+  if(st.k==='min')return head+'قدم ب: از هر جفت، کوچک‌تر را بردار (min).</b> '+A.map(function(a,i){return M+'min('+f(a)+', '+f(p.M[i][j])+') = '+f(mins[i])+E}).join('، ')+'. این عددها در ستون min سمت راست نوشته شدند.';
+  if(st.k==='max'){var w=A.map(function(a,i){return mins[i]===best?rowName(i):null}).filter(Boolean).join(' و ');
+    return head+'قدم ج: از ستون min، بزرگ‌ترین را بردار (max).</b> '+M+'max{'+mins.map(f).join(', ')+'} = '+f(best)+E+'. پس '+M+bn+(j+1)+' = '+f(best)+E+' (سطر برنده: '+w+'، خانه سبز). این عدد در ردیف پایین زیر ستون '+(j+1)+' نوشته شد.'+(j<q-1?' حالا همین سه کار را برای ستون '+(j+2)+' تکرار می‌کنیم.':'')}
+  return '<b>تمام شد.</b> جواب: '+M+Bn+' = '+vec(B)+E+'. خلاصه کار: برای هر ستون (۱) جفت کن، (۲) از هر جفت min، (۳) از minها max.'+(P?' سطر ۱۲۵ همیشه برنده است چون بقیه ورودی‌ها صفرند؛ پس '+M+Bn+E+' همان سطر ۱۲۵ ماتریس است. معنی: «سرعت متوسط است، ولی فقط تا درجه 0.5».':'');
+}
 function draw(){
-  var p=presets[P],n=A.length,q=p.M[0].length,B=comp();clear(svg);
+  var p=presets[P],n=A.length,q=p.M[0].length,B=comp(),st=steps[S],k=st.k,free=k==='done';clear(svg);
+  if(!free&&st.j!==undefined)J=st.j;
+  var hl=k!=='q'&&k!=='sym',showMin=k==='min'||k==='max'||free,showWin=k==='max'||free;
+  var known=function(jj){return free||(st.j!==undefined&&(jj<st.j||(jj===st.j&&k==='max')))};
   var mins=A.map(function(a,i){return Math.min(a,p.M[i][J])}),best=Math.max.apply(null,mins);
   var xMin=xM+q*cw+34;
   el(svg,'text',{x:xA+28,y:30,'text-anchor':'middle'},p.an+'_i');
-  el(svg,'text',{x:xMin+28,y:30,'text-anchor':'middle'},'min');
-  for(var j=0;j<q;j++)el(svg,'text',{x:xM+j*cw+cw/2,y:30,'text-anchor':'middle',style:j===J?'fill:var(--accent);font-weight:700':''},P?'y='+p.cl[j]:'ستون '+(j+1));
+  if(hl)el(svg,'text',{x:xMin+28,y:30,'text-anchor':'middle'},'min');
+  for(var j=0;j<q;j++)el(svg,'text',{x:xM+j*cw+cw/2,y:30,'text-anchor':'middle',style:hl&&j===J?'fill:var(--accent);font-weight:700':''},P?'y='+p.cl[j]:'ستون '+(j+1));
+  var pickCol=function(jj){return function(){if(free){J=jj;draw()}}};
   for(var i=0;i<n;i++){
     var y=y0+i*ch;
     el(svg,'text',{x:26,y:y+22,'text-anchor':'middle'},P?'x='+p.rl[i]:p.rl[i]);
     el(svg,'rect',{x:xA,y:y,width:56,height:ch-4,rx:6,style:'fill:var(--surface-1);stroke:var(--c1);stroke-width:1.5'});
     el(svg,'text',{x:xA+28,y:y+21,'text-anchor':'middle',style:'fill:var(--text)'},f(A[i]));
     for(var j2=0;j2<q;j2++){
-      var on=j2===J;
-      var r=el(svg,'rect',{x:xM+j2*cw+3,y:y,width:cw-6,height:ch-4,rx:6,'class':'cell',style:on?'fill:var(--accent-bg);stroke:var(--accent);stroke-width:1.5':'fill:var(--surface);stroke:var(--border)'});
-      r.addEventListener('click',(function(jj){return function(){J=jj;draw()}})(j2));
-      var t=el(svg,'text',{x:xM+j2*cw+cw/2,y:y+21,'text-anchor':'middle','class':'cell',style:on?'fill:var(--text)':''},f(p.M[i][j2]));
-      t.addEventListener('click',(function(jj){return function(){J=jj;draw()}})(j2));
+      var on=hl&&j2===J;
+      var r=el(svg,'rect',{x:xM+j2*cw+3,y:y,width:cw-6,height:ch-4,rx:6,'class':free?'cell':'',style:on?'fill:var(--accent-bg);stroke:var(--accent);stroke-width:1.5':'fill:var(--surface);stroke:var(--border)'});
+      r.addEventListener('click',pickCol(j2));
+      var t=el(svg,'text',{x:xM+j2*cw+cw/2,y:y+21,'text-anchor':'middle','class':free?'cell':'',style:on?'fill:var(--text)':''},f(p.M[i][j2]));
+      t.addEventListener('click',pickCol(j2));
     }
-    var win=mins[i]===best;
-    el(svg,'rect',{x:xMin,y:y,width:56,height:ch-4,rx:6,style:win?'fill:var(--ok-bg);stroke:var(--c2);stroke-width:2':'fill:var(--surface);stroke:var(--border)'});
-    el(svg,'text',{x:xMin+28,y:y+21,'text-anchor':'middle',style:win?'fill:var(--ok);font-weight:700':''},f(mins[i]));
-    el(svg,'line',{x1:xM+q*cw+4,y1:y+ch/2-2,x2:xMin-4,y2:y+ch/2-2,style:'stroke:var(--grid);stroke-dasharray:3 3'});
+    if(hl){
+      var win=showWin&&mins[i]===best;
+      el(svg,'rect',{x:xMin,y:y,width:56,height:ch-4,rx:6,style:win?'fill:var(--ok-bg);stroke:var(--c2);stroke-width:2':'fill:var(--surface);stroke:var(--border)'});
+      el(svg,'text',{x:xMin+28,y:y+21,'text-anchor':'middle',style:win?'fill:var(--ok);font-weight:700':''},showMin?f(mins[i]):'؟');
+      el(svg,'line',{x1:xM+q*cw+4,y1:y+ch/2-2,x2:xMin-4,y2:y+ch/2-2,style:'stroke:var(--grid);stroke-dasharray:3 3'});
+    }
   }
   var yB=y0+n*ch+14;
   el(svg,'text',{x:xA+28,y:yB+22,'text-anchor':'middle'},P?"B′":'B');
   for(var j3=0;j3<q;j3++){
-    var on3=j3===J;
-    var rb=el(svg,'rect',{x:xM+j3*cw+3,y:yB,width:cw-6,height:ch-4,rx:6,'class':'cell',style:on3?'fill:var(--ok-bg);stroke:var(--c2);stroke-width:2':'fill:var(--surface-1);stroke:var(--c2)'});
-    rb.addEventListener('click',(function(jj){return function(){J=jj;draw()}})(j3));
-    el(svg,'text',{x:xM+j3*cw+cw/2,y:yB+21,'text-anchor':'middle',style:on3?'fill:var(--ok);font-weight:700':'fill:var(--text)'},f(B[j3]));
+    var on3=hl&&j3===J&&known(j3);
+    var rb=el(svg,'rect',{x:xM+j3*cw+3,y:yB,width:cw-6,height:ch-4,rx:6,'class':free?'cell':'',style:on3?'fill:var(--ok-bg);stroke:var(--c2);stroke-width:2':'fill:var(--surface-1);stroke:var(--c2)'});
+    rb.addEventListener('click',pickCol(j3));
+    el(svg,'text',{x:xM+j3*cw+cw/2,y:yB+21,'text-anchor':'middle',style:on3?'fill:var(--ok);font-weight:700':'fill:var(--text)'},known(j3)?f(B[j3]):'؟');
   }
-  el(svg,'text',{x:xMin+28,y:yB+21,'text-anchor':'middle',style:'fill:var(--ok)'},'max ↑');
-  el(svg,'text',{x:300,y:yB+ch+20,'text-anchor':'middle'},'هر b_j = بزرگ‌ترینِ ستون سبز (min) — خانه سبز پررنگ، سطر برنده است');
-  var bn=P?"b′":'b',an=P?"a′":'a';
-  out.textContent=bn+'_'+(J+1)+' = max{'+A.map(function(a,i){return 'min('+f(a)+','+f(p.M[i][J])+')'}).join(', ')+'}\n     = max{'+mins.map(f).join(', ')+'} = '+f(best)+
-    '\nبرنده: '+A.map(function(a,i){return mins[i]===best?(P?'x='+p.rl[i]:p.rl[i]):null}).filter(Boolean).join(' و ');
-  out.style.whiteSpace='pre';
-  Array.prototype.forEach.call(pick.children,function(b,k){b.classList.toggle('on',k===J)});
+  if(showWin){
+    el(svg,'text',{x:xMin+28,y:yB+21,'text-anchor':'middle',style:'fill:var(--ok)'},'max ↑');
+    el(svg,'text',{x:300,y:yB+ch+20,'text-anchor':'middle'},'هر b_j = بزرگ‌ترینِ ستون min — خانه سبز پررنگ، سطر برنده است');
+  }
+  out.innerHTML=narrate(st,B,mins,best);
+  document.getElementById('cmpCount').textContent='قدم '+(S+1)+' از '+steps.length;
+  document.getElementById('cmpPrev').disabled=S===0;
+  document.getElementById('cmpNext').disabled=free;
+  document.getElementById('cmpFree').hidden=!free;
+  Array.prototype.forEach.call(pick.children,function(b,kk){b.classList.toggle('on',kk===J)});
 }
 function build(){
-  var p=presets[P];A=p.a.slice();J=P?1:0;
+  var p=presets[P];A=p.a.slice();J=0;S=0;makeSteps();
   document.getElementById('cmpCtx').innerHTML=CTX[P];
   pick.innerHTML='';sl.innerHTML='';
   for(var j=0;j<p.M[0].length;j++){var b=document.createElement('button');b.textContent=(P?"b′":'b')+(j+1)+(P?' (y='+p.cl[j]+')':'');b.addEventListener('click',(function(jj){return function(){J=jj;draw()}})(j));pick.appendChild(b)}
@@ -426,6 +550,10 @@ function build(){
   });
   draw();
 }
+document.getElementById('cmpNext').addEventListener('click',function(){if(S<steps.length-1){S++;draw()}});
+document.getElementById('cmpPrev').addEventListener('click',function(){if(S>0){S--;if(steps[S].k!=='done')A=presets[P].a.slice();build2()}});
+document.getElementById('cmpRestart').addEventListener('click',function(){build()});
+function build2(){var keep=S;build();S=keep;draw()}
 Array.prototype.forEach.call(document.querySelectorAll('#cmpPreset button'),function(b){b.addEventListener('click',function(){
   P=+b.dataset.p;Array.prototype.forEach.call(document.querySelectorAll('#cmpPreset button'),function(x){x.classList.toggle('on',x===b)});build()})});
 build();
