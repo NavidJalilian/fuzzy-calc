@@ -152,20 +152,13 @@ table.t.pair{direction:rtl}
     <div id="cmpSliders"></div>
   </div>
 
-  <h3 style="margin-top:20px">ب) ساختن ماتریس قانون خانه به خانه (مثال اسلاید ۷۴)</h3>
-  <p style="font-size:14px">A = دمای نرمال روی x، و B = سرعت متوسط روی y. هر خانه: <span class="m">min(a_i , b_j)</span>.</p>
-  <div class="soft">
-    <p style="margin:0 0 4px"><b>این شکل را چطور بخوانی:</b></p>
-    <ul style="margin:0;padding-right:22px">
-      <li><b>ردیف نارنجی بالا</b> = عضویت هر سرعت در «سرعت متوسط» (b_j). هر ستون یک سرعت است: ۱۰، ۲۰، … ۵۰.</li>
-      <li><b>ستون بنفش چپ</b> = عضویت هر دما در «دمای نرمال» (a_i). هر سطر یک دما است: ۱۰۰، ۱۲۵، … ۲۰۰.</li>
-      <li><b>هر خانه</b> = کوچک‌ترِ عدد بنفشِ سطرش و عدد نارنجیِ ستونش. وقتی روی «خانه بعدی» می‌زنی، آن سطر و ستون پررنگ می‌شوند تا ببینی کدام دو عدد با هم مقایسه شدند.</li>
-      <li>معنی هر خانه: «این دما و این سرعت تا چه حد با هم با قانون جور درمی‌آیند». مثلاً x=150 کاملاً نرمال است و y=30 کاملاً متوسط، پس خانه‌شان ۱ است.</li>
-    </ul>
-  </div>
+  <h3 style="margin-top:20px">ب) ساختن ماتریس قانون خانه به خانه (مثال اسلاید ۷۴)، قدم به قدم</h3>
+  <div id="relWalk"></div>
+  <h3 style="margin-top:18px">حالا خودت امتحان کن</h3>
+  <p style="font-size:14px;color:var(--text-2)">روی هر خانه جدول کلیک کن تا ببینی از کدام دو عدد ساخته شده، یا «خانه بعدی» را بزن تا خانه‌ها یکی‌یکی پر شوند.</p>
   <svg id="relSvg" viewBox="0 0 480 280" role="img" aria-labelledby="relTitle"><title id="relTitle">ساخت ماتریس قانون: هر خانه کمینه عضویت سطر و ستون است</title></svg>
   <div class="row"><button id="relNext">خانه بعدی</button><button id="relAll">پر کردن همه</button><button id="relReset">پاک کردن</button></div>
-  <div class="mb" id="relOut">روی «خانه بعدی» یا روی هر خانه جدول کلیک کن.</div>
+  <div class="soft" id="relOut" aria-live="polite" style="margin-top:6px"></div>
 </div></section>
 
 <!-- ===== 3. WORKED EXAMPLE ===== -->
@@ -576,37 +569,62 @@ build();
 var ra=[0,0.5,1,0.5,0],rb=[0,0.6,1,0.6,0],rx=['100','125','150','175','200'],ry=['10','20','30','40','50'];
 var rs=document.getElementById('relSvg'),ro=document.getElementById('relOut');
 var filled={},cur=-1,gx=150,gy=84,gw=62,gh=36;
-function rdraw(){
-  clear(rs);
-  var ci=cur>=0?Math.floor(cur/5):-1,cj=cur>=0?cur%5:-1;
-  el(rs,'text',{x:88,y:20,'text-anchor':'middle'},'a_i');
+/* o: {has(i,j) -> bool, row: highlighted row, cur: highlighted cell, click: bool} */
+function rgrid(svg,o){
+  clear(svg);
+  var hr=[].concat(o.row),ci=o.cur>=0?Math.floor(o.cur/5):-1,cj=o.cur>=0?o.cur%5:-1,isHR=function(i){return o.cur<0&&hr.indexOf(i)>=0&&i>=0},anyHR=o.cur<0&&hr.some(function(i){return i>=0});
+  el(svg,'text',{x:88,y:20,'text-anchor':'middle'},'a_i');
   for(var j=0;j<5;j++){
-    el(rs,'text',{x:gx+j*gw+gw/2,y:20,'text-anchor':'middle'},'y='+ry[j]);
-    el(rs,'rect',{x:gx+j*gw+3,y:30,width:gw-6,height:gh-4,rx:6,style:j===cj?'fill:var(--accent-bg);stroke:var(--c3);stroke-width:2':'fill:var(--surface-1);stroke:var(--c3)'});
-    el(rs,'text',{x:gx+j*gw+gw/2,y:51,'text-anchor':'middle',style:'fill:var(--text)'},f(rb[j]));
+    el(svg,'text',{x:gx+j*gw+gw/2,y:20,'text-anchor':'middle'},'y='+ry[j]);
+    el(svg,'rect',{x:gx+j*gw+3,y:30,width:gw-6,height:gh-4,rx:6,style:j===cj||anyHR?'fill:var(--warn-bg);stroke:var(--c3);stroke-width:2':'fill:var(--surface-1);stroke:var(--c3)'});
+    el(svg,'text',{x:gx+j*gw+gw/2,y:51,'text-anchor':'middle',style:'fill:var(--text)'},f(rb[j]));
   }
-  el(rs,'text',{x:120,y:51,'text-anchor':'end'},'b_j');
+  el(svg,'text',{x:120,y:51,'text-anchor':'end'},'b_j');
   for(var i=0;i<5;i++){
     var y=gy+i*gh;
-    el(rs,'text',{x:30,y:y+21,'text-anchor':'middle'},'x='+rx[i]);
-    el(rs,'rect',{x:62,y:y,width:52,height:gh-4,rx:6,style:i===ci?'fill:var(--accent-bg);stroke:var(--c1);stroke-width:2':'fill:var(--surface-1);stroke:var(--c1)'});
-    el(rs,'text',{x:88,y:y+21,'text-anchor':'middle',style:'fill:var(--text)'},f(ra[i]));
+    el(svg,'text',{x:30,y:y+21,'text-anchor':'middle'},'x='+rx[i]);
+    el(svg,'rect',{x:62,y:y,width:52,height:gh-4,rx:6,style:i===ci||isHR(i)?'fill:var(--accent-bg);stroke:var(--c1);stroke-width:2':'fill:var(--surface-1);stroke:var(--c1)'});
+    el(svg,'text',{x:88,y:y+21,'text-anchor':'middle',style:'fill:var(--text)'},f(ra[i]));
     for(var j2=0;j2<5;j2++){
-      var k=i*5+j2,on=k===cur,has=filled[k];
-      var r=el(rs,'rect',{x:gx+j2*gw+3,y:y,width:gw-6,height:gh-4,rx:6,'class':'cell',style:on?'fill:var(--ok-bg);stroke:var(--c2);stroke-width:2':(has?'fill:var(--surface);stroke:var(--c2)':'fill:var(--surface);stroke:var(--border);stroke-dasharray:3 3')});
-      r.addEventListener('click',(function(kk){return function(){show(kk)}})(k));
-      if(has){var t=el(rs,'text',{x:gx+j2*gw+gw/2,y:y+21,'text-anchor':'middle','class':'cell',style:on?'fill:var(--ok);font-weight:700':'fill:var(--text)'},f(Math.min(ra[i],rb[j2])));
-        t.addEventListener('click',(function(kk){return function(){show(kk)}})(k));}
+      var k=i*5+j2,has=o.has(i,j2),on=k===o.cur||isHR(i);
+      var r=el(svg,'rect',{x:gx+j2*gw+3,y:y,width:gw-6,height:gh-4,rx:6,'class':o.click?'cell':'',style:on?'fill:var(--ok-bg);stroke:var(--c2);stroke-width:2':(has?'fill:var(--surface);stroke:var(--c2)':'fill:var(--surface);stroke:var(--border);stroke-dasharray:3 3')});
+      var t=el(svg,'text',{x:gx+j2*gw+gw/2,y:y+21,'text-anchor':'middle','class':o.click?'cell':'',style:on?'fill:var(--ok);font-weight:700':(has?'fill:var(--text)':'')},has?f(Math.min(ra[i],rb[j2])):'؟');
+      if(o.click){r.addEventListener('click',(function(kk){return function(){show(kk)}})(k));t.addEventListener('click',(function(kk){return function(){show(kk)}})(k))}
     }
   }
 }
+function rowCalc(i){return rb.map(function(v,j){return '<span class="m">min('+f(ra[i])+', '+f(v)+') = '+f(Math.min(ra[i],v))+'</span>'}).join('<br>')}
+function rowVec(i){return '<span class="m">('+rb.map(function(v){return f(Math.min(ra[i],v))}).join(', ')+')</span>'}
+(function relWalk(){
+  var M='<span class="m">',E='</span>',done={};
+  var steps=[
+    {t:'<b>سؤال را ببین.</b> قانون: «اگر دما نرمال است، سرعت متوسط است». این قانون را به یک جدول ۵×۵ تبدیل کن. داده‌ها: ستون بنفش سمت چپ = '+M+'A = (0, 0.5, 1, 0.5, 0)'+E+' (دمای نرمال)، ردیف نارنجی بالا = '+M+'B = (0, 0.6, 1, 0.6, 0)'+E+' (سرعت متوسط). همه خانه‌های جدول فعلاً «؟» است.',rows:[],row:-1},
+    {t:'<b>هر چیز چیست؟</b><br>• <b>ستون بنفش سمت چپ</b> = عضویت هر دما در «دمای نرمال». هر سطر یک دماست: ۱۰۰، ۱۲۵، ۱۵۰، ۱۷۵، ۲۰۰.<br>• <b>ردیف نارنجی بالا</b> = عضویت هر سرعت در «سرعت متوسط». هر ستون یک سرعت است: ۱۰، ۲۰، ۳۰، ۴۰، ۵۰.<br>• <b>هر خانه</b> = کوچک‌ترِ دو عدد: عدد بنفشِ سطرش و عدد نارنجیِ ستونش ('+M+'m_ij = min(a_i, b_j)'+E+'). معنی: «این دما و این سرعت تا چه حد با هم با قانون جور درمی‌آیند». سطر به سطر پر می‌کنیم.',rows:null},
+    {t:'<b>سطر دمای ۱۰۰ (عدد بنفش 0).</b> عدد بنفش این سطر را با هر عدد نارنجی مقایسه کن و کوچک‌تر را بنویس:<br>'+rowCalc(0)+'<br>کوچک‌ترِ صفر و هر عددی صفر است، پس کل سطر صفر می‌شود: '+rowVec(0)+'.',rows:[0],row:0},
+    {t:'<b>سطر دمای ۱۲۵ (عدد بنفش 0.5).</b><br>'+rowCalc(1)+'<br>سطر: '+rowVec(1)+'. هرجا عدد نارنجی از 0.5 بزرگ‌تر بود، 0.5 نوشته شد؛ یعنی B از ارتفاع 0.5 «بریده» شد.',rows:[0,1],row:1},
+    {t:'<b>سطر دمای ۱۵۰ (عدد بنفش 1).</b><br>'+rowCalc(2)+'<br>سطر: '+rowVec(2)+'. کوچک‌ترِ ۱ و هر عدد، خود آن عدد است؛ پس این سطر <b>دقیقاً خود B</b> است.',rows:[0,1,2],row:2},
+    {t:'<b>سطرهای ۱۷۵ و ۲۰۰.</b> عدد بنفش ۱۷۵ همان 0.5 است و عدد بنفش ۲۰۰ همان 0؛ پس سطر ۱۷۵ مثل سطر ۱۲۵ می‌شود و سطر ۲۰۰ مثل سطر ۱۰۰:<br>سطر ۱۷۵: '+rowVec(3)+'<br>سطر ۲۰۰: '+rowVec(4),rows:[0,1,2,3,4],row:[3,4]},
+    {t:'<b>تمام شد.</b> این همان ماتریس اسلاید ۷۵ است. الگو: <b>هر سطر همان B است که از ارتفاع عدد بنفشِ آن سطر بریده شده.</b> سطر با عدد بنفش 1 خود B است و سطر با عدد بنفش 0 تمام صفر.',rows:[0,1,2,3,4],row:-1}
+  ];
+  var w=document.getElementById('relWalk');
+  steps.forEach(function(st,n){
+    var d=document.createElement('div');d.className='wstep';
+    var t=document.createElement('div');t.innerHTML='<span class="num">'+(n+1)+'</span>'+st.t;d.appendChild(t);
+    if(st.rows){var sv=document.createElementNS(NS,'svg');sv.setAttribute('viewBox','0 0 480 280');sv.setAttribute('role','img');sv.setAttribute('aria-label','قدم '+(n+1));d.appendChild(sv);
+      var rows=st.rows;rgrid(sv,{has:function(i){return rows.indexOf(i)>=0},row:st.row,cur:-1,click:false});
+}
+    w.appendChild(d);
+  });
+})();
+function rdraw(){rgrid(rs,{has:function(i,j){return !!filled[i*5+j]},row:-1,cur:cur,click:true})}
+var HINT='روی «خانه بعدی» یا روی هر خانه جدول کلیک کن.';
 function show(k){cur=k;filled[k]=1;var i=Math.floor(k/5),j=k%5;
-  ro.textContent='r_'+(i+1)+(j+1)+' = min(a_'+(i+1)+', b_'+(j+1)+') = min('+f(ra[i])+', '+f(rb[j])+') = '+f(Math.min(ra[i],rb[j]))+'      (x='+rx[i]+', y='+ry[j]+')';
+  ro.innerHTML='دمای '+rx[i]+' و سرعت '+ry[j]+': <span class="m">m_'+(i+1)+(j+1)+' = min(a_'+(i+1)+', b_'+(j+1)+') = min('+f(ra[i])+', '+f(rb[j])+') = '+f(Math.min(ra[i],rb[j]))+'</span>';
   rdraw()}
 document.getElementById('relNext').addEventListener('click',function(){var k=0;while(filled[k]&&k<25)k++;if(k>=25){ro.textContent='ماتریس کامل شد. هر سطر = B بریده‌شده در ارتفاع a_i.';cur=-1;rdraw();return}show(k)});
-document.getElementById('relAll').addEventListener('click',function(){for(var k=0;k<25;k++)filled[k]=1;cur=-1;ro.textContent='ماتریس کامل (همان اسلاید ۷۵). سطر x=150 با a=1 خود B است.';rdraw()});
-document.getElementById('relReset').addEventListener('click',function(){filled={};cur=-1;ro.textContent='روی «خانه بعدی» یا روی هر خانه جدول کلیک کن.';rdraw()});
-rdraw();
+document.getElementById('relAll').addEventListener('click',function(){for(var k=0;k<25;k++)filled[k]=1;cur=-1;ro.textContent='ماتریس کامل (همان اسلاید ۷۵). سطر دمای ۱۵۰ (عدد بنفش 1) خود B است.';rdraw()});
+document.getElementById('relReset').addEventListener('click',function(){filled={};cur=-1;ro.textContent=HINT;rdraw()});
+ro.textContent=HINT;rdraw();
 })();
 </script>
 </body>
