@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>درس ۱ — مجموعه قطعی در برابر مجموعه فازی</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ===== SHARED STYLE — copy verbatim into every lesson, do not edit per lesson ===== */
+:root{--bg:#fbfaf7;--surface:#ffffff;--surface-1:#f3f1ec;--text:#1f1e1c;--text-2:#5f5e5a;--text-3:#888780;--border:#e3e0d8;--border-strong:#c9c6bc;
+--accent:#534AB7;--accent-bg:#EEEDFE;--ok:#3B6D11;--ok-bg:#EAF3DE;--bad:#A32D2D;--bad-bg:#FCEBEB;--warn:#854F0B;--warn-bg:#FAEEDA;
+--c1:#7F77DD;--c2:#1D9E75;--c3:#EF9F27;--c4:#D4537E;--grid:#e3e0d8}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1a1a19;--surface:#232322;--surface-1:#2c2c2a;--text:#ecebe6;--text-2:#b4b2a9;--text-3:#888780;--border:#3a3a37;--border-strong:#55554f;
+--accent:#AFA9EC;--accent-bg:#26215C;--ok:#97C459;--ok-bg:#173404;--bad:#F09595;--bad-bg:#501313;--warn:#FAC775;--warn-bg:#412402;--grid:#3a3a37}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Vazirmatn,Tahoma,sans-serif;font-size:16px;line-height:1.95}
+main{max-width:760px;margin:0 auto;padding:24px 16px 64px}
+a{color:var(--accent)}
+h1{font-size:26px;font-weight:700;line-height:1.5;margin:6px 0 6px}
+h2{font-size:19px;font-weight:500;margin:0 0 8px}
+h3{font-size:16px;font-weight:500;margin:12px 0 4px}
+p{margin:0 0 10px}
+.top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:13px;color:var(--text-2)}
+.goal{color:var(--text-2);margin-bottom:22px}
+.sec{margin:0 0 28px}
+.lab{font-size:13px;color:var(--text-3);margin:0 0 4px;letter-spacing:0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.soft{background:var(--surface-1);border-radius:12px;padding:12px 14px}
+.m{direction:ltr;unicode-bidi:isolate;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14.5px;white-space:nowrap}
+@media (max-width:700px){.m{white-space:normal}}
+.mb{direction:ltr;text-align:left;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14.5px;background:var(--surface-1);border-radius:8px;padding:8px 12px;margin:6px 0;overflow-x:auto;line-height:1.8}
+.en{direction:ltr;unicode-bidi:isolate;font-size:13px;color:var(--text-2)}
+b,strong{font-weight:500}
+.key{background:var(--warn-bg);color:var(--warn);border-radius:6px;padding:0 6px}
+.tip{border-right:3px solid var(--accent);background:var(--accent-bg);padding:8px 12px;border-radius:0;margin:8px 0}
+.trap{border-right:3px solid var(--bad);background:var(--bad-bg);padding:8px 12px;border-radius:0;margin:8px 0}
+button{font-family:inherit;font-size:14px;background:var(--surface);color:var(--text);border:1px solid var(--border-strong);border-radius:8px;padding:5px 14px;cursor:pointer}
+button:hover{background:var(--surface-1)}
+button.on{background:var(--accent-bg);border-color:var(--accent);color:var(--accent)}
+input[type=text]{font-family:inherit;font-size:15px;direction:ltr;text-align:center;width:72px;height:34px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text)}
+input[type=range]{width:100%;accent-color:var(--accent);direction:ltr}
+table.t{border-collapse:collapse;direction:ltr;font-size:14.5px;margin:6px 0;display:block;max-width:100%;overflow-x:auto}
+table.t>tbody,table.t>thead{display:table;width:100%}
+table.t th,table.t td{border:1px solid var(--border);padding:5px 6px;text-align:center;font-weight:400}
+table.t th{background:var(--surface-1)}
+.ok{background:var(--ok-bg)!important}.no{background:var(--bad-bg)!important}
+.fb{font-size:14px;margin-top:8px;min-height:1em}.fb.good{color:var(--ok)}.fb.bad{color:var(--bad)}
+.q{margin:0 0 18px}
+.mcq .opts{display:grid;gap:6px;margin-top:6px}
+.mcq .opts button{text-align:right;padding:7px 12px}
+.stepper .st{display:none;padding:6px 0;border-bottom:1px dashed var(--border)}
+.stepper .st.show{display:block}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+svg{max-width:100%;height:auto;direction:ltr}
+svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12px}
+.nav{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:14px;border-top:1px solid var(--border);padding-top:14px;margin-top:28px}
+.ask{font-size:14px;color:var(--text-2)}
+@media print{body{background:#fff}.card,.soft{break-inside:avoid}.stepper .st{display:block}button{display:none}}
+/* ===== END SHARED STYLE ===== */
+</style>
+<style>
+/* lesson 1 only */
+.read{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:8px 0}
+.read div{background:var(--surface-1);border-radius:8px;padding:6px 10px;font-size:14px}
+.read b{display:block;font-size:20px;direction:ltr;text-align:right}
+.sw{display:inline-block;width:18px;height:3px;vertical-align:middle;margin-left:4px;border-radius:2px}
+.legend{font-size:13px;color:var(--text-2);display:flex;gap:14px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<main>
+<div class="top"><a href="../index.html">← فهرست درس‌ها</a><span>درس ۱ از ۱۱ · فصل ۱ · حدود ۱۲ دقیقه</span></div>
+<h1>مجموعه قطعی در برابر مجموعه فازی</h1>
+<p class="goal">هدف: بعد از این درس می‌توانی برای یک عنصر هم عضویت «قطعی» (فقط ۰ یا ۱) و هم «درجه عضویت فازی» (هر عددی از ۰ تا ۱) را حساب کنی، و دو دلیل اسلاید برای لزوم منطق فازی را بگویی.</p>
+
+<!-- ===== 1. IDEA ===== -->
+<section class="sec"><p class="lab">۱. ایده</p>
+<div class="card">
+  <p>جمله «هوا خوب است» را در نظر بگیر. هیچ عددی برای «خوب بودن» نداریم که اندازه بگیریم؛ این یک <b>حس کیفی</b> است. مغز ما با این جمله‌های نادقیق راحت کار می‌کند، ولی نوشتنشان با فرمول ریاضی سخت است. منطق فازی <span class="en">(fuzzy logic)</span> همین کار را ممکن می‌کند. واژه «فازی» یعنی <b>غیردقیق، ناواضح و مبهم</b>.</p>
+
+  <h3>مجموعه قطعی: «یا هست یا نیست»</h3>
+  <p>در مجموعه قطعی یا کلاسیک <span class="en">(crisp / classical set)</span> هر چیز <b>یا عضو است (۱) یا نیست (۰)</b>. مثال اسلاید: مجموعه «روزهای هفته» = شنبه، یکشنبه، دوشنبه، … . «کتاب» یا «قلم» اصلاً عضو آن نیستند. حالت سومی وجود ندارد.</p>
+
+  <h3>مجموعه فازی: «تا چه اندازه عضو است؟»</h3>
+  <p>در مجموعه فازی <span class="en">(fuzzy set)</span> هر عنصر با یک <span class="key">درجه عضویت</span> <span class="en">(degree of membership)</span> عضو است؛ عددی از ۰ تا ۱ (خود ۰ و ۱ هم مجازند). مثال اسلاید برای مجموعه «آخر هفته»:</p>
+  <table class="t"><tr><th>روز</th><th>جمعه</th><th>پنجشنبه</th><th>یکشنبه</th></tr>
+    <tr><th>درجه عضویت در «آخر هفته»</th><td>1</td><td>0.8</td><td>0</td></tr></table>
+  <p>پنجشنبه را نه می‌شود کامل از «آخر هفته» بیرون گذاشت و نه کامل عضو دانست؛ پس عددی بین این دو می‌گیرد.</p>
+
+  <h3>تابع عضویت <span class="m">μ(x)</span></h3>
+  <p>تابع عضویت <span class="en">(membership function)</span> قاعده‌ای است که به هر ورودی <span class="m">x</span> یک عدد بین ۰ و ۱ می‌دهد:</p>
+  <div class="mb">μ_A : X → [0, 1]<br>μ_A(x) = 0  →  x is completely outside A<br>μ_A(x) = 1  →  x is completely inside A</div>
+  <p>مثلاً جمله «آقای الف به اندازه هفتاد درصد عضو جامعه بزرگسالان است» در نظریه فازی درست است و یعنی <span class="m">μ_adult(الف) = 0.7</span>. اسلاید مجموعه فازی را این‌طور می‌نویسد (طرز نوشتن را در درس ۲ کامل می‌بینیم):</p>
+  <div class="mb">A = { ( x , μ_A(x) ) | x ∈ X }</div>
+  <p>مقدارهای <span class="m">μ</span> می‌توانند <b>گسسته</b> باشند (مثلاً فقط 0، 0.3، 0.5، 0.7، 0.9 و 1) یا یک <b>منحنی پیوسته</b> بسازند.</p>
+  <div class="tip">تصویر ذهنی اسلاید: اگر سیاه = ۰ و سفید = ۱ باشد، خاکستری عددی بین ۰ و ۱ است. منطق کلاسیک فقط سیاه و سفید دارد. منطق فازی همه خاکستری‌ها را هم دارد. برای همین منطق فازی <b>فرامجموعه</b> منطق کلاسیک است و نظریه مجموعه‌های فازی <b>تعمیم</b> نظریه کلاسیک مجموعه‌هاست: اگر فقط ۰ و ۱ مجاز باشد، دوباره به مجموعه قطعی می‌رسیم.</div>
+
+  <h3>تاریخچه (اسلاید ۹)</h3>
+  <p>منطق فازی را اولین بار در سال <span class="m">1965</span> پروفسور <b>لطفعلی عسگرزاده</b>، مشهور به <b>لطفی‌زاده</b> <span class="en">(Lotfi A. Zadeh)</span>، مطرح کرد. او ایرانی‌الاصل و استاد علوم کامپیوتر دانشگاه برکلی کالیفرنیا بود و در ۱۶ شهریور ۱۳۹۶ <span class="en">(Sep 7, 2017)</span> در ۹۶ سالگی درگذشت.</p>
+
+  <h3>چرا سیستم فازی؟ دو توجیه اسلاید ۱۲</h3>
+  <ol>
+    <li><b>دنیای واقعی خیلی پیچیده است.</b> نمی‌شود آن را دقیق تعریف کرد. پس یک <b>توصیف تقریبی</b> (یعنی فازی) لازم است که هنوز بشود آن را تحلیل کرد.</li>
+    <li><b>در عصر اطلاعات، دانش بشری مهم شده است.</b> نظریه‌ای لازم داریم که دانش انسان را <b>به شکل سیستماتیک فرمول‌بندی کند</b> و کنار مدل‌های ریاضی در <b>سیستم‌های مهندسی</b> بگذارد.</li>
+  </ol>
+  <p>مزیت‌هایی که اسلاید ۱۳ می‌شمارد: فهمش آسان است؛ انعطاف‌پذیر است و می‌شود آن را به یک سیستم موجود اضافه کرد بدون اینکه سیستم را از پایه بسازیم؛ با داده نادقیق کنار می‌آید؛ روی تجربه افراد خبره بنا می‌شود؛ بر پایه زبان طبیعی انسان است؛ و برای شرایط <b>عدم قطعیت</b> مناسب است.</p>
+</div></section>
+
+<!-- ===== 2. SEE IT ===== -->
+<section class="sec"><p class="lab">۲. ببین چه اتفاقی می‌افتد</p>
+<div class="card">
+  <p>دو نفر درباره «قدبلند» حرف می‌زنند. نفر اول قطعی فکر می‌کند: «از ۱۸۰ سانت به بالا بلند است، وگرنه نه». نفر دوم فازی فکر می‌کند: «زیر ۱۶۰ اصلاً بلند نیست، از ۱۸۵ به بالا کاملاً بلند است، و بینشان کم‌کم بلندتر می‌شود». قد را با لغزنده عوض کن و دو جواب را مقایسه کن.</p>
+  <svg id="h-svg" viewBox="0 0 640 290" role="img" aria-labelledby="h-title">
+    <title id="h-title">نمودار درجه عضویت در مجموعه قدبلند: تابع پله‌ای قطعی و تابع پیوسته فازی بر حسب قد</title>
+    <g id="h-grid"></g>
+    <path id="h-crisp" fill="none" stroke="var(--c1)" stroke-width="3"/>
+    <path id="h-fuzzy" fill="none" stroke="var(--c2)" stroke-width="3"/>
+    <path id="h-short" fill="none" stroke="var(--c3)" stroke-width="2.5" stroke-dasharray="7 5" style="display:none"/>
+    <line id="h-line" y1="30" y2="240" stroke="var(--text-3)" stroke-width="1.5" stroke-dasharray="4 4"/>
+    <circle id="h-dc" r="6" fill="var(--c1)"/>
+    <circle id="h-df" r="6" fill="var(--c2)"/>
+    <circle id="h-ds" r="5" fill="var(--c3)" style="display:none"/>
+    <text x="330" y="282" text-anchor="middle">قد (سانتی‌متر)</text>
+  </svg>
+  <div class="legend"><span><span class="sw" style="background:var(--c1)"></span>قطعی: بلند اگر قد ≥ ۱۸۰</span><span><span class="sw" style="background:var(--c2)"></span>فازی: <span class="m">μ_tall</span></span><span id="h-leg-s" style="display:none"><span class="sw" style="background:var(--c3)"></span>فازی: <span class="m">μ_short = 1 − μ_tall</span></span></div>
+  <label for="h-in" style="display:block;margin-top:10px">قد: <b id="h-val" class="m">175</b> سانتی‌متر</label>
+  <input type="range" id="h-in" min="140" max="210" step="1" value="175">
+  <div class="row" style="margin-top:6px">
+    <span style="font-size:13px;color:var(--text-2)">برو به:</span>
+    <button type="button" data-h="160">160</button><button type="button" data-h="175">175</button><button type="button" data-h="179">179</button><button type="button" data-h="180">180</button><button type="button" data-h="190">190</button>
+    <button type="button" id="h-tog">نمایش «کوتاه» هم</button>
+  </div>
+  <div class="read">
+    <div>قطعی: آیا بلند است؟<b id="h-rc">0</b></div>
+    <div>فازی: درجه بلندی<b id="h-rf">0.60</b></div>
+    <div>فازی: درجه کوتاهی<b id="h-rs">0.40</b></div>
+  </div>
+  <p id="h-story" class="soft" style="font-size:14px"></p>
+  <p style="font-size:14px;color:var(--text-2)">این دو منحنی همان شکل اسلاید ۱۶ را دارند: سمت چپ اسلاید یک تابع «لبه‌تیز» پله‌ای است و سمت راست یک منحنی پیوسته. به ۱۷۹ و ۱۸۰ برو: یک سانتی‌متر جواب قطعی را از ۰ به ۱ می‌پراند، ولی درجه فازی فقط <span class="m">0.04</span> عوض می‌شود.</p>
+</div></section>
+
+<!-- ===== 3. WORKED EXAMPLE ===== -->
+<section class="sec"><p class="lab">۳. مثال حل‌شده، قدم به قدم</p>
+<div class="card stepper">
+  <p>تابع عضویت فازی «قدبلند» در این درس (همان منحنی سبز بالا):</p>
+  <div class="mb">μ_tall(h) = 0                 if h ≤ 160<br>μ_tall(h) = (h − 160) / 25   if 160 &lt; h &lt; 185<br>μ_tall(h) = 1                 if h ≥ 185</div>
+  <p>سارا ۱۷۰، رضا ۱۷۵ و علی ۱۹۰ سانتی‌متر قد دارند. عضویت قطعی (مرز ۱۸۰) و درجه فازی هر سه را پیدا کن.</p>
+  <div class="st">قدم ۱ (قطعی): فقط مقایسه با ۱۸۰. سارا <span class="m">170 &lt; 180 → 0</span>، رضا <span class="m">175 &lt; 180 → 0</span>، علی <span class="m">190 ≥ 180 → 1</span>. سارا و رضا از نظر قطعی هیچ فرقی ندارند.</div>
+  <div class="st">قدم ۲ (سارا، فازی): ۱۷۰ بین ۱۶۰ و ۱۸۵ است، پس از خط وسط استفاده می‌کنیم: <span class="m">μ_tall(170) = (170 − 160)/25 = 10/25 = 0.4</span></div>
+  <div class="st">قدم ۳ (رضا، فازی): <span class="m">μ_tall(175) = (175 − 160)/25 = 15/25 = 0.6</span>. این دقیقاً عدد مثال اسلاید ۱۵ است: قد ۱۷۵ «تا حدی بلند» با درجه <span class="m">0.6</span> و هم‌زمان «تا حدی کوتاه» با درجه <span class="m">0.4</span>.</div>
+  <div class="st">قدم ۴ (علی، فازی): <span class="m">190 ≥ 185</span>، پس <span class="m">μ_tall(190) = 1</span>؛ علی کاملاً عضو «قدبلند» است.</div>
+  <div class="st">قدم ۵ (معنی): جواب فازی <span class="m">{سارا: 0.4, رضا: 0.6, علی: 1}</span> نشان می‌دهد رضا از سارا «بلندتر» است؛ جواب قطعی <span class="m">{0, 0, 1}</span> این را گم می‌کند. جمله «رضا ۶۰٪ عضو مجموعه قدبلندهاست» همان نوع جمله‌ای است که اسلاید ۱۹ درباره «۷۰٪ بزرگسال» می‌گوید.</div>
+  <div class="row" style="margin-top:8px"><button class="next">قدم بعدی</button><button class="all">نمایش همه</button></div>
+</div>
+<div class="trap">دام: اسلاید ۱۵ برای قد ۱۷۵ سانتی‌متر درجه <span class="m">0.6</span> می‌دهد، ولی اسلایدهای ۱۶ و ۱۹ برای ۱٫۷۵ متر درجه <span class="m">0.75</span> می‌دهند. این تناقض نیست: درجه عضویت به <b>تابع عضویتی که طراح انتخاب کرده</b> بستگی دارد و دو مثال دو منحنی متفاوت دارند (هر دو با کلمه «مثلاً»). در امتحان همیشه از تابع یا مجموعه‌ای استفاده کن که در صورت سؤال داده شده است.</div>
+</section>
+
+<!-- ===== 4. PRACTICE ===== -->
+<section class="sec"><p class="lab">۴. نوبت توست</p>
+<div class="card">
+  <div class="q practice" data-hint="قطعی: فقط بپرس «قد ≥ ۱۸۰؟». فازی: اگر بین ۱۶۰ و ۱۸۵ است (قد − ۱۶۰) ÷ ۲۵، و از ۱۸۵ به بالا ۱." data-yes="عالی! ۱۸۰ از نظر قطعی کامل عضو است (۱) ولی از نظر فازی فقط ۰٫۸.">
+    <p><b>سؤال ۱.</b> با همان دو قاعده بخش ۳ (قطعی: بلند اگر قد ≥ ۱۸۰؛ فازی: <span class="m">μ_tall</span>) جدول را پر کن.</p>
+    <table class="t"><tr><th>قد (cm)</th><th>165</th><th>180</th><th>200</th></tr>
+      <tr><th>قطعی (0 یا 1)</th><td><input type="text" data-k="0" aria-label="قطعی برای 165"></td><td><input type="text" data-k="1" aria-label="قطعی برای 180"></td><td><input type="text" data-k="1" aria-label="قطعی برای 200"></td></tr>
+      <tr><th>فازی <span class="m">μ_tall</span></th><td><input type="text" data-k="0.2" aria-label="فازی برای 165"></td><td><input type="text" data-k="0.8" aria-label="فازی برای 180"></td><td><input type="text" data-k="1" aria-label="فازی برای 200"></td></tr></table>
+    <button class="check">بررسی</button><div class="fb"></div>
+  </div>
+
+  <div class="q practice" data-hint="قطعی: «بالاتر از ۳۰» یعنی خود ۳۰ حساب نیست. فازی: (T − 12.5) ÷ 25." data-yes="درست! دقت کن خود ۳۰ «بالاتر از ۳۰» نیست، پس قطعی‌اش ۰ است.">
+    <p><b>سؤال ۲ (از اسلاید ۲۲).</b> قاعده کلاسیک اسلاید: «اگر دما <b>بالاتر از</b> ۳۰ باشد هوا گرم است (۱)، وگرنه گرم نیست (۰)». برای حالت فازی، تابعی ساخته‌ایم که با دو عدد اسلاید (۲۵ → ۰٫۵ و ۳۵ → ۰٫۹) جور است: <span class="m">μ_warm(T) = (T − 12.5)/25</span> (بین ۰ و ۱ بریده می‌شود).</p>
+    <table class="t"><tr><th>دما T</th><th>20</th><th>25</th><th>30</th><th>35</th></tr>
+      <tr><th>قطعی</th><td>—</td><td><input type="text" data-k="0" aria-label="قطعی 25"></td><td><input type="text" data-k="0" aria-label="قطعی 30"></td><td><input type="text" data-k="1" aria-label="قطعی 35"></td></tr>
+      <tr><th>فازی <span class="m">μ_warm</span></th><td><input type="text" data-k="0.3" aria-label="فازی 20"></td><td>0.5</td><td><input type="text" data-k="0.7" aria-label="فازی 30"></td><td>0.9</td></tr></table>
+    <button class="check">بررسی</button><div class="fb"></div>
+  </div>
+
+  <div class="q practice" data-hint="در مثال قد اسلاید ۱۵، دو درجه «بلند» و «کوتاه» با هم ۱ شدند (۰٫۶ + ۰٫۴). همین ایده را برای «آخر هفته / نه آخر هفته» به کار ببر. «۷۰ درصد» را به عدد اعشاری بنویس." data-yes="عالی! (این «یک منهای درجه» همان «مکمل» است که در درس ۴ رسمی می‌شود.)">
+    <p><b>سؤال ۳.</b> درجه‌ها را بنویس.</p>
+    <table class="t"><tr><th>جمله</th><th>درجه</th></tr>
+      <tr><th style="text-align:right">رضا با درجه 0.6 بلند است؛ درجه «کوتاه» بودنش (مثل اسلاید ۱۵)</th><td><input type="text" data-k="0.4" aria-label="درجه کوتاهی"></td></tr>
+      <tr><th style="text-align:right">پنجشنبه با درجه 0.8 آخر هفته است؛ درجه «آخر هفته نبودن» آن</th><td><input type="text" data-k="0.2" aria-label="درجه آخر هفته نبودن"></td></tr>
+      <tr><th style="text-align:right">«آقای الف ۷۰٪ عضو بزرگسالان است»؛ <span class="m">μ_adult(الف)</span></th><td><input type="text" data-k="0.7" aria-label="درجه بزرگسالی"></td></tr></table>
+    <button class="check">بررسی</button><div class="fb"></div>
+  </div>
+
+  <div class="q mcq" data-yes="درست! لطفی‌زاده منطق فازی را در ۱۹۶۵ در برکلی مطرح کرد." data-no="نه. سال طرح منطق فازی در اسلاید ۹ آمده: ۱۹۶۵.">
+    <p><b>سؤال ۴.</b> منطق فازی اولین بار در چه سالی مطرح شد؟</p>
+    <div class="opts">
+      <button><span class="m">1956</span></button>
+      <button data-ok><span class="m">1965</span></button>
+      <button><span class="m">1975</span></button>
+      <button><span class="m">1985</span></button>
+    </div><div class="fb"></div>
+  </div>
+
+  <div class="q mcq" data-yes="درست! درجه عضویت هر عدد حقیقی از ۰ تا ۱ است و خود ۰ و ۱ هم مجازند." data-no="نه. «فقط ۰ و ۱» مال مجموعه قطعی است و منفی یا بیشتر از ۱ معنا ندارد.">
+    <p><b>سؤال ۵.</b> درجه عضویت در یک مجموعه فازی چه مقدارهایی می‌تواند داشته باشد؟</p>
+    <div class="opts">
+      <button>فقط دو مقدار <span class="m">0</span> و <span class="m">1</span></button>
+      <button>هر عدد حقیقی در <span class="m">[−1, 1]</span></button>
+      <button>هر عدد حقیقی بزرگ‌تر از <span class="m">0</span></button>
+      <button data-ok>هر عدد حقیقی در <span class="m">[0, 1]</span></button>
+    </div><div class="fb"></div>
+  </div>
+
+  <div class="q mcq" data-yes="درست! این توجیه اول اسلاید ۱۲ است. توجیه دوم: فرمول‌بندی سیستماتیک دانش بشری برای سیستم‌های مهندسی." data-no="نه. اسلاید ۱۲ دو توجیه دارد: پیچیدگی دنیای واقعی (پس توصیف تقریبی لازم است) و فرمول‌بندی دانش بشری برای سیستم‌های مهندسی.">
+    <p><b>سؤال ۶.</b> کدام جمله یکی از دو توجیه اسلاید برای نظریه سیستم‌های فازی است؟</p>
+    <div class="opts">
+      <button>کامپیوترها فقط با صفر و یک کار می‌کنند</button>
+      <button>منطق کلاسیک برای مسئله‌های ساده کند است</button>
+      <button data-ok>دنیای واقعی برای توصیف دقیق خیلی پیچیده است</button>
+      <button>داده‌های اندازه‌گیری همیشه کاملاً دقیق هستند</button>
+    </div><div class="fb"></div>
+  </div>
+
+  <div class="q mcq" data-yes="درست! اگر در نظریه فازی فقط ۰ و ۱ را مجاز کنیم، به نظریه کلاسیک برمی‌گردیم؛ پس فازی تعمیم کلاسیک است." data-no="نه. اسلاید ۱۴: نظریه مجموعه‌های فازی «تعمیمی» از نظریه کلاسیک مجموعه‌هاست.">
+    <p><b>سؤال ۷.</b> نظریه مجموعه‌های فازی نسبت به نظریه کلاسیک مجموعه‌ها چیست؟</p>
+    <div class="opts">
+      <button data-ok>تعمیمی از آن</button>
+      <button>حالت خاصی از آن</button>
+      <button>کاملاً مخالف آن</button>
+      <button>بی‌ارتباط با آن</button>
+    </div><div class="fb"></div>
+  </div>
+
+  <div class="q mcq" data-yes="درست! پنجشنبه نه کاملاً آخر هفته است نه کاملاً نیست؛ اسلاید ۱۸ به آن ۰٫۸ می‌دهد." data-no="نه. ۰ و ۱ جواب قطعی‌اند. اسلاید ۱۸ برای پنجشنبه یک عدد بین آن دو می‌دهد.">
+    <p><b>سؤال ۸.</b> در مثال اسلاید ۱۸، جواب فازی سؤال «آیا پنجشنبه آخر هفته است؟» چیست؟</p>
+    <div class="opts">
+      <button><span class="m">0.0</span></button>
+      <button><span class="m">0.2</span></button>
+      <button data-ok><span class="m">0.8</span></button>
+      <button><span class="m">1.0</span></button>
+    </div><div class="fb"></div>
+  </div>
+</div></section>
+
+<!-- ===== 5. SUMMARY ===== -->
+<section class="sec"><p class="lab">۵. جمع‌بندی — همین را به خاطر بسپار</p>
+<div class="soft"><ul>
+  <li><b>قطعی (کلاسیک):</b> عضویت فقط ۰ یا ۱. <b>فازی:</b> درجه عضویت هر عددی در <span class="m">[0, 1]</span>.</li>
+  <li><b>تابع عضویت</b> <span class="m">μ_A(x)</span> هر <span class="m">x</span> را به عددی بین ۰ و ۱ می‌برد: ۰ یعنی کاملاً بیرون، ۱ یعنی کاملاً داخل. می‌تواند گسسته یا پیوسته باشد.</li>
+  <li>نظریه فازی <b>تعمیم</b> نظریه کلاسیک است؛ منطق فازی بر «درستی نسبی» تکیه دارد.</li>
+  <li>لطفی‌زاده، ۱۹۶۵، برکلی. «فازی» یعنی غیردقیق، ناواضح، مبهم.</li>
+  <li>دو توجیه: (۱) دنیای واقعی برای توصیف دقیق خیلی پیچیده است ← توصیف تقریبی؛ (۲) فرمول‌بندی سیستماتیک دانش بشری برای سیستم‌های مهندسی.</li>
+  <li>عدد درجه به تابع عضویت انتخاب‌شده بستگی دارد (۰٫۶ در اسلاید ۱۵، ۰٫۷۵ در اسلاید ۱۹ برای قد مشابه).</li>
+</ul></div></section>
+
+<!-- ===== 6. SOURCE + ASK ===== -->
+<section class="sec"><p class="lab">منبع اصلی</p>
+<p>جزوه درس، اسلایدهای ۷ تا ۲۲ (صفحه‌های PDF) — به‌خصوص ۹ (تاریخچه)، ۱۲ (دو توجیه)، ۱۵ (قد ۱۷۵)، ۱۸ (آخر هفته)، ۱۹ (۷۰٪ بزرگسال)، ۲۱ (منحنی قطعی و فازی)، ۲۲ (دمای گرم) · <a href="https://doi.org/10.1016/S0019-9958(65)90241-X">L. A. Zadeh, “Fuzzy Sets”, Information and Control, 1965</a> (مقاله پایه‌گذار؛ تعریف اصلی تابع عضویت)</p>
+<p class="ask">جایی مبهم بود؟ همین حالا در چت از من (Claude) بپرس — معلم تو هستم و می‌توانم مثال بیشتری بسازم.</p>
+<p><a href="../reference/cheatsheet.html">برگه فرمول‌ها</a> · <a href="../reference/glossary.html">واژه‌نامه</a></p>
+</section>
+
+<div class="nav"><a href="../index.html">← فهرست درس‌ها</a><a href="0002-writing-fuzzy-sets.html">درس بعد: نوشتن و خواندن یک مجموعه فازی →</a></div>
+</main>
+
+<script>
+/* ===== SHARED JS — copy verbatim into every lesson ===== */
+(function(){
+function norm(s){return s.trim().replace(/[۰-۹]/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)}).replace(/[٠-٩]/g,function(d){return '٠١٢٣٤٥٦٧٨٩'.indexOf(d)}).replace(/[٫,]/g,'.').replace(/\s+/g,'')}
+function val(s){s=norm(s);if(/^-?\d*\.?\d+\/-?\d*\.?\d+$/.test(s)){var p=s.split('/');return +p[0]/+p[1]}return s===''?NaN:+s}
+document.querySelectorAll('.practice').forEach(function(q){
+  var ins=q.querySelectorAll('input[data-k]'),fb=q.querySelector('.fb'),btn=q.querySelector('.check');
+  ins.forEach(function(i){i.addEventListener('input',function(){i.parentNode.classList.remove('ok','no');fb.textContent='';fb.className='fb'})});
+  btn.addEventListener('click',function(){
+    var empty=0,ok=0;
+    ins.forEach(function(i){var c=i.parentNode;c.classList.remove('ok','no');if(!i.value.trim()){empty++;return}
+      var v=val(i.value),k=+i.dataset.k,tol=i.dataset.tol?+i.dataset.tol:0.01;
+      if(!isNaN(v)&&Math.abs(v-k)<=tol+1e-9){ok++;c.classList.add('ok')}else c.classList.add('no')});
+    if(empty){fb.className='fb bad';fb.textContent='اول همه خانه‌ها را پر کن ('+empty+' خانه خالی است).';return}
+    if(ok===ins.length){fb.className='fb good';fb.textContent=q.dataset.yes||('عالی! همه '+ins.length+' جواب درست است.')}
+    else{fb.className='fb bad';fb.textContent=ok+' از '+ins.length+' درست. '+(q.dataset.hint||'خانه‌های قرمز را دوباره حساب کن.')}
+  });
+});
+document.querySelectorAll('.mcq').forEach(function(q){
+  var fb=q.querySelector('.fb');
+  q.querySelectorAll('.opts button').forEach(function(b){b.addEventListener('click',function(){
+    q.querySelectorAll('.opts button').forEach(function(x){x.classList.remove('ok','no')});
+    if(b.hasAttribute('data-ok')){b.classList.add('ok');fb.className='fb good';fb.textContent=q.dataset.yes||'درست!'}
+    else{b.classList.add('no');fb.className='fb bad';fb.textContent=q.dataset.no||'نه، دوباره فکر کن.'}
+  })});
+});
+document.querySelectorAll('.stepper').forEach(function(s){
+  var st=s.querySelectorAll('.st'),n=0,nx=s.querySelector('.next'),al=s.querySelector('.all');
+  function upd(){st.forEach(function(e,i){e.classList.toggle('show',i<n)});if(nx)nx.textContent=n>=st.length?'از اول':'قدم بعدی ('+n+'/'+st.length+')'}
+  if(nx)nx.addEventListener('click',function(){n=n>=st.length?0:n+1;upd()});
+  if(al)al.addEventListener('click',function(){n=st.length;upd()});
+  upd();
+});
+})();
+/* ===== END SHARED JS ===== */
+</script>
+<script>
+/* lesson 1: crisp vs fuzzy height slider */
+(function(){
+  var NS = 'http://www.w3.org/2000/svg';
+  var H0 = 140, H1 = 210;
+  function X(h){ return 50 + (h - H0) * 570 / (H1 - H0); }
+  function Y(m){ return 240 - 210 * m; }
+  function tall(h){ return Math.max(0, Math.min(1, (h - 160) / 25)); }
+  function crisp(h){ return h >= 180 ? 1 : 0; }
+  function el(tag, attrs, txt){
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    if (txt !== undefined) e.textContent = txt;
+    return e;
+  }
+  var g = document.getElementById('h-grid');
+  [0, 0.25, 0.5, 0.75, 1].forEach(function(m){
+    g.appendChild(el('line', {x1: 50, x2: 620, y1: Y(m), y2: Y(m), stroke: 'var(--grid)', 'stroke-width': 1}));
+    g.appendChild(el('text', {x: 42, y: Y(m) + 4, 'text-anchor': 'end'}, String(m)));
+  });
+  for (var h = 140; h <= 210; h += 10){
+    g.appendChild(el('line', {x1: X(h), x2: X(h), y1: 240, y2: 246, stroke: 'var(--text-3)', 'stroke-width': 1}));
+    g.appendChild(el('text', {x: X(h), y: 262, 'text-anchor': 'middle'}, String(h)));
+  }
+  g.appendChild(el('line', {x1: 50, x2: 620, y1: 240, y2: 240, stroke: 'var(--text-3)', 'stroke-width': 1}));
+  g.appendChild(el('text', {x: 16, y: 22}, 'μ'));
+
+  document.getElementById('h-crisp').setAttribute('d',
+    'M' + X(140) + ' ' + Y(0) + ' L' + X(180) + ' ' + Y(0) + ' L' + X(180) + ' ' + Y(1) + ' L' + X(210) + ' ' + Y(1));
+  document.getElementById('h-fuzzy').setAttribute('d',
+    'M' + X(140) + ' ' + Y(0) + ' L' + X(160) + ' ' + Y(0) + ' L' + X(185) + ' ' + Y(1) + ' L' + X(210) + ' ' + Y(1));
+  document.getElementById('h-short').setAttribute('d',
+    'M' + X(140) + ' ' + Y(1) + ' L' + X(160) + ' ' + Y(1) + ' L' + X(185) + ' ' + Y(0) + ' L' + X(210) + ' ' + Y(0));
+
+  var inp = document.getElementById('h-in'), showShort = false;
+  function f2(v){ return v.toFixed(2); }
+  function upd(){
+    var h = +inp.value, c = crisp(h), t = tall(h), s = 1 - t;
+    document.getElementById('h-val').textContent = h;
+    var ln = document.getElementById('h-line'); ln.setAttribute('x1', X(h)); ln.setAttribute('x2', X(h));
+    var dc = document.getElementById('h-dc'); dc.setAttribute('cx', X(h)); dc.setAttribute('cy', Y(c));
+    var df = document.getElementById('h-df'); df.setAttribute('cx', X(h)); df.setAttribute('cy', Y(t));
+    var ds = document.getElementById('h-ds'); ds.setAttribute('cx', X(h)); ds.setAttribute('cy', Y(s));
+    document.getElementById('h-rc').textContent = c + (c ? '  (بله)' : '  (نه)');
+    document.getElementById('h-rf').textContent = f2(t);
+    document.getElementById('h-rs').textContent = f2(s);
+    var h2 = h + 1, c2 = crisp(h2), t2 = tall(h2);
+    var msg;
+    if (h >= H1) msg = 'قد ' + h + ': از نظر قطعی بلند است (۱) و از نظر فازی درجه ' + f2(t) + ' دارد.';
+    else msg = 'اگر این آدم فقط ۱ سانتی‌متر بلندتر بود (' + h2 + '): جواب قطعی از ' + c + ' به ' + c2 +
+      (c === c2 ? ' (بدون تغییر)' : ' (پرش کامل!)') + ' می‌رفت، و درجه فازی از ' + f2(t) + ' به ' + f2(t2) + '.';
+    document.getElementById('h-story').textContent = msg;
+  }
+  inp.addEventListener('input', upd);
+  document.querySelectorAll('button[data-h]').forEach(function(b){
+    b.addEventListener('click', function(){ inp.value = b.getAttribute('data-h'); upd(); });
+  });
+  document.getElementById('h-tog').addEventListener('click', function(){
+    showShort = !showShort;
+    this.classList.toggle('on', showShort);
+    this.textContent = showShort ? 'پنهان کردن «کوتاه»' : 'نمایش «کوتاه» هم';
+    ['h-short', 'h-ds', 'h-leg-s'].forEach(function(id){ document.getElementById(id).style.display = showShort ? '' : 'none'; });
+  });
+  upd();
+})();
+</script>
+</body>
+</html>

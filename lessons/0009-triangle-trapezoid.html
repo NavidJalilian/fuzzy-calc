@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>درس ۹ — توابع عضویت مثلثی و ذوزنقه‌ای</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ===== SHARED STYLE — copy verbatim into every lesson, do not edit per lesson ===== */
+:root{--bg:#fbfaf7;--surface:#ffffff;--surface-1:#f3f1ec;--text:#1f1e1c;--text-2:#5f5e5a;--text-3:#888780;--border:#e3e0d8;--border-strong:#c9c6bc;
+--accent:#534AB7;--accent-bg:#EEEDFE;--ok:#3B6D11;--ok-bg:#EAF3DE;--bad:#A32D2D;--bad-bg:#FCEBEB;--warn:#854F0B;--warn-bg:#FAEEDA;
+--c1:#7F77DD;--c2:#1D9E75;--c3:#EF9F27;--c4:#D4537E;--grid:#e3e0d8}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1a1a19;--surface:#232322;--surface-1:#2c2c2a;--text:#ecebe6;--text-2:#b4b2a9;--text-3:#888780;--border:#3a3a37;--border-strong:#55554f;
+--accent:#AFA9EC;--accent-bg:#26215C;--ok:#97C459;--ok-bg:#173404;--bad:#F09595;--bad-bg:#501313;--warn:#FAC775;--warn-bg:#412402;--grid:#3a3a37}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Vazirmatn,Tahoma,sans-serif;font-size:16px;line-height:1.95}
+main{max-width:760px;margin:0 auto;padding:24px 16px 64px}
+a{color:var(--accent)}
+h1{font-size:26px;font-weight:700;line-height:1.5;margin:6px 0 6px}
+h2{font-size:19px;font-weight:500;margin:0 0 8px}
+h3{font-size:16px;font-weight:500;margin:12px 0 4px}
+p{margin:0 0 10px}
+.top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:13px;color:var(--text-2)}
+.goal{color:var(--text-2);margin-bottom:22px}
+.sec{margin:0 0 28px}
+.lab{font-size:13px;color:var(--text-3);margin:0 0 4px;letter-spacing:0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.soft{background:var(--surface-1);border-radius:12px;padding:12px 14px}
+.m{direction:ltr;unicode-bidi:isolate;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14.5px;white-space:nowrap}
+@media (max-width:700px){.m{white-space:normal}}
+.mb{direction:ltr;text-align:left;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14.5px;background:var(--surface-1);border-radius:8px;padding:8px 12px;margin:6px 0;overflow-x:auto;line-height:1.8}
+.en{direction:ltr;unicode-bidi:isolate;font-size:13px;color:var(--text-2)}
+b,strong{font-weight:500}
+.key{background:var(--warn-bg);color:var(--warn);border-radius:6px;padding:0 6px}
+.tip{border-right:3px solid var(--accent);background:var(--accent-bg);padding:8px 12px;border-radius:0;margin:8px 0}
+.trap{border-right:3px solid var(--bad);background:var(--bad-bg);padding:8px 12px;border-radius:0;margin:8px 0}
+button{font-family:inherit;font-size:14px;background:var(--surface);color:var(--text);border:1px solid var(--border-strong);border-radius:8px;padding:5px 14px;cursor:pointer}
+button:hover{background:var(--surface-1)}
+button.on{background:var(--accent-bg);border-color:var(--accent);color:var(--accent)}
+input[type=text]{font-family:inherit;font-size:15px;direction:ltr;text-align:center;width:72px;height:34px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text)}
+input[type=range]{width:100%;accent-color:var(--accent);direction:ltr}
+table.t{border-collapse:collapse;direction:ltr;font-size:14.5px;margin:6px 0;display:block;max-width:100%;overflow-x:auto}
+table.t>tbody,table.t>thead{display:table;width:100%}
+table.t th,table.t td{border:1px solid var(--border);padding:5px 6px;text-align:center;font-weight:400}
+table.t th{background:var(--surface-1)}
+.ok{background:var(--ok-bg)!important}.no{background:var(--bad-bg)!important}
+.fb{font-size:14px;margin-top:8px;min-height:1em}.fb.good{color:var(--ok)}.fb.bad{color:var(--bad)}
+.q{margin:0 0 18px}
+.mcq .opts{display:grid;gap:6px;margin-top:6px}
+.mcq .opts button{text-align:right;padding:7px 12px}
+.stepper .st{display:none;padding:6px 0;border-bottom:1px dashed var(--border)}
+.stepper .st.show{display:block}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+svg{max-width:100%;height:auto;direction:ltr}
+svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12px}
+.nav{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:14px;border-top:1px solid var(--border);padding-top:14px;margin-top:28px}
+.ask{font-size:14px;color:var(--text-2)}
+@media print{body{background:#fff}.card,.soft{break-inside:avoid}.stepper .st{display:block}button{display:none}}
+/* ===== END SHARED STYLE ===== */
+</style>
+<style>
+/* lesson 9 only */
+.ctl{display:grid;grid-template-columns:auto 1fr auto;gap:2px 10px;align-items:center;margin-top:8px}
+.ctl label{font-size:14px;color:var(--text-2)}
+.ctl output{direction:ltr;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14px;min-width:34px;text-align:left}
+.ctl .hide{display:none}
+#readout{white-space:normal}
+.mb.pre{white-space:pre}
+</style>
+</head>
+<body>
+<main>
+<div class="top"><a href="../index.html">← فهرست درس‌ها</a><span>درس ۹ از ۱۱ · فصل ۳ · حدود ۱۲ دقیقه</span></div>
+<h1>توابع عضویت مثلثی و ذوزنقه‌ای</h1>
+<p class="goal">هدف: بعد از این درس می‌توانی با داشتن گوشه‌های یک مثلث <span class="m">[a b c]</span> یا ذوزنقه <span class="m">[a b c d]</span>، مقدار <span class="m">μ(x)</span> را برای هر x با دست حساب کنی، گوشه‌ها را از روی شکل بخوانی و دستور متلب آن را بنویسی.</p>
+
+<!-- ===== 1. IDEA ===== -->
+<section class="sec"><p class="lab">۱. ایده</p>
+<div class="card">
+  <p><b>تابع عضویت</b> <span class="en">(membership function)</span> همان قاعده‌ای است که به هر x یک درجه عضویت <span class="m">μ(x)</span> می‌دهد. طبق اسلاید ۸۲، شکلش هر منحنی دلخواهی می‌تواند باشد؛ <span class="key">تنها شرط این است که مقدارش بین ۰ و ۱ تغییر کند</span>.</p>
+  <p>نرم‌افزار متلب <span class="en">(MATLAB)</span> ۱۱ نوع تابع عضویت آماده دارد که از چند پایه ساخته شده‌اند: توابع تکه‌ای خطی، تابع گاوسی، منحنی سیگموئید و منحنی‌های چندجمله‌ای درجه دوم و سوم. طبق قرارداد، نام همه آن‌ها به <span class="m">mf</span> ختم می‌شود (مخفف membership function). در این درس دو تابع <b>تکه‌ای خطی</b> را می‌بینیم: یعنی شکل از چند پاره‌خط صاف ساخته شده است.</p>
+
+  <h3>۱) مثلثی <span class="en">(Triangular)</span> — دستور <span class="m">trimf</span></h3>
+  <p>ساده‌ترین تابع عضویت. سه نقطه <span class="m">{a,b,c}</span> روی محور x داریم و سه گوشه مثلث <span class="m">{(a,0),(b,1),(c,0)}</span> هستند: از a بالا می‌رود، در b به ۱ می‌رسد، تا c پایین می‌آید.</p>
+  <div class="mb pre">           ⎧ 0,              x ≤ a
+           ⎪ (x−a)/(b−a),    a ≤ x ≤ b
+f(x;a,b,c)=⎨ (c−x)/(c−b),    b ≤ x ≤ c
+           ⎩ 0,              c ≤ x</div>
+  <p>همین را می‌شود در یک خط هم نوشت (این شکل فشرده در اسلاید نیست؛ از مستندات MathWorks است و جواب یکسان می‌دهد):</p>
+  <div class="mb">f(x;a,b,c) = max( min( (x−a)/(b−a), (c−x)/(c−b) ), 0 )</div>
+  <p>چرا کار می‌کند؟ <span class="m">min</span> از بین «خط بالارونده» و «خط پایین‌رونده» آن که پایین‌تر است را برمی‌دارد، پس نوک مثلث ساخته می‌شود. بیرون از <span class="m">[a,c]</span> این عدد منفی می‌شود و <span class="m">max(…,0)</span> آن را صفر می‌کند.</p>
+
+  <h3>۲) ذوزنقه‌ای <span class="en">(Trapezoidal)</span> — دستور <span class="m">trapmf</span></h3>
+  <p>چهار گوشه دارد: <span class="m">{(a,0),(b,1),(c,1),(d,0)}</span>. بین b و c یک «سقف صاف» با مقدار ۱ دارد.</p>
+  <div class="mb pre">             ⎧ 0,              x ≤ a
+             ⎪ (x−a)/(b−a),    a ≤ x ≤ b
+f(x;a,b,c,d)=⎨ 1,              b ≤ x ≤ c
+             ⎪ (d−x)/(d−c),    c ≤ x ≤ d
+             ⎩ 0,              d ≤ x</div>
+  <div class="tip">ترفند حفظ کردن: <b>بالارونده</b> همیشه «فاصله x از گوشه چپ ÷ پهنای شیب چپ» است و <b>پایین‌رونده</b> «فاصله x تا گوشه راست ÷ پهنای شیب راست». مثلث همان ذوزنقه‌ای است که <span class="m">b = c</span> (سقفش به یک نقطه جمع شده).</div>
+  <div class="tip">در فرمول اسلاید، مرزها دو بار آمده‌اند (مثلاً <span class="m">x ≤ a</span> و <span class="m">a ≤ x ≤ b</span> هر دو شامل <span class="m">x = a</span> هستند). اشکالی ندارد: در نقطه مرزی هر دو تکه یک جواب می‌دهند (اینجا هر دو ۰).</div>
+</div></section>
+
+<!-- ===== 2. SEE IT ===== -->
+<section class="sec"><p class="lab">۲. ببین چه اتفاقی می‌افتد</p>
+<div class="card">
+  <p>گوشه‌ها را جابه‌جا کن و ببین شکل عوض می‌شود. بعد x را حرکت بده: تکه‌ای از فرمول که الان فعال است نارنجی می‌شود و عددها جای حروف می‌نشینند.</p>
+  <div class="row">
+    <button id="m-tri" class="on" type="button">مثلثی trimf</button>
+    <button id="m-trap" type="button">ذوزنقه‌ای trapmf</button>
+  </div>
+  <svg id="plot" viewBox="0 0 560 262" role="img" aria-labelledby="plot-t">
+    <title id="plot-t">نمودار تابع عضویت مثلثی یا ذوزنقه‌ای با نقطه x و مقدار μ(x)</title>
+    <g id="grid"></g>
+    <path id="curve" fill="none" stroke="var(--c1)" stroke-width="2.5" stroke-linejoin="round"></path>
+    <path id="active" fill="none" stroke="var(--c3)" stroke-width="5" stroke-linecap="round" opacity="0.85"></path>
+    <line id="vx" stroke="var(--c2)" stroke-dasharray="4 3" stroke-width="1.5"></line>
+    <line id="hx" stroke="var(--c2)" stroke-dasharray="4 3" stroke-width="1.5"></line>
+    <circle id="pt" r="6" fill="var(--c2)"></circle>
+    <text id="mulab" font-size="13" style="fill:var(--c2)"></text>
+    <g id="corners"></g>
+  </svg>
+  <div class="ctl">
+    <label for="s-a">a</label><input type="range" id="s-a" min="0" max="10" step="0.5"><output id="o-a"></output>
+    <label for="s-b">b</label><input type="range" id="s-b" min="0" max="10" step="0.5"><output id="o-b"></output>
+    <label for="s-c">c</label><input type="range" id="s-c" min="0" max="10" step="0.5"><output id="o-c"></output>
+    <label for="s-d" class="dd">d</label><input type="range" id="s-d" class="dd" min="0" max="10" step="0.5"><output id="o-d" class="dd"></output>
+    <label for="s-x"><b>x</b></label><input type="range" id="s-x" min="0" max="10" step="0.25"><output id="o-x"></output>
+  </div>
+  <div class="mb" id="cmd"></div>
+  <div class="mb" id="readout" aria-live="polite"></div>
+  <p style="font-size:14px;color:var(--text-2)">امتحان کن: در حالت مثلثی b را روی a بگذار — شیب چپ عمود می‌شود. در حالت ذوزنقه c را روی b بگذار — ذوزنقه مثلث می‌شود.</p>
+</div></section>
+
+<!-- ===== 3. WORKED EXAMPLE ===== -->
+<section class="sec"><p class="lab">۳. مثال حل‌شده، قدم به قدم (اسلاید ۸۴ و ۸۶)</p>
+<div class="card stepper">
+  <p>اسلاید ۸۴ در متلب می‌نویسد:</p>
+  <div class="mb pre">x=0:0.1:10;
+y=trimf(x,[3 6 8]);
+plot(x,y)
+xlabel('trimf, P=[3 6 8]')</div>
+  <p style="font-size:14px;color:var(--text-2)"><span class="m">x=0:0.1:10</span> یعنی x از ۰ تا ۱۰ با گام ۰٫۱. <span class="m">trimf(x,[3 6 8])</span> برای همه این xها μ را حساب می‌کند. حالا خودمان چند نقطه را دستی حساب می‌کنیم.</p>
+  <div class="st">قدم ۱ — گوشه‌ها را بخوان: <span class="m">a=3, b=6, c=8</span>. پس شیب چپ از ۳ تا ۶ (پهنا ۳) و شیب راست از ۶ تا ۸ (پهنا ۲).</div>
+  <div class="st">قدم ۲ — <span class="m">x = 2</span>: چون <span class="m">2 ≤ a=3</span>، بیرون مثلث است: <span class="m">μ(2) = 0</span>.</div>
+  <div class="st">قدم ۳ — <span class="m">x = 4.5</span>: بین a و b است، پس تکه بالارونده: <span class="m">(4.5−3)/(6−3) = 1.5/3 = 0.5</span>.</div>
+  <div class="st">قدم ۴ — <span class="m">x = 7</span>: بین b و c است، پس تکه پایین‌رونده: <span class="m">(8−7)/(8−6) = 1/2 = 0.5</span>. دو نقطه متفاوت، یک درجه عضویت؛ چون شیب راست تندتر است، x=7 به قله نزدیک‌تر است.</div>
+  <div class="st">قدم ۵ — همین با فرمول فشرده برای <span class="m">x = 7</span>: <span class="m">max(min((7−3)/3, (8−7)/2), 0) = max(min(1.333, 0.5), 0) = 0.5</span>. همان جواب.</div>
+  <div class="st">قدم ۶ — ذوزنقه اسلاید ۸۶، <span class="m">trapmf(x,[1 5 7 8])</span>: در <span class="m">x=3</span> بالارونده <span class="m">(3−1)/(5−1) = 0.5</span>؛ در <span class="m">x=6</span> روی سقف است، <span class="m">μ=1</span>؛ در <span class="m">x=7.5</span> پایین‌رونده <span class="m">(8−7.5)/(8−7) = 0.5</span>.</div>
+  <div class="row" style="margin-top:8px"><button class="next" type="button">قدم بعدی</button><button class="all" type="button">نمایش همه</button></div>
+</div></section>
+
+<!-- ===== 4. PRACTICE ===== -->
+<section class="sec"><p class="lab">۴. نوبت توست</p>
+<div class="card">
+  <div class="q practice" data-hint="اول ببین x در کدام بازه است: x≤3 یا 3..6 یا 6..8 یا x≥8. بالارونده (x−3)/3، پایین‌رونده (8−x)/2." data-yes="عالی! هر پنج نقطه درست است.">
+    <p><b>سؤال ۱ (مثلث اسلاید ۸۴).</b> برای <span class="m">trimf(x,[3 6 8])</span> مقدار μ را حساب کن (تا دو رقم اعشار کافی است؛ کسر هم قبول است، مثل 1/3).</p>
+    <table class="t"><tr><th>x</th><th>4</th><th>5</th><th>6</th><th>7.5</th><th>9</th></tr>
+      <tr><th>μ(x)</th><td><input type="text" data-k="0.3333" data-tol="0.01" aria-label="mu at 4"></td><td><input type="text" data-k="0.6667" data-tol="0.01" aria-label="mu at 5"></td><td><input type="text" data-k="1" aria-label="mu at 6"></td><td><input type="text" data-k="0.25" aria-label="mu at 7.5"></td><td><input type="text" data-k="0" aria-label="mu at 9"></td></tr></table>
+    <button class="check" type="button">بررسی</button><div class="fb"></div>
+  </div>
+
+  <div class="q practice" data-hint="گوشه‌ها a=1، b=5، c=7، d=8. بین ۵ و ۷ همیشه ۱. بالارونده (x−1)/4، پایین‌رونده (8−x)/1." data-yes="عالی! دقت کن شیب راست (پهنای ۱) خیلی تندتر از شیب چپ (پهنای ۴) است.">
+    <p><b>سؤال ۲ (ذوزنقه اسلاید ۸۶).</b> برای <span class="m">trapmf(x,[1 5 7 8])</span> مقدار μ را حساب کن.</p>
+    <table class="t"><tr><th>x</th><th>2</th><th>4</th><th>6</th><th>7.25</th><th>8.5</th></tr>
+      <tr><th>μ(x)</th><td><input type="text" data-k="0.25" aria-label="mu at 2"></td><td><input type="text" data-k="0.75" aria-label="mu at 4"></td><td><input type="text" data-k="1" aria-label="mu at 6"></td><td><input type="text" data-k="0.75" aria-label="mu at 7.25"></td><td><input type="text" data-k="0" aria-label="mu at 8.5"></td></tr></table>
+    <button class="check" type="button">بررسی</button><div class="fb"></div>
+  </div>
+
+  <div class="q practice" data-hint="گوشه‌ها نقطه‌هایی هستند که شکل می‌شکند: کجا از ۰ جدا می‌شود، کجا به ۱ می‌رسد، کجا از ۱ جدا می‌شود و کجا دوباره ۰ می‌شود.">
+    <p><b>سؤال ۳ (خواندن از شکل).</b> پارامترهای این ذوزنقه را بخوان تا دستور <span class="m">trapmf(x,[a b c d])</span> کامل شود.</p>
+    <svg viewBox="0 0 560 250" role="img" aria-labelledby="q3t">
+      <title id="q3t">ذوزنقه‌ای روی محور ۰ تا ۱۰ که باید گوشه‌هایش را بخوانی</title>
+      <g id="q3grid"></g>
+      <polyline points="40,220 140,220 240,30 340,30 490,220 540,220" fill="none" stroke="var(--c4)" stroke-width="2.5" stroke-linejoin="round"></polyline>
+    </svg>
+    <div class="row"><span class="m">trapmf(x,[</span>
+      <span>a=</span><input type="text" data-k="2" data-tol="0" aria-label="a">
+      <span>b=</span><input type="text" data-k="4" data-tol="0" aria-label="b">
+      <span>c=</span><input type="text" data-k="6" data-tol="0" aria-label="c">
+      <span>d=</span><input type="text" data-k="9" data-tol="0" aria-label="d"><span class="m">])</span></div>
+    <button class="check" type="button">بررسی</button><div class="fb"></div>
+  </div>
+
+  <div class="q practice" data-hint="Cold بین ۱۰ و ۳۰ پایین می‌آید: (30−x)/(30−10). Medium از ۲۵ بالا می‌رود: (x−25)/(45−25). AND = min و OR = max (درس ۴)." data-yes="عالی! این دقیقاً قدم اول تمرین ۳ است: اول μ هر مجموعه را از روی شکل حساب کن، بعد AND/OR را با min/max.">
+    <p><b>سؤال ۴ (به سبک تمرین ۳ + یادآوری درس ۴).</b> در یک کنترل‌کننده دما، «سرد» <span class="m">Cold = trapmf(x,[0 0 10 30])</span> و «متوسط» <span class="m">Medium = trimf(x,[25 45 65])</span> است. دمای <span class="m">x = 27</span> درجه است.</p>
+    <p style="font-size:14px;color:var(--text-2)">(در Cold چون <span class="m">a = b = 0</span>، شیب چپ ندارد و از ۰ تا ۱۰ مقدارش ۱ است — به این «شانه چپ» می‌گویند.)</p>
+    <table class="t"><tr><th>μ_Cold(27)</th><th>μ_Medium(27)</th><th>Cold AND Medium</th><th>Cold OR Medium</th></tr>
+      <tr><td><input type="text" data-k="0.15" aria-label="cold"></td><td><input type="text" data-k="0.1" aria-label="medium"></td><td><input type="text" data-k="0.1" aria-label="and"></td><td><input type="text" data-k="0.15" aria-label="or"></td></tr></table>
+    <button class="check" type="button">بررسی</button><div class="fb"></div>
+  </div>
+
+  <div class="q mcq" data-yes="درست! 6 بین b=5 و c=9 است، پس روی شیب پایین‌رونده‌ایم: (9−6)/(9−5) = 0.75." data-no="نه. اول ببین x=6 بین کدام دو گوشه است. b=5 و c=9، پس شیب پایین‌رونده.">
+    <p><b>سؤال ۵.</b> برای <span class="m">trimf(x,[2 5 9])</span> در <span class="m">x = 6</span> کدام تکه فرمول را استفاده می‌کنی؟</p>
+    <div class="opts">
+      <button type="button"><span class="m">(x−a)/(b−a)</span></button>
+      <button type="button"><span class="m">(b−x)/(b−a)</span></button>
+      <button type="button" data-ok><span class="m">(c−x)/(c−b)</span></button>
+      <button type="button"><span class="m">(x−b)/(c−b)</span></button>
+    </div><div class="fb"></div>
+  </div>
+
+  <div class="q mcq" data-yes="درست! trapmf برای ذوزنقه با چهار پارامتر [a b c d] است." data-no="نه. trimf سه گوشه دارد (مثلث). ذوزنقه چهار گوشه دارد و دستورش trapmf است.">
+    <p><b>سؤال ۶.</b> کدام دستور متلب یک تابع عضویت با چهار گوشه <span class="m">{(a,0),(b,1),(c,1),(d,0)}</span> می‌سازد؟</p>
+    <div class="opts">
+      <button type="button"><span class="m">trimf</span></button>
+      <button type="button" data-ok><span class="m">trapmf</span></button>
+      <button type="button"><span class="m">gaussmf</span></button>
+      <button type="button"><span class="m">sigmf</span></button>
+    </div><div class="fb"></div>
+  </div>
+
+  <div class="q mcq" data-yes="درست! وقتی b = c، سقف صاف به یک نقطه جمع می‌شود و ذوزنقه همان مثلث است." data-no="نه. سقف ذوزنقه بین b و c است. اگر این دو یکی شوند، سقف یک نقطه (نوک مثلث) می‌شود.">
+    <p><b>سؤال ۷.</b> ذوزنقه <span class="m">trapmf(x,[a b c d])</span> در چه حالتی دقیقاً همان مثلث است؟</p>
+    <div class="opts">
+      <button type="button"><span class="m">a = b</span></button>
+      <button type="button"><span class="m">c = d</span></button>
+      <button type="button"><span class="m">a = d</span></button>
+      <button type="button" data-ok><span class="m">b = c</span></button>
+    </div><div class="fb"></div>
+  </div>
+
+  <div class="q mcq" data-yes="درست! طبق اسلاید ۸۲ تنها شرط این است که مقدار بین ۰ و ۱ بماند؛ ۱٫۲ این شرط را می‌شکند." data-no="نه. شکل می‌تواند نامتقارن باشد، به ۱ نرسد یا همه‌جا مثبت باشد. تنها شرط اسلاید ۸۲: مقدار بین ۰ و ۱.">
+    <p><b>سؤال ۸.</b> کدام ویژگی باعث می‌شود یک منحنی <b>نتواند</b> تابع عضویت باشد؟</p>
+    <div class="opts">
+      <button type="button" data-ok>جایی مقدارش به ۱٫۲ برسد</button>
+      <button type="button">شکلش نسبت به قله نامتقارن باشد</button>
+      <button type="button">بیشترین مقدارش کمتر از ۱ باشد</button>
+      <button type="button">در هیچ نقطه‌ای صفر نشود</button>
+    </div><div class="fb"></div>
+  </div>
+</div></section>
+
+<!-- ===== 5. SUMMARY ===== -->
+<section class="sec"><p class="lab">۵. جمع‌بندی — همین را به خاطر بسپار</p>
+<div class="soft"><ul>
+  <li>تنها شرط تابع عضویت: مقدارش بین ۰ و ۱ باشد. نام همه توابع عضویت متلب به <span class="m">mf</span> ختم می‌شود.</li>
+  <li>مثلثی: <span class="m">trimf(x,[a b c])</span>، گوشه‌ها <span class="m">(a,0),(b,1),(c,0)</span>. فشرده: <span class="m">max(min((x−a)/(b−a),(c−x)/(c−b)),0)</span>.</li>
+  <li>ذوزنقه‌ای: <span class="m">trapmf(x,[a b c d])</span>، گوشه‌ها <span class="m">(a,0),(b,1),(c,1),(d,0)</span>؛ بین b و c مقدار ۱.</li>
+  <li>روش حل: (۱) بازه x را پیدا کن، (۲) تکه درست را بردار: بالارونده <span class="m">(x−a)/(b−a)</span>، پایین‌رونده <span class="m">(c−x)/(c−b)</span> یا <span class="m">(d−x)/(d−c)</span>، (۳) عدد بگذار.</li>
+  <li>مثال‌های اسلاید: <span class="m">trimf(x,[3 6 8])</span> و <span class="m">trapmf(x,[1 5 7 8])</span> روی <span class="m">x=0:0.1:10</span>.</li>
+</ul></div></section>
+
+<!-- ===== 6. SOURCE + ASK ===== -->
+<section class="sec"><p class="lab">منبع اصلی</p>
+<p>جزوه درس، اسلایدهای ۸۲ تا ۸۶ (فصل ۳) · <a href="https://www.mathworks.com/help/fuzzy/membership-functions.html">MathWorks Fuzzy Logic Toolbox — Membership Functions</a> (منبع شکل فشرده فرمول مثلث)</p>
+<p class="ask">جایی مبهم بود؟ همین حالا در چت از من (Claude) بپرس — معلم تو هستم و می‌توانم مثال بیشتری بسازم.</p>
+<p><a href="../reference/cheatsheet.html">برگه فرمول‌ها</a> · <a href="../reference/glossary.html">واژه‌نامه</a></p>
+</section>
+
+<div class="nav"><a href="0008-max-product-defuzzify.html">← درس قبل: استنتاج max-product و غیرفازی‌سازی</a><a href="0010-gaussian-bell-sigmoid.html">درس بعد: توابع گاوسی، زنگوله‌ای، سیگموئید و چندجمله‌ای →</a></div>
+</main>
+
+<script>
+/* ===== SHARED JS — copy verbatim into every lesson ===== */
+(function(){
+function norm(s){return s.trim().replace(/[۰-۹]/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)}).replace(/[٠-٩]/g,function(d){return '٠١٢٣٤٥٦٧٨٩'.indexOf(d)}).replace(/[٫,]/g,'.').replace(/\s+/g,'')}
+function val(s){s=norm(s);if(/^-?\d*\.?\d+\/-?\d*\.?\d+$/.test(s)){var p=s.split('/');return +p[0]/+p[1]}return s===''?NaN:+s}
+document.querySelectorAll('.practice').forEach(function(q){
+  var ins=q.querySelectorAll('input[data-k]'),fb=q.querySelector('.fb'),btn=q.querySelector('.check');
+  ins.forEach(function(i){i.addEventListener('input',function(){i.parentNode.classList.remove('ok','no');fb.textContent='';fb.className='fb'})});
+  btn.addEventListener('click',function(){
+    var empty=0,ok=0;
+    ins.forEach(function(i){var c=i.parentNode;c.classList.remove('ok','no');if(!i.value.trim()){empty++;return}
+      var v=val(i.value),k=+i.dataset.k,tol=i.dataset.tol?+i.dataset.tol:0.01;
+      if(!isNaN(v)&&Math.abs(v-k)<=tol+1e-9){ok++;c.classList.add('ok')}else c.classList.add('no')});
+    if(empty){fb.className='fb bad';fb.textContent='اول همه خانه‌ها را پر کن ('+empty+' خانه خالی است).';return}
+    if(ok===ins.length){fb.className='fb good';fb.textContent=q.dataset.yes||('عالی! همه '+ins.length+' جواب درست است.')}
+    else{fb.className='fb bad';fb.textContent=ok+' از '+ins.length+' درست. '+(q.dataset.hint||'خانه‌های قرمز را دوباره حساب کن.')}
+  });
+});
+document.querySelectorAll('.mcq').forEach(function(q){
+  var fb=q.querySelector('.fb');
+  q.querySelectorAll('.opts button').forEach(function(b){b.addEventListener('click',function(){
+    q.querySelectorAll('.opts button').forEach(function(x){x.classList.remove('ok','no')});
+    if(b.hasAttribute('data-ok')){b.classList.add('ok');fb.className='fb good';fb.textContent=q.dataset.yes||'درست!'}
+    else{b.classList.add('no');fb.className='fb bad';fb.textContent=q.dataset.no||'نه، دوباره فکر کن.'}
+  })});
+});
+document.querySelectorAll('.stepper').forEach(function(s){
+  var st=s.querySelectorAll('.st'),n=0,nx=s.querySelector('.next'),al=s.querySelector('.all');
+  function upd(){st.forEach(function(e,i){e.classList.toggle('show',i<n)});if(nx)nx.textContent=n>=st.length?'از اول':'قدم بعدی ('+n+'/'+st.length+')'}
+  if(nx)nx.addEventListener('click',function(){n=n>=st.length?0:n+1;upd()});
+  if(al)al.addEventListener('click',function(){n=st.length;upd()});
+  upd();
+});
+})();
+/* ===== END SHARED JS ===== */
+</script>
+<script>
+/* ===== lesson 9: interactive triangle / trapezoid ===== */
+(function(){
+var NS='http://www.w3.org/2000/svg';
+function X(x){return 40+50*x}
+function Y(m){return 220-190*m}
+function el(tag,attrs,txt){var e=document.createElementNS(NS,tag);for(var k in attrs)e.setAttribute(k,attrs[k]);if(txt!=null)e.textContent=txt;return e}
+function grid(g){
+  for(var i=0;i<=10;i++){g.appendChild(el('line',{x1:X(i),x2:X(i),y1:Y(0),y2:Y(1),stroke:'var(--grid)'}));g.appendChild(el('text',{x:X(i),y:236,'text-anchor':'middle'},i))}
+  [0,0.25,0.5,0.75,1].forEach(function(m){g.appendChild(el('line',{x1:X(0),x2:X(10),y1:Y(m),y2:Y(m),stroke:'var(--grid)'}));g.appendChild(el('text',{x:34,y:Y(m)+4,'text-anchor':'end'},m))});
+  g.appendChild(el('line',{x1:X(0),x2:X(10),y1:Y(0),y2:Y(0),stroke:'var(--border-strong)','stroke-width':1.5}));
+}
+grid(document.getElementById('grid'));
+grid(document.getElementById('q3grid'));
+
+var mode='tri',P={},x=4.5,KEYS=['a','b','c','d'];
+var PRE={tri:{a:3,b:6,c:8,d:8},trap:{a:1,b:5,c:7,d:8}};
+function keys(){return mode==='tri'?KEYS.slice(0,3):KEYS}
+function f(n){return String(+(+n).toFixed(3))}
+function setMode(m){
+  mode=m;P=JSON.parse(JSON.stringify(PRE[m]));x=m==='tri'?4.5:3;
+  document.getElementById('m-tri').classList.toggle('on',m==='tri');
+  document.getElementById('m-trap').classList.toggle('on',m==='trap');
+  document.querySelectorAll('.dd').forEach(function(e){e.classList.toggle('hide',m==='tri')});
+  KEYS.forEach(function(k){document.getElementById('s-'+k).value=P[k]});
+  document.getElementById('s-x').value=x;
+  draw();
+}
+/* which piece is active + mu */
+function evalMu(){
+  var a=P.a,b=P.b,c=P.c,d=P.d;
+  if(mode==='tri'){
+    if(x===b)return{i:-1,mu:1,t:'x = b = '+f(b)+'  →  μ = 1 (نوک مثلث)'};
+    if(x<=a)return{i:0,mu:0,t:'x ≤ a  ('+f(x)+' ≤ '+f(a)+')  →  μ = 0'};
+    if(x>=c)return{i:3,mu:0,t:'x ≥ c  ('+f(x)+' ≥ '+f(c)+')  →  μ = 0'};
+    if(x<b){var m=(x-a)/(b-a);return{i:1,mu:m,t:'a ≤ x ≤ b  →  μ = (x−a)/(b−a) = ('+f(x)+'−'+f(a)+')/('+f(b)+'−'+f(a)+') = '+f(x-a)+'/'+f(b-a)+' = '+f(m)}}
+    var m2=(c-x)/(c-b);return{i:2,mu:m2,t:'b ≤ x ≤ c  →  μ = (c−x)/(c−b) = ('+f(c)+'−'+f(x)+')/('+f(c)+'−'+f(b)+') = '+f(c-x)+'/'+f(c-b)+' = '+f(m2)};
+  }
+  if(x>=b&&x<=c)return{i:2,mu:1,t:'b ≤ x ≤ c  ('+f(b)+' ≤ '+f(x)+' ≤ '+f(c)+')  →  μ = 1 (سقف)'};
+  if(x<=a)return{i:0,mu:0,t:'x ≤ a  ('+f(x)+' ≤ '+f(a)+')  →  μ = 0'};
+  if(x>=d)return{i:4,mu:0,t:'x ≥ d  ('+f(x)+' ≥ '+f(d)+')  →  μ = 0'};
+  if(x<b){var r=(x-a)/(b-a);return{i:1,mu:r,t:'a ≤ x ≤ b  →  μ = (x−a)/(b−a) = ('+f(x)+'−'+f(a)+')/('+f(b)+'−'+f(a)+') = '+f(x-a)+'/'+f(b-a)+' = '+f(r)}}
+  var s=(d-x)/(d-c);return{i:3,mu:s,t:'c ≤ x ≤ d  →  μ = (d−x)/(d−c) = ('+f(d)+'−'+f(x)+')/('+f(d)+'−'+f(c)+') = '+f(d-x)+'/'+f(d-c)+' = '+f(s)};
+}
+function pts(){
+  var a=P.a,b=P.b,c=P.c,d=P.d;
+  return mode==='tri'?[[0,0],[a,0],[b,1],[c,0],[10,0]]:[[0,0],[a,0],[b,1],[c,1],[d,0],[10,0]];
+}
+function pathOf(p){return p.map(function(q,i){return(i?'L':'M')+X(q[0])+' '+Y(q[1])}).join(' ')}
+function draw(){
+  var p=pts(),r=evalMu();
+  document.getElementById('curve').setAttribute('d',pathOf(p));
+  document.getElementById('active').setAttribute('d',r.i>=0?pathOf([p[r.i],p[r.i+1]]):'');
+  var px=X(x),py=Y(r.mu);
+  var vx=document.getElementById('vx'),hx=document.getElementById('hx'),pt=document.getElementById('pt'),lb=document.getElementById('mulab');
+  vx.setAttribute('x1',px);vx.setAttribute('x2',px);vx.setAttribute('y1',Y(0));vx.setAttribute('y2',py);
+  hx.setAttribute('x1',X(0));hx.setAttribute('x2',px);hx.setAttribute('y1',py);hx.setAttribute('y2',py);
+  pt.setAttribute('cx',px);pt.setAttribute('cy',py);
+  lb.setAttribute('x',Math.min(px+8,470));lb.setAttribute('y',Math.max(py-10,16));lb.textContent='μ('+f(x)+') = '+f(r.mu);
+  var cg=document.getElementById('corners');cg.innerHTML='';
+  var used={};
+  keys().forEach(function(k){var v=P[k],n=used[v]||0;used[v]=n+1;
+    cg.appendChild(el('text',{x:X(v)+n*10,y:254,'text-anchor':'middle','font-size':14,style:'fill:var(--accent);font-weight:500'},k))});
+  keys().forEach(function(k){document.getElementById('o-'+k).textContent=f(P[k])});
+  document.getElementById('o-x').textContent=f(x);
+  document.getElementById('cmd').textContent=mode==='tri'?('trimf(x,['+f(P.a)+' '+f(P.b)+' '+f(P.c)+'])'):('trapmf(x,['+f(P.a)+' '+f(P.b)+' '+f(P.c)+' '+f(P.d)+'])');
+  var t=r.t;
+  if(mode==='tri'&&P.a<P.b&&P.b<P.c){
+    var u=(x-P.a)/(P.b-P.a),w=(P.c-x)/(P.c-P.b);
+    t+='\nفشرده: max(min('+f(u)+', '+f(w)+'), 0) = '+f(Math.max(Math.min(u,w),0));
+  }
+  var ro=document.getElementById('readout');ro.textContent='';
+  t.split('\n').forEach(function(line,i){if(i)ro.appendChild(document.createElement('br'));ro.appendChild(document.createTextNode(line))});
+}
+KEYS.forEach(function(k){
+  document.getElementById('s-'+k).addEventListener('input',function(e){
+    var v=+e.target.value,ks=keys(),j=ks.indexOf(k);if(j<0)return;
+    P[k]=v;
+    for(var q=j+1;q<ks.length;q++){if(P[ks[q]]<v){P[ks[q]]=v;document.getElementById('s-'+ks[q]).value=v}}
+    for(var q2=0;q2<j;q2++){if(P[ks[q2]]>v){P[ks[q2]]=v;document.getElementById('s-'+ks[q2]).value=v}}
+    if(mode==='tri')P.d=P.c;
+    draw();
+  });
+});
+document.getElementById('s-x').addEventListener('input',function(e){x=+e.target.value;draw()});
+document.getElementById('m-tri').addEventListener('click',function(){setMode('tri')});
+document.getElementById('m-trap').addEventListener('click',function(){setMode('trap')});
+setMode('tri');
+})();
+</script>
+</body>
+</html>

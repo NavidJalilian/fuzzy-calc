@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>برگه فرمول‌های منطق فازی — فصل ۱ تا ۳</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ===== SHARED STYLE — copy verbatim into every lesson, do not edit per lesson ===== */
+:root{--bg:#fbfaf7;--surface:#ffffff;--surface-1:#f3f1ec;--text:#1f1e1c;--text-2:#5f5e5a;--text-3:#888780;--border:#e3e0d8;--border-strong:#c9c6bc;
+--accent:#534AB7;--accent-bg:#EEEDFE;--ok:#3B6D11;--ok-bg:#EAF3DE;--bad:#A32D2D;--bad-bg:#FCEBEB;--warn:#854F0B;--warn-bg:#FAEEDA;
+--c1:#7F77DD;--c2:#1D9E75;--c3:#EF9F27;--c4:#D4537E;--grid:#e3e0d8}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1a1a19;--surface:#232322;--surface-1:#2c2c2a;--text:#ecebe6;--text-2:#b4b2a9;--text-3:#888780;--border:#3a3a37;--border-strong:#55554f;
+--accent:#AFA9EC;--accent-bg:#26215C;--ok:#97C459;--ok-bg:#173404;--bad:#F09595;--bad-bg:#501313;--warn:#FAC775;--warn-bg:#412402;--grid:#3a3a37}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Vazirmatn,Tahoma,sans-serif;font-size:16px;line-height:1.95}
+main{max-width:760px;margin:0 auto;padding:24px 16px 64px}
+a{color:var(--accent)}
+h1{font-size:26px;font-weight:700;line-height:1.5;margin:6px 0 6px}
+h2{font-size:19px;font-weight:500;margin:0 0 8px}
+h3{font-size:16px;font-weight:500;margin:12px 0 4px}
+p{margin:0 0 10px}
+.top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:13px;color:var(--text-2)}
+.goal{color:var(--text-2);margin-bottom:22px}
+.sec{margin:0 0 28px}
+.lab{font-size:13px;color:var(--text-3);margin:0 0 4px;letter-spacing:0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.soft{background:var(--surface-1);border-radius:12px;padding:12px 14px}
+.m{direction:ltr;unicode-bidi:isolate;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14.5px;white-space:nowrap}
+@media (max-width:700px){.m{white-space:normal}}
+.mb{direction:ltr;text-align:left;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14.5px;background:var(--surface-1);border-radius:8px;padding:8px 12px;margin:6px 0;overflow-x:auto;line-height:1.8}
+.en{direction:ltr;unicode-bidi:isolate;font-size:13px;color:var(--text-2)}
+b,strong{font-weight:500}
+.key{background:var(--warn-bg);color:var(--warn);border-radius:6px;padding:0 6px}
+.tip{border-right:3px solid var(--accent);background:var(--accent-bg);padding:8px 12px;border-radius:0;margin:8px 0}
+.trap{border-right:3px solid var(--bad);background:var(--bad-bg);padding:8px 12px;border-radius:0;margin:8px 0}
+button{font-family:inherit;font-size:14px;background:var(--surface);color:var(--text);border:1px solid var(--border-strong);border-radius:8px;padding:5px 14px;cursor:pointer}
+button:hover{background:var(--surface-1)}
+button.on{background:var(--accent-bg);border-color:var(--accent);color:var(--accent)}
+input[type=text]{font-family:inherit;font-size:15px;direction:ltr;text-align:center;width:72px;height:34px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text)}
+input[type=range]{width:100%;accent-color:var(--accent);direction:ltr}
+table.t{border-collapse:collapse;direction:ltr;font-size:14.5px;margin:6px 0;display:block;max-width:100%;overflow-x:auto}
+table.t>tbody,table.t>thead{display:table;width:100%}
+table.t th,table.t td{border:1px solid var(--border);padding:5px 6px;text-align:center;font-weight:400}
+table.t th{background:var(--surface-1)}
+.ok{background:var(--ok-bg)!important}.no{background:var(--bad-bg)!important}
+.fb{font-size:14px;margin-top:8px;min-height:1em}.fb.good{color:var(--ok)}.fb.bad{color:var(--bad)}
+.q{margin:0 0 18px}
+.mcq .opts{display:grid;gap:6px;margin-top:6px}
+.mcq .opts button{text-align:right;padding:7px 12px}
+.stepper .st{display:none;padding:6px 0;border-bottom:1px dashed var(--border)}
+.stepper .st.show{display:block}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+svg{max-width:100%;height:auto;direction:ltr}
+svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12px}
+.nav{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:14px;border-top:1px solid var(--border);padding-top:14px;margin-top:28px}
+.ask{font-size:14px;color:var(--text-2)}
+@media print{body{background:#fff}.card,.soft{break-inside:avoid}.stepper .st{display:block}button{display:none}}
+/* ===== END SHARED STYLE ===== */
+</style>
+<style>
+/* cheatsheet-specific */
+main{max-width:1040px}
+.hero{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap;border-bottom:2px solid var(--accent);padding-bottom:8px;margin-bottom:14px}
+.hero h1{margin:0}
+.hero .sub{font-size:13px;color:var(--text-2)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+@media (min-width:820px){.grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.span2{grid-column:1 / -1}}
+.cs{background:var(--surface);border:1px solid var(--border);border-top:4px solid var(--c1);border-radius:12px;padding:10px 14px;break-inside:avoid}
+.cs.ch1{border-top-color:var(--c1)}.cs.ch2{border-top-color:var(--c2)}.cs.ch3{border-top-color:var(--c3)}.cs.warn{border-top-color:var(--c4)}
+.cs h2{font-size:16px;font-weight:700;margin:0 0 6px;display:flex;justify-content:space-between;gap:6px;flex-wrap:wrap;align-items:baseline}
+.cs h2 small{font-size:12px;font-weight:400;color:var(--text-3)}
+.cs h2 small a{color:var(--text-3)}
+.cs ul,.cs ol{margin:0;padding-inline-start:18px}
+.cs li{margin:0 0 2px}
+.cs p{margin:0 0 6px}
+.cs .mb{margin:4px 0;padding:6px 10px;font-size:13.5px}
+.pre{white-space:pre}
+table.t.s{font-size:13.5px;margin:4px 0}
+table.t.s td,table.t.s th{padding:3px 5px}
+table.rtl{direction:rtl}
+table.rtl td,table.rtl th{text-align:right}
+.ok-t{color:var(--ok);font-weight:500}.no-t{color:var(--bad);font-weight:500}
+.links{display:flex;flex-wrap:wrap;gap:6px;font-size:14px}
+.links a{border:1px solid var(--border);border-radius:999px;padding:0 10px;text-decoration:none;background:var(--surface)}
+.trapl li{margin-bottom:4px}
+.legend{font-size:12px;color:var(--text-3)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin:0 4px 0 2px;vertical-align:middle}
+@media print{
+  @page{size:A4;margin:9mm}
+  body{font-size:10.5px;line-height:1.45}
+  main{max-width:none;padding:0}
+  .grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px}
+  .span2{grid-column:1 / -1}
+  .cs{padding:5px 8px;border-radius:6px}
+  .cs h2{font-size:12px;margin-bottom:3px}
+  .m,.cs .mb,table.t.s{font-size:10px}
+  .cs .mb{padding:3px 6px;margin:2px 0}
+  table.t.s td,table.t.s th{padding:1px 3px}
+  h1{font-size:17px}
+  .hero{margin-bottom:6px;padding-bottom:4px}
+  .noprint{display:none}
+  .links a{border:none;padding:0 4px}
+}
+</style>
+</head>
+<body>
+<main>
+<div class="top noprint"><a href="../index.html">← فهرست درس‌ها</a><span>مرجع · <a href="glossary.html">واژه‌نامه</a> · <a href="../lessons/0011-mock-exam.html">آزمون جامع</a></span></div>
+<div class="hero">
+  <div><h1>برگه فرمول‌ها — منطق فازی، فصل ۱ تا ۳</h1>
+  <div class="sub">برای مرور شب امتحان · همه عددهای مثال‌ها با پایتون بررسی شده · چاپ: حدود دو صفحه A4</div></div>
+  <div class="legend"><i style="background:var(--c1)"></i>فصل ۱ <i style="background:var(--c2)"></i>فصل ۲ <i style="background:var(--c3)"></i>فصل ۳ <i style="background:var(--c4)"></i>تله</div>
+</div>
+
+<div class="grid">
+
+<!-- 1 notation -->
+<section class="cs ch1"><h2>۱. نماد و نوشتار <small><a href="../lessons/0001-crisp-vs-fuzzy.html">درس ۱</a> · <a href="../lessons/0002-writing-fuzzy-sets.html">۲</a></small></h2>
+<ul>
+  <li>قطعی: عضویت فقط <span class="m">0</span> یا <span class="m">1</span>. فازی: <span class="m">μ_A: X → [0, 1]</span>.</li>
+  <li>مجموعه جهانی <span class="m">U</span> یا <span class="m">X</span>: همه xهای ممکن (گسسته یا پیوسته).</li>
+  <li>زوج مرتب: <span class="m">A = {(x, μ_A(x)) | x ∈ U}</span>.</li>
+  <li>گسسته: <span class="m">A = μ1/x1 + μ2/x2 + … = Σ μ_A(x)/x</span> یا <span class="m">{μ1/x1, μ2/x2, …}</span>. پیوسته: <span class="m">∫ μ_A(x)/x</span>.</li>
+  <li><b>/ تقسیم نیست، + جمع نیست، ∫ انتگرال نیست.</b> عدد بالای خط = درجه، پایین = عنصر.</li>
+  <li>عنصرِ ننوشته = درجه <span class="m">0</span>.</li>
+</ul>
+<div class="tip" style="margin-top:6px"><b>تله: ترتیب برعکس است.</b>
+<table class="t s"><tr><th>شکل</th><th>اول</th><th>دوم</th><th>مثال</th></tr>
+<tr><td><span class="m">(x, μ)</span> زوج مرتب</td><td>عنصر</td><td>درجه</td><td><span class="m">(20, 0.2)</span></td></tr>
+<tr><td><span class="m">μ/x</span></td><td>درجه</td><td>عنصر</td><td><span class="m">0.2/20</span></td></tr></table>
+زوج ← μ/x: هر زوج را <b>برعکس</b> کن. جای خالی: <span class="m">?</span> چپِ خط = درجه، <span class="m">?</span> راستِ خط = عنصر.
+«چند عنصر درجه ۱ دارند» = بشمار در چند زوج عدد <b>دوم</b> برابر <span class="m">1</span> است.</div>
+</section>
+
+<!-- 2 ops -->
+<section class="cs ch2"><h2>۲. عملیات و قوانین <small><a href="../lessons/0004-union-intersection-complement.html">درس ۴</a> · اسلاید ۴۹–۶۰</small></h2>
+<table class="t s"><tr><th>عمل</th><th>فرمول (نقطه به نقطه)</th><th>منطق</th></tr>
+  <tr><td>Ā</td><td>1 − μ_A(x)</td><td>NOT</td></tr>
+  <tr><td>A ∪ B</td><td>max(μ_A, μ_B)</td><td>OR</td></tr>
+  <tr><td>A ∩ B</td><td>min(μ_A, μ_B)</td><td>AND</td></tr>
+  <tr><td>A = B</td><td>μ_A = μ_B for all x</td><td>—</td></tr>
+  <tr><td>A ⊆ B</td><td>μ_A ≤ μ_B for all x</td><td>—</td></tr></table>
+<p><span class="ok-t">برقرار</span>: جابه‌جایی، شرکت‌پذیری، پخشی، خودتوانی <span class="m">A∪A = A</span>، جذب <span class="m">A∪(A∩B) = A</span>، دمورگان <span class="m">(A∪B)‾ = Ā∩B̄</span>، مکملِ مکمل <span class="m">(Ā)‾ = A</span>.</p>
+<p><span class="no-t">برقرار نیست</span>: طرد شق ثالث <span class="m">A∪Ā ≠ X</span> و تناقض <span class="m">A∩Ā ≠ ∅</span>. مثال <span class="m">μ = 0.6</span>: <span class="m">max(0.6, 0.4) = 0.6</span>، <span class="m">min(0.6, 0.4) = 0.4</span>. همیشه <span class="m">min(μ, 1−μ) ≤ 0.5</span>.</p>
+<p class="legend">اسلایدها فقط طرد شق ثالث را می‌گویند؛ فهرست قوانین برقرار از Ross است.</p>
+</section>
+
+<!-- 3 hedges -->
+<section class="cs ch2 span2"><h2>۳. قیدهای زبانی <small><a href="../lessons/0005-hedges.html">درس ۵</a> · اسلاید ۵۱–۵۳</small></h2>
+<table class="t s"><tr><th>hedge</th><th>فارسی</th><th>نام</th><th>فرمول</th><th>μ = 0.6 →</th></tr>
+  <tr><td>not</td><td>نه</td><td>complement</td><td>1 − μ</td><td>0.4</td></tr>
+  <tr><td>very</td><td>خیلی</td><td>CON (تمرکز)</td><td>μ²</td><td>0.36</td></tr>
+  <tr><td>very very</td><td>خیلی خیلی</td><td>POW</td><td>μ³ <b>(جزوه)</b> · کتاب‌ها μ⁴</td><td>0.216 · (μ⁴: 0.1296)</td></tr>
+  <tr><td>not very</td><td>نه خیلی</td><td>—</td><td>1 − μ²</td><td>0.64</td></tr>
+  <tr><td>somewhat / more or less</td><td>تا حدی</td><td>DIL (اتساع)</td><td>μ^0.5</td><td>0.775</td></tr>
+  <tr><td>indeed</td><td>واقعاً</td><td>INT (تشدید)</td><td>2μ² if μ ≤ 0.5 · 1 − 2(1−μ)² if μ ≥ 0.5</td><td>0.68</td></tr>
+  <tr><td>very not (تله)</td><td>خیلی نه</td><td>—</td><td>(1 − μ)²</td><td>0.16</td></tr></table>
+<p>ترکیب: «نه خیلی کوتاه و نه خیلی بلند» = <span class="m">min(1 − μ_short², 1 − μ_tall²)</span>. توان بیشتر ← سخت‌گیرتر؛ جذر ← آسان‌گیرتر. <span class="m">0</span> و <span class="m">1</span> با توان عوض نمی‌شوند؛ indeed درجه <span class="m">0.5</span> را ثابت نگه می‌دارد. slightly فرمول ندارد.</p>
+</section>
+
+<!-- 4 system -->
+<section class="cs ch1"><h2>۴. سیستم فازی: ۴ مرحله و ۳ نوع <small><a href="../lessons/0003-fuzzy-system-pipeline.html">درس ۳</a> · اسلاید ۳۰–۳۹</small></h2>
+<div class="mb">fuzzification → inference → aggregation (composition) → defuzzification</div>
+<p>فازی‌سازی ← استنتاج (درجه درستی هر قاعده) ← ساخت/ترکیب (یک نتیجه کلی) ← غیرفازی‌سازی («اغلب پیچیده»).</p>
+<table class="t s rtl"><tr><th>نوع</th><th>ورودی ← خروجی</th><th>نکته</th></tr>
+  <tr><td>فازی خالص</td><td>مجموعه فازی ← مجموعه فازی</td><td>به درد مهندسی نمی‌خورد</td></tr>
+  <tr><td>TSK</td><td>عدد ← عدد</td><td>«آنگاه» = فرمول (y = c·x)؛ بی‌جا برای دانش، بی‌انعطاف</td></tr>
+  <tr><td>با فازی‌ساز و غیرفازی‌ساز</td><td>عدد ← عدد</td><td>هر دو عیب را می‌پوشاند؛ «سیستم فازی» یعنی همین</td></tr></table>
+<p>الگوی قاعده: <span class="m">IF variable IS set THEN action</span>. لباسشویی ۳ ورودی/۱ خروجی؛ کوره سیمان ۴ ورودی/۲ خروجی.</p>
+</section>
+
+<!-- 5 expert system -->
+<section class="cs ch2"><h2>۵. ساخت سیستم خبره فازی <small><a href="../lessons/0006-fuzzy-expert-system.html">درس ۶</a> · اسلاید ۶۱–۶۷</small></h2>
+<ol>
+  <li>تعریف مسئله</li>
+  <li>تعریف متغیرهای زبانی (height) و مقدارهای زبانی (short, tall)</li>
+  <li>تعریف مجموعه‌های فازی (یک تابع عضویت برای هر مقدار)</li>
+  <li>تعریف قوانین فازی: <span class="m">if antecedent then consequent</span> (در شرط and/or/not)</li>
+  <li>استنتاج فازی: نگاشت ورودی به خروجی</li>
+</ol>
+<p>پایگاه دانش = قوانین + مجموعه‌های فازی. بعد: فازی‌سازی ← استنتاج ← غیرفازی‌سازی.</p>
+<p>تعداد قوانین جدول کامل = <b>حاصل‌ضرب</b> تعداد مقدارهای هر ورودی (مثلاً <span class="m">3 × 3 = 9</span>، نه جمع).</p>
+</section>
+
+<!-- 6 inference -->
+<section class="cs ch2 span2"><h2>۶. دستور استنتاج: ماتریس قانون، max-min، max-product، میانگین وزنی <small><a href="../lessons/0007-max-min-inference.html">درس ۷</a> · <a href="../lessons/0008-max-product-defuzzify.html">۸</a> · اسلاید ۶۹–۸۰</small></h2>
+<div class="mb pre">rule:         if x is A then y is B        A = (a_1 … a_n) on x ,  B = (b_1 … b_p) on y
+1) matrix:    r_ij = min(a_i , b_j)               [max-product: r_ij = a_i · b_j]      row = x , column = y
+2) input x0:  A′ = μ_A(x0) at x0 , 0 elsewhere    (slide 77 — not 1)
+3) compose:   b′_j = max_i min(a′_i , r_ij)       [max-product: b′_j = max_i a′_i · r_ij]      B′ = A′ ∘ R
+4) defuzzify: y* = Σ y_j · μ_B′(y_j)  /  Σ μ_B′(y_j)</div>
+<p><b>میان‌بر چک</b> (یک قاعده، α = μ_A(x0)): max-min ← <span class="m">b′_j = min(α, b_j)</span> (بریدن)؛ max-product ← <span class="m">b′_j = α²·b_j</span> (کوچک شدن، y* = مرکز خود B). اندازه‌ها: <span class="m">(1×n) ∘ (n×p) = (1×p)</span>. سطر با <span class="m">a_i = 1</span> خود B است؛ سطر با <span class="m">a_i = 0</span> تمام صفر.</p>
+<p><b>مثال کوچک:</b> <span class="m">A = {0.4/1, 1/2}</span>، <span class="m">B = {1/10, 0.6/20, 0.2/30}</span>، ورودی <span class="m">x0 = 1</span> ← <span class="m">A′ = [0.4, 0]</span>.</p>
+<table class="t s"><tr><th></th><th>R (min)</th><th>B′ max-min</th><th>y*</th><th>R (product)</th><th>B′ max-product</th><th>y*</th></tr>
+  <tr><td>row x=1</td><td>0.4 0.4 0.2</td><td rowspan="2">(0.4, 0.4, 0.2)</td><td rowspan="2">18/1.0 = 18</td><td>0.4 0.24 0.08</td><td rowspan="2">(0.16, 0.096, 0.032)</td><td rowspan="2">4.48/0.288 ≈ 15.56</td></tr>
+  <tr><td>row x=2</td><td>1 0.6 0.2</td><td>1 0.6 0.2</td></tr></table>
+<p>مثال اسلاید ۷۴–۷۹: دمای نرمال <span class="m">{0/100, 0.5/125, 1/150, 0.5/175, 0/200}</span>، سرعت متوسط <span class="m">{0/10, 0.6/20, 1/30, 0.6/40, 0/50}</span>، ورودی ۱۲۵ ← <span class="m">B′ = {0/10, 0.5/20, 0.5/30, 0.5/40, 0/50}</span> ← <span class="m">y* = 45/1.5 = 30</span>.</p>
+</section>
+
+<!-- 7 MFs -->
+<section class="cs ch3 span2"><h2>۷. توابع عضویت متلب <small><a href="../lessons/0009-triangle-trapezoid.html">درس ۹</a> · <a href="../lessons/0010-gaussian-bell-sigmoid.html">۱۰</a> · اسلاید ۸۲–۹۴</small></h2>
+<table class="t s"><tr><th>MATLAB (ترتیب پارامترها)</th><th>فرمول</th><th>نکته کلیدی</th></tr>
+  <tr><td>trimf(x,[a b c])</td><td>max(min((x−a)/(b−a), (c−x)/(c−b)), 0)</td><td>گوشه‌ها (a,0) (b,1) (c,0) · اسلاید: [3 6 8]</td></tr>
+  <tr><td>trapmf(x,[a b c d])</td><td>max(min((x−a)/(b−a), 1, (d−x)/(d−c)), 0)</td><td>بین b و c برابر 1 · a=b یا c=d: شانه · اسلاید: [1 5 7 8]</td></tr>
+  <tr><td>gaussmf(x,[sigma c])</td><td>e^(−(x−c)² / (2σ²))</td><td><b>اول σ!</b> · μ(c) = 1 · μ(c±σ) ≈ 0.607 · μ(c±2σ) ≈ 0.135 · اسلاید: [2 5]</td></tr>
+  <tr><td>gauss2mf(x,[sig1 c1 sig2 c2])</td><td>چپ: گاوسی (σ1,c1) · وسط: 1 · راست: گاوسی (σ2,c2)</td><td>اگر c1 &lt; c2 قله 1، وگرنه کمتر از 1</td></tr>
+  <tr><td>gbellmf(x,[a b c])</td><td>1 / (1 + |(x−c)/a|^(2b))</td><td>c مرکز · μ(c±a) = 0.5 · b بزرگ‌تر = دیواره عمودتر</td></tr>
+  <tr><td>sigmf(x,[a c])</td><td>1 / (1 + e^(−a(x−c)))</td><td>μ(c) = 0.5 · a&gt;0 بالارونده، a&lt;0 پایین‌رونده · S(x)=sigmf(x,[1 0])</td></tr>
+  <tr><td>zmf / smf (x,[a b])</td><td>دو تکه سهمی؛ zmf = 1 − smf</td><td>μ((a+b)/2) = 0.5 · Z باز از چپ، S باز از راست</td></tr>
+  <tr><td>pimf(x,[a b c d])</td><td>S بالارونده (a→b) · 1 · Z پایین‌رونده (c→d)</td><td>«ذوزنقه نرم»</td></tr></table>
+<p>روش حل تکه‌ای: (۱) بازه x را پیدا کن (۲) تکه را بردار: بالارونده <span class="m">(x−a)/(b−a)</span>، پایین‌رونده <span class="m">(c−x)/(c−b)</span> یا <span class="m">(d−x)/(d−c)</span> (۳) عدد بگذار. نمونه: <span class="m">trimf(5,[3 6 8]) = 2/3 ≈ 0.667</span>، <span class="m">trapmf(3,[1 5 7 8]) = 0.5</span>. ۱۱ تابع متلب: trimf, trapmf, gaussmf, gauss2mf, gbellmf, sigmf, dsigmf, psigmf, zmf, smf, pimf — همه به mf ختم می‌شوند. گاوسی و زنگوله‌ای هموار و همه‌جا غیرصفرند (اسلاید ۹۴)؛ سیگموئید یکنوا، کران‌دار و مشتق‌پذیر است.</p>
+<p><b>توان‌های e برای حفظ</b> (اگر ماشین‌حساب نداری): <span class="m">e^0 = 1</span> · <span class="m">e^(−0.5) ≈ 0.607</span> · <span class="m">e^(−1) ≈ 0.368</span> · <span class="m">e^(−2) ≈ 0.135</span></p>
+</section>
+
+<!-- 8 traps -->
+<section class="cs warn span2"><h2>۸. تله‌های امتحانی <small>از گزارش درس‌ها</small></h2>
+<ul class="trapl">
+  <li><b>very very:</b> جزوه <span class="m">μ³</span>، کتاب‌ها <span class="m">μ⁴</span>. فرمولی را که به کار بردی کنار جواب بنویس.</li>
+  <li><b>max-product مبهم است (اسلاید ۸۰):</b> ضرب در ماتریس و ترکیب ← تمرین ۲: <span class="m">B′ = 0.064/25 + 0.384/50 + 0.512/75 + 0.64/100</span>، <b>y* = 77</b>. ماتریس با min و فقط ترکیب ضربی ← <span class="m">B′ = 0.08/25 + 0.48/50 + 0.64/75 + 0.64/100</span>، <b>y* = 75</b>. خوانشت را بنویس و از استاد بپرس.</li>
+  <li><b>A′ با μ_A(x0)، نه 1</b> (اسلاید ۷۷). اگر <span class="m">μ_A(x0) = 0</span> شود، y* برابر <span class="m">0/0</span> و تعریف‌نشده است.</li>
+  <li><b>ترتیب جفت‌ها:</b> تمرین ۱ <span class="m">(x, μ)</span> است، بقیه جاها <span class="m">μ/x</span>. عنصر ننوشته = 0 و مکملش 1.</li>
+  <li><b>«not very» ≠ «very not»:</b> <span class="m">1 − μ²</span> در برابر <span class="m">(1 − μ)²</span>.</li>
+  <li><b>gaussmf اول σ:</b> <span class="m">gaussmf(x,[2 5])</span> یعنی σ = 2، c = 5. فرمول با <span class="m">1/(√(2π)σ)</span> در اسلاید ۸۷ چگالی احتمال است (قله ≠ 1) و «guassmf» غلط تایپی است.</li>
+  <li><b>اشتباه‌های تایپی اسلاید:</b> ۷۵–۷۶ <span class="m">min(0,0.6)</span> ← <span class="m">min(0,0)</span>؛ ۷۸ خط b5 <span class="m">min(0.5,0.5)</span> ← <span class="m">min(0.5,0)</span>؛ ۷۱ <span class="m">b_i</span> ← <span class="m">b_j</span>؛ ۸۹ ∂ یعنی σ. جواب‌های نهایی اسلایدها درست‌اند.</li>
+  <li><b>درجه به تابع عضویت بستگی دارد:</b> قد ۱۷۵ در اسلاید ۱۵ ← 0.6، در اسلاید ۱۹ ← 0.75.</li>
+  <li><b>«ترکیب» دو معنی دارد:</b> مرحله سوم سیستم (تجمیع نتیجه قاعده‌ها) و عملگر <span class="m">∘</span> (max-min). در جواب مشخص کن کدام.</li>
+  <li><b>نام‌های ماتریس قانون:</b> M (اسلاید ۷۱)، <span class="m">μ_AB</span> (۷۳)، <span class="m">μ_ij</span> (۷۵) — همه یکی‌اند.</li>
+</ul></section>
+
+<!-- 9 links -->
+<section class="cs ch1 span2"><h2>۹. درس‌ها</h2>
+<div class="links">
+  <a href="../lessons/0001-crisp-vs-fuzzy.html">۱ قطعی در برابر فازی</a>
+  <a href="../lessons/0002-writing-fuzzy-sets.html">۲ نوشتن مجموعه فازی</a>
+  <a href="../lessons/0003-fuzzy-system-pipeline.html">۳ ساختار سیستم فازی</a>
+  <a href="../lessons/0004-union-intersection-complement.html">۴ اجتماع، اشتراک، مکمل</a>
+  <a href="../lessons/0005-hedges.html">۵ قیدهای زبانی</a>
+  <a href="../lessons/0006-fuzzy-expert-system.html">۶ سیستم خبره فازی</a>
+  <a href="../lessons/0007-max-min-inference.html">۷ استنتاج max-min</a>
+  <a href="../lessons/0008-max-product-defuzzify.html">۸ max-product و غیرفازی‌سازی</a>
+  <a href="../lessons/0009-triangle-trapezoid.html">۹ مثلثی و ذوزنقه‌ای</a>
+  <a href="../lessons/0010-gaussian-bell-sigmoid.html">۱۰ گاوسی، زنگوله‌ای، سیگموئید</a>
+  <a href="../lessons/0011-mock-exam.html">۱۱ آزمون جامع</a>
+  <a href="glossary.html">واژه‌نامه</a>
+  <a href="../index.html">فهرست</a>
+</div>
+<p class="legend" style="margin-top:6px">منابع: جزوه دکتر حبیبی (اسلایدهای ۶–۹۴)، تمرین ۱ و ۲، <a href="https://www.mathworks.com/help/fuzzy/membership-functions.html">MathWorks — Membership Functions</a>، Ross — Fuzzy Logic with Engineering Applications.</p>
+</section>
+
+</div>
+<p class="ask noprint" style="margin-top:14px">سؤالی درباره یکی از فرمول‌ها داری؟ در چت از من (Claude) بپرس.</p>
+</main>
+</body>
+</html>

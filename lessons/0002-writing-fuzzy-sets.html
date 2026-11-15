@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>درس ۲ — نوشتن و خواندن یک مجموعه فازی</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ===== SHARED STYLE — copy verbatim into every lesson, do not edit per lesson ===== */
+:root{--bg:#fbfaf7;--surface:#ffffff;--surface-1:#f3f1ec;--text:#1f1e1c;--text-2:#5f5e5a;--text-3:#888780;--border:#e3e0d8;--border-strong:#c9c6bc;
+--accent:#534AB7;--accent-bg:#EEEDFE;--ok:#3B6D11;--ok-bg:#EAF3DE;--bad:#A32D2D;--bad-bg:#FCEBEB;--warn:#854F0B;--warn-bg:#FAEEDA;
+--c1:#7F77DD;--c2:#1D9E75;--c3:#EF9F27;--c4:#D4537E;--grid:#e3e0d8}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1a1a19;--surface:#232322;--surface-1:#2c2c2a;--text:#ecebe6;--text-2:#b4b2a9;--text-3:#888780;--border:#3a3a37;--border-strong:#55554f;
+--accent:#AFA9EC;--accent-bg:#26215C;--ok:#97C459;--ok-bg:#173404;--bad:#F09595;--bad-bg:#501313;--warn:#FAC775;--warn-bg:#412402;--grid:#3a3a37}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Vazirmatn,Tahoma,sans-serif;font-size:16px;line-height:1.95}
+main{max-width:760px;margin:0 auto;padding:24px 16px 64px}
+a{color:var(--accent)}
+h1{font-size:26px;font-weight:700;line-height:1.5;margin:6px 0 6px}
+h2{font-size:19px;font-weight:500;margin:0 0 8px}
+h3{font-size:16px;font-weight:500;margin:12px 0 4px}
+p{margin:0 0 10px}
+.top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:13px;color:var(--text-2)}
+.goal{color:var(--text-2);margin-bottom:22px}
+.sec{margin:0 0 28px}
+.lab{font-size:13px;color:var(--text-3);margin:0 0 4px;letter-spacing:0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.soft{background:var(--surface-1);border-radius:12px;padding:12px 14px}
+.m{direction:ltr;unicode-bidi:isolate;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14.5px;white-space:nowrap}
+@media (max-width:700px){.m{white-space:normal}}
+.mb{direction:ltr;text-align:left;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14.5px;background:var(--surface-1);border-radius:8px;padding:8px 12px;margin:6px 0;overflow-x:auto;line-height:1.8}
+.en{direction:ltr;unicode-bidi:isolate;font-size:13px;color:var(--text-2)}
+b,strong{font-weight:500}
+.key{background:var(--warn-bg);color:var(--warn);border-radius:6px;padding:0 6px}
+.tip{border-right:3px solid var(--accent);background:var(--accent-bg);padding:8px 12px;border-radius:0;margin:8px 0}
+.trap{border-right:3px solid var(--bad);background:var(--bad-bg);padding:8px 12px;border-radius:0;margin:8px 0}
+button{font-family:inherit;font-size:14px;background:var(--surface);color:var(--text);border:1px solid var(--border-strong);border-radius:8px;padding:5px 14px;cursor:pointer}
+button:hover{background:var(--surface-1)}
+button.on{background:var(--accent-bg);border-color:var(--accent);color:var(--accent)}
+input[type=text]{font-family:inherit;font-size:15px;direction:ltr;text-align:center;width:72px;height:34px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text)}
+input[type=range]{width:100%;accent-color:var(--accent);direction:ltr}
+table.t{border-collapse:collapse;direction:ltr;font-size:14.5px;margin:6px 0;display:block;max-width:100%;overflow-x:auto}
+table.t>tbody,table.t>thead{display:table;width:100%}
+table.t th,table.t td{border:1px solid var(--border);padding:5px 6px;text-align:center;font-weight:400}
+table.t th{background:var(--surface-1)}
+.ok{background:var(--ok-bg)!important}.no{background:var(--bad-bg)!important}
+.fb{font-size:14px;margin-top:8px;min-height:1em}.fb.good{color:var(--ok)}.fb.bad{color:var(--bad)}
+.q{margin:0 0 18px}
+.mcq .opts{display:grid;gap:6px;margin-top:6px}
+.mcq .opts button{text-align:right;padding:7px 12px}
+.stepper .st{display:none;padding:6px 0;border-bottom:1px dashed var(--border)}
+.stepper .st.show{display:block}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+svg{max-width:100%;height:auto;direction:ltr}
+svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12px}
+.nav{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:14px;border-top:1px solid var(--border);padding-top:14px;margin-top:28px}
+.ask{font-size:14px;color:var(--text-2)}
+@media print{body{background:#fff}.card,.soft{break-inside:avoid}.stepper .st{display:block}button{display:none}}
+/* ===== END SHARED STYLE ===== */
+</style>
+<style>
+/* lesson 2 only */
+.chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:6px;margin:8px 0}
+.chips div{background:var(--surface-1);border-radius:8px;padding:5px 10px;font-size:14px;border-top:3px solid var(--border)}
+.chips div b{display:block;font-size:19px;direction:ltr;text-align:right}
+.chips div.zero{opacity:.45}
+.nt{direction:ltr;text-align:left;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14px;background:var(--surface-1);border-radius:8px;padding:6px 10px;margin:4px 0;overflow-x:auto;white-space:nowrap}
+.nt .hl{background:var(--warn-bg);color:var(--warn);border-radius:4px;padding:0 3px}
+.sw{display:inline-block;width:18px;height:3px;vertical-align:middle;margin-left:4px;border-radius:2px}
+</style>
+</head>
+<body>
+<main>
+<div class="top"><a href="../index.html">← فهرست درس‌ها</a><span>درس ۲ از ۱۱ · فصل ۱ · حدود ۱۲ دقیقه</span></div>
+<h1>نوشتن و خواندن یک مجموعه فازی</h1>
+<p class="goal">هدف: بعد از این درس می‌توانی یک مجموعه فازی را به هر سه شکل اسلاید (زوج مرتب، <span class="m">Σ μ/x</span> و <span class="m">∫ μ/x</span>) بنویسی، از روی آن درجه هر عنصر را بخوانی و دو شکل را به هم تبدیل کنی.</p>
+
+<!-- ===== 1. IDEA ===== -->
+<section class="sec"><p class="lab">۱. ایده</p>
+<div class="card">
+  <h3>اول: مجموعه جهانی</h3>
+  <p>مجموعه جهانی <span class="en">(universe of discourse)</span>، که با <span class="m">U</span> یا <span class="m">X</span> نشانش می‌دهند، یعنی <b>همه مقدارهایی که درباره‌شان حرف می‌زنیم</b>. مثلاً قدها از ۱ تا ۲٫۲ متر، دماها از ۰ تا ۴۰ درجه، یا در تمرین ۱: <span class="m">X = {1,2,3,4,5,6}</span>. یک مجموعه فازی <span class="m">A</span> به <b>هر</b> عضو <span class="m">U</span> یک درجه می‌دهد.</p>
+  <p><span class="m">U</span> می‌تواند <b>گسسته</b> باشد، یعنی چند مقدار جدا از هم مثل <span class="m">{1,2,…,6}</span>، یا <b>پیوسته</b>، یعنی همه اعداد یک بازه مثل دمای ۰ تا ۴۰.</p>
+
+  <h3>سه شکل نوشتن (اسلاید ۲۳)</h3>
+  <p><b>شکل ۱، زوج مرتب:</b> هر عنصر را کنار درجه‌اش می‌نویسیم؛ <b>اول x، بعد درجه</b>.</p>
+  <div class="mb">A = { (x, μ_A(x)) | x ∈ U }        e.g.  {(1, 0), (1.5, 0.5), (2, 1)}</div>
+  <p><b>شکل ۲، وقتی U گسسته است:</b></p>
+  <div class="mb">A = Σ_U μ_A(x) / x  =  μ_1/x_1 + μ_2/x_2 + …        e.g.  0.5/1.5 + 1/2</div>
+  <p><b>شکل ۳، وقتی U پیوسته است:</b></p>
+  <div class="mb">A = ∫_U μ_A(x) / x</div>
+  <div class="trap">دام بزرگ: در این نمادها <b>هیچ حسابی انجام نمی‌شود</b>. <span class="m">/</span> تقسیم نیست؛ <span class="m">0.5/2</span> یعنی «عنصر ۲ با درجه ۰٫۵» و <b>نه</b> ۰٫۲۵. <span class="m">+</span> و <span class="m">Σ</span> جمع نیستند و <span class="m">∫</span> انتگرال نیست؛ همه فقط یعنی «همه این عنصرها را با درجه‌شان کنار هم بگذار» (اسلاید می‌گوید «اجتماع همه نقاط»). در کسر <span class="m">μ/x</span> اول درجه می‌آید، ولی در زوج مرتب <span class="m">(x, μ)</span> اول خود عنصر. جای این دو را عوض نکن.</div>
+  <div class="tip">در تمرین ۱، مجموعه‌ها به شکل کسر داخل آکولاد نوشته شده‌اند، مثلاً <span class="m">A = {0.5/2, 0.7/3, 1/4, 0.6/5, 1/6}</span> که در آن درجه صورت کسر است و عنصر مخرج. این همان شکل ۲ است که به جای <span class="m">+</span> با ویرگول نوشته شده. <b>عنصری از U که در فهرست نیامده درجه‌اش ۰ است</b>؛ مثلاً اینجا <span class="m">μ_A(1) = 0</span>.</div>
+
+  <h3>یک مقدار، چند مجموعه (اسلایدهای ۲۲ و ۲۷–۲۸)</h3>
+  <p>اسلاید ۲۲ می‌گوید در منطق فازی دمای ۲۵ «تا حدی گرم» است (مثلاً ۰٫۵) و دمای ۳۵ «خیلی گرم» (۰٫۹). با نماد این درس، این دو تکه از مجموعه «گرم» می‌شوند <span class="m">0.5/25 + 0.9/35</span>.</p>
+  <p>اسلاید ۲۷ متغیر «دمای هوا» را با پنج مجموعه فازی پوشش می‌دهد: <b>سرد، خنک، عادی، گرم، داغ</b>. اسلاید ۲۸ نکته مهم را می‌گوید: <b>یک دمای معین ممکن است هم‌زمان عضو یک یا دو مجموعه باشد</b>، با درجه‌های متفاوت. دمای بین <span class="m">T1</span> و <span class="m">T2</span> هم «سرد» است و هم «خنک»؛ نزدیک <span class="m">T2</span> فقط چند صدم «سرد» است ولی نزدیک ۹۰٪ «خنک». این را در بخش بعد با چشم ببین.</p>
+</div></section>
+
+<!-- ===== 2. SEE IT ===== -->
+<section class="sec"><p class="lab">۲. ببین چه اتفاقی می‌افتد</p>
+<div class="card">
+  <p>پنج مجموعه این نمودار شبیه شکل اسلاید ۲۷ ساخته شده‌اند، با مرزهای مشخص: سرد = ۱ تا ۱۰ درجه و بعد صاف پایین تا ۰ در ۱۵؛ خنک از ۱۰ بالا می‌رود، در ۱۵ به ۱ می‌رسد و در ۲۰ صفر می‌شود؛ عادی ۱۵/۲۰/۲۵؛ گرم ۲۰/۲۵/۳۰؛ داغ از ۲۵ بالا می‌رود و از ۳۰ به بعد ۱ است. دما را تغییر بده.</p>
+  <svg id="t-svg" viewBox="0 0 640 270" role="img" aria-labelledby="t-title">
+    <title id="t-title">پنج مجموعه فازی سرد، خنک، عادی، گرم و داغ روی محور دما از ۰ تا ۴۰ درجه، با خط عمودی برای دمای انتخاب‌شده</title>
+    <g id="t-grid"></g>
+    <g id="t-curves"></g>
+    <line id="t-line" y1="30" y2="220" stroke="var(--text-3)" stroke-width="1.5" stroke-dasharray="4 4"/>
+    <g id="t-dots"></g>
+    <text x="330" y="262" text-anchor="middle">دما (درجه سانتی‌گراد)</text>
+  </svg>
+  <label for="t-in" style="display:block;margin-top:8px">دما: <b id="t-val" class="m">14.5</b> درجه</label>
+  <input type="range" id="t-in" min="0" max="40" step="0.5" value="14.5">
+  <div class="chips" id="t-chips"></div>
+  <p id="t-msg" class="soft" style="font-size:14px"></p>
+
+  <h3>همین مجموعه‌ها، نوشته‌شده با نماد اسلاید</h3>
+  <p style="font-size:14px">یک مجموعه را انتخاب کن. آن را روی <span class="m">U = {0, 4, 8, …, 40}</span> (هر ۴ درجه یک نقطه) می‌نویسیم. عنصری که به دمای لغزنده نزدیک‌تر است رنگی می‌شود.</p>
+  <div class="row" id="t-pick"></div>
+  <p style="font-size:13px;color:var(--text-2);margin:8px 0 0">شکل ۱، زوج مرتب (همه عنصرها، حتی با درجه ۰):</p>
+  <div class="nt" id="t-pairs"></div>
+  <p style="font-size:13px;color:var(--text-2);margin:6px 0 0">شکل ۲، <span class="m">μ/x</span> (معمولاً عنصرهای با درجه ۰ را نمی‌نویسند):</p>
+  <div class="nt" id="t-frac"></div>
+</div></section>
+
+<!-- ===== 3. WORKED EXAMPLE ===== -->
+<section class="sec"><p class="lab">۳. مثال حل‌شده، قدم به قدم (اسلاید ۲۴)</p>
+<div class="card stepper">
+  <p>اسلاید ۲۴ مجموعه فازی «قدبلند» را با زوج مرتب نوشته است (قد به متر):</p>
+  <div class="mb">tall = {(1,0), (1.3,0.3), (1.5,0.5), (1.7,0.7), (1.75,0.75), (1.9,0.9), (2,1), (2.1,1), (2.2,1)}</div>
+  <div class="st">قدم ۱ (U و شکل): این شکل ۱ است و هر زوج یعنی <span class="m">(قد, درجه)</span>. مجموعه جهانی گسسته است: <span class="m">U = {1, 1.3, 1.5, 1.7, 1.75, 1.9, 2, 2.1, 2.2}</span>.</div>
+  <div class="st">قدم ۲ (خواندن درجه): دنبال زوجی می‌گردیم که <b>اولش</b> قد موردنظر باشد. <span class="m">μ_tall(1.75) = 0.75</span>، <span class="m">μ_tall(1) = 0</span>، <span class="m">μ_tall(2.1) = 1</span>. همین سه جمله را اسلاید ۲۴ بالای مجموعه نوشته است.</div>
+  <div class="st">قدم ۳ (تبدیل به <span class="m">μ/x</span>): هر زوج <span class="m">(x, μ)</span> را برعکس به شکل <span class="m">μ/x</span> می‌نویسیم و <span class="m">0/1</span> را حذف می‌کنیم:
+    <div class="mb">tall = 0.3/1.3 + 0.5/1.5 + 0.7/1.7 + 0.75/1.75 + 0.9/1.9 + 1/2 + 1/2.1 + 1/2.2</div></div>
+  <div class="st">قدم ۴ (مقایسه): بیشترین درجه ۱ است و مال سه عنصر <span class="m">2, 2.1, 2.2</span> است؛ یعنی هر سه «کاملاً بلند»‌اند. عنصرهایی که کمتر از نیمه عضوند: <span class="m">1</span> (درجه ۰) و <span class="m">1.3</span> (درجه ۰٫۳).</div>
+  <div class="st">قدم ۵ (احتیاط): قد <span class="m">1.6</span> در این مجموعه گسسته <b>نیست</b>. نمودار اسلاید ۲۴ نقطه‌ها را با خط به هم وصل کرده و اگر از روی خط بخوانی حدود <span class="m">0.6</span> می‌شود، ولی این حدسِ بین دو نقطه است، نه عضوی از مجموعه نوشته‌شده. در امتحان فقط عنصرهای داده‌شده را بخوان، مگر اینکه سؤال تابع پیوسته داده باشد.</div>
+  <div class="row" style="margin-top:8px"><button class="next">قدم بعدی</button><button class="all">نمایش همه</button></div>
+</div>
+<div class="trap">نکته اسلاید: نمودار اسلاید ۲۴ روی محور افقی یک نقطه <span class="m">0</span> هم دارد که در فهرست مجموعه نیامده و فاصله‌های محور هم مساوی نیستند (۰، ۱، ۱٫۳، … با فاصله برابر کشیده شده‌اند). پس شیب ظاهری نمودار گمراه‌کننده است؛ به فهرست زوج‌ها اعتماد کن.</div>
+</section>
+
+<!-- ===== 4. PRACTICE ===== -->
+<section class="sec"><p class="lab">۴. نوبت توست</p>
+<div class="card">
+  <div class="q practice" data-hint="در کسر μ/x، بالا درجه است و پایین عنصر. عنصری که در فهرست نیست درجه ۰ دارد." data-yes="عالی! دقت کردی که ۱ در فهرست نیست، پس درجه‌اش ۰ است.">
+    <p><b>سؤال ۱ (شکل تمرین ۱).</b> <span class="m">X = {1,2,3,4,5,6}</span> و <span class="m">A = {0.5/2, 0.7/3, 1/4, 0.6/5, 1/6}</span>. درجه عضویت هر عنصر را بنویس.</p>
+    <table class="t"><tr><th>x</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th></tr>
+      <tr><th>μ_A(x)</th><td><input type="text" data-k="0" aria-label="mu A 1"></td><td><input type="text" data-k="0.5" aria-label="mu A 2"></td><td><input type="text" data-k="0.7" aria-label="mu A 3"></td><td><input type="text" data-k="1" aria-label="mu A 4"></td><td><input type="text" data-k="0.6" aria-label="mu A 5"></td><td><input type="text" data-k="1" aria-label="mu A 6"></td></tr></table>
+    <button class="check">بررسی</button><div class="fb"></div>
+  </div>
+
+  <div class="q practice" data-hint="هر زوج (x, μ) در شکل کسری می‌شود μ/x: درجه بالا، عنصر پایین." data-yes="درست! تبدیل زوج ↔ کسر فقط جابه‌جا کردن جای دو عدد است.">
+    <p><b>سؤال ۲ (مجموعه تمرین ۱).</b> <span class="m">Tall = {(0,0), (20,0.2), (40,0.4), (60,0.7), (80,1), (100,1)}</span>. آن را به شکل <span class="m">μ/x</span> بازنویسی کرده‌ایم؛ جاهای خالی را پر کن. بعد بگو چند عنصر درجه کامل ۱ دارند.</p>
+    <table class="t"><tr><th>کسر</th><th>?/20</th><th>0.4/?</th><th>?/60</th><th>تعداد عنصرهای با درجه 1</th></tr>
+      <tr><th>جواب</th><td><input type="text" data-k="0.2" aria-label="درجه 20"></td><td><input type="text" data-k="40" aria-label="عنصر با درجه 0.4"></td><td><input type="text" data-k="0.7" aria-label="درجه 60"></td><td><input type="text" data-k="2" aria-label="تعداد درجه یک"></td></tr></table>
+    <button class="check">بررسی</button><div class="fb"></div>
+  </div>
+
+  <div class="q practice" data-hint="عادی: از ۱۵ تا ۲۰ بالا می‌رود و از ۲۰ تا ۲۵ پایین می‌آید؛ پس در ۲۳ (۲۵ − ۲۳) ÷ ۵. گرم: از ۲۰ تا ۲۵ بالا می‌رود؛ پس (۲۳ − ۲۰) ÷ ۵. خنک در ۲۰ تمام شده است." data-yes="درست! ۲۳ درجه هم‌زمان عضو دو مجموعه است، درست همان چیزی که اسلاید ۲۸ می‌گوید.">
+    <p><b>سؤال ۳.</b> با پنج مجموعه بخش ۲ (مرزها بالای نمودار نوشته شده‌اند)، برای دمای <span class="m">23</span> درجه حساب کن. اول خودت حساب کن و بعد با لغزنده چک کن.</p>
+    <table class="t"><tr><th>μ_خنک(23)</th><th>μ_عادی(23)</th><th>μ_گرم(23)</th><th>عضو چند مجموعه است؟</th></tr>
+      <tr><td><input type="text" data-k="0" aria-label="خنک 23"></td><td><input type="text" data-k="0.4" aria-label="عادی 23"></td><td><input type="text" data-k="0.6" aria-label="گرم 23"></td><td><input type="text" data-k="2" aria-label="تعداد مجموعه"></td></tr></table>
+    <button class="check">بررسی</button><div class="fb"></div>
+  </div>
+
+  <div class="q mcq" data-yes="درست! 0.5/2 یعنی عنصر ۲ با درجه ۰٫۵. خط کسری تقسیم نیست." data-no="نه. در نماد اسلاید، خط کسری فقط درجه (بالا) را به عنصر (پایین) می‌چسباند و هیچ تقسیمی انجام نمی‌شود.">
+    <p><b>سؤال ۴.</b> در مجموعه <span class="m">{0.5/2, 0.7/3}</span>، عبارت <span class="m">0.5/2</span> یعنی چه؟</p>
+    <div class="opts">
+      <button>حاصل تقسیم <span class="m">0.5</span> بر <span class="m">2</span></button>
+      <button data-ok>درجه عضویت عنصر <span class="m">2</span></button>
+      <button>عنصری با مقدار <span class="m">0.5</span></button>
+      <button>تعداد تکرار عنصر <span class="m">2</span></button>
+    </div><div class="fb"></div>
+  </div>
+
+  <div class="q mcq" data-yes="درست! اسلاید ۲۳: علامت Σ جمع ریاضی نیست، بلکه اجتماع همه نقاط با درجه‌شان است." data-no="نه. اسلاید ۲۳ صریح می‌گوید Σ به معنای جمع ریاضی نیست.">
+    <p><b>سؤال ۵.</b> در <span class="m">A = Σ_U μ_A(x)/x</span>، علامت <span class="m">Σ</span> یعنی چه؟</p>
+    <div class="opts">
+      <button>جمع جبری همه درجه‌ها</button>
+      <button>میانگین همه درجه‌ها</button>
+      <button data-ok>کنار هم گذاشتن زوج‌ها</button>
+      <button>بیشترین درجه در میان همه</button>
+    </div><div class="fb"></div>
+  </div>
+
+  <div class="q mcq" data-yes="درست! در مجموعه قطعی ۱٫۷۵ کمتر از ۱٫۸ است، پس درجه‌اش ۰ است؛ و در زوج مرتب اول عنصر می‌آید." data-no="نه. دو چیز را چک کن: (۱) در مجموعه قطعی فقط ۰ یا ۱ داریم (درس ۱)؛ (۲) در زوج مرتب اول x می‌آید.">
+    <p><b>سؤال ۶ (مرور درس ۱).</b> مجموعه <b>قطعی</b> «قدبلند = قد ≥ ۱٫۸ متر» را به شکل زوج مرتب می‌نویسیم. زوج درست برای قد <span class="m">1.75</span> کدام است؟</p>
+    <div class="opts">
+      <button data-ok><span class="m">(1.75, 0)</span></button>
+      <button><span class="m">(1.75, 0.75)</span></button>
+      <button><span class="m">(0, 1.75)</span></button>
+      <button><span class="m">(0.75, 1.75)</span></button>
+    </div><div class="fb"></div>
+  </div>
+
+  <div class="q mcq" data-yes="درست! برای U پیوسته از ∫ استفاده می‌شود که آن هم انتگرال نیست." data-no="نه. اسلاید ۲۳: U پیوسته ← ∫ و U گسسته ← Σ.">
+    <p><b>سؤال ۷.</b> مجموعه جهانی <span class="m">U</span> همه دماهای ۰ تا ۴۰ (پیوسته) است. اسلاید ۲۳ مجموعه فازی <span class="m">A</span> را معمولاً چطور می‌نویسد؟</p>
+    <div class="opts">
+      <button><span class="m">A = Σ_U μ_A(x)/x</span></button>
+      <button><span class="m">A = Π_U μ_A(x)/x</span></button>
+      <button><span class="m">A = max_U μ_A(x)/x</span></button>
+      <button data-ok><span class="m">A = ∫_U μ_A(x)/x</span></button>
+    </div><div class="fb"></div>
+  </div>
+</div></section>
+
+<!-- ===== 5. SUMMARY ===== -->
+<section class="sec"><p class="lab">۵. جمع‌بندی — همین را به خاطر بسپار</p>
+<div class="soft"><ul>
+  <li><b>مجموعه جهانی</b> <span class="m">U</span> (یا <span class="m">X</span>) یعنی همه مقدارهای ممکن x؛ گسسته یا پیوسته.</li>
+  <li>زوج مرتب: <span class="m">{(x, μ_A(x)) | x ∈ U}</span> که اول عنصر و بعد درجه است.</li>
+  <li>گسسته: <span class="m">Σ μ_A(x)/x = μ1/x1 + μ2/x2 + …</span> (یا <span class="m">{μ1/x1, μ2/x2, …}</span>). پیوسته: <span class="m">∫ μ_A(x)/x</span>. این علامت‌ها جمع، تقسیم یا انتگرال نیستند.</li>
+  <li>عنصری که نوشته نشده درجه‌اش ۰ است.</li>
+  <li>یک مقدار (مثلاً یک دما) می‌تواند هم‌زمان با درجه‌های مختلف عضو یک یا دو مجموعه باشد (اسلاید ۲۸).</li>
+</ul></div></section>
+
+<!-- ===== 6. SOURCE + ASK ===== -->
+<section class="sec"><p class="lab">منبع اصلی</p>
+<p>جزوه درس، اسلایدهای ۱۹، ۲۲، ۲۳ (سه شکل نوشتن)، ۲۴ (مجموعه قدبلند)، ۲۷ و ۲۸ (پنج مجموعه دما) و تمرین ۱ · <a href="https://doi.org/10.1016/S0019-9958(65)90241-X">L. A. Zadeh, “Fuzzy Sets”, Information and Control, 1965</a></p>
+<p class="ask">جایی مبهم بود؟ همین حالا در چت از من (Claude) بپرس — معلم تو هستم و می‌توانم مثال بیشتری بسازم.</p>
+<p><a href="../reference/cheatsheet.html">برگه فرمول‌ها</a> · <a href="../reference/glossary.html">واژه‌نامه</a></p>
+</section>
+
+<div class="nav"><a href="0001-crisp-vs-fuzzy.html">← درس قبل: مجموعه قطعی در برابر مجموعه فازی</a><a href="0003-fuzzy-system-pipeline.html">درس بعد: ساختار یک سیستم فازی →</a></div>
+</main>
+
+<script>
+/* ===== SHARED JS — copy verbatim into every lesson ===== */
+(function(){
+function norm(s){return s.trim().replace(/[۰-۹]/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)}).replace(/[٠-٩]/g,function(d){return '٠١٢٣٤٥٦٧٨٩'.indexOf(d)}).replace(/[٫,]/g,'.').replace(/\s+/g,'')}
+function val(s){s=norm(s);if(/^-?\d*\.?\d+\/-?\d*\.?\d+$/.test(s)){var p=s.split('/');return +p[0]/+p[1]}return s===''?NaN:+s}
+document.querySelectorAll('.practice').forEach(function(q){
+  var ins=q.querySelectorAll('input[data-k]'),fb=q.querySelector('.fb'),btn=q.querySelector('.check');
+  ins.forEach(function(i){i.addEventListener('input',function(){i.parentNode.classList.remove('ok','no');fb.textContent='';fb.className='fb'})});
+  btn.addEventListener('click',function(){
+    var empty=0,ok=0;
+    ins.forEach(function(i){var c=i.parentNode;c.classList.remove('ok','no');if(!i.value.trim()){empty++;return}
+      var v=val(i.value),k=+i.dataset.k,tol=i.dataset.tol?+i.dataset.tol:0.01;
+      if(!isNaN(v)&&Math.abs(v-k)<=tol+1e-9){ok++;c.classList.add('ok')}else c.classList.add('no')});
+    if(empty){fb.className='fb bad';fb.textContent='اول همه خانه‌ها را پر کن ('+empty+' خانه خالی است).';return}
+    if(ok===ins.length){fb.className='fb good';fb.textContent=q.dataset.yes||('عالی! همه '+ins.length+' جواب درست است.')}
+    else{fb.className='fb bad';fb.textContent=ok+' از '+ins.length+' درست. '+(q.dataset.hint||'خانه‌های قرمز را دوباره حساب کن.')}
+  });
+});
+document.querySelectorAll('.mcq').forEach(function(q){
+  var fb=q.querySelector('.fb');
+  q.querySelectorAll('.opts button').forEach(function(b){b.addEventListener('click',function(){
+    q.querySelectorAll('.opts button').forEach(function(x){x.classList.remove('ok','no')});
+    if(b.hasAttribute('data-ok')){b.classList.add('ok');fb.className='fb good';fb.textContent=q.dataset.yes||'درست!'}
+    else{b.classList.add('no');fb.className='fb bad';fb.textContent=q.dataset.no||'نه، دوباره فکر کن.'}
+  })});
+});
+document.querySelectorAll('.stepper').forEach(function(s){
+  var st=s.querySelectorAll('.st'),n=0,nx=s.querySelector('.next'),al=s.querySelector('.all');
+  function upd(){st.forEach(function(e,i){e.classList.toggle('show',i<n)});if(nx)nx.textContent=n>=st.length?'از اول':'قدم بعدی ('+n+'/'+st.length+')'}
+  if(nx)nx.addEventListener('click',function(){n=n>=st.length?0:n+1;upd()});
+  if(al)al.addEventListener('click',function(){n=st.length;upd()});
+  upd();
+});
+})();
+/* ===== END SHARED JS ===== */
+</script>
+<script>
+/* lesson 2: five temperature sets + live set notation */
+(function(){
+  var NS = 'http://www.w3.org/2000/svg';
+  function X(t){ return 40 + t * 575 / 40; }
+  function Y(m){ return 220 - 180 * m; }
+  function trap(x, a, b, c, d){
+    if (x < a || x > d) return 0;
+    if (x >= b && x <= c) return 1;
+    if (x < b) return (x - a) / (b - a);
+    return (d - x) / (d - c);
+  }
+  // [name(fa), key, color, dash, membership fn, polyline points]
+  var SETS = [
+    {fa: 'سرد', key: 'cold', col: 'var(--c1)', dash: '', f: function(x){ return x <= 10 ? 1 : trap(x, 10, 10, 10, 15); }, pts: [[0,1],[10,1],[15,0],[40,0]]},
+    {fa: 'خنک', key: 'cool', col: 'var(--c2)', dash: '', f: function(x){ return trap(x, 10, 15, 15, 20); }, pts: [[0,0],[10,0],[15,1],[20,0],[40,0]]},
+    {fa: 'عادی', key: 'nominal', col: 'var(--text-2)', dash: '6 4', f: function(x){ return trap(x, 15, 20, 20, 25); }, pts: [[0,0],[15,0],[20,1],[25,0],[40,0]]},
+    {fa: 'گرم', key: 'warm', col: 'var(--c3)', dash: '', f: function(x){ return trap(x, 20, 25, 25, 30); }, pts: [[0,0],[20,0],[25,1],[30,0],[40,0]]},
+    {fa: 'داغ', key: 'hot', col: 'var(--c4)', dash: '', f: function(x){ return x >= 30 ? 1 : trap(x, 25, 30, 30, 30); }, pts: [[0,0],[25,0],[30,1],[40,1]]}
+  ];
+  function el(tag, attrs, txt){
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    if (txt !== undefined) e.textContent = txt;
+    return e;
+  }
+  function fmt(v){ return String(parseFloat(v.toFixed(2))); }
+
+  var g = document.getElementById('t-grid');
+  [0, 0.5, 1].forEach(function(m){
+    g.appendChild(el('line', {x1: 40, x2: 615, y1: Y(m), y2: Y(m), stroke: 'var(--grid)', 'stroke-width': 1}));
+    g.appendChild(el('text', {x: 32, y: Y(m) + 4, 'text-anchor': 'end'}, String(m)));
+  });
+  for (var t = 0; t <= 40; t += 5){
+    g.appendChild(el('line', {x1: X(t), x2: X(t), y1: 220, y2: 226, stroke: 'var(--text-3)', 'stroke-width': 1}));
+    g.appendChild(el('text', {x: X(t), y: 242, 'text-anchor': 'middle'}, String(t)));
+  }
+  g.appendChild(el('line', {x1: 40, x2: 615, y1: 220, y2: 220, stroke: 'var(--text-3)', 'stroke-width': 1}));
+  var labelX = [4, 15, 20, 25, 36];
+  var cg = document.getElementById('t-curves'), dg = document.getElementById('t-dots'), dots = [];
+  SETS.forEach(function(s, i){
+    var d = s.pts.map(function(p, j){ return (j ? 'L' : 'M') + X(p[0]).toFixed(1) + ' ' + Y(p[1]).toFixed(1); }).join(' ');
+    var attrs = {d: d, fill: 'none', stroke: s.col, 'stroke-width': 2.5};
+    if (s.dash) attrs['stroke-dasharray'] = s.dash;
+    cg.appendChild(el('path', attrs));
+    var lab = el('text', {x: X(labelX[i]), y: 26, 'text-anchor': 'middle', 'font-weight': '500'}, s.fa);
+    lab.style.fill = s.col;
+    cg.appendChild(lab);
+    var c = el('circle', {r: 5.5, fill: s.col});
+    dg.appendChild(c); dots.push(c);
+  });
+
+  // chips
+  var chipsBox = document.getElementById('t-chips'), chips = [];
+  SETS.forEach(function(s){
+    var d = document.createElement('div');
+    d.style.borderTopColor = s.col;
+    var name = document.createElement('span'); name.textContent = s.fa + ' ';
+    var en = document.createElement('span'); en.className = 'en'; en.textContent = '(' + s.key + ')';
+    var b = document.createElement('b');
+    d.appendChild(name); d.appendChild(en); d.appendChild(b);
+    chipsBox.appendChild(d); chips.push({box: d, val: b});
+  });
+
+  // set picker
+  var U = []; for (var u = 0; u <= 40; u += 4) U.push(u);
+  var pick = document.getElementById('t-pick'), cur = 1, pickBtns = [];
+  SETS.forEach(function(s, i){
+    var b = document.createElement('button'); b.type = 'button'; b.textContent = s.fa;
+    b.addEventListener('click', function(){ cur = i; render(); });
+    pick.appendChild(b); pickBtns.push(b);
+  });
+
+  var inp = document.getElementById('t-in');
+  function piece(parent, txt, hl){
+    var sp = document.createElement('span'); sp.textContent = txt;
+    if (hl) sp.className = 'hl';
+    parent.appendChild(sp);
+  }
+  function render(){
+    var t = +inp.value;
+    document.getElementById('t-val').textContent = t;
+    var ln = document.getElementById('t-line'); ln.setAttribute('x1', X(t)); ln.setAttribute('x2', X(t));
+    var members = [];
+    SETS.forEach(function(s, i){
+      var m = s.f(t);
+      dots[i].setAttribute('cx', X(t)); dots[i].setAttribute('cy', Y(m));
+      dots[i].style.display = m > 0 ? '' : 'none';
+      chips[i].val.textContent = m.toFixed(2);
+      chips[i].box.classList.toggle('zero', m === 0);
+      if (m > 0) members.push(s.fa + ' با درجه ' + fmt(m));
+    });
+    var msg = 'دمای ' + t + ' درجه عضو ' + members.length + ' مجموعه است: ' + members.join(' و ') + '.';
+    if (members.length === 2) msg += ' (درست مثل اسلاید ۲۸: یک دما، دو مجموعه، دو درجه متفاوت.)';
+    if (members.length === 1) msg += ' (اینجا فقط در یک مجموعه است.)';
+    document.getElementById('t-msg').textContent = msg;
+
+    // notation
+    var s = SETS[cur];
+    pickBtns.forEach(function(b, i){ b.classList.toggle('on', i === cur); });
+    var near = Math.round(t / 4) * 4;
+    var pairs = document.getElementById('t-pairs'), frac = document.getElementById('t-frac');
+    pairs.textContent = ''; frac.textContent = '';
+    piece(pairs, s.key + ' = {');
+    U.forEach(function(x, j){
+      piece(pairs, '(' + x + ', ' + fmt(s.f(x)) + ')', x === near);
+      if (j < U.length - 1) piece(pairs, ', ');
+    });
+    piece(pairs, '}');
+    var nz = U.filter(function(x){ return s.f(x) > 0; });
+    piece(frac, s.key + ' = ');
+    nz.forEach(function(x, j){
+      piece(frac, fmt(s.f(x)) + '/' + x, x === near);
+      if (j < nz.length - 1) piece(frac, ' + ');
+    });
+  }
+  inp.addEventListener('input', render);
+  render();
+})();
+</script>
+</body>
+</html>

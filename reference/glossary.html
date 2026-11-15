@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>واژه‌نامه منطق فازی — فصل ۱ تا ۳</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ===== SHARED STYLE — copy verbatim into every lesson, do not edit per lesson ===== */
+:root{--bg:#fbfaf7;--surface:#ffffff;--surface-1:#f3f1ec;--text:#1f1e1c;--text-2:#5f5e5a;--text-3:#888780;--border:#e3e0d8;--border-strong:#c9c6bc;
+--accent:#534AB7;--accent-bg:#EEEDFE;--ok:#3B6D11;--ok-bg:#EAF3DE;--bad:#A32D2D;--bad-bg:#FCEBEB;--warn:#854F0B;--warn-bg:#FAEEDA;
+--c1:#7F77DD;--c2:#1D9E75;--c3:#EF9F27;--c4:#D4537E;--grid:#e3e0d8}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1a1a19;--surface:#232322;--surface-1:#2c2c2a;--text:#ecebe6;--text-2:#b4b2a9;--text-3:#888780;--border:#3a3a37;--border-strong:#55554f;
+--accent:#AFA9EC;--accent-bg:#26215C;--ok:#97C459;--ok-bg:#173404;--bad:#F09595;--bad-bg:#501313;--warn:#FAC775;--warn-bg:#412402;--grid:#3a3a37}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Vazirmatn,Tahoma,sans-serif;font-size:16px;line-height:1.95}
+main{max-width:760px;margin:0 auto;padding:24px 16px 64px}
+a{color:var(--accent)}
+h1{font-size:26px;font-weight:700;line-height:1.5;margin:6px 0 6px}
+h2{font-size:19px;font-weight:500;margin:0 0 8px}
+h3{font-size:16px;font-weight:500;margin:12px 0 4px}
+p{margin:0 0 10px}
+.top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:13px;color:var(--text-2)}
+.goal{color:var(--text-2);margin-bottom:22px}
+.sec{margin:0 0 28px}
+.lab{font-size:13px;color:var(--text-3);margin:0 0 4px;letter-spacing:0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.soft{background:var(--surface-1);border-radius:12px;padding:12px 14px}
+.m{direction:ltr;unicode-bidi:isolate;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14.5px;white-space:nowrap}
+@media (max-width:700px){.m{white-space:normal}}
+.mb{direction:ltr;text-align:left;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14.5px;background:var(--surface-1);border-radius:8px;padding:8px 12px;margin:6px 0;overflow-x:auto;line-height:1.8}
+.en{direction:ltr;unicode-bidi:isolate;font-size:13px;color:var(--text-2)}
+b,strong{font-weight:500}
+.key{background:var(--warn-bg);color:var(--warn);border-radius:6px;padding:0 6px}
+.tip{border-right:3px solid var(--accent);background:var(--accent-bg);padding:8px 12px;border-radius:0;margin:8px 0}
+.trap{border-right:3px solid var(--bad);background:var(--bad-bg);padding:8px 12px;border-radius:0;margin:8px 0}
+button{font-family:inherit;font-size:14px;background:var(--surface);color:var(--text);border:1px solid var(--border-strong);border-radius:8px;padding:5px 14px;cursor:pointer}
+button:hover{background:var(--surface-1)}
+button.on{background:var(--accent-bg);border-color:var(--accent);color:var(--accent)}
+input[type=text]{font-family:inherit;font-size:15px;direction:ltr;text-align:center;width:72px;height:34px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text)}
+input[type=range]{width:100%;accent-color:var(--accent);direction:ltr}
+table.t{border-collapse:collapse;direction:ltr;font-size:14.5px;margin:6px 0;display:block;max-width:100%;overflow-x:auto}
+table.t>tbody,table.t>thead{display:table;width:100%}
+table.t th,table.t td{border:1px solid var(--border);padding:5px 6px;text-align:center;font-weight:400}
+table.t th{background:var(--surface-1)}
+.ok{background:var(--ok-bg)!important}.no{background:var(--bad-bg)!important}
+.fb{font-size:14px;margin-top:8px;min-height:1em}.fb.good{color:var(--ok)}.fb.bad{color:var(--bad)}
+.q{margin:0 0 18px}
+.mcq .opts{display:grid;gap:6px;margin-top:6px}
+.mcq .opts button{text-align:right;padding:7px 12px}
+.stepper .st{display:none;padding:6px 0;border-bottom:1px dashed var(--border)}
+.stepper .st.show{display:block}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+svg{max-width:100%;height:auto;direction:ltr}
+svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12px}
+.nav{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:14px;border-top:1px solid var(--border);padding-top:14px;margin-top:28px}
+.ask{font-size:14px;color:var(--text-2)}
+@media print{body{background:#fff}.card,.soft{break-inside:avoid}.stepper .st{display:block}button{display:none}}
+/* ===== END SHARED STYLE ===== */
+</style>
+<style>
+/* glossary-specific */
+main{max-width:860px}
+.search{position:sticky;top:0;z-index:2;background:var(--bg);padding:10px 0 8px;border-bottom:1px solid var(--border);margin-bottom:14px}
+.search input{width:100%;font-family:inherit;font-size:16px;height:40px;padding:0 12px;border:1px solid var(--border-strong);border-radius:10px;background:var(--surface);color:var(--text)}
+.search input:focus{outline:2px solid var(--accent);outline-offset:1px}
+.search .cnt{font-size:13px;color:var(--text-3);margin-top:4px}
+.toc{display:flex;flex-wrap:wrap;gap:6px;font-size:14px;margin-top:6px}
+.toc a{text-decoration:none;border:1px solid var(--border);border-radius:999px;padding:0 10px;background:var(--surface)}
+.grp{margin:0 0 26px}
+.grp h2{border-bottom:2px solid var(--accent);padding-bottom:4px;display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.grp h2 small{font-size:13px;color:var(--text-3);font-weight:400}
+.term{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 14px;margin:0 0 8px}
+.term .hd{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.term .fa{font-weight:700;font-size:16.5px}
+.term .eng{direction:ltr;unicode-bidi:isolate;font-size:14px;color:var(--text-2)}
+.term p{margin:4px 0 0}
+.term .avoid{font-size:13.5px;color:var(--text-3)}
+.term .flag{font-size:14px;margin-top:6px;border-right:3px solid var(--warn);background:var(--warn-bg);color:var(--text);padding:3px 10px}
+.term .src{font-size:13px;margin-top:4px}
+.empty{display:none;color:var(--text-2)}
+[hidden]{display:none!important}
+@media print{
+  .search,.toc{display:none}
+  main{max-width:none;padding:0}
+  body{font-size:12.5px;line-height:1.6}
+  .grp h2{font-size:15px}
+  .term{padding:5px 9px;margin-bottom:5px;break-inside:avoid}
+  .term .fa{font-size:13.5px}
+  .grp .list{column-count:2;column-gap:14px}
+  @page{size:A4;margin:12mm}
+}
+</style>
+</head>
+<body>
+<main>
+<div class="top"><a href="../index.html">← فهرست درس‌ها</a><span>مرجع · فصل ۱ تا ۳ · <a href="cheatsheet.html">برگه فرمول‌ها</a></span></div>
+<h1>واژه‌نامه منطق فازی</h1>
+<p class="goal">زبان مشترک همه درس‌ها: هر اصطلاح یک نام فارسی منتخب، نام انگلیسی، تعریف یک‌دوخطی و درسی که آن را یاد می‌دهد. جایی که اسلایدها یا کتاب‌ها چند جور می‌گویند، انتخاب این درس صریح نوشته شده (کادر زرد).</p>
+
+<div class="search">
+  <label for="q" class="lab" style="display:block">جست‌وجو (فارسی یا انگلیسی، مثلاً «اشتراک»، «hedge»، «trimf»)</label>
+  <input type="search" id="q" autocomplete="off" placeholder="یک کلمه بنویس…">
+  <div class="cnt" id="cnt" aria-live="polite"></div>
+  <nav class="toc" aria-label="گروه‌ها">
+    <a href="#g1">مفاهیم پایه</a><a href="#g2">عملیات</a><a href="#g3">قیدها</a><a href="#g4">سیستم و استنتاج</a><a href="#g5">توابع عضویت</a>
+  </nav>
+</div>
+<p class="empty" id="empty">چیزی پیدا نشد. املای دیگری را امتحان کن (مثلاً «فازی‌سازی» یا «fuzzification»).</p>
+
+<!-- ===== 1 ===== -->
+<section class="grp" id="g1"><h2>مفاهیم پایه <small>فصل ۱ · درس ۱ و ۲</small></h2><div class="list">
+
+<div class="term"><div class="hd"><span class="fa">مجموعه قطعی</span><span class="eng">crisp set</span></div>
+<p>مجموعه‌ای که درجه عضویت هر عنصرش فقط ۰ یا ۱ است: یا کاملاً داخل، یا کاملاً بیرون.</p>
+<p class="avoid">به جای این نگو: مجموعه دقیق، مجموعه عادی (در اسلایدها «کلاسیک» هم آمده و هم‌معنی است)</p>
+<p class="src"><a href="../lessons/0001-crisp-vs-fuzzy.html">درس ۱</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">مجموعه فازی</span><span class="eng">fuzzy set</span></div>
+<p>مجموعه‌ای که هر عنصرش یک درجه عضویت در بازه <span class="m">[0, 1]</span> دارد. تعمیم مجموعه قطعی است.</p>
+<p class="src"><a href="../lessons/0001-crisp-vs-fuzzy.html">درس ۱</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">درجه عضویت</span><span class="eng">membership degree · μ_A(x)</span></div>
+<p>عددی در <span class="m">[0, 1]</span> که می‌گوید x چقدر عضو مجموعه فازی A است؛ ۰ یعنی کاملاً بیرون و ۱ یعنی کاملاً داخل.</p>
+<p class="flag">این عدد به تابع عضویتِ انتخاب‌شده بستگی دارد، نه به خود x: قد ۱۷۵ در اسلاید ۱۵ درجه 0.6 و در اسلاید ۱۹ درجه 0.75 می‌گیرد.</p>
+<p class="src"><a href="../lessons/0001-crisp-vs-fuzzy.html">درس ۱</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">تابع عضویت</span><span class="eng">membership function (MF) · μ_A: X → [0,1]</span></div>
+<p>قاعده‌ای که به هر عنصر مجموعه جهانی یک درجه عضویت می‌دهد. شکلش آزاد است؛ تنها شرطش ماندن در <span class="m">[0, 1]</span> است.</p>
+<p class="src"><a href="../lessons/0001-crisp-vs-fuzzy.html">درس ۱</a> · <a href="../lessons/0009-triangle-trapezoid.html">درس ۹</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">مجموعه جهانی</span><span class="eng">universe of discourse · U یا X</span></div>
+<p>همه مقدارهای ممکن x که مجموعه فازی روی آن تعریف می‌شود؛ می‌تواند گسسته یا پیوسته باشد.</p>
+<p class="avoid">به جای این نگو: فضای نمونه (آن اصطلاح احتمال است)</p>
+<p class="src"><a href="../lessons/0002-writing-fuzzy-sets.html">درس ۲</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">نوشتار μ/x</span><span class="eng">Zadeh notation · μ1/x1 + μ2/x2 + …</span></div>
+<p>«عنصر x با درجه μ». علامت <span class="m">/</span> تقسیم نیست، <span class="m">+</span> جمع نیست، و <span class="m">Σ</span> و <span class="m">∫</span> فقط یعنی «فهرست گسسته» و «فهرست پیوسته».</p>
+<p class="flag">تمرین ۱ جفت‌ها را برعکس می‌نویسد: <span class="m">(x, μ)</span> — اول عنصر، بعد درجه. عنصری که در فهرست نیامده درجه ۰ دارد.</p>
+<p class="src"><a href="../lessons/0002-writing-fuzzy-sets.html">درس ۲</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">منطق فازی</span><span class="eng">fuzzy logic</span></div>
+<p>تعمیم منطق کلاسیک که به جای «درست یا نادرست» با درستی نسبی (عددی در <span class="m">[0, 1]</span>) کار می‌کند. پایه‌گذار: لطفی‌زاده، ۱۹۶۵.</p>
+<p class="src"><a href="../lessons/0001-crisp-vs-fuzzy.html">درس ۱</a></p></div>
+</div></section>
+
+<!-- ===== 2 ===== -->
+<section class="grp" id="g2"><h2>عملیات <small>فصل ۲ · درس ۴</small></h2><div class="list">
+
+<div class="term"><div class="hd"><span class="fa">مکمل</span><span class="eng">complement · Ā · NOT</span></div>
+<p>مجموعه‌ای با درجه <span class="m">μ_Ā(x) = 1 − μ_A(x)</span> در هر نقطه.</p>
+<p class="src"><a href="../lessons/0004-union-intersection-complement.html">درس ۴</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">اجتماع</span><span class="eng">union · A ∪ B · OR</span></div>
+<p>مجموعه‌ای با درجه <span class="m">max(μ_A(x), μ_B(x))</span> در هر نقطه: بزرگ‌تر را بردار.</p>
+<p class="src"><a href="../lessons/0004-union-intersection-complement.html">درس ۴</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">اشتراک</span><span class="eng">intersection · A ∩ B · AND</span></div>
+<p>مجموعه‌ای با درجه <span class="m">min(μ_A(x), μ_B(x))</span> در هر نقطه: کوچک‌تر را بردار.</p>
+<p class="src"><a href="../lessons/0004-union-intersection-complement.html">درس ۴</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">عملگرهای منطقی فازی</span><span class="eng">fuzzy AND / OR / NOT</span></div>
+<p>همان اشتراک (min)، اجتماع (max) و مکمل (<span class="m">1 − μ</span>). این سه انتخاب شده‌اند چون روی ورودی‌های ۰ و ۱ دقیقاً همان جواب منطق بولی را می‌دهند.</p>
+<p class="src"><a href="../lessons/0004-union-intersection-complement.html">درس ۴</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">تساوی و زیرمجموعه</span><span class="eng">equality · subset (A ⊆ B)</span></div>
+<p><span class="m">A = B</span> یعنی درجه‌ها در همه x برابرند؛ <span class="m">A ⊆ B</span> یعنی در همه x داریم <span class="m">μ_A ≤ μ_B</span>. یک نقطه خراب کافی است تا برقرار نباشد.</p>
+<p class="src"><a href="../lessons/0004-union-intersection-complement.html">درس ۴</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">قانون طرد شق ثالث</span><span class="eng">law of excluded middle</span></div>
+<p>در مجموعه قطعی <span class="m">A ∪ Ā = X</span> و <span class="m">A ∩ Ā = ∅</span>. در فازی هیچ‌کدام برقرار نیست؛ مثلاً با <span class="m">μ = 0.6</span>: <span class="m">min(0.6, 0.4) = 0.4 ≠ 0</span>.</p>
+<p class="flag">کتاب‌ها (Ross) فقط <span class="m">A ∪ Ā = X</span> را «طرد شق ثالث» و <span class="m">A ∩ Ā = ∅</span> را «قانون تناقض» <span class="en">(law of contradiction)</span> می‌نامند. درس‌ها هر دو را زیر همین نام آورده‌اند؛ در امتحان هر دو را بنویس.</p>
+<p class="src"><a href="../lessons/0004-union-intersection-complement.html">درس ۴</a></p></div>
+</div></section>
+
+<!-- ===== 3 ===== -->
+<section class="grp" id="g3"><h2>قیدها <small>فصل ۲ · درس ۵</small></h2><div class="list">
+
+<div class="term"><div class="hd"><span class="fa">قید زبانی</span><span class="eng">linguistic hedge</span></div>
+<p>کلمه‌ای مثل «خیلی» یا «تا حدی» که با یک فرمول نقطه‌به‌نقطه روی μ، از یک مجموعه فازی مجموعه فازی تازه‌ای می‌سازد.</p>
+<p class="avoid">به جای این نگو: صفت، اصلاح‌کننده (در بعضی کتاب‌ها modifier هم‌معنی است)</p>
+<p class="src"><a href="../lessons/0005-hedges.html">درس ۵</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">تمرکز — «خیلی»</span><span class="eng">concentration · CON(A) · very</span></div>
+<p>قیدی با فرمول <span class="m">(μ_A)²</span>: مجموعه را سخت‌گیرتر و منحنی را جمع‌تر می‌کند.</p>
+<p class="src"><a href="../lessons/0005-hedges.html">درس ۵</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">«خیلی خیلی»</span><span class="eng">very very · POW(A)</span></div>
+<p>قیدی که در این درس با <span class="m">(μ_A)³</span> حساب می‌شود (اسلاید ۵۲).</p>
+<p class="flag">در این درس very very = <span class="m">μ³</span>. بیشتر کتاب‌ها (Ross) آن را <span class="m">μ⁴</span> (دو بار very) می‌گیرند و Negnevitsky توان ۳ را برای extremely به کار می‌برد. در امتحان فرمول را کنار جواب بنویس.</p>
+<p class="src"><a href="../lessons/0005-hedges.html">درس ۵</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">«نه خیلی»</span><span class="eng">not very</span></div>
+<p>مکمل «خیلی»: <span class="m">1 − (μ_A)²</span>.</p>
+<p class="flag">«not very» با «very not» یکی نیست: دومی <span class="m">(1 − μ_A)²</span> است.</p>
+<p class="src"><a href="../lessons/0005-hedges.html">درس ۵</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">اتساع — «تا حدی»</span><span class="eng">dilation · DIL(A) · somewhat / more or less</span></div>
+<p>قیدی با فرمول <span class="m">(μ_A)^0.5</span>: مجموعه را آسان‌گیرتر و منحنی را پهن‌تر می‌کند.</p>
+<p class="src"><a href="../lessons/0005-hedges.html">درس ۵</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">تشدید — «واقعاً»</span><span class="eng">intensification · INT(A) · indeed</span></div>
+<p>قید دوشاخه: <span class="m">2μ²</span> اگر <span class="m">μ ≤ 0.5</span>، و <span class="m">1 − 2(1−μ)²</span> اگر <span class="m">μ ≥ 0.5</span>. درجه‌های زیر 0.5 را پایین‌تر و بالای 0.5 را بالاتر می‌برد؛ خود 0.5 ثابت می‌ماند.</p>
+<p class="src"><a href="../lessons/0005-hedges.html">درس ۵</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">«کمی»</span><span class="eng">slightly</span></div>
+<p>قیدی که اسلاید ۵۱ نامش را می‌آورد ولی فرمولی برایش نمی‌دهد.</p>
+<p class="flag">در این درس فرمولی برای slightly نداریم؛ انتظار محاسبه‌اش را نداشته باش.</p>
+<p class="src"><a href="../lessons/0005-hedges.html">درس ۵</a></p></div>
+</div></section>
+
+<!-- ===== 4 ===== -->
+<section class="grp" id="g4"><h2>سیستم و استنتاج <small>فصل ۱ و ۲ · درس ۳، ۶، ۷، ۸</small></h2><div class="list">
+
+<div class="term"><div class="hd"><span class="fa">قاعده اگر-آنگاه فازی</span><span class="eng">fuzzy IF-THEN rule</span></div>
+<p>جمله‌ای به شکل <span class="m">IF x IS A THEN y IS B</span> که یک تکه دانش خبره را با مجموعه‌های فازی نگه می‌دارد.</p>
+<p class="avoid">به جای این نگو: عملگر فازی (اسلاید ۲۷ قواعد را این‌طور نامیده؛ گیج‌کننده است). «قانون فازی» هم‌معنی است.</p>
+<p class="src"><a href="../lessons/0003-fuzzy-system-pipeline.html">درس ۳</a> · <a href="../lessons/0006-fuzzy-expert-system.html">درس ۶</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">شرط / نتیجه</span><span class="eng">antecedent / consequent</span></div>
+<p>شرط بخش «اگر» یک قاعده اگر-آنگاه فازی است و نتیجه بخش «آنگاه». در شرط می‌شود چند مجموعه را با and، or و not ترکیب کرد.</p>
+<p class="avoid">اسلاید ۶۴ به جای consequent نوشته consequence؛ هم‌معنی است.</p>
+<p class="src"><a href="../lessons/0006-fuzzy-expert-system.html">درس ۶</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">متغیر زبانی</span><span class="eng">linguistic variable</span></div>
+<p>کمیتی که مقدارش به جای عدد، کلمه است؛ مثل «قد» <span class="en">(height)</span>.</p>
+<p class="src"><a href="../lessons/0006-fuzzy-expert-system.html">درس ۶</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">مقدار زبانی</span><span class="eng">linguistic value</span></div>
+<p>یکی از کلمه‌هایی که متغیر زبانی می‌گیرد؛ مثل «بلند» <span class="en">(tall)</span> برای قد.</p>
+<p class="flag">مقدار زبانی (کلمه tall) با مجموعه فازی (عددهایی که معنی tall را می‌گویند) یکی نیست.</p>
+<p class="src"><a href="../lessons/0006-fuzzy-expert-system.html">درس ۶</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">پایگاه دانش</span><span class="eng">knowledge base</span></div>
+<p>قلب سیستم فازی: مجموعه قاعده‌های اگر-آنگاه فازی به‌علاوه مجموعه‌های فازی‌ای که در آن‌ها به کار رفته‌اند.</p>
+<p class="avoid">اسلاید ۶۶ «پایگاه داده» هم گفته؛ «پایگاه دانش» دقیق‌تر است.</p>
+<p class="src"><a href="../lessons/0003-fuzzy-system-pipeline.html">درس ۳</a> · <a href="../lessons/0006-fuzzy-expert-system.html">درس ۶</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">سیستم فازی خالص</span><span class="eng">pure fuzzy system</span></div>
+<p>سیستمی که مجموعه فازی می‌گیرد و مجموعه فازی می‌دهد؛ چون سیستم‌های مهندسی با عدد کار می‌کنند، به‌تنهایی کاربرد مهندسی ندارد.</p>
+<p class="src"><a href="../lessons/0003-fuzzy-system-pipeline.html">درس ۳</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">سیستم تاکاگی–سوگنو–کانگ</span><span class="eng">TSK fuzzy system</span></div>
+<p>سیستمی که عدد می‌گیرد و عدد می‌دهد و بخش «آنگاه» قاعده‌هایش یک فرمول است (مثل <span class="m">y = c·x</span>). عیب: جایی برای دانش زبانی و انعطاف کم.</p>
+<p class="src"><a href="../lessons/0003-fuzzy-system-pipeline.html">درس ۳</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">سیستم فازی با فازی‌ساز و غیرفازی‌ساز</span><span class="eng">fuzzy system with fuzzifier and defuzzifier</span></div>
+<p>سیستم فازی خالص که یک فازی‌ساز جلوی آن و یک غیرفازی‌ساز پشت آن گذاشته شده؛ عیب هر دو نوع قبلی را برطرف می‌کند.</p>
+<p class="flag">در این درس «سیستم فازی» بدون پسوند یعنی همین نوع سوم.</p>
+<p class="src"><a href="../lessons/0003-fuzzy-system-pipeline.html">درس ۳</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">فازی‌ساز / غیرفازی‌ساز</span><span class="eng">fuzzifier / defuzzifier</span></div>
+<p>فازی‌ساز بخشی است که عدد ورودی را به مجموعه فازی تبدیل می‌کند؛ غیرفازی‌ساز بخشی است که مجموعه فازی خروجی را به عدد برمی‌گرداند.</p>
+<p class="avoid">اسلاید ۳۳ نوشته Fuzzier و Defuzzier؛ املای درست fuzzifier و defuzzifier است.</p>
+<p class="src"><a href="../lessons/0003-fuzzy-system-pipeline.html">درس ۳</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">فازی‌سازی</span><span class="eng">fuzzification</span></div>
+<p>مرحله اول: تبدیل عدد ورودی به درجه عضویتش در هر مجموعه فازی، با خواندن تابع عضویت در آن نقطه.</p>
+<p class="src"><a href="../lessons/0003-fuzzy-system-pipeline.html">درس ۳</a> · <a href="../lessons/0006-fuzzy-expert-system.html">درس ۶</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">استنتاج فازی</span><span class="eng">fuzzy inference</span></div>
+<p>مرحله دوم: ارزیابی قاعده‌های اگر-آنگاه فازی با ورودی‌های فازی‌شده تا خروجی فازی هر قاعده (و درجه درستی آن) به دست آید.</p>
+<p class="src"><a href="../lessons/0003-fuzzy-system-pipeline.html">درس ۳</a> · <a href="../lessons/0006-fuzzy-expert-system.html">درس ۶</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">تجمیع (ساخت/ترکیب)</span><span class="eng">aggregation</span></div>
+<p>مرحله سوم: یکی کردن خروجی همه قاعده‌ها در یک نتیجه فازی کلی.</p>
+<p class="flag">اسلایدها این مرحله را «ترکیب» <span class="en">(composition)</span> هم می‌نامند، ولی «ترکیب max-min» (<span class="m">∘</span>) چیز دیگری است. در این واژه‌نامه مرحله سوم = «تجمیع».</p>
+<p class="src"><a href="../lessons/0003-fuzzy-system-pipeline.html">درس ۳</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">غیرفازی‌سازی</span><span class="eng">defuzzification</span></div>
+<p>مرحله چهارم: تبدیل مجموعه فازی خروجی به یک عدد قطعی قابل استفاده. در این درس با میانگین وزنی انجام می‌شود.</p>
+<p class="avoid">اسلاید: «بازگرداندن از حالت فازی» — هم‌معنی، ولی طولانی.</p>
+<p class="src"><a href="../lessons/0003-fuzzy-system-pipeline.html">درس ۳</a> · <a href="../lessons/0008-max-product-defuzzify.html">درس ۸</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">سیستم خبره فازی</span><span class="eng">fuzzy expert system</span></div>
+<p>برنامه‌ای که دانش خبره را به شکل قاعده‌های اگر-آنگاه فازی نگه می‌دارد. پنج گام ساخت: مسئله ← متغیرهای زبانی ← مجموعه‌های فازی ← قاعده‌ها ← استنتاج.</p>
+<p class="src"><a href="../lessons/0006-fuzzy-expert-system.html">درس ۶</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">ماتریس قانون</span><span class="eng">rule (relation) matrix · R</span></div>
+<p>ماتریسی که یک قاعده «اگر x برابر A آنگاه y برابر B» را نگه می‌دارد: سطر = نقطه x، ستون = نقطه y، و خانه <span class="m">r_ij = min(a_i , b_j)</span>.</p>
+<p class="avoid">اسلایدها همین ماتریس را M، <span class="m">μ_AB</span> و <span class="m">μ_ij</span> نامیده‌اند؛ هر سه یکی‌اند. اینجا R.</p>
+<p class="src"><a href="../lessons/0007-max-min-inference.html">درس ۷</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">ترکیب max-min</span><span class="eng">max-min composition · ∘</span></div>
+<p>نسخه فازی ضرب بردار در ماتریس: <span class="m">b_j = max_i min(a_i , r_ij)</span>؛ ضرب ← min و جمع ← max.</p>
+<p class="src"><a href="../lessons/0007-max-min-inference.html">درس ۷</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">قاعده ترکیبی استنتاج</span><span class="eng">compositional rule of inference (Zadeh)</span></div>
+<p>از اطلاعات تازه درباره A (یعنی A′) و ماتریس قانون، اطلاعات درباره B به دست می‌آید: <span class="m">B′ = A′ ∘ R</span>.</p>
+<p class="src"><a href="../lessons/0007-max-min-inference.html">درس ۷</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">ورودی قطعی و بردار A′</span><span class="eng">crisp input → A′</span></div>
+<p>برای ورودی عددی <span class="m">x0</span>، بردار A′ در جای <span class="m">x0</span> مقدار <span class="m">μ_A(x0)</span> و در بقیه جاها صفر دارد (اسلاید ۷۷).</p>
+<p class="flag">اسلایدها <span class="m">μ_A(x0)</span> می‌گذارند، نه ۱ (کتاب‌ها اغلب ۱). در max-min فرقی نمی‌کند؛ در max-product عضویت‌های B′ فرق می‌کنند ولی y* یکی است.</p>
+<p class="src"><a href="../lessons/0008-max-product-defuzzify.html">درس ۸</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">استنتاج max-product</span><span class="eng">max-product inference</span></div>
+<p>همان استنتاج max-min با این فرق که به جای min ضرب می‌آید؛ برای یک ورودی قطعی با عضویت α نتیجه <span class="m">B′ = α²·B</span> است: B کوچک می‌شود ولی شکلش می‌ماند.</p>
+<p class="flag">اسلاید ۸۰ یک جمله است. در این درس ضرب در هر دو جا (ساخت R و ترکیب) — تمرین ۲: y* = 77. اگر R با min ساخته شود و فقط ترکیب ضربی باشد: 75. از استاد بپرس کدام را می‌خواهد.</p>
+<p class="src"><a href="../lessons/0008-max-product-defuzzify.html">درس ۸</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">میانگین وزنی</span><span class="eng">weighted average defuzzification</span></div>
+<p>روش غیرفازی‌سازی اسلایدها: <span class="m">y* = Σ y_j·μ(y_j) / Σ μ(y_j)</span>؛ هر نقطه به اندازه عضویتش جواب را به سمت خودش می‌کشد.</p>
+<p class="flag">اگر همه عضویت‌های B′ صفر باشند (ورودی بیرون از A)، کسر <span class="m">0/0</span> و جواب تعریف‌نشده است.</p>
+<p class="src"><a href="../lessons/0008-max-product-defuzzify.html">درس ۸</a></p></div>
+</div></section>
+
+<!-- ===== 5 ===== -->
+<section class="grp" id="g5"><h2>توابع عضویت <small>فصل ۳ · درس ۹ و ۱۰</small></h2><div class="list">
+
+<div class="term"><div class="hd"><span class="fa">تابع مثلثی</span><span class="eng">triangular MF · trimf(x,[a b c])</span></div>
+<p>تابع عضویت تکه‌ای خطی با گوشه‌های <span class="m">(a,0), (b,1), (c,0)</span>.</p>
+<p class="src"><a href="../lessons/0009-triangle-trapezoid.html">درس ۹</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">تابع ذوزنقه‌ای</span><span class="eng">trapezoidal MF · trapmf(x,[a b c d])</span></div>
+<p>تابع عضویت تکه‌ای خطی با گوشه‌های <span class="m">(a,0), (b,1), (c,1), (d,0)</span>؛ بین b و c مقدار ۱ دارد.</p>
+<p class="src"><a href="../lessons/0009-triangle-trapezoid.html">درس ۹</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">شانه</span><span class="eng">shoulder</span></div>
+<p>تابع ذوزنقه‌ای یا مثلثی که یک طرفش شیب ندارد (<span class="m">a = b</span> یا <span class="m">c = d</span>) و تا لبه محور روی ۱ می‌ماند؛ مثل «سرد» در <span class="m">trapmf(x,[0 0 10 30])</span>.</p>
+<p class="src"><a href="../lessons/0009-triangle-trapezoid.html">درس ۹</a> · <a href="../lessons/0006-fuzzy-expert-system.html">درس ۶</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">تابع گاوسی</span><span class="eng">Gaussian MF · gaussmf(x,[sigma c])</span></div>
+<p>تابع عضویت هموار <span class="m">e^(−(x−c)²/(2σ²))</span> با مرکز c و پهنای σ؛ قله‌اش دقیقاً ۱ است.</p>
+<p class="flag">ترتیب پارامترها: اول σ بعد c. فرمول با ضریب <span class="m">1/(√(2π)σ)</span> در اسلاید ۸۷ چگالی احتمال است، نه تابع عضویت؛ و «guassmf» در همان اسلاید غلط تایپی است.</p>
+<p class="src"><a href="../lessons/0010-gaussian-bell-sigmoid.html">درس ۱۰</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">گاوسی دوطرفه</span><span class="eng">two-sided Gaussian · gauss2mf(x,[sig1 c1 sig2 c2])</span></div>
+<p>تابع عضویتی که سمت چپش گاوسی <span class="m">(σ1, c1)</span> و سمت راستش گاوسی <span class="m">(σ2, c2)</span> است؛ اگر <span class="m">c1 &lt; c2</span> بین آن دو مقدار ۱ دارد.</p>
+<p class="flag">اسلاید ۸۹ به جای σ علامت ∂ گذاشته؛ منظور همان σ است.</p>
+<p class="src"><a href="../lessons/0010-gaussian-bell-sigmoid.html">درس ۱۰</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">زنگوله‌ای تعمیم‌یافته</span><span class="eng">generalized bell MF · gbellmf(x,[a b c])</span></div>
+<p>تابع عضویت هموار <span class="m">1/(1 + |(x−c)/a|^(2b))</span>: c مرکز، a نیم‌پهنا (در <span class="m">c ± a</span> مقدار 0.5)، b شیب دیواره‌ها.</p>
+<p class="src"><a href="../lessons/0010-gaussian-bell-sigmoid.html">درس ۱۰</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">سیگموئید</span><span class="eng">sigmoid MF · sigmf(x,[a c])</span></div>
+<p>تابع عضویت یکنوای <span class="m">1/(1 + e^(−a(x−c)))</span> که در <span class="m">x = c</span> مقدار 0.5 دارد؛ a مثبت یعنی بالارونده و a منفی یعنی پایین‌رونده.</p>
+<p class="flag">اسلاید ۹۳ فقط <span class="m">S(x) = 1/(1+e^(−x))</span> را بدون پارامتر می‌دهد؛ همان <span class="m">sigmf(x,[1 0])</span> است. شکل پارامتردار از MathWorks است.</p>
+<p class="src"><a href="../lessons/0010-gaussian-bell-sigmoid.html">درس ۱۰</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">توابع Z، S و Pi</span><span class="eng">zmf(x,[a b]) · smf(x,[a b]) · pimf(x,[a b c d])</span></div>
+<p>توابع عضویت چندجمله‌ای هموار: Z از ۱ به ۰ می‌رود، S از ۰ به ۱، و Pi بالا می‌رود، روی ۱ می‌ماند و پایین می‌آید. S و Z در <span class="m">(a+b)/2</span> مقدار 0.5 دارند.</p>
+<p class="src"><a href="../lessons/0010-gaussian-bell-sigmoid.html">درس ۱۰</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">یکنوا</span><span class="eng">monotonic</span></div>
+<p>تابعی که فقط در یک جهت حرکت می‌کند (همیشه بالا یا همیشه پایین)؛ مثل سیگموئید.</p>
+<p class="src"><a href="../lessons/0010-gaussian-bell-sigmoid.html">درس ۱۰</a></p></div>
+
+<div class="term"><div class="hd"><span class="fa">هموار</span><span class="eng">smooth</span></div>
+<p>تابعی با منحنی نرم و بدون گوشه تیز؛ مثل گاوسی و زنگوله‌ای (برخلاف مثلثی و ذوزنقه‌ای). اسلاید ۹۴: به همین دلیل محبوب‌اند و هیچ‌جا دقیقاً صفر نمی‌شوند.</p>
+<p class="src"><a href="../lessons/0010-gaussian-bell-sigmoid.html">درس ۱۰</a></p></div>
+</div></section>
+
+<p class="ask">اصطلاحی کم است یا تعریفی را دقیق نمی‌فهمی؟ در چت از من (Claude) بپرس.</p>
+<div class="nav"><a href="../index.html">← فهرست درس‌ها</a><a href="cheatsheet.html">برگه فرمول‌ها →</a></div>
+</main>
+
+<script>
+/* glossary filter */
+(function(){
+var q=document.getElementById('q'),cnt=document.getElementById('cnt'),empty=document.getElementById('empty');
+var terms=[].slice.call(document.querySelectorAll('.term')),groups=[].slice.call(document.querySelectorAll('.grp'));
+function norm(s){return (s||'').toLowerCase().replace(/[‌‏‎]/g,'').replace(/ي/g,'ی').replace(/ك/g,'ک').replace(/[أإآ]/g,'ا').replace(/\s+/g,' ').trim()}
+terms.forEach(function(t){t._txt=norm(t.textContent)});
+function fa(n){return String(n).replace(/\d/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'[d]})}
+function run(){
+  var v=norm(q.value),shown=0;
+  terms.forEach(function(t){var hit=!v||t._txt.indexOf(v)>=0;t.hidden=!hit;if(hit)shown++});
+  groups.forEach(function(g){g.hidden=!g.querySelector('.term:not([hidden])')});
+  empty.style.display=shown?'none':'block';
+  cnt.textContent=v?fa(shown)+' اصطلاح از '+fa(terms.length):fa(terms.length)+' اصطلاح';
+}
+q.addEventListener('input',run);
+q.addEventListener('keydown',function(e){if(e.key==='Escape'){q.value='';run()}});
+run();
+})();
+</script>
+</body>
+</html>

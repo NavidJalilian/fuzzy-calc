@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>درس ۷ — استنتاج max-min</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ===== SHARED STYLE — copy verbatim into every lesson, do not edit per lesson ===== */
+:root{--bg:#fbfaf7;--surface:#ffffff;--surface-1:#f3f1ec;--text:#1f1e1c;--text-2:#5f5e5a;--text-3:#888780;--border:#e3e0d8;--border-strong:#c9c6bc;
+--accent:#534AB7;--accent-bg:#EEEDFE;--ok:#3B6D11;--ok-bg:#EAF3DE;--bad:#A32D2D;--bad-bg:#FCEBEB;--warn:#854F0B;--warn-bg:#FAEEDA;
+--c1:#7F77DD;--c2:#1D9E75;--c3:#EF9F27;--c4:#D4537E;--grid:#e3e0d8}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1a1a19;--surface:#232322;--surface-1:#2c2c2a;--text:#ecebe6;--text-2:#b4b2a9;--text-3:#888780;--border:#3a3a37;--border-strong:#55554f;
+--accent:#AFA9EC;--accent-bg:#26215C;--ok:#97C459;--ok-bg:#173404;--bad:#F09595;--bad-bg:#501313;--warn:#FAC775;--warn-bg:#412402;--grid:#3a3a37}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Vazirmatn,Tahoma,sans-serif;font-size:16px;line-height:1.95}
+main{max-width:760px;margin:0 auto;padding:24px 16px 64px}
+a{color:var(--accent)}
+h1{font-size:26px;font-weight:700;line-height:1.5;margin:6px 0 6px}
+h2{font-size:19px;font-weight:500;margin:0 0 8px}
+h3{font-size:16px;font-weight:500;margin:12px 0 4px}
+p{margin:0 0 10px}
+.top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:13px;color:var(--text-2)}
+.goal{color:var(--text-2);margin-bottom:22px}
+.sec{margin:0 0 28px}
+.lab{font-size:13px;color:var(--text-3);margin:0 0 4px;letter-spacing:0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.soft{background:var(--surface-1);border-radius:12px;padding:12px 14px}
+.m{direction:ltr;unicode-bidi:isolate;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14.5px;white-space:nowrap}
+@media (max-width:700px){.m{white-space:normal}}
+.mb{direction:ltr;text-align:left;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14.5px;background:var(--surface-1);border-radius:8px;padding:8px 12px;margin:6px 0;overflow-x:auto;line-height:1.8}
+.en{direction:ltr;unicode-bidi:isolate;font-size:13px;color:var(--text-2)}
+b,strong{font-weight:500}
+.key{background:var(--warn-bg);color:var(--warn);border-radius:6px;padding:0 6px}
+.tip{border-right:3px solid var(--accent);background:var(--accent-bg);padding:8px 12px;border-radius:0;margin:8px 0}
+.trap{border-right:3px solid var(--bad);background:var(--bad-bg);padding:8px 12px;border-radius:0;margin:8px 0}
+button{font-family:inherit;font-size:14px;background:var(--surface);color:var(--text);border:1px solid var(--border-strong);border-radius:8px;padding:5px 14px;cursor:pointer}
+button:hover{background:var(--surface-1)}
+button.on{background:var(--accent-bg);border-color:var(--accent);color:var(--accent)}
+input[type=text]{font-family:inherit;font-size:15px;direction:ltr;text-align:center;width:72px;height:34px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text)}
+input[type=range]{width:100%;accent-color:var(--accent);direction:ltr}
+table.t{border-collapse:collapse;direction:ltr;font-size:14.5px;margin:6px 0;display:block;max-width:100%;overflow-x:auto}
+table.t>tbody,table.t>thead{display:table;width:100%}
+table.t th,table.t td{border:1px solid var(--border);padding:5px 6px;text-align:center;font-weight:400}
+table.t th{background:var(--surface-1)}
+.ok{background:var(--ok-bg)!important}.no{background:var(--bad-bg)!important}
+.fb{font-size:14px;margin-top:8px;min-height:1em}.fb.good{color:var(--ok)}.fb.bad{color:var(--bad)}
+.q{margin:0 0 18px}
+.mcq .opts{display:grid;gap:6px;margin-top:6px}
+.mcq .opts button{text-align:right;padding:7px 12px}
+.stepper .st{display:none;padding:6px 0;border-bottom:1px dashed var(--border)}
+.stepper .st.show{display:block}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+svg{max-width:100%;height:auto;direction:ltr}
+svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12px}
+.nav{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:14px;border-top:1px solid var(--border);padding-top:14px;margin-top:28px}
+.ask{font-size:14px;color:var(--text-2)}
+@media print{body{background:#fff}.card,.soft{break-inside:avoid}.stepper .st{display:block}button{display:none}}
+/* ===== END SHARED STYLE ===== */
+</style>
+<style>
+/* lesson 7 only */
+.mb{white-space:pre}
+.matw{display:flex;align-items:center;gap:8px;direction:ltr;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14px;margin:6px 0}
+.mat{border-collapse:collapse;border-left:2px solid var(--text-2);border-right:2px solid var(--text-2);border-radius:4px}
+.mat td{padding:2px 10px;text-align:center}
+.sl{display:grid;grid-template-columns:70px 1fr 44px;gap:8px;align-items:center;direction:ltr;font-size:14px}
+.sl span{font-family:"SF Mono",Menlo,Consolas,monospace}
+.cell{cursor:pointer}
+</style>
+</head>
+<body>
+<main>
+<div class="top"><a href="../index.html">← فهرست درس‌ها</a><span>درس ۷ از ۱۱ · فصل ۲ · حدود ۱۵ دقیقه</span></div>
+<h1>استنتاج max-min</h1>
+<p class="goal">هدف: بعد از این درس می‌توانی یک قانون «اگر x برابر A است آنگاه y برابر B است» را به یک ماتریس تبدیل کنی، و با ترکیب max-min خروجی را برای هر ورودی حساب کنی — درست مثل مثال اسلاید ۷۲.</p>
+
+<!-- ===== 1. IDEA ===== -->
+<section class="sec"><p class="lab">۱. ایده</p>
+<div class="card">
+  <h3>قانون فازی و ماتریس آن</h3>
+  <p>در سیستم خبره فازی، دانش به شکل قانون نوشته می‌شود <span class="en">(slide 69)</span>:</p>
+  <div class="mb">If x is A then y is B</div>
+  <p>A و B هر دو مجموعه فازی‌اند. سیستم، جفت <span class="m">(A,B)</span> را در قالب یک <b>ماتریس</b> به نام <span class="m">M</span> ذخیره می‌کند. کار M این است که مجموعه A را به مجموعه B <b>نگاشت</b> کند (یعنی از A به B برساند). دو روش برای این کار در اسلایدها آمده: <span class="m">Max-Min</span> (همین درس) و <span class="m">Max-product</span> (درس بعد).</p>
+
+  <h3>ضرب بردار در ماتریس — نسخه معمولی و نسخه فازی</h3>
+  <p>در ضرب معمولی بردار در ماتریس <span class="en">(vector-matrix multiplication)</span> داریم <span class="en">(slide 70)</span>:</p>
+  <div class="mb">X(1×n) · A(n×p) = Y(1×p)        y_j = Σ_{i=1..n} x_i · a_ij</div>
+  <p>نسخه فازی، که به آن ترکیب max-min <span class="en">(max-min composition)</span> می‌گویند و با علامت <span class="m">∘</span> نشان می‌دهند، همان کار را می‌کند با دو جابه‌جایی:</p>
+  <ul>
+    <li>به جای <b>ضرب</b> دوبه‌دو ← <b>min</b> دوبه‌دو</li>
+    <li>به جای <b>جمع</b> ← <b>max</b></li>
+  </ul>
+  <div class="mb">A(1×n) ∘ M(n×p) = B(1×p)        b_j = max_{1≤i≤n} { min(a_i , m_ij) }</div>
+  <p><span class="key">دستور کار برای b_j:</span> ستون j ماتریس را از بالا به پایین بخوان؛ هر عدد ستون را با عدد هم‌ردیفش در A جفت کن و min بگیر؛ از این minها، بزرگ‌ترین (max) را بردار.</p>
+  <div class="tip">یادآوری از درس ۴: <span class="m">min</span> همان اشتراک <span class="en">(intersection, AND)</span> است و <span class="m">max</span> همان اجتماع <span class="en">(union, OR)</span>. پس b_j یعنی: «یا (x1 و ستون) یا (x2 و ستون) یا …».</div>
+
+  <h3>ساختن ماتریس قانون از A و B</h3>
+  <p>اگر <span class="m">A = (a_1, …, a_n)</span> با <span class="m">a_i = μ_A(x_i)</span> و <span class="m">B = (b_1, …, b_p)</span> با <span class="m">b_j = μ_B(y_j)</span> باشد، ماتریس فازی <span class="m">M(n×p)</span> این‌طور ساخته می‌شود <span class="en">(slide 71)</span>:</p>
+  <div class="mb">m_ij = min(a_i , b_j)</div>
+  <p>هر <b>سطر</b> یک نقطه از x است و هر <b>ستون</b> یک نقطه از y.</p>
+
+  <h3>قاعده ترکیبی استنتاج زاده</h3>
+  <p>پروفسور لطفی‌زاده: اگر اطلاعاتی درباره A داشته باشیم و اسمش را <span class="m">A′</span> بگذاریم، با کمک ماتریس قانون می‌توانیم اطلاعاتی درباره B به دست بیاوریم و اسمش را <span class="m">B′</span> بگذاریم. به این روش قاعده ترکیبی استنتاج <span class="en">(compositional rule of inference)</span> می‌گویند <span class="en">(slide 73)</span>:</p>
+  <div class="mb">B′ = A′ ∘ μ_AB</div>
+  <div class="tip">نام‌گذاری اسلایدها: یک ماتریس قانون با سه اسم آمده — <span class="m">M</span> (اسلاید ۷۱)، <span class="m">μ_AB</span> (اسلاید ۷۳) و <span class="m">μ_ij</span> (اسلاید ۷۵). هر سه یکی‌اند. در کتاب‌ها معمولاً <span class="m">R</span> (رابطه، <span class="en">relation</span>) می‌نویسند.</div>
+  <div class="trap">دو نکته درباره اسلایدها:
+    (۱) در اسلاید ۷۲ ماتریس M از A و B ساخته نشده؛ فقط یک ماتریس دلخواه است تا عملگر ∘ را تمرین کنیم.
+    (۲) در اسلاید ۷۱ نوشته شده <span class="m">b_i = μ_B(y_i)</span>؛ منظور <span class="m">b_j = μ_B(y_j)</span> است. و در اسلاید ۷۵–۷۶ آخرین خانه ماتریس <span class="m">min(0,0.6)</span> نوشته شده، در حالی که درستش <span class="m">min(0,0)</span> است (چون عضویت B در ۵۰ صفر است). جواب هر دو صفر است، پس نتیجه عوض نمی‌شود.</div>
+</div></section>
+
+<!-- ===== 2. SEE IT ===== -->
+<section class="sec"><p class="lab">۲. ببین چه اتفاقی می‌افتد</p>
+<div class="card">
+  <h3>الف) ترکیب max-min: روی هر b_j کلیک کن</h3>
+  <div class="row" id="cmpPreset">
+    <button class="on" data-p="0">مثال اسلاید ۷۲</button>
+    <button data-p="1">قانون دما ← سرعت، ورودی ۱۲۵</button>
+  </div>
+  <svg id="cmpSvg" viewBox="0 0 600 320" role="img" aria-labelledby="cmpTitle"><title id="cmpTitle">ترکیب max-min: بردار A کنار ماتریس M؛ برای ستون انتخاب‌شده، minهای دوبه‌دو و بزرگ‌ترین آن‌ها نشان داده می‌شود</title></svg>
+  <div class="row" id="cmpPick"></div>
+  <div class="mb" id="cmpOut"></div>
+  <p style="font-size:14px;color:var(--text-2)">عددهای بردار ورودی را تغییر بده و ببین کدام سطر «برنده» max می‌شود:</p>
+  <div id="cmpSliders"></div>
+
+  <h3 style="margin-top:20px">ب) ساختن ماتریس قانون خانه به خانه (مثال اسلاید ۷۴)</h3>
+  <p style="font-size:14px">A = دمای نرمال روی x، و B = سرعت متوسط روی y. هر خانه: <span class="m">min(a_i , b_j)</span>.</p>
+  <svg id="relSvg" viewBox="0 0 480 280" role="img" aria-labelledby="relTitle"><title id="relTitle">ساخت ماتریس قانون: هر خانه کمینه عضویت سطر و ستون است</title></svg>
+  <div class="row"><button id="relNext">خانه بعدی</button><button id="relAll">پر کردن همه</button><button id="relReset">پاک کردن</button></div>
+  <div class="mb" id="relOut">روی «خانه بعدی» یا روی هر خانه جدول کلیک کن.</div>
+</div></section>
+
+<!-- ===== 3. WORKED EXAMPLE ===== -->
+<section class="sec"><p class="lab">۳. مثال حل‌شده، قدم به قدم</p>
+<div class="card stepper">
+  <h3>مثال اسلاید ۷۲: B = A ∘ M را حساب کن</h3>
+  <div class="mb">A = (0.2 , 0.4 , 0.6 , 1)</div>
+  <div class="matw"><span>M =</span><table class="mat"><tr><td>0.1</td><td>0.6</td><td>0.8</td></tr><tr><td>0.6</td><td>0.8</td><td>0.6</td></tr><tr><td>0.8</td><td>0.6</td><td>0.5</td></tr><tr><td>0.0</td><td>0.5</td><td>0.5</td></tr></table></div>
+  <div class="st">قدم ۱ — اندازه‌ها: A یک بردار <span class="m">1×4</span> است و M یک ماتریس <span class="m">4×3</span>؛ پس B یک بردار <span class="m">1×3</span> است (سه عدد: b1، b2، b3).</div>
+  <div class="st">قدم ۲ — b1 از ستون اول <span class="m">(0.1, 0.6, 0.8, 0.0)</span>:
+    <div class="mb">b1 = max{min(0.2,0.1), min(0.4,0.6), min(0.6,0.8), min(1,0)}
+   = max{0.1, 0.4, 0.6, 0} = 0.6</div></div>
+  <div class="st">قدم ۳ — b2 از ستون دوم <span class="m">(0.6, 0.8, 0.6, 0.5)</span>:
+    <div class="mb">b2 = max{min(0.2,0.6), min(0.4,0.8), min(0.6,0.6), min(1,0.5)}
+   = max{0.2, 0.4, 0.6, 0.5} = 0.6</div></div>
+  <div class="st">قدم ۴ — b3 از ستون سوم <span class="m">(0.8, 0.6, 0.5, 0.5)</span>:
+    <div class="mb">b3 = max{min(0.2,0.8), min(0.4,0.6), min(0.6,0.5), min(1,0.5)}
+   = max{0.2, 0.4, 0.5, 0.5} = 0.5</div></div>
+  <div class="st">قدم ۵ — جواب: <span class="m">B = (0.6 , 0.6 , 0.5)</span> — دقیقاً همان جواب اسلاید ۷۲. نکته: هیچ b_j نمی‌تواند از بزرگ‌ترین عدد A یا بزرگ‌ترین عدد ستونش بیشتر شود، چون min همیشه از هر دو طرف کوچک‌تر یا مساوی است.</div>
+  <div class="row" style="margin-top:8px"><button class="next">قدم بعدی</button><button class="all">نمایش همه</button></div>
+</div>
+
+<div class="card stepper" style="margin-top:12px">
+  <h3>مثال اسلاید ۷۴–۷۵: ماتریس قانون «اگر دما نرمال باشد، سرعت متوسط است»</h3>
+  <div class="mb">Normal temperature (A) = {0/100 , 0.5/125 , 1/150 , 0.5/175 , 0/200}
+Medium velocity (B)    = {0/10 , 0.6/20 , 1/30 , 0.6/40 , 0/50}</div>
+  <div class="tip">یادآوری نوشتار (درس ۲): در <span class="m">0.5/125</span> عدد بالا عضویت است و عدد پایین خود نقطه؛ خط کج یعنی «مال»، نه تقسیم.</div>
+  <div class="st">قدم ۱ — سطرها پنج نقطه دما (۱۰۰ تا ۲۰۰) و ستون‌ها پنج نقطه سرعت (۱۰ تا ۵۰) هستند؛ پس <span class="m">μ_AB</span> یک ماتریس <span class="m">5×5</span> است با <span class="m">m_ij = min(a_i , b_j)</span>.</div>
+  <div class="st">قدم ۲ — سطر ۱ (x=100، a=0) و سطر ۵ (x=200، a=0): min هر عددی با صفر، صفر است ← <span class="m">(0, 0, 0, 0, 0)</span>.</div>
+  <div class="st">قدم ۳ — سطر ۲ (x=125، a=0.5):
+    <div class="mb">min(0.5,0), min(0.5,0.6), min(0.5,1), min(0.5,0.6), min(0.5,0) = (0, 0.5, 0.5, 0.5, 0)</div>
+    سطر ۴ (x=175) هم a=0.5 دارد، پس همین سطر تکرار می‌شود.</div>
+  <div class="st">قدم ۴ — سطر ۳ (x=150، a=1): <span class="m">min(1, b_j) = b_j</span>، پس این سطر خود B است ← <span class="m">(0, 0.6, 1, 0.6, 0)</span>.</div>
+  <div class="st">قدم ۵ — ماتریس کامل (همان اسلاید ۷۵):
+    <div class="matw"><span>μ_ij =</span><table class="mat"><tr><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr><tr><td>0</td><td>0.5</td><td>0.5</td><td>0.5</td><td>0</td></tr><tr><td>0</td><td>0.6</td><td>1</td><td>0.6</td><td>0</td></tr><tr><td>0</td><td>0.5</td><td>0.5</td><td>0.5</td><td>0</td></tr><tr><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr></table></div>
+    الگو را ببین: هر سطر همان B است که از ارتفاع <span class="m">a_i</span> «بریده» شده. در درس بعد با همین ماتریس، سرعت را برای دمای ۱۲۵ حساب می‌کنیم.</div>
+  <div class="row" style="margin-top:8px"><button class="next">قدم بعدی</button><button class="all">نمایش همه</button></div>
+</div></section>
+
+<!-- ===== 4. PRACTICE ===== -->
+<section class="sec"><p class="lab">۴. نوبت توست</p>
+<div class="card">
+  <div class="q practice" data-hint="برای هر b_j فقط ستون j را نگاه کن: سه min بگیر و بعد بزرگ‌ترینشان را بنویس." data-yes="عالی! B = (0.5, 0.6, 0.8). دقت کن برنده هر ستون یک سطر متفاوت بود.">
+    <p>۱) <span class="m">B = A ∘ M</span> را با روش max-min حساب کن.</p>
+    <div class="mb">A = (0.3 , 0.9 , 0.5)</div>
+    <div class="matw"><span>M =</span><table class="mat"><tr><td>0.7</td><td>0.2</td><td>0.4</td></tr><tr><td>0.1</td><td>0.6</td><td>0.8</td></tr><tr><td>0.5</td><td>1.0</td><td>0.3</td></tr></table></div>
+    <table class="t"><tr><th>b1</th><th>b2</th><th>b3</th></tr>
+      <tr><td><input type="text" data-k="0.5" aria-label="b1"></td><td><input type="text" data-k="0.6" aria-label="b2"></td><td><input type="text" data-k="0.8" aria-label="b3"></td></tr></table>
+    <button class="check">بررسی</button><div class="fb"></div>
+  </div>
+
+  <div class="q mcq" data-yes="درست! تعداد عناصر A (۵) باید با تعداد سطرهای ماتریس برابر باشد و خروجی به تعداد ستون‌ها (۴) عدد دارد." data-no="نه. مثل ضرب معمولی: (1×n) ∘ (n×p) = (1×p). اینجا n=5 و p=4.">
+    <p>۲) اگر <span class="m">A′</span> یک بردار <span class="m">1×5</span> و ماتریس قانون <span class="m">5×4</span> باشد، اندازه <span class="m">B′ = A′ ∘ M</span> چیست؟</p>
+    <div class="opts">
+      <button><span class="m">5×1</span></button>
+      <button><span class="m">4×5</span></button>
+      <button data-ok><span class="m">1×4</span></button>
+      <button><span class="m">1×5</span></button>
+    </div><div class="fb"></div>
+  </div>
+
+  <div class="q practice" data-hint="هر خانه = min(عضویت سطر، عضویت ستون). سطری که عضویتش ۱ است، خود B را کپی می‌کند." data-yes="عالی! ماتریس قانون درست ساخته شد. ستون آخر همه 0.2 است چون b3=0.2 از همه aها کوچک‌تر است.">
+    <p>۳) قانون «اگر x برابر A است آنگاه y برابر B است» را در نظر بگیر. ماتریس قانون <span class="m">R</span> را با <span class="m">r_ij = min(a_i , b_j)</span> پر کن.</p>
+    <div class="mb">A = {0.4/1 , 1/2 , 0.7/3}        B = {0.5/10 , 1/20 , 0.2/30}</div>
+    <table class="t"><tr><th></th><th>y=10</th><th>y=20</th><th>y=30</th></tr>
+      <tr><th>x=1</th><td><input type="text" data-k="0.4" aria-label="r11"></td><td><input type="text" data-k="0.4" aria-label="r12"></td><td><input type="text" data-k="0.2" aria-label="r13"></td></tr>
+      <tr><th>x=2</th><td><input type="text" data-k="0.5" aria-label="r21"></td><td><input type="text" data-k="1" aria-label="r22"></td><td><input type="text" data-k="0.2" aria-label="r23"></td></tr>
+      <tr><th>x=3</th><td><input type="text" data-k="0.5" aria-label="r31"></td><td><input type="text" data-k="0.7" aria-label="r32"></td><td><input type="text" data-k="0.2" aria-label="r33"></td></tr></table>
+    <button class="check">بررسی</button><div class="fb"></div>
+  </div>
+
+  <div class="q mcq" data-yes="درست! min یعنی «و» (اشتراک) و max یعنی «یا» (اجتماع)." data-no="نه. در درس ۴ دیدیم کدام عملگر با min ساخته می‌شود: μ_A∩B(x) = min(μ_A(x), μ_B(x)).">
+    <p>۴) قدم <span class="m">min(a_i , m_ij)</span> در زبان درس ۴ کدام عمل روی مجموعه‌هاست؟</p>
+    <div class="opts">
+      <button data-ok>اشتراک <span class="m">(∩)</span></button>
+      <button>اجتماع <span class="m">(∪)</span></button>
+      <button>مکمل <span class="m">(¬)</span></button>
+      <button>تفاضل <span class="m">(−)</span></button>
+    </div><div class="fb"></div>
+  </div>
+
+  <div class="q practice" data-hint="اول مکمل را حساب کن: 1 − a. بعد برای هر ستون R سه min بگیر و max را بنویس. یادت باشد min(0, هر چیز) = 0." data-yes="عالی! B′ = (0.4, 0.4, 0.2). «نه A» تقریباً چیزی درباره B نمی‌گوید، پس عضویت‌ها پایین ماندند.">
+    <p>۵) (ترکیب با درس ۴) ورودی این بار «نه A» است: <span class="m">A′ = ¬A</span> برای همان A سؤال ۳. اول <span class="m">A′</span> را بنویس، بعد <span class="m">B′ = A′ ∘ R</span> را با ماتریس سؤال ۳ حساب کن.</p>
+    <table class="t"><tr><th></th><th>1</th><th>2</th><th>3</th></tr>
+      <tr><th>A′ = ¬A</th><td><input type="text" data-k="0.6" aria-label="A' در 1"></td><td><input type="text" data-k="0" aria-label="A' در 2"></td><td><input type="text" data-k="0.3" aria-label="A' در 3"></td></tr></table>
+    <table class="t"><tr><th></th><th>y=10</th><th>y=20</th><th>y=30</th></tr>
+      <tr><th>B′</th><td><input type="text" data-k="0.4" aria-label="B' در 10"></td><td><input type="text" data-k="0.4" aria-label="B' در 20"></td><td><input type="text" data-k="0.2" aria-label="B' در 30"></td></tr></table>
+    <button class="check">بررسی</button><div class="fb"></div>
+  </div>
+
+  <div class="q mcq" data-yes="درست! وقتی A′ = A و A یک عضویت ۱ دارد، همان سطر B را کپی می‌کند و بقیه سطرها از B کوچک‌ترند؛ پس B′ = B. قانون «همان چیزی را که گفتی» برمی‌گرداند." data-no="نه. سطری از R که a_i = 1 دارد خود B است، و هیچ خانه R از b_j بزرگ‌تر نیست. پس max دقیقاً b_j می‌شود.">
+    <p>۶) فرض کن ورودی دقیقاً خود A باشد (<span class="m">A′ = A</span>) و A حداقل یک عضویت برابر ۱ داشته باشد (مثل سؤال ۳). حاصل <span class="m">A ∘ R</span> چیست؟</p>
+    <div class="opts">
+      <button><span class="m">B′ = A</span></button>
+      <button><span class="m">B′ = 0</span></button>
+      <button><span class="m">B′ = 1</span></button>
+      <button data-ok><span class="m">B′ = B</span></button>
+    </div><div class="fb"></div>
+  </div>
+
+  <div class="q mcq" data-yes="درست! ضرب به min و جمع به max تبدیل می‌شود (اسلاید ۷۰)." data-no="نه. اسلاید ۷۰: «ضرب دوبه‌دو را با مینیمم و حاصل‌جمع را با ماکزیمم جایگزین کنیم».">
+    <p>۷) در ترکیب max-min، «جمع» در فرمول معمولی <span class="m">y_j = Σ x_i a_ij</span> با چه چیزی جایگزین می‌شود؟</p>
+    <div class="opts">
+      <button>کمینه <span class="m">(min)</span></button>
+      <button data-ok>بیشینه <span class="m">(max)</span></button>
+      <button>ضرب <span class="m">(×)</span></button>
+      <button>میانگین <span class="m">(avg)</span></button>
+    </div><div class="fb"></div>
+  </div>
+</div></section>
+
+<!-- ===== 5. SUMMARY ===== -->
+<section class="sec"><p class="lab">۵. جمع‌بندی — همین را به خاطر بسپار</p>
+<div class="soft"><ul>
+  <li>قانون <span class="m">If x is A then y is B</span> به صورت یک ماتریس ذخیره می‌شود: <span class="m">m_ij = min(a_i , b_j)</span> — سطر = نقطه x، ستون = نقطه y.</li>
+  <li>ترکیب max-min: <span class="m">b_j = max_i { min(a_i , m_ij) }</span>؛ مثل ضرب بردار در ماتریس، با «ضرب ← min» و «جمع ← max».</li>
+  <li>اندازه‌ها: <span class="m">(1×n) ∘ (n×p) = (1×p)</span>.</li>
+  <li>قاعده ترکیبی استنتاج زاده: <span class="m">B′ = A′ ∘ μ_AB</span> — از اطلاعات تازه درباره A، اطلاعات درباره B به دست می‌آید.</li>
+  <li>سطری از ماتریس که <span class="m">a_i = 1</span> دارد، خود B است؛ سطر با <span class="m">a_i = 0</span> تمام صفر است.</li>
+  <li>مثال اسلاید ۷۲: <span class="m">A=(0.2,0.4,0.6,1)</span> ← <span class="m">B=(0.6,0.6,0.5)</span>.</li>
+</ul></div></section>
+
+<!-- ===== 6. SOURCE + ASK ===== -->
+<section class="sec"><p class="lab">منبع اصلی</p>
+<p>جزوه درس، اسلایدهای ۶۹ تا ۷۶ (شماره صفحه PDF؛ روی خود اسلاید ۲۲ تا ۲۹) · <a href="https://www.wiley.com/en-us/Fuzzy+Logic+with+Engineering+Applications%2C+4th+Edition-p-9781119235866">Timothy J. Ross, Fuzzy Logic with Engineering Applications</a> — بخش رابطه‌های فازی و ترکیب max-min.</p>
+<p class="ask">جایی مبهم بود؟ همین حالا در چت از من (Claude) بپرس — معلم تو هستم و می‌توانم مثال بیشتری بسازم.</p>
+<p><a href="../reference/cheatsheet.html">برگه فرمول‌ها</a> · <a href="../reference/glossary.html">واژه‌نامه</a></p>
+</section>
+
+<div class="nav"><a href="0006-fuzzy-expert-system.html">← درس قبل: ساخت یک سیستم خبره فازی</a><a href="0008-max-product-defuzzify.html">درس بعد: استنتاج max-product و غیرفازی‌سازی →</a></div>
+</main>
+
+<script>
+/* ===== SHARED JS — copy verbatim into every lesson ===== */
+(function(){
+function norm(s){return s.trim().replace(/[۰-۹]/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)}).replace(/[٠-٩]/g,function(d){return '٠١٢٣٤٥٦٧٨٩'.indexOf(d)}).replace(/[٫,]/g,'.').replace(/\s+/g,'')}
+function val(s){s=norm(s);if(/^-?\d*\.?\d+\/-?\d*\.?\d+$/.test(s)){var p=s.split('/');return +p[0]/+p[1]}return s===''?NaN:+s}
+document.querySelectorAll('.practice').forEach(function(q){
+  var ins=q.querySelectorAll('input[data-k]'),fb=q.querySelector('.fb'),btn=q.querySelector('.check');
+  ins.forEach(function(i){i.addEventListener('input',function(){i.parentNode.classList.remove('ok','no');fb.textContent='';fb.className='fb'})});
+  btn.addEventListener('click',function(){
+    var empty=0,ok=0;
+    ins.forEach(function(i){var c=i.parentNode;c.classList.remove('ok','no');if(!i.value.trim()){empty++;return}
+      var v=val(i.value),k=+i.dataset.k,tol=i.dataset.tol?+i.dataset.tol:0.01;
+      if(!isNaN(v)&&Math.abs(v-k)<=tol+1e-9){ok++;c.classList.add('ok')}else c.classList.add('no')});
+    if(empty){fb.className='fb bad';fb.textContent='اول همه خانه‌ها را پر کن ('+empty+' خانه خالی است).';return}
+    if(ok===ins.length){fb.className='fb good';fb.textContent=q.dataset.yes||('عالی! همه '+ins.length+' جواب درست است.')}
+    else{fb.className='fb bad';fb.textContent=ok+' از '+ins.length+' درست. '+(q.dataset.hint||'خانه‌های قرمز را دوباره حساب کن.')}
+  });
+});
+document.querySelectorAll('.mcq').forEach(function(q){
+  var fb=q.querySelector('.fb');
+  q.querySelectorAll('.opts button').forEach(function(b){b.addEventListener('click',function(){
+    q.querySelectorAll('.opts button').forEach(function(x){x.classList.remove('ok','no')});
+    if(b.hasAttribute('data-ok')){b.classList.add('ok');fb.className='fb good';fb.textContent=q.dataset.yes||'درست!'}
+    else{b.classList.add('no');fb.className='fb bad';fb.textContent=q.dataset.no||'نه، دوباره فکر کن.'}
+  })});
+});
+document.querySelectorAll('.stepper').forEach(function(s){
+  var st=s.querySelectorAll('.st'),n=0,nx=s.querySelector('.next'),al=s.querySelector('.all');
+  function upd(){st.forEach(function(e,i){e.classList.toggle('show',i<n)});if(nx)nx.textContent=n>=st.length?'از اول':'قدم بعدی ('+n+'/'+st.length+')'}
+  if(nx)nx.addEventListener('click',function(){n=n>=st.length?0:n+1;upd()});
+  if(al)al.addEventListener('click',function(){n=st.length;upd()});
+  upd();
+});
+})();
+/* ===== END SHARED JS ===== */
+</script>
+<script>
+/* ===== lesson 7: interactive matrices ===== */
+(function(){
+var NS='http://www.w3.org/2000/svg';
+function f(v){return String(Math.round(v*1000)/1000)}
+function el(svg,tag,attrs,txt){var e=document.createElementNS(NS,tag);for(var k in attrs)e.setAttribute(k,attrs[k]);if(txt!==undefined)e.textContent=txt;svg.appendChild(e);return e}
+function clear(svg){Array.prototype.slice.call(svg.childNodes).forEach(function(n){if(n.nodeName!=='title')svg.removeChild(n)})}
+
+/* ---- A) max-min composition ---- */
+var MU=[[0,0,0,0,0],[0,0.5,0.5,0.5,0],[0,0.6,1,0.6,0],[0,0.5,0.5,0.5,0],[0,0,0,0,0]];
+var presets=[
+  {a:[0.2,0.4,0.6,1],M:[[0.1,0.6,0.8],[0.6,0.8,0.6],[0.8,0.6,0.5],[0.0,0.5,0.5]],rl:['x1','x2','x3','x4'],cl:['b1','b2','b3'],an:'a'},
+  {a:[0,0.5,0,0,0],M:MU,rl:['100','125','150','175','200'],cl:['10','20','30','40','50'],an:"a′"}
+];
+var P=0,A=presets[0].a.slice(),J=0;
+var svg=document.getElementById('cmpSvg'),out=document.getElementById('cmpOut'),pick=document.getElementById('cmpPick'),sl=document.getElementById('cmpSliders');
+var cw=62,ch=36,xA=56,xM=140,y0=46;
+function comp(){var p=presets[P],res=[];for(var j=0;j<p.M[0].length;j++){var m=0;for(var i=0;i<A.length;i++)m=Math.max(m,Math.min(A[i],p.M[i][j]));res.push(m)}return res}
+function draw(){
+  var p=presets[P],n=A.length,q=p.M[0].length,B=comp();clear(svg);
+  var mins=A.map(function(a,i){return Math.min(a,p.M[i][J])}),best=Math.max.apply(null,mins);
+  var xMin=xM+q*cw+34;
+  el(svg,'text',{x:xA+28,y:30,'text-anchor':'middle'},p.an+'_i');
+  el(svg,'text',{x:xMin+28,y:30,'text-anchor':'middle'},'min');
+  for(var j=0;j<q;j++)el(svg,'text',{x:xM+j*cw+cw/2,y:30,'text-anchor':'middle',style:j===J?'fill:var(--accent);font-weight:700':''},P?'y='+p.cl[j]:'ستون '+(j+1));
+  for(var i=0;i<n;i++){
+    var y=y0+i*ch;
+    el(svg,'text',{x:26,y:y+22,'text-anchor':'middle'},P?'x='+p.rl[i]:p.rl[i]);
+    el(svg,'rect',{x:xA,y:y,width:56,height:ch-4,rx:6,style:'fill:var(--surface-1);stroke:var(--c1);stroke-width:1.5'});
+    el(svg,'text',{x:xA+28,y:y+21,'text-anchor':'middle',style:'fill:var(--text)'},f(A[i]));
+    for(var j2=0;j2<q;j2++){
+      var on=j2===J;
+      var r=el(svg,'rect',{x:xM+j2*cw+3,y:y,width:cw-6,height:ch-4,rx:6,'class':'cell',style:on?'fill:var(--accent-bg);stroke:var(--accent);stroke-width:1.5':'fill:var(--surface);stroke:var(--border)'});
+      r.addEventListener('click',(function(jj){return function(){J=jj;draw()}})(j2));
+      var t=el(svg,'text',{x:xM+j2*cw+cw/2,y:y+21,'text-anchor':'middle','class':'cell',style:on?'fill:var(--text)':''},f(p.M[i][j2]));
+      t.addEventListener('click',(function(jj){return function(){J=jj;draw()}})(j2));
+    }
+    var win=mins[i]===best;
+    el(svg,'rect',{x:xMin,y:y,width:56,height:ch-4,rx:6,style:win?'fill:var(--ok-bg);stroke:var(--c2);stroke-width:2':'fill:var(--surface);stroke:var(--border)'});
+    el(svg,'text',{x:xMin+28,y:y+21,'text-anchor':'middle',style:win?'fill:var(--ok);font-weight:700':''},f(mins[i]));
+    el(svg,'line',{x1:xM+q*cw+4,y1:y+ch/2-2,x2:xMin-4,y2:y+ch/2-2,style:'stroke:var(--grid);stroke-dasharray:3 3'});
+  }
+  var yB=y0+n*ch+14;
+  el(svg,'text',{x:xA+28,y:yB+22,'text-anchor':'middle'},P?"B′":'B');
+  for(var j3=0;j3<q;j3++){
+    var on3=j3===J;
+    var rb=el(svg,'rect',{x:xM+j3*cw+3,y:yB,width:cw-6,height:ch-4,rx:6,'class':'cell',style:on3?'fill:var(--ok-bg);stroke:var(--c2);stroke-width:2':'fill:var(--surface-1);stroke:var(--c2)'});
+    rb.addEventListener('click',(function(jj){return function(){J=jj;draw()}})(j3));
+    el(svg,'text',{x:xM+j3*cw+cw/2,y:yB+21,'text-anchor':'middle',style:on3?'fill:var(--ok);font-weight:700':'fill:var(--text)'},f(B[j3]));
+  }
+  el(svg,'text',{x:xMin+28,y:yB+21,'text-anchor':'middle',style:'fill:var(--ok)'},'max ↑');
+  el(svg,'text',{x:300,y:yB+ch+20,'text-anchor':'middle'},'هر b_j = بزرگ‌ترینِ ستون سبز (min) — خانه سبز پررنگ، سطر برنده است');
+  var bn=P?"b′":'b',an=P?"a′":'a';
+  out.textContent=bn+'_'+(J+1)+' = max{'+A.map(function(a,i){return 'min('+f(a)+','+f(p.M[i][J])+')'}).join(', ')+'}\n     = max{'+mins.map(f).join(', ')+'} = '+f(best);
+  out.style.whiteSpace='pre';
+  Array.prototype.forEach.call(pick.children,function(b,k){b.classList.toggle('on',k===J)});
+}
+function build(){
+  var p=presets[P];A=p.a.slice();J=P?1:0;
+  pick.innerHTML='';sl.innerHTML='';
+  for(var j=0;j<p.M[0].length;j++){var b=document.createElement('button');b.textContent=(P?"b′":'b')+(j+1)+(P?' (y='+p.cl[j]+')':'');b.addEventListener('click',(function(jj){return function(){J=jj;draw()}})(j));pick.appendChild(b)}
+  A.forEach(function(v,i){
+    var d=document.createElement('div');d.className='sl';
+    var lab=document.createElement('label');lab.textContent=(P?"a′ x=":'a'+(i+1)+' ')+(P?p.rl[i]:'');lab.setAttribute('for','cmpA'+i);
+    var r=document.createElement('input');r.type='range';r.min=0;r.max=1;r.step=0.1;r.value=v;r.id='cmpA'+i;
+    var s=document.createElement('span');s.textContent=f(v);
+    r.addEventListener('input',function(){A[i]=+r.value;s.textContent=f(A[i]);draw()});
+    d.appendChild(lab);d.appendChild(r);d.appendChild(s);sl.appendChild(d);
+  });
+  draw();
+}
+Array.prototype.forEach.call(document.querySelectorAll('#cmpPreset button'),function(b){b.addEventListener('click',function(){
+  P=+b.dataset.p;Array.prototype.forEach.call(document.querySelectorAll('#cmpPreset button'),function(x){x.classList.toggle('on',x===b)});build()})});
+build();
+
+/* ---- B) build the rule matrix ---- */
+var ra=[0,0.5,1,0.5,0],rb=[0,0.6,1,0.6,0],rx=['100','125','150','175','200'],ry=['10','20','30','40','50'];
+var rs=document.getElementById('relSvg'),ro=document.getElementById('relOut');
+var filled={},cur=-1,gx=150,gy=84,gw=62,gh=36;
+function rdraw(){
+  clear(rs);
+  var ci=cur>=0?Math.floor(cur/5):-1,cj=cur>=0?cur%5:-1;
+  el(rs,'text',{x:88,y:20,'text-anchor':'middle'},'a_i');
+  for(var j=0;j<5;j++){
+    el(rs,'text',{x:gx+j*gw+gw/2,y:20,'text-anchor':'middle'},'y='+ry[j]);
+    el(rs,'rect',{x:gx+j*gw+3,y:30,width:gw-6,height:gh-4,rx:6,style:j===cj?'fill:var(--accent-bg);stroke:var(--c3);stroke-width:2':'fill:var(--surface-1);stroke:var(--c3)'});
+    el(rs,'text',{x:gx+j*gw+gw/2,y:51,'text-anchor':'middle',style:'fill:var(--text)'},f(rb[j]));
+  }
+  el(rs,'text',{x:120,y:51,'text-anchor':'end'},'b_j');
+  for(var i=0;i<5;i++){
+    var y=gy+i*gh;
+    el(rs,'text',{x:30,y:y+21,'text-anchor':'middle'},'x='+rx[i]);
+    el(rs,'rect',{x:62,y:y,width:52,height:gh-4,rx:6,style:i===ci?'fill:var(--accent-bg);stroke:var(--c1);stroke-width:2':'fill:var(--surface-1);stroke:var(--c1)'});
+    el(rs,'text',{x:88,y:y+21,'text-anchor':'middle',style:'fill:var(--text)'},f(ra[i]));
+    for(var j2=0;j2<5;j2++){
+      var k=i*5+j2,on=k===cur,has=filled[k];
+      var r=el(rs,'rect',{x:gx+j2*gw+3,y:y,width:gw-6,height:gh-4,rx:6,'class':'cell',style:on?'fill:var(--ok-bg);stroke:var(--c2);stroke-width:2':(has?'fill:var(--surface);stroke:var(--c2)':'fill:var(--surface);stroke:var(--border);stroke-dasharray:3 3')});
+      r.addEventListener('click',(function(kk){return function(){show(kk)}})(k));
+      if(has){var t=el(rs,'text',{x:gx+j2*gw+gw/2,y:y+21,'text-anchor':'middle','class':'cell',style:on?'fill:var(--ok);font-weight:700':'fill:var(--text)'},f(Math.min(ra[i],rb[j2])));
+        t.addEventListener('click',(function(kk){return function(){show(kk)}})(k));}
+    }
+  }
+}
+function show(k){cur=k;filled[k]=1;var i=Math.floor(k/5),j=k%5;
+  ro.textContent='r_'+(i+1)+(j+1)+' = min(a_'+(i+1)+', b_'+(j+1)+') = min('+f(ra[i])+', '+f(rb[j])+') = '+f(Math.min(ra[i],rb[j]))+'      (x='+rx[i]+', y='+ry[j]+')';
+  rdraw()}
+document.getElementById('relNext').addEventListener('click',function(){var k=0;while(filled[k]&&k<25)k++;if(k>=25){ro.textContent='ماتریس کامل شد. هر سطر = B بریده‌شده در ارتفاع a_i.';cur=-1;rdraw();return}show(k)});
+document.getElementById('relAll').addEventListener('click',function(){for(var k=0;k<25;k++)filled[k]=1;cur=-1;ro.textContent='ماتریس کامل (همان اسلاید ۷۵). سطر x=150 با a=1 خود B است.';rdraw()});
+document.getElementById('relReset').addEventListener('click',function(){filled={};cur=-1;ro.textContent='روی «خانه بعدی» یا روی هر خانه جدول کلیک کن.';rdraw()});
+rdraw();
+})();
+</script>
+</body>
+</html>

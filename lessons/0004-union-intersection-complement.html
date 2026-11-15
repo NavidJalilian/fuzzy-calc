@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>درس ۴ — اجتماع، اشتراک و مکمل</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ===== SHARED STYLE — copy verbatim into every lesson, do not edit per lesson ===== */
+:root{--bg:#fbfaf7;--surface:#ffffff;--surface-1:#f3f1ec;--text:#1f1e1c;--text-2:#5f5e5a;--text-3:#888780;--border:#e3e0d8;--border-strong:#c9c6bc;
+--accent:#534AB7;--accent-bg:#EEEDFE;--ok:#3B6D11;--ok-bg:#EAF3DE;--bad:#A32D2D;--bad-bg:#FCEBEB;--warn:#854F0B;--warn-bg:#FAEEDA;
+--c1:#7F77DD;--c2:#1D9E75;--c3:#EF9F27;--c4:#D4537E;--grid:#e3e0d8}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1a1a19;--surface:#232322;--surface-1:#2c2c2a;--text:#ecebe6;--text-2:#b4b2a9;--text-3:#888780;--border:#3a3a37;--border-strong:#55554f;
+--accent:#AFA9EC;--accent-bg:#26215C;--ok:#97C459;--ok-bg:#173404;--bad:#F09595;--bad-bg:#501313;--warn:#FAC775;--warn-bg:#412402;--grid:#3a3a37}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Vazirmatn,Tahoma,sans-serif;font-size:16px;line-height:1.95}
+main{max-width:760px;margin:0 auto;padding:24px 16px 64px}
+a{color:var(--accent)}
+h1{font-size:26px;font-weight:700;line-height:1.5;margin:6px 0 6px}
+h2{font-size:19px;font-weight:500;margin:0 0 8px}
+h3{font-size:16px;font-weight:500;margin:12px 0 4px}
+p{margin:0 0 10px}
+.top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:13px;color:var(--text-2)}
+.goal{color:var(--text-2);margin-bottom:22px}
+.sec{margin:0 0 28px}
+.lab{font-size:13px;color:var(--text-3);margin:0 0 4px;letter-spacing:0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.soft{background:var(--surface-1);border-radius:12px;padding:12px 14px}
+.m{direction:ltr;unicode-bidi:isolate;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14.5px;white-space:nowrap}
+@media (max-width:700px){.m{white-space:normal}}
+.mb{direction:ltr;text-align:left;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14.5px;background:var(--surface-1);border-radius:8px;padding:8px 12px;margin:6px 0;overflow-x:auto;line-height:1.8}
+.en{direction:ltr;unicode-bidi:isolate;font-size:13px;color:var(--text-2)}
+b,strong{font-weight:500}
+.key{background:var(--warn-bg);color:var(--warn);border-radius:6px;padding:0 6px}
+.tip{border-right:3px solid var(--accent);background:var(--accent-bg);padding:8px 12px;border-radius:0;margin:8px 0}
+.trap{border-right:3px solid var(--bad);background:var(--bad-bg);padding:8px 12px;border-radius:0;margin:8px 0}
+button{font-family:inherit;font-size:14px;background:var(--surface);color:var(--text);border:1px solid var(--border-strong);border-radius:8px;padding:5px 14px;cursor:pointer}
+button:hover{background:var(--surface-1)}
+button.on{background:var(--accent-bg);border-color:var(--accent);color:var(--accent)}
+input[type=text]{font-family:inherit;font-size:15px;direction:ltr;text-align:center;width:72px;height:34px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text)}
+input[type=range]{width:100%;accent-color:var(--accent);direction:ltr}
+table.t{border-collapse:collapse;direction:ltr;font-size:14.5px;margin:6px 0;display:block;max-width:100%;overflow-x:auto}
+table.t>tbody,table.t>thead{display:table;width:100%}
+table.t th,table.t td{border:1px solid var(--border);padding:5px 6px;text-align:center;font-weight:400}
+table.t th{background:var(--surface-1)}
+.ok{background:var(--ok-bg)!important}.no{background:var(--bad-bg)!important}
+.fb{font-size:14px;margin-top:8px;min-height:1em}.fb.good{color:var(--ok)}.fb.bad{color:var(--bad)}
+.q{margin:0 0 18px}
+.mcq .opts{display:grid;gap:6px;margin-top:6px}
+.mcq .opts button{text-align:right;padding:7px 12px}
+.stepper .st{display:none;padding:6px 0;border-bottom:1px dashed var(--border)}
+.stepper .st.show{display:block}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+svg{max-width:100%;height:auto;direction:ltr}
+svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12px}
+.nav{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:14px;border-top:1px solid var(--border);padding-top:14px;margin-top:28px}
+.ask{font-size:14px;color:var(--text-2)}
+@media print{body{background:#fff}.card,.soft{break-inside:avoid}.stepper .st{display:block}button{display:none}}
+/* ===== END SHARED STYLE ===== */
+</style>
+<style>
+.mb.pre{white-space:pre}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--text-2);margin:8px 0 2px}
+.legend i{display:inline-block;width:14px;height:10px;border-radius:2px;margin-left:5px;vertical-align:middle}
+</style>
+</head>
+<body>
+<main>
+<div class="top"><a href="../index.html">← فهرست درس‌ها</a><span>درس ۴ از ۱۱ · فصل ۲ · حدود ۱۵ دقیقه</span></div>
+<h1>اجتماع، اشتراک و مکمل</h1>
+<p class="goal">هدف: بعد از این درس می‌توانی برای هر دو مجموعه فازی، اجتماع (max)، اشتراک (min) و مکمل (1−μ) را عنصر به عنصر حساب کنی — دقیقاً همان کاری که سؤال ۱ تمرین ۱ می‌خواهد.</p>
+
+<!-- ===== 1. IDEA ===== -->
+<section class="sec"><p class="lab">۱. ایده</p>
+<div class="card">
+  <p>فرض کن <span class="m">A</span> و <span class="m">B</span> دو مجموعه فازی روی <b>یک مجموعه جهانی یکسان</b> <span class="m">U</span> هستند. همه عملیات‌ها <span class="key">عنصر به عنصر</span> انجام می‌شوند: برای هر <span class="m">x</span> فقط دو عدد <span class="m">μ_A(x)</span> و <span class="m">μ_B(x)</span> را نگاه می‌کنی و یک عدد جدید می‌سازی.</p>
+
+  <h3>تساوی و زیرمجموعه</h3>
+  <p><b>تساوی</b>: <span class="m">A = B</span> اگر و فقط اگر برای <b>همه</b> <span class="m">x∈U</span> داشته باشیم <span class="m">μ_A(x) = μ_B(x)</span>.</p>
+  <p><b>زیرمجموعه</b> <span class="en">(subset)</span>: <span class="m">A ⊆ B</span> اگر و فقط اگر برای <b>همه</b> <span class="m">x∈U</span> داشته باشیم <span class="m">μ_A(x) ≤ μ_B(x)</span>. کافی است فقط در یک نقطه این شرط خراب شود تا <span class="m">A</span> زیرمجموعه <span class="m">B</span> نباشد.</p>
+
+  <h3>سه عمل اصلی (اسلاید ۴۹)</h3>
+  <table class="t">
+    <tr><th>عمل</th><th>نماد</th><th>فرمول</th><th>به زبان ساده</th></tr>
+    <tr><td>مکمل <span class="en">(complement)</span></td><td><span class="m">Ā</span></td><td><span class="m">μ_Ā(x) = 1 − μ_A(x)</span></td><td>از ۱ کم کن</td></tr>
+    <tr><td>اجتماع <span class="en">(union)</span></td><td><span class="m">A ∪ B</span></td><td><span class="m">max[μ_A(x), μ_B(x)]</span></td><td>بزرگ‌تر را بردار</td></tr>
+    <tr><td>اشتراک <span class="en">(intersection)</span></td><td><span class="m">A ∩ B</span></td><td><span class="m">min[μ_A(x), μ_B(x)]</span></td><td>کوچک‌تر را بردار</td></tr>
+  </table>
+
+  <h3>چرا max و min؟ (اسلایدهای ۵۴ تا ۵۶)</h3>
+  <p>منطق فازی گسترشِ منطق بولی <span class="en">(Boolean logic)</span> است، پس عملگرهایش باید وقتی ورودی فقط ۰ یا ۱ است <b>همان جواب بولی</b> را بدهند. مثلاً <span class="m">AND</span> برای ۰ و ۰ باید باز هم ۰ بدهد. ببین:</p>
+  <table class="t">
+    <tr><th>A</th><th>B</th><th>A and B</th><th>min(A,B)</th><th>A or B</th><th>max(A,B)</th><th>not A</th><th>1 − A</th></tr>
+    <tr><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>1</td><td>1</td></tr>
+    <tr><td>0</td><td>1</td><td>0</td><td>0</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
+    <tr><td>1</td><td>0</td><td>0</td><td>0</td><td>1</td><td>1</td><td>0</td><td>0</td></tr>
+    <tr><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td><td>0</td></tr>
+  </table>
+  <p>ستون‌ها دوبه‌دو یکی هستند. پس در فازی: <span class="m">AND → min</span>، <span class="m">OR → max</span>، <span class="m">NOT → 1 − μ</span>. فرقش این است که حالا ورودی می‌تواند هر عددی بین ۰ و ۱ باشد (مثلاً <span class="m">min(0.7, 0.4) = 0.4</span>).</p>
+
+  <div class="trap"><b>تله مهم — قانون طرد شق ثالث</b> <span class="en">(law of excluded middle)</span>: در مجموعه قطعی همیشه <span class="m">A ∩ Ā = ∅</span> و <span class="m">A ∪ Ā = X</span>. در فازی این‌ها <b>برقرار نیستند</b>. اگر <span class="m">μ_A(x) = 0.6</span> باشد، <span class="m">μ_Ā(x) = 0.4</span> و <span class="m">min(0.6, 0.4) = 0.4 ≠ 0</span> و <span class="m">max(0.6, 0.4) = 0.6 ≠ 1</span>. یعنی یک چیز می‌تواند «تا حدی A» و «تا حدی نه‌A» باشد.</div>
+</div></section>
+
+<!-- ===== 2. SEE IT ===== -->
+<section class="sec"><p class="lab">۲. ببین چه اتفاقی می‌افتد</p>
+<div class="card">
+  <p>اول نوع مثال را انتخاب کن، بعد یک عمل را بزن. رنگ نارنجی همیشه <b>حاصل</b> است.</p>
+  <div class="row" role="group" aria-label="نوع مثال">
+    <button class="tab on" data-tab="bars">گسسته: x = 1..4</button>
+    <button class="tab" data-tab="trap">ذوزنقه‌ها (اسلاید ۵۷)</button>
+    <button class="tab" data-tab="cars">ماشین‌ها (اسلاید ۵۹)</button>
+  </div>
+  <div class="row" role="group" aria-label="عمل" style="margin-top:8px" id="opBtns">
+    <button class="op on" data-op="union"></button>
+    <button class="op" data-op="inter"></button>
+    <button class="op" data-op="notA"></button>
+    <button class="op" data-op="AnA"></button>
+    <button class="op" data-op="AuA"></button>
+  </div>
+  <div class="legend" id="opsLegend"></div>
+  <svg id="opsSvg" viewBox="0 0 600 262" role="img" aria-labelledby="opsTitle"><title id="opsTitle">نمودار درجه عضویت دو مجموعه فازی و حاصل عمل انتخاب‌شده</title></svg>
+  <div class="mb" id="opsSet"></div>
+  <p id="opsNote" style="margin:6px 0 0"></p>
+</div>
+
+<div class="card" style="margin-top:10px">
+  <h3 style="margin-top:0">مثال ماشین‌های ایرانی و خارجی (اسلایدهای ۵۹ و ۶۰)</h3>
+  <p><span class="m">p(x)</span> = سهم قطعات ایرانیِ ماشین <span class="m">x</span> (در اسلاید به صورت درصد روی محور، ولی در فرمول‌ها به صورت عددی بین ۰ و ۱؛ یعنی ۵۰٪ همان <span class="m">0.5</span>).</p>
+  <p><span class="m">D</span> = مجموعه ماشین‌های ایرانی و <span class="m">F</span> = مجموعه ماشین‌های خارجی:</p>
+  <div class="mb pre">μ_D(x) = p(x)
+μ_F(x) = 1 − p(x)</div>
+  <p>دقت کن که <span class="m">F</span> همان مکمل <span class="m">D</span> است. اسلاید ۶۰ نتیجه را تکه‌تکه نوشته:</p>
+  <div class="mb pre">μ_F∩D(x) = min[μ_F, μ_D] = { μ_D(x)   if 0 ≤ p(x) ≤ 0.5
+                              { μ_F(x)   if 0.5 ≤ p(x) ≤ 1
+
+μ_F∪D(x) = max[μ_F, μ_D] = { μ_F(x)   if 0 ≤ p(x) ≤ 0.5
+                              { μ_D(x)   if 0.5 ≤ p(x) ≤ 1</div>
+  <p>یعنی اشتراک شکل «Λ» دارد و بیشینه‌اش <span class="m">0.5</span> است (در ۵۰٪)؛ اجتماع شکل «V» دارد و کمینه‌اش <span class="m">0.5</span> است. باز هم همان تله: <span class="m">F ∩ D</span> تهی نیست.</p>
+</div></section>
+
+<!-- ===== 3. WORKED EXAMPLE ===== -->
+<section class="sec"><p class="lab">۳. مثال حل‌شده، قدم به قدم</p>
+<div class="card stepper">
+  <div class="mb pre">A = {0.2/1, 0.6/2, 1/3, 0.4/4}
+B = {0.5/1, 0.3/2, 0.8/3, 0.9/4}</div>
+  <div class="st">قدم ۱: یادآوری نوشتار: <span class="m">0.6/2</span> یعنی «عنصر ۲ با درجه ۰٫۶». عدد بالای خط درجه است، عدد زیر خط خودِ عنصر. پس برای هر <span class="m">x</span> دو درجه داریم:
+    <table class="t"><tr><th>x</th><th>1</th><th>2</th><th>3</th><th>4</th></tr><tr><th>μ_A</th><td>0.2</td><td>0.6</td><td>1</td><td>0.4</td></tr><tr><th>μ_B</th><td>0.5</td><td>0.3</td><td>0.8</td><td>0.9</td></tr></table></div>
+  <div class="st">قدم ۲ — اجتماع (بزرگ‌تر):
+    <span class="m">max(0.2,0.5)=0.5</span>، <span class="m">max(0.6,0.3)=0.6</span>، <span class="m">max(1,0.8)=1</span>، <span class="m">max(0.4,0.9)=0.9</span>
+    <div class="mb">A ∪ B = {0.5/1, 0.6/2, 1/3, 0.9/4}</div></div>
+  <div class="st">قدم ۳ — اشتراک (کوچک‌تر):
+    <span class="m">min(0.2,0.5)=0.2</span>، <span class="m">min(0.6,0.3)=0.3</span>، <span class="m">min(1,0.8)=0.8</span>، <span class="m">min(0.4,0.9)=0.4</span>
+    <div class="mb">A ∩ B = {0.2/1, 0.3/2, 0.8/3, 0.4/4}</div></div>
+  <div class="st">قدم ۴ — مکمل A (از ۱ کم کن):
+    <span class="m">1−0.2=0.8</span>، <span class="m">1−0.6=0.4</span>، <span class="m">1−1=0</span>، <span class="m">1−0.4=0.6</span>
+    <div class="mb">Ā = {0.8/1, 0.4/2, 0/3, 0.6/4}</div></div>
+  <div class="st">قدم ۵ — بررسی تله: <span class="m">A ∩ Ā = {0.2/1, 0.4/2, 0/3, 0.4/4}</span> که تهی نیست، و <span class="m">A ∪ Ā = {0.8/1, 0.6/2, 1/3, 0.6/4}</span> که برابر <span class="m">X</span> (همه‌جا ۱) نیست. فقط در <span class="m">x=3</span> که <span class="m">μ_A</span> دقیقاً ۱ است، رفتار مثل حالت قطعی است.</div>
+  <div class="row" style="margin-top:8px"><button class="next">قدم بعدی</button><button class="all">نمایش همه</button></div>
+</div>
+
+<div class="card stepper" style="margin-top:10px">
+  <p style="margin:0 0 4px"><b>مثال خودِ اسلاید ۵۰</b> (اسلاید پرانتز می‌گذارد، معنی همان آکولاد است):</p>
+  <div class="mb pre">T = (0/5, 0.2/5.5, 0.5/6, 0.8/6.5, 1/7)
+S = (1/5, 0.8/5.5, 0.5/6, 0.2/6.5, 0/7)</div>
+  <div class="st">اشتراک، کوچک‌ترِ هر ستون: <span class="m">μ_T∩S = (0/5, 0.2/5.5, 0.5/6, 0.2/6.5, 0/7)</span></div>
+  <div class="st">اجتماع، بزرگ‌ترِ هر ستون: <span class="m">μ_T∪S = (1/5, 0.8/5.5, 0.5/6, 0.8/6.5, 1/7)</span></div>
+  <div class="st">مکمل T: <span class="m">μ_T̄ = (1/5, 0.8/5.5, 0.5/6, 0.2/6.5, 0/7)</span> — دقیقاً همان <span class="m">S</span>! پس در این مثال <span class="m">S = T̄</span>، و باز هم <span class="m">T ∩ T̄</span> در نقطه ۶ مقدار <span class="m">0.5</span> دارد، نه صفر.</div>
+  <div class="row" style="margin-top:8px"><button class="next">قدم بعدی</button><button class="all">نمایش همه</button></div>
+</div></section>
+
+<!-- ===== 4. PRACTICE ===== -->
+<section class="sec"><p class="lab">۴. نوبت توست</p>
+<div class="card">
+  <div class="q practice" data-hint="اجتماع = عدد بزرگ‌تر، اشتراک = عدد کوچک‌تر، مکمل = ۱ منهای درجه. هر ستون را جدا حساب کن.">
+    <p><b>سؤال ۱.</b> با <span class="m">C = {0.1/1, 0.7/2, 0.4/3, 1/4}</span> و <span class="m">D = {0.6/1, 0.2/2, 0.4/3, 0.5/4}</span> جدول را پر کن.</p>
+    <table class="t"><tr><th></th><th>x=1</th><th>x=2</th><th>x=3</th><th>x=4</th></tr>
+      <tr><th>C ∪ D</th><td><input type="text" data-k="0.6" aria-label="C∪D در x=1"></td><td><input type="text" data-k="0.7" aria-label="C∪D در x=2"></td><td><input type="text" data-k="0.4" aria-label="C∪D در x=3"></td><td><input type="text" data-k="1" aria-label="C∪D در x=4"></td></tr>
+      <tr><th>C ∩ D</th><td><input type="text" data-k="0.1" aria-label="C∩D در x=1"></td><td><input type="text" data-k="0.2" aria-label="C∩D در x=2"></td><td><input type="text" data-k="0.4" aria-label="C∩D در x=3"></td><td><input type="text" data-k="0.5" aria-label="C∩D در x=4"></td></tr>
+      <tr><th>D̄</th><td><input type="text" data-k="0.4" aria-label="مکمل D در x=1"></td><td><input type="text" data-k="0.8" aria-label="مکمل D در x=2"></td><td><input type="text" data-k="0.6" aria-label="مکمل D در x=3"></td><td><input type="text" data-k="0.5" aria-label="مکمل D در x=4"></td></tr></table>
+    <button class="check">بررسی</button><div class="fb"></div>
+  </div>
+
+  <div class="q practice" data-hint="عنصری که در مجموعه نوشته نشده یعنی درجه‌اش ۰ است (درس ۲). پس μ_A(1) = 0 و مکملش 1 است؛ μ_B(6) = 0 و مکملش 1 است.">
+    <p><b>سؤال ۲ (به سبک تمرین ۱).</b> مجموعه جهانی <span class="m">X = {1,2,3,4,5,6}</span> است و</p>
+    <div class="mb pre">A = {0.3/2, 0.9/3, 1/4, 0.4/5, 0.8/6}
+B = {0.6/1, 0.2/2, 1/3, 0.5/4, 0.7/5}</div>
+    <p>مجموعه‌های زیر را حساب کن (همه شش خانه را پر کن، حتی آن‌هایی که صفر یا یک می‌شوند).</p>
+    <table class="t"><tr><th></th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th></tr>
+      <tr><th>Ā</th><td><input type="text" data-k="1" aria-label="Ā در 1"></td><td><input type="text" data-k="0.7" aria-label="Ā در 2"></td><td><input type="text" data-k="0.1" aria-label="Ā در 3"></td><td><input type="text" data-k="0" aria-label="Ā در 4"></td><td><input type="text" data-k="0.6" aria-label="Ā در 5"></td><td><input type="text" data-k="0.2" aria-label="Ā در 6"></td></tr>
+      <tr><th>B̄</th><td><input type="text" data-k="0.4" aria-label="B̄ در 1"></td><td><input type="text" data-k="0.8" aria-label="B̄ در 2"></td><td><input type="text" data-k="0" aria-label="B̄ در 3"></td><td><input type="text" data-k="0.5" aria-label="B̄ در 4"></td><td><input type="text" data-k="0.3" aria-label="B̄ در 5"></td><td><input type="text" data-k="1" aria-label="B̄ در 6"></td></tr>
+      <tr><th>A ∪ Ā</th><td><input type="text" data-k="1" aria-label="A∪Ā در 1"></td><td><input type="text" data-k="0.7" aria-label="A∪Ā در 2"></td><td><input type="text" data-k="0.9" aria-label="A∪Ā در 3"></td><td><input type="text" data-k="1" aria-label="A∪Ā در 4"></td><td><input type="text" data-k="0.6" aria-label="A∪Ā در 5"></td><td><input type="text" data-k="0.8" aria-label="A∪Ā در 6"></td></tr>
+      <tr><th>B ∪ Ā</th><td><input type="text" data-k="1" aria-label="B∪Ā در 1"></td><td><input type="text" data-k="0.7" aria-label="B∪Ā در 2"></td><td><input type="text" data-k="1" aria-label="B∪Ā در 3"></td><td><input type="text" data-k="0.5" aria-label="B∪Ā در 4"></td><td><input type="text" data-k="0.7" aria-label="B∪Ā در 5"></td><td><input type="text" data-k="0.2" aria-label="B∪Ā در 6"></td></tr></table>
+    <button class="check">بررسی</button><div class="fb"></div>
+  </div>
+
+  <div class="q practice" data-hint="μ_D = p و μ_F = 1 − p. اشتراک = کوچک‌ترِ این دو، اجتماع = بزرگ‌تر.">
+    <p><b>سؤال ۳ (اسلاید ۵۹).</b> برای دو ماشین درجه‌ها را بنویس: ماشین اول ۳۰٪ قطعه ایرانی دارد (<span class="m">p = 0.3</span>)، ماشین دوم ۸۰٪ (<span class="m">p = 0.8</span>).</p>
+    <table class="t"><tr><th></th><th>μ_D</th><th>μ_F</th><th>μ_F∩D</th><th>μ_F∪D</th></tr>
+      <tr><th>p = 0.3</th><td><input type="text" data-k="0.3" aria-label="μ_D برای p=0.3"></td><td><input type="text" data-k="0.7" aria-label="μ_F برای p=0.3"></td><td><input type="text" data-k="0.3" aria-label="اشتراک برای p=0.3"></td><td><input type="text" data-k="0.7" aria-label="اجتماع برای p=0.3"></td></tr>
+      <tr><th>p = 0.8</th><td><input type="text" data-k="0.8" aria-label="μ_D برای p=0.8"></td><td><input type="text" data-k="0.2" aria-label="μ_F برای p=0.8"></td><td><input type="text" data-k="0.2" aria-label="اشتراک برای p=0.8"></td><td><input type="text" data-k="0.8" aria-label="اجتماع برای p=0.8"></td></tr></table>
+    <button class="check">بررسی</button><div class="fb"></div>
+  </div>
+
+  <div class="q mcq" data-yes="درست! μ_Ā(2) = 1 − 0.6 = 0.4 و min(0.6, 0.4) = 0.4. پس A ∩ Ā در فازی تهی نیست." data-no="نه. اول مکمل: 1 − 0.6 = 0.4. بعد اشتراک یعنی کوچک‌تر: min(0.6, 0.4). جواب «۰» مال مجموعه‌های قطعی است.">
+    <p><b>سؤال ۴.</b> اگر <span class="m">μ_A(2) = 0.6</span> باشد، <span class="m">μ_A∩Ā(2)</span> چقدر است؟</p>
+    <div class="opts">
+      <button><span class="m">0.0</span></button>
+      <button data-ok><span class="m">0.4</span></button>
+      <button><span class="m">0.6</span></button>
+      <button><span class="m">1.0</span></button>
+    </div><div class="fb"></div>
+  </div>
+
+  <div class="q mcq" data-yes="درست! کافی است در یک نقطه μ_A > μ_B باشد تا A زیرمجموعه B نباشد: 0.9 > 0.7." data-no="نه. شرط زیرمجموعه باید برای همه x برقرار باشد: μ_A(x) ≤ μ_B(x). در x=3 داریم 0.9 > 0.7.">
+    <p><b>سؤال ۵ (اسلاید ۴۹).</b> <span class="m">A = {0.2/1, 0.5/2, 0.9/3}</span> و <span class="m">B = {0.4/1, 0.5/2, 0.7/3}</span>. آیا <span class="m">A ⊆ B</span>؟</p>
+    <div class="opts">
+      <button data-ok>نه؛ چون در x=3 درجه A از B بیشتر است</button>
+      <button>بله؛ چون در x=2 درجه‌های A و B برابرند</button>
+      <button>بله؛ چون در x=1 درجه A از B کمتر است</button>
+      <button>نه؛ چون A و B هیچ عضو مشترکی ندارند</button>
+    </div><div class="fb"></div>
+  </div>
+
+  <div class="q mcq" data-yes="درست! هر ستون را نگاه کن: 1−0=1، 1−0.2=0.8، 1−0.5=0.5، … پس S = T̄." data-no="نه. ستون به ستون 1 − μ_T را حساب کن: (1, 0.8, 0.5, 0.2, 0) که دقیقاً درجه‌های S است.">
+    <p><b>سؤال ۶.</b> در مثال اسلاید ۵۰، رابطه <span class="m">S</span> با <span class="m">T</span> چیست؟</p>
+    <div class="opts">
+      <button>S همان اجتماع T با خودش است</button>
+      <button>S همان اشتراک T با خودش است</button>
+      <button data-ok>S همان مکمل مجموعه T است</button>
+      <button>S هیچ رابطه خاصی با T ندارد</button>
+    </div><div class="fb"></div>
+  </div>
+
+  <div class="q mcq" data-yes="درست! منطق فازی باید با منطق بولی سازگار بماند؛ اسلاید ۵۵ دقیقاً همین را می‌گوید." data-no="نه. دلیلِ اسلاید ۵۵ «سازگاری با منطق بولی» است: وقتی ورودی‌ها فقط ۰ و ۱ باشند، min همان جدول AND را تولید می‌کند.">
+    <p><b>سؤال ۷.</b> چرا در منطق فازی به جای <span class="m">AND</span> از <span class="m">min</span> استفاده می‌کنیم؟</p>
+    <div class="opts">
+      <button>چون min همیشه عددی بزرگ‌تر از max می‌دهد</button>
+      <button>چون حاصل min همیشه دقیقاً صفر یا یک است</button>
+      <button>چون min تنها عملگری است که ترتیب ندارد</button>
+      <button data-ok>چون برای ۰ و ۱ همان جدول AND را می‌دهد</button>
+    </div><div class="fb"></div>
+  </div>
+</div></section>
+
+<!-- ===== 5. SUMMARY ===== -->
+<section class="sec"><p class="lab">۵. جمع‌بندی — همین را به خاطر بسپار</p>
+<div class="soft"><ul>
+  <li>همه چیز <b>عنصر به عنصر</b>: <span class="m">∪ → max</span>، <span class="m">∩ → min</span>، <span class="m">Ā → 1 − μ</span>.</li>
+  <li><span class="m">A = B</span> یعنی درجه‌ها همه‌جا برابر؛ <span class="m">A ⊆ B</span> یعنی همه‌جا <span class="m">μ_A ≤ μ_B</span>.</li>
+  <li>در منطق: <span class="m">AND → min</span>، <span class="m">OR → max</span>، <span class="m">NOT → 1 − μ</span>؛ چون برای ۰ و ۱ همان جواب بولی را می‌دهند.</li>
+  <li>در فازی <span class="m">A ∩ Ā ≠ ∅</span> و <span class="m">A ∪ Ā ≠ X</span> (قانون طرد شق ثالث برقرار نیست).</li>
+  <li>در تمرین‌ها عنصرِ ننوشته = درجه ۰؛ مکملش ۱ می‌شود. این خانه‌ها را جا نینداز.</li>
+</ul></div></section>
+
+<!-- ===== 6. SOURCE + ASK ===== -->
+<section class="sec"><p class="lab">منبع اصلی</p>
+<p>جزوه درس، اسلایدهای ۴۹ تا ۶۰ (تعریف‌ها: ۴۹؛ مثال T و S: ۵۰؛ منطق بولی و فازی: ۵۴ تا ۵۸؛ ماشین‌ها: ۵۹ و ۶۰) · تمرین ۱، سؤال ۱ · <a href="https://doi.org/10.1016/S0019-9958(65)90241-X">Zadeh, “Fuzzy Sets”, 1965</a> — همان مقاله‌ای که max، min و 1−μ را اولین بار تعریف کرد.</p>
+<p class="ask">جایی مبهم بود؟ همین حالا در چت از من (Claude) بپرس — معلم تو هستم و می‌توانم مثال بیشتری بسازم.</p>
+<p><a href="../reference/cheatsheet.html">برگه فرمول‌ها</a> · <a href="../reference/glossary.html">واژه‌نامه</a></p>
+</section>
+
+<div class="nav"><a href="0003-fuzzy-system-pipeline.html">← درس قبل: ساختار یک سیستم فازی</a><a href="0005-hedges.html">درس بعد: قیدهای زبانی: خیلی، تا حدی، نه خیلی →</a></div>
+</main>
+
+<script>
+/* ===== SHARED JS — copy verbatim into every lesson ===== */
+(function(){
+function norm(s){return s.trim().replace(/[۰-۹]/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)}).replace(/[٠-٩]/g,function(d){return '٠١٢٣٤٥٦٧٨٩'.indexOf(d)}).replace(/[٫,]/g,'.').replace(/\s+/g,'')}
+function val(s){s=norm(s);if(/^-?\d*\.?\d+\/-?\d*\.?\d+$/.test(s)){var p=s.split('/');return +p[0]/+p[1]}return s===''?NaN:+s}
+document.querySelectorAll('.practice').forEach(function(q){
+  var ins=q.querySelectorAll('input[data-k]'),fb=q.querySelector('.fb'),btn=q.querySelector('.check');
+  ins.forEach(function(i){i.addEventListener('input',function(){i.parentNode.classList.remove('ok','no');fb.textContent='';fb.className='fb'})});
+  btn.addEventListener('click',function(){
+    var empty=0,ok=0;
+    ins.forEach(function(i){var c=i.parentNode;c.classList.remove('ok','no');if(!i.value.trim()){empty++;return}
+      var v=val(i.value),k=+i.dataset.k,tol=i.dataset.tol?+i.dataset.tol:0.01;
+      if(!isNaN(v)&&Math.abs(v-k)<=tol+1e-9){ok++;c.classList.add('ok')}else c.classList.add('no')});
+    if(empty){fb.className='fb bad';fb.textContent='اول همه خانه‌ها را پر کن ('+empty+' خانه خالی است).';return}
+    if(ok===ins.length){fb.className='fb good';fb.textContent=q.dataset.yes||('عالی! همه '+ins.length+' جواب درست است.')}
+    else{fb.className='fb bad';fb.textContent=ok+' از '+ins.length+' درست. '+(q.dataset.hint||'خانه‌های قرمز را دوباره حساب کن.')}
+  });
+});
+document.querySelectorAll('.mcq').forEach(function(q){
+  var fb=q.querySelector('.fb');
+  q.querySelectorAll('.opts button').forEach(function(b){b.addEventListener('click',function(){
+    q.querySelectorAll('.opts button').forEach(function(x){x.classList.remove('ok','no')});
+    if(b.hasAttribute('data-ok')){b.classList.add('ok');fb.className='fb good';fb.textContent=q.dataset.yes||'درست!'}
+    else{b.classList.add('no');fb.className='fb bad';fb.textContent=q.dataset.no||'نه، دوباره فکر کن.'}
+  })});
+});
+document.querySelectorAll('.stepper').forEach(function(s){
+  var st=s.querySelectorAll('.st'),n=0,nx=s.querySelector('.next'),al=s.querySelector('.all');
+  function upd(){st.forEach(function(e,i){e.classList.toggle('show',i<n)});if(nx)nx.textContent=n>=st.length?'از اول':'قدم بعدی ('+n+'/'+st.length+')'}
+  if(nx)nx.addEventListener('click',function(){n=n>=st.length?0:n+1;upd()});
+  if(al)al.addEventListener('click',function(){n=st.length;upd()});
+  upd();
+});
+})();
+/* ===== END SHARED JS ===== */
+</script>
+<script>
+/* lesson 4: operations visual */
+(function(){
+var svg=document.getElementById('opsSvg');
+var L=46,R=586,T=16,B=222;
+function Y(v){return B-(B-T)*v}
+function fmt(v){return String(Math.round(v*100)/100)}
+function trap(a,b,c,d){return function(x){if(x<=a||x>=d)return 0;if(x<b)return (x-a)/(b-a);if(x<=c)return 1;return (d-x)/(d-c)}}
+var TABS={
+  bars:{a:'A',b:'B',A:[0.2,0.6,1,0.4],B:[0.5,0.3,0.8,0.9]},
+  trap:{a:'A',b:'B',fa:trap(1.5,3,4.5,5.8),fb:trap(4.5,5.6,7.2,8.5),x0:0,x1:10,ticks:[],xl:'x'},
+  cars:{a:'D',b:'F',fa:function(p){return p/100},fb:function(p){return 1-p/100},x0:0,x1:100,ticks:[0,50,100],xl:'p(x) %'}
+};
+var tab='bars',op='union';
+function bar(n){return n+'̄'}
+function lbl(o,n){return {union:n.a+' ∪ '+n.b,inter:n.a+' ∩ '+n.b,notA:bar(n.a),AnA:n.a+' ∩ '+bar(n.a),AuA:n.a+' ∪ '+bar(n.a)}[o]}
+function f(o,a,b){return o==='union'?Math.max(a,b):o==='inter'?Math.min(a,b):o==='notA'?1-a:o==='AnA'?Math.min(a,1-a):Math.max(a,1-a)}
+function usesB(o){return o==='union'||o==='inter'}
+var NOTE={
+  union:'اجتماع = بزرگ‌ترِ دو درجه در هر نقطه. خط نارنجی همیشه روی بالاترین منحنی است.',
+  inter:'اشتراک = کوچک‌ترِ دو درجه در هر نقطه. فقط جایی که هر دو مجموعه با هم بالا هستند، حاصل بالا می‌رود.',
+  notA:'مکمل = 1 − μ. جایی که مجموعه بالاست، مکملش پایین است و برعکس. مجموعه دوم در این عمل نقشی ندارد.',
+  AnA:'اگر قانون طرد شق ثالث برقرار بود، این باید همه‌جا صفر می‌شد؛ ولی بیشینه‌اش ',
+  AuA:'اگر قانون طرد شق ثالث برقرار بود، این باید همه‌جا ۱ می‌شد؛ ولی کمینه‌اش '
+};
+function grid(){
+  var s='<title id="opsTitle">نمودار درجه عضویت دو مجموعه فازی و حاصل عمل انتخاب‌شده</title>';
+  [0,0.25,0.5,0.75,1].forEach(function(v){s+='<line x1="'+L+'" x2="'+R+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="var(--grid)" stroke-width="1"/>'+'<text x="'+(L-8)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+v+'</text>'});
+  s+='<line x1="'+L+'" x2="'+L+'" y1="'+T+'" y2="'+B+'" stroke="var(--text-3)"/><line x1="'+L+'" x2="'+R+'" y1="'+B+'" y2="'+B+'" stroke="var(--text-3)"/>';
+  s+='<text x="14" y="'+(T+6)+'" text-anchor="middle">μ</text>';
+  return s;
+}
+function draw(){
+  var n=TABS[tab],s=grid(),res=[],nb=usesB(op);
+  document.querySelectorAll('#opBtns .op').forEach(function(b){b.textContent=lbl(b.dataset.op,n);b.classList.toggle('on',b.dataset.op===op)});
+  document.getElementById('opsLegend').innerHTML='<span><i style="background:var(--c1)"></i>'+n.a+'</span><span style="opacity:'+(nb?1:0.4)+'"><i style="background:var(--c2)"></i>'+n.b+'</span><span><i style="background:var(--c3)"></i>حاصل: <span class="m">'+lbl(op,n)+'</span></span>';
+  if(tab==='bars'){
+    var gw=(R-L)/4;
+    for(var i=0;i<4;i++){
+      var cx=L+gw*(i+0.5),a=n.A[i],b=n.B[i],r=f(op,a,b);res.push(r);
+      [[a,'var(--c1)',cx-46,1],[b,'var(--c2)',cx-14,nb?1:0.25],[r,'var(--c3)',cx+18,1]].forEach(function(q){
+        var h=B-Y(q[0]);
+        s+='<rect x="'+q[2]+'" y="'+Y(q[0])+'" width="28" height="'+Math.max(h,0.001)+'" rx="3" fill="'+q[1]+'" opacity="'+q[3]+'"/>';
+        s+='<text x="'+(q[2]+14)+'" y="'+(Y(q[0])-4)+'" text-anchor="middle" opacity="'+q[3]+'">'+fmt(q[0])+'</text>';
+      });
+      s+='<text x="'+cx+'" y="'+(B+18)+'" text-anchor="middle">x = '+(i+1)+'</text>';
+    }
+    document.getElementById('opsSet').textContent=lbl(op,n)+' = {'+res.map(function(v,i){return fmt(v)+'/'+(i+1)}).join(', ')+'}';
+  }else{
+    var N=240,pa='',pb='',pr='',mx=0,mn=1;
+    function X(x){return L+(R-L)*(x-n.x0)/(n.x1-n.x0)}
+    for(var k=0;k<=N;k++){
+      var x=n.x0+(n.x1-n.x0)*k/N,a2=n.fa(x),b2=n.fb(x),r2=f(op,a2,b2);
+      mx=Math.max(mx,r2);mn=Math.min(mn,r2);
+      var c=(k?'L':'M');pa+=c+X(x).toFixed(1)+' '+Y(a2).toFixed(1);pb+=c+X(x).toFixed(1)+' '+Y(b2).toFixed(1);pr+=c+X(x).toFixed(1)+' '+Y(r2).toFixed(1);
+    }
+    s+='<path d="'+pr+'" fill="none" stroke="var(--c3)" stroke-width="7" stroke-linejoin="round" opacity="0.85"/>';
+    s+='<path d="'+pa+'" fill="none" stroke="var(--c1)" stroke-width="2"/>';
+    s+='<path d="'+pb+'" fill="none" stroke="var(--c2)" stroke-width="2" stroke-dasharray="6 4" opacity="'+(nb?1:0.3)+'"/>';
+    n.ticks.forEach(function(t){s+='<text x="'+X(t)+'" y="'+(B+18)+'" text-anchor="middle">'+t+'</text>'});
+    s+='<text x="'+R+'" y="'+(B+36)+'" text-anchor="end">'+n.xl+'</text>';
+    res=[mx,mn];
+    document.getElementById('opsSet').textContent=tab==='cars'?
+      ('μ_D(x) = p(x),  μ_F(x) = 1 − p(x)   →   '+lbl(op,n)+': max = '+fmt(mx)+', min = '+fmt(mn)):
+      (lbl(op,n)+':  max = '+fmt(mx)+',  min = '+fmt(mn));
+  }
+  var note=NOTE[op];
+  if(op==='AnA')note+=fmt(tab==='bars'?Math.max.apply(null,res):res[0])+' است، پس تهی نیست.';
+  if(op==='AuA')note+=fmt(tab==='bars'?Math.min.apply(null,res):res[1])+' است، پس برابر X نیست.';
+  if(tab==='cars'&&(op==='inter'||op==='union'))note+=' در p = 50٪ هر دو منحنی 0.5 هستند و حاصل همان‌جا می‌شکند.';
+  if(tab==='cars'&&op==='notA')note='مکمل D یعنی 1 − p(x)، که دقیقاً همان F است: خط نارنجی روی خط‌چینِ F می‌افتد.';
+  document.getElementById('opsNote').textContent=note;
+  svg.innerHTML=s;
+}
+document.querySelectorAll('.tab').forEach(function(b){b.addEventListener('click',function(){tab=b.dataset.tab;document.querySelectorAll('.tab').forEach(function(x){x.classList.toggle('on',x===b)});draw()})});
+document.querySelectorAll('#opBtns .op').forEach(function(b){b.addEventListener('click',function(){op=b.dataset.op;draw()})});
+draw();
+})();
+</script>
+</body>
+</html>

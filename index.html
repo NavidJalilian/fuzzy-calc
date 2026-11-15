@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>منطق فازی — فصل ۱ تا ۳</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ===== SHARED STYLE — copy verbatim into every lesson, do not edit per lesson ===== */
+:root{--bg:#fbfaf7;--surface:#ffffff;--surface-1:#f3f1ec;--text:#1f1e1c;--text-2:#5f5e5a;--text-3:#888780;--border:#e3e0d8;--border-strong:#c9c6bc;
+--accent:#534AB7;--accent-bg:#EEEDFE;--ok:#3B6D11;--ok-bg:#EAF3DE;--bad:#A32D2D;--bad-bg:#FCEBEB;--warn:#854F0B;--warn-bg:#FAEEDA;
+--c1:#7F77DD;--c2:#1D9E75;--c3:#EF9F27;--c4:#D4537E;--grid:#e3e0d8}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1a1a19;--surface:#232322;--surface-1:#2c2c2a;--text:#ecebe6;--text-2:#b4b2a9;--text-3:#888780;--border:#3a3a37;--border-strong:#55554f;
+--accent:#AFA9EC;--accent-bg:#26215C;--ok:#97C459;--ok-bg:#173404;--bad:#F09595;--bad-bg:#501313;--warn:#FAC775;--warn-bg:#412402;--grid:#3a3a37}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Vazirmatn,Tahoma,sans-serif;font-size:16px;line-height:1.95}
+main{max-width:760px;margin:0 auto;padding:24px 16px 64px}
+a{color:var(--accent)}
+h1{font-size:26px;font-weight:700;line-height:1.5;margin:6px 0 6px}
+h2{font-size:19px;font-weight:500;margin:0 0 8px}
+h3{font-size:16px;font-weight:500;margin:12px 0 4px}
+p{margin:0 0 10px}
+.top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:13px;color:var(--text-2)}
+.goal{color:var(--text-2);margin-bottom:22px}
+.sec{margin:0 0 28px}
+.lab{font-size:13px;color:var(--text-3);margin:0 0 4px;letter-spacing:0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.soft{background:var(--surface-1);border-radius:12px;padding:12px 14px}
+.m{direction:ltr;unicode-bidi:isolate;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14.5px;white-space:nowrap}
+@media (max-width:700px){.m{white-space:normal}}
+.mb{direction:ltr;text-align:left;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14.5px;background:var(--surface-1);border-radius:8px;padding:8px 12px;margin:6px 0;overflow-x:auto;line-height:1.8}
+.en{direction:ltr;unicode-bidi:isolate;font-size:13px;color:var(--text-2)}
+b,strong{font-weight:500}
+.key{background:var(--warn-bg);color:var(--warn);border-radius:6px;padding:0 6px}
+.tip{border-right:3px solid var(--accent);background:var(--accent-bg);padding:8px 12px;border-radius:0;margin:8px 0}
+.trap{border-right:3px solid var(--bad);background:var(--bad-bg);padding:8px 12px;border-radius:0;margin:8px 0}
+button{font-family:inherit;font-size:14px;background:var(--surface);color:var(--text);border:1px solid var(--border-strong);border-radius:8px;padding:5px 14px;cursor:pointer}
+button:hover{background:var(--surface-1)}
+button.on{background:var(--accent-bg);border-color:var(--accent);color:var(--accent)}
+input[type=text]{font-family:inherit;font-size:15px;direction:ltr;text-align:center;width:72px;height:34px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text)}
+input[type=range]{width:100%;accent-color:var(--accent);direction:ltr}
+table.t{border-collapse:collapse;direction:ltr;font-size:14.5px;margin:6px 0;display:block;max-width:100%;overflow-x:auto}
+table.t>tbody,table.t>thead{display:table;width:100%}
+table.t th,table.t td{border:1px solid var(--border);padding:5px 6px;text-align:center;font-weight:400}
+table.t th{background:var(--surface-1)}
+.ok{background:var(--ok-bg)!important}.no{background:var(--bad-bg)!important}
+.fb{font-size:14px;margin-top:8px;min-height:1em}.fb.good{color:var(--ok)}.fb.bad{color:var(--bad)}
+.q{margin:0 0 18px}
+.mcq .opts{display:grid;gap:6px;margin-top:6px}
+.mcq .opts button{text-align:right;padding:7px 12px}
+.stepper .st{display:none;padding:6px 0;border-bottom:1px dashed var(--border)}
+.stepper .st.show{display:block}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+svg{max-width:100%;height:auto;direction:ltr}
+svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12px}
+.nav{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:14px;border-top:1px solid var(--border);padding-top:14px;margin-top:28px}
+.ask{font-size:14px;color:var(--text-2)}
+@media print{body{background:#fff}.card,.soft{break-inside:avoid}.stepper .st{display:block}button{display:none}}
+/* ===== END SHARED STYLE ===== */
+</style>
+<style>
+.lesson{display:flex;gap:12px;align-items:flex-start;margin:0 0 8px;padding:10px 14px}
+.lesson a{text-decoration:none;color:var(--text)} .lesson a:hover{color:var(--accent)}
+.sub{font-size:13px;color:var(--text-2)} .done input{width:18px;height:18px;margin-top:8px;accent-color:var(--accent)}
+.bar{height:8px;background:var(--surface-1);border-radius:4px;overflow:hidden;margin:6px 0 0} .bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+</style></head><body><main>
+<h1>منطق فازی — فصل ۱ تا ۳</h1>
+<p class="goal">آمادگی برای امتحان «مبانی هوش محاسباتی». ۱۰ درس کوتاه + یک آزمون جامع. هر درس: ایده ← نمایش تعاملی ← مثال حل‌شده ← تمرین با جواب فوری.</p>
+<div class="soft sec"><div class="row" style="justify-content:space-between"><span>پیشرفت تو</span><span id="pc" class="m">0 / 11</span></div><div class="bar"><i id="pb"></i></div>
+<p style="font-size:13px;color:var(--text-2);margin:8px 0 0">بعد از تمام کردن هر درس تیکش را بزن (فقط در همین مرورگر ذخیره می‌شود).</p></div>
+<section class="sec"><p class="lab">مرجع سریع</p><div class="row"><a href="reference/cheatsheet.html">برگه فرمول‌ها</a> · <a href="reference/glossary.html">واژه‌نامه فارسی–انگلیسی</a></div></section>
+<section class="sec"><p class="lab">فصل ۱ — منطق فازی چیست (اسلاید ۶ تا ۴۷)</p><div class="card lesson"><label class="done"><input type="checkbox" data-id="1" aria-label="درس ۱ را تمام کردم"></label><div><a href="lessons/0001-crisp-vs-fuzzy.html"><b>درس ۱ · مجموعه قطعی در برابر مجموعه فازی</b></a><div class="sub">صفر و یک در برابر درجه عضویت</div></div></div><div class="card lesson"><label class="done"><input type="checkbox" data-id="2" aria-label="درس ۲ را تمام کردم"></label><div><a href="lessons/0002-writing-fuzzy-sets.html"><b>درس ۲ · نوشتن و خواندن یک مجموعه فازی</b></a><div class="sub">نماد μ/x و زوج‌های مرتب</div></div></div><div class="card lesson"><label class="done"><input type="checkbox" data-id="3" aria-label="درس ۳ را تمام کردم"></label><div><a href="lessons/0003-fuzzy-system-pipeline.html"><b>درس ۳ · ساختار یک سیستم فازی</b></a><div class="sub">فازی‌سازی ← استنتاج ← تجمیع ← غیرفازی‌سازی</div></div></div></section><section class="sec"><p class="lab">فصل ۲ — عملیات و استنتاج فازی (اسلاید ۴۸ تا ۸۰)</p><div class="card lesson"><label class="done"><input type="checkbox" data-id="4" aria-label="درس ۴ را تمام کردم"></label><div><a href="lessons/0004-union-intersection-complement.html"><b>درس ۴ · اجتماع، اشتراک و مکمل</b></a><div class="sub">max · min · ۱ منهای μ — تمرین ۱</div></div></div><div class="card lesson"><label class="done"><input type="checkbox" data-id="5" aria-label="درس ۵ را تمام کردم"></label><div><a href="lessons/0005-hedges.html"><b>درس ۵ · قیدهای زبانی: خیلی، تا حدی، نه خیلی</b></a><div class="sub">very · somewhat · indeed — تمرین ۱</div></div></div><div class="card lesson"><label class="done"><input type="checkbox" data-id="6" aria-label="درس ۶ را تمام کردم"></label><div><a href="lessons/0006-fuzzy-expert-system.html"><b>درس ۶ · ساخت یک سیستم خبره فازی</b></a><div class="sub">متغیر زبانی، مجموعه‌ها، قوانین</div></div></div><div class="card lesson"><label class="done"><input type="checkbox" data-id="7" aria-label="درس ۷ را تمام کردم"></label><div><a href="lessons/0007-max-min-inference.html"><b>درس ۷ · استنتاج max-min</b></a><div class="sub">ماتریس رابطه و ضرب بردار در ماتریس</div></div></div><div class="card lesson"><label class="done"><input type="checkbox" data-id="8" aria-label="درس ۸ را تمام کردم"></label><div><a href="lessons/0008-max-product-defuzzify.html"><b>درس ۸ · استنتاج max-product و غیرفازی‌سازی</b></a><div class="sub">گرفتن یک عدد قطعی — تمرین ۲</div></div></div></section><section class="sec"><p class="lab">فصل ۳ — شکل توابع عضویت (اسلاید ۸۱ تا ۹۴)</p><div class="card lesson"><label class="done"><input type="checkbox" data-id="9" aria-label="درس ۹ را تمام کردم"></label><div><a href="lessons/0009-triangle-trapezoid.html"><b>درس ۹ · توابع عضویت مثلثی و ذوزنقه‌ای</b></a><div class="sub">trimf · trapmf</div></div></div><div class="card lesson"><label class="done"><input type="checkbox" data-id="10" aria-label="درس ۱۰ را تمام کردم"></label><div><a href="lessons/0010-gaussian-bell-sigmoid.html"><b>درس ۱۰ · توابع گاوسی، زنگوله‌ای، سیگموئید و چندجمله‌ای</b></a><div class="sub">gaussmf · gbellmf · sigmf · zmf/smf/pimf</div></div></div></section><section class="sec"><p class="lab">مرور نهایی</p><div class="card lesson"><label class="done"><input type="checkbox" data-id="11" aria-label="درس ۱۱ را تمام کردم"></label><div><a href="lessons/0011-mock-exam.html"><b>درس ۱۱ · آزمون جامع فصل ۱ تا ۳</b></a><div class="sub">سؤال‌های ترکیبی مثل امتحان</div></div></div></section>
+<section class="sec"><p class="lab">روش مطالعه پیشنهادی</p><div class="soft"><ul style="margin:0">
+<li>هر روز ۲ یا ۳ درس، نه همه با هم. فاصله انداختن بین مرورها حافظه بلندمدت را قوی‌تر می‌کند.</li>
+<li>قبل از دیدن جواب، اول خودت حساب کن — همین زحمت است که مطلب را ماندگار می‌کند.</li>
+<li>بعد از درس ۸، تمرین ۱ و ۲ خودت را دوباره حل کن؛ بعد آزمون جامع را بزن.</li>
+<li>هر جا گیر کردی، در چت از من (Claude) بپرس.</li></ul></div></section>
+</main>
+<script>
+(function(){var k='fuzzy-ch1-3-done',s={};try{s=JSON.parse(localStorage.getItem(k)||'{}')}catch(e){}
+var bs=document.querySelectorAll('input[data-id]');function u(){var n=0;bs.forEach(function(b){if(b.checked)n++});document.getElementById('pc').textContent=n+' / '+bs.length;document.getElementById('pb').style.width=(100*n/bs.length)+'%'}
+bs.forEach(function(b){b.checked=!!s[b.dataset.id];b.addEventListener('change',function(){s[b.dataset.id]=b.checked;try{localStorage.setItem(k,JSON.stringify(s))}catch(e){}u()})});u()})();
+</script></body></html>

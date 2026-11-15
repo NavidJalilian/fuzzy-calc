@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>درس ۶ — ساخت یک سیستم خبره فازی</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ===== SHARED STYLE — copy verbatim into every lesson, do not edit per lesson ===== */
+:root{--bg:#fbfaf7;--surface:#ffffff;--surface-1:#f3f1ec;--text:#1f1e1c;--text-2:#5f5e5a;--text-3:#888780;--border:#e3e0d8;--border-strong:#c9c6bc;
+--accent:#534AB7;--accent-bg:#EEEDFE;--ok:#3B6D11;--ok-bg:#EAF3DE;--bad:#A32D2D;--bad-bg:#FCEBEB;--warn:#854F0B;--warn-bg:#FAEEDA;
+--c1:#7F77DD;--c2:#1D9E75;--c3:#EF9F27;--c4:#D4537E;--grid:#e3e0d8}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1a1a19;--surface:#232322;--surface-1:#2c2c2a;--text:#ecebe6;--text-2:#b4b2a9;--text-3:#888780;--border:#3a3a37;--border-strong:#55554f;
+--accent:#AFA9EC;--accent-bg:#26215C;--ok:#97C459;--ok-bg:#173404;--bad:#F09595;--bad-bg:#501313;--warn:#FAC775;--warn-bg:#412402;--grid:#3a3a37}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Vazirmatn,Tahoma,sans-serif;font-size:16px;line-height:1.95}
+main{max-width:760px;margin:0 auto;padding:24px 16px 64px}
+a{color:var(--accent)}
+h1{font-size:26px;font-weight:700;line-height:1.5;margin:6px 0 6px}
+h2{font-size:19px;font-weight:500;margin:0 0 8px}
+h3{font-size:16px;font-weight:500;margin:12px 0 4px}
+p{margin:0 0 10px}
+.top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:13px;color:var(--text-2)}
+.goal{color:var(--text-2);margin-bottom:22px}
+.sec{margin:0 0 28px}
+.lab{font-size:13px;color:var(--text-3);margin:0 0 4px;letter-spacing:0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.soft{background:var(--surface-1);border-radius:12px;padding:12px 14px}
+.m{direction:ltr;unicode-bidi:isolate;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14.5px;white-space:nowrap}
+@media (max-width:700px){.m{white-space:normal}}
+.mb{direction:ltr;text-align:left;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14.5px;background:var(--surface-1);border-radius:8px;padding:8px 12px;margin:6px 0;overflow-x:auto;line-height:1.8}
+.en{direction:ltr;unicode-bidi:isolate;font-size:13px;color:var(--text-2)}
+b,strong{font-weight:500}
+.key{background:var(--warn-bg);color:var(--warn);border-radius:6px;padding:0 6px}
+.tip{border-right:3px solid var(--accent);background:var(--accent-bg);padding:8px 12px;border-radius:0;margin:8px 0}
+.trap{border-right:3px solid var(--bad);background:var(--bad-bg);padding:8px 12px;border-radius:0;margin:8px 0}
+button{font-family:inherit;font-size:14px;background:var(--surface);color:var(--text);border:1px solid var(--border-strong);border-radius:8px;padding:5px 14px;cursor:pointer}
+button:hover{background:var(--surface-1)}
+button.on{background:var(--accent-bg);border-color:var(--accent);color:var(--accent)}
+input[type=text]{font-family:inherit;font-size:15px;direction:ltr;text-align:center;width:72px;height:34px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text)}
+input[type=range]{width:100%;accent-color:var(--accent);direction:ltr}
+table.t{border-collapse:collapse;direction:ltr;font-size:14.5px;margin:6px 0;display:block;max-width:100%;overflow-x:auto}
+table.t>tbody,table.t>thead{display:table;width:100%}
+table.t th,table.t td{border:1px solid var(--border);padding:5px 6px;text-align:center;font-weight:400}
+table.t th{background:var(--surface-1)}
+.ok{background:var(--ok-bg)!important}.no{background:var(--bad-bg)!important}
+.fb{font-size:14px;margin-top:8px;min-height:1em}.fb.good{color:var(--ok)}.fb.bad{color:var(--bad)}
+.q{margin:0 0 18px}
+.mcq .opts{display:grid;gap:6px;margin-top:6px}
+.mcq .opts button{text-align:right;padding:7px 12px}
+.stepper .st{display:none;padding:6px 0;border-bottom:1px dashed var(--border)}
+.stepper .st.show{display:block}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+svg{max-width:100%;height:auto;direction:ltr}
+svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12px}
+.nav{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:14px;border-top:1px solid var(--border);padding-top:14px;margin-top:28px}
+.ask{font-size:14px;color:var(--text-2)}
+@media print{body{background:#fff}.card,.soft{break-inside:avoid}.stepper .st{display:block}button{display:none}}
+/* ===== END SHARED STYLE ===== */
+</style>
+<style>
+.mb.pre{white-space:pre}
+#dgSvg .bx{cursor:pointer}
+#dgSvg .bx rect,#dgSvg .bx ellipse{fill:var(--surface);stroke:var(--border-strong);stroke-width:1.5}
+#dgSvg .bx.sel rect,#dgSvg .bx.sel ellipse{fill:var(--accent-bg);stroke:var(--accent);stroke-width:2.5}
+#dgSvg .bx text{fill:var(--text);font-size:13px}
+#dgSvg .ar{stroke:var(--text-3);stroke-width:1.5;fill:none}
+#dgInfo{margin-top:8px}
+</style>
+</head>
+<body>
+<main>
+<div class="top"><a href="../index.html">← فهرست درس‌ها</a><span>درس ۶ از ۱۱ · فصل ۲ · حدود ۱۵ دقیقه</span></div>
+<h1>ساخت یک سیستم خبره فازی</h1>
+<p class="goal">هدف: بعد از این درس می‌توانی پنج گام ساخت سیستم خبره فازی را به ترتیب نام ببری، متغیر زبانی و مقدار زبانی و مجموعه فازی را از هم تشخیص بدهی، و یک عدد قطعی را روی چند مجموعه مثلثی فازی‌سازی کنی.</p>
+
+<!-- ===== 1. IDEA ===== -->
+<section class="sec"><p class="lab">۱. ایده</p>
+<div class="card">
+  <p><b>سیستم خبره فازی</b> <span class="en">(fuzzy expert system)</span> برنامه‌ای است که دانش یک آدم خبره را به شکل جمله‌های «اگر … آنگاه …» با کلمه‌های مبهم (مثل «گرم»، «تند») نگه می‌دارد و با آن تصمیم می‌گیرد. اسلایدهای ۶۱ تا ۶۶ ساختنش را در <span class="key">پنج گام</span> می‌گویند:</p>
+  <ol>
+    <li><b>تعریف مسئله</b> (اسلاید ۶۱): دقیقاً چه چیزی را می‌خواهیم تصمیم بگیریم یا کنترل کنیم؟</li>
+    <li><b>تعریف متغیرهای زبانی</b> <span class="en">(linguistic variables)</span> (اسلاید ۶۲): متغیرهایی که به جای عدد، <b>کلمه‌های مبهم</b> مقدارشان هستند.</li>
+    <li><b>تعریف مجموعه‌های فازی</b> (اسلاید ۶۳): برای هر کلمه یک مجموعه فازی (یعنی یک تابع عضویت) می‌سازیم.</li>
+    <li><b>تعریف قوانین فازی</b> <span class="en">(fuzzy rules)</span> (اسلایدهای ۶۴ و ۶۵): جمله‌های «اگر–آنگاه» که دانش خبره را می‌سازند.</li>
+    <li><b>استنتاج فازی</b> <span class="en">(fuzzy inference)</span> (اسلاید ۶۶): فرایند نگاشت ورودی به خروجی با منطق فازی.</li>
+  </ol>
+
+  <h3>متغیر زبانی، مقدار زبانی، مجموعه فازی</h3>
+  <table class="t">
+    <tr><th>Fuzzy variable (متغیر زبانی)</th><th>value (مقدارهای زبانی)</th></tr>
+    <tr><td>temp</td><td>hot, cold</td></tr>
+    <tr><td>height</td><td>short, medium, tall</td></tr>
+    <tr><td>speed</td><td>slow, fast</td></tr>
+    <tr><td>age</td><td>young, old</td></tr>
+  </table>
+  <p>جدول اسلاید ۶۲. <b>متغیر زبانی</b> مثل <span class="m">height</span> اسمِ کمیت است؛ <b>مقدار زبانی</b> <span class="en">(linguistic value)</span> مثل <span class="m">tall</span> یک کلمه از مقدارهای آن است؛ و <b>مجموعه فازی</b> همان چیزی است که معنی دقیق آن کلمه را با عدد می‌گوید.</p>
+  <div class="soft"><b>مثال اسلاید ۶۳:</b> جمله «علی قد بلند است» مبهم است. مجموعه فازی «قد بلند» را این‌طور تعریف می‌کنیم:
+    <div class="mb">Tall = (0/170, 0.1/175, 0.2/180, 0.3/185, ...)</div>
+    حالا می‌گوییم «علی با درجه <span class="m">0.3</span> به مجموعه tall تعلق دارد» و از روی مجموعه می‌فهمیم قد علی <span class="m">185 cm</span> است. ابهام برطرف شد. (مجموعه‌های فازی را با توابع عضویت نشان می‌دهند.)</div>
+
+  <h3>قانون فازی (اسلایدهای ۶۴ و ۶۵)</h3>
+  <p>قلب سیستم یک <b>پایگاه دانش</b> از قوانین اگر–آنگاه است. شکل کلی: <span class="m">if antecedent(s) then consequence(s)</span>؛ بخش «اگر» را <b>شرط</b> <span class="en">(antecedent)</span> و بخش «آنگاه» را <b>نتیجه</b> <span class="en">(consequence)</span> می‌گویند.</p>
+  <div class="mb pre">If A = a and B = b then C = c
+Rule1: If speed is slow then make acceleration high.
+Rule2: If height is tall then weight is heavy.
+Rule3: If temp is low and pressure is medium then make speed very slow.</div>
+  <p>در شرط می‌توان چند مجموعه فازی را با عملگرهای <span class="m">and, or, not</span> ترکیب کرد (همان min، max و 1−μ درس ۴). در Rule3 حتی قید «very» از درس ۵ هم آمده.</p>
+
+  <h3>سه بخش استنتاج (اسلایدهای ۶۶ و ۶۷)</h3>
+  <p><b>پایگاه داده</b> (پایگاه دانش) سیستم از <b>قوانین فازی</b> و <b>مجموعه‌های فازی</b> تشکیل شده. علاوه بر آن سه بخش داریم:</p>
+  <ul>
+    <li><b>فازی‌سازی</b> <span class="en">(fuzzification)</span>: تبدیل داده ورودی به مجموعه‌های فازی با استفاده از توابع عضویت.</li>
+    <li><b>استنتاج</b> <span class="en">(inferencing)</span>: با ورودی‌های فازی‌شده و قوانین فازی، خروجی‌های فازی را می‌سازد.</li>
+    <li><b>غیرفازی‌سازی</b> <span class="en">(defuzzification)</span>: خروجی‌های فازی قوانین را به عدد قطعی (غیرفازی) تبدیل می‌کند.</li>
+  </ul>
+  <div class="tip">اسلاید ۶۷ می‌گوید فازی‌سازی «تبدیل داده‌های <b>کلامی</b> به مجموعه فازی» است. در محاسبه‌ها، ورودی معمولاً یک <b>عدد قطعی</b> است (مثلاً دمای ۲۴ درجه) و فازی‌سازی یعنی: برای هر مقدار زبانی، درجه عضویت این عدد را از تابع عضویتش بخوان. پایین همین را امتحان می‌کنی.</div>
+</div></section>
+
+<!-- ===== 2. SEE IT ===== -->
+<section class="sec"><p class="lab">۲. ببین چه اتفاقی می‌افتد</p>
+<div class="card">
+  <h3 style="margin-top:0">الف) یک متغیر زبانی بساز و فازی‌سازی کن</h3>
+  <p>یکی از متغیرهای جدول اسلاید ۶۲ را انتخاب کن. هر مقدار زبانی یک مجموعه فازی دارد. با لغزنده یک عدد قطعی بده و ببین در هر مجموعه چه درجه‌ای می‌گیرد. (این مجموعه‌ها نمونه‌اند؛ هر طراح می‌تواند مرزها را خودش انتخاب کند. در مثال پنکه پایین‌تر، برای دما سه مجموعهٔ دیگر تعریف می‌کنیم.)</p>
+  <div class="row" id="varBtns" role="group" aria-label="متغیر زبانی"></div>
+  <svg id="fzSvg" viewBox="0 0 600 250" role="img" aria-labelledby="fzTitle"><title id="fzTitle">مجموعه‌های فازی یک متغیر زبانی</title></svg>
+  <label for="fzx" class="row" style="justify-content:space-between"><span>ورودی قطعی: <span class="m" id="fzv"></span></span></label>
+  <input type="range" id="fzx">
+  <div class="mb" id="fzOut"></div>
+</div>
+
+<div class="card" style="margin-top:10px">
+  <h3 style="margin-top:0">ب) نمودار سیستم استدلال فازی (اسلایدهای ۶۶ و ۶۸)</h3>
+  <p>روی هر بخش بزن تا کارش را در مثال «پنکه هوشمند» (دمای اتاق ۲۴ درجه) ببینی.</p>
+  <div class="row" id="partBtns" role="group" aria-label="بخش‌های سیستم"></div>
+  <svg id="dgSvg" viewBox="0 0 600 300" role="img" aria-labelledby="dgTitle"><title id="dgTitle">نمودار سیستم استدلال مبتنی بر قوانین فازی</title></svg>
+  <div class="soft" id="dgInfo" aria-live="polite"></div>
+</div></section>
+
+<!-- ===== 3. WORKED EXAMPLE ===== -->
+<section class="sec"><p class="lab">۳. مثال حل‌شده، قدم به قدم — پنکه هوشمند</p>
+<div class="card stepper">
+  <p style="margin:0">می‌خواهیم با پنج گام اسلایدها یک سیستم کوچک بسازیم و در آخر دمای <span class="m">24°C</span> را فازی‌سازی کنیم.</p>
+  <div class="st">گام ۱ — <b>تعریف مسئله</b>: سرعت پنکه را بر اساس دمای اتاق تنظیم کن.</div>
+  <div class="st">گام ۲ — <b>متغیرهای زبانی</b>: ورودی <span class="m">temp</span> با مقدارهای <span class="m">cold, warm, hot</span>؛ خروجی <span class="m">fan</span> با مقدارهای <span class="m">slow, medium, fast</span>. (اسلاید فقط hot و cold دارد؛ ما warm را اضافه کرده‌ایم.)</div>
+  <div class="st">گام ۳ — <b>مجموعه‌های فازی</b> (دما به درجه سانتی‌گراد):
+    <div class="mb pre">cold : 1 for x ≤ 10,  falls linearly to 0 at x = 20
+warm : triangle (10, 20, 30)  → 0 at 10, peak 1 at 20, 0 at 30
+hot  : 0 for x ≤ 20,  rises linearly to 1 at x = 30, then stays 1</div>
+    یعنی cold و hot «شانه‌ای» (یک طرفشان صاف روی ۱) هستند و warm یک مثلث است.</div>
+  <div class="st">گام ۴ — <b>قوانین فازی</b>: یک ورودی با ۳ مقدار ← ۳ قانون:
+    <div class="mb pre">R1: If temp is cold then fan is slow
+R2: If temp is warm then fan is medium
+R3: If temp is hot  then fan is fast</div></div>
+  <div class="st">گام ۵ — <b>استنتاج</b>، اول فازی‌سازی <span class="m">x = 24</span>:
+    <div class="mb pre">μ_cold(24) = 0                          (24 ≥ 20)
+μ_warm(24) = (30 − 24)/(30 − 20) = 0.6   (falling side)
+μ_hot(24)  = (24 − 20)/(30 − 20) = 0.4   (rising side)</div>
+    برای warm، عدد ۲۴ روی ضلع پایین‌روندهٔ مثلث (بین ۲۰ و ۳۰) است؛ برای hot روی ضلع بالارونده.
+    پس R2 با قدرت <span class="m">0.6</span> و R3 با قدرت <span class="m">0.4</span> فعال می‌شوند و R1 خاموش است. ترکیب این خروجی‌ها و تبدیلشان به یک عدد، موضوع درس‌های ۷ و ۸ است.</div>
+  <div class="row" style="margin-top:8px"><button class="next">قدم بعدی</button><button class="all">نمایش همه</button></div>
+</div></section>
+
+<!-- ===== 4. PRACTICE ===== -->
+<section class="sec"><p class="lab">۴. نوبت توست</p>
+<div class="card">
+  <div class="q practice" data-hint="فقط ضلعی را استفاده کن که x روی آن است. cold بین 10 و 20: (20 − x)/10. warm بین 10 و 20: (x − 10)/10. hot زیر 20 صفر است.">
+    <p><b>سؤال ۱.</b> با همان مجموعه‌های مثال پنکه، دمای <span class="m">17°C</span> را فازی‌سازی کن.</p>
+    <table class="t"><tr><th>μ_cold(17)</th><th>μ_warm(17)</th><th>μ_hot(17)</th></tr>
+      <tr><td><input type="text" data-k="0.3" aria-label="cold در 17"></td><td><input type="text" data-k="0.7" aria-label="warm در 17"></td><td><input type="text" data-k="0" aria-label="hot در 17"></td></tr></table>
+    <button class="check">بررسی</button><div class="fb"></div>
+  </div>
+
+  <div class="q practice" data-hint="short بعد از 170 صفر است. medium: 172 روی ضلع پایین‌رونده است → (185 − 172)/(185 − 170). tall: (172 − 170)/(190 − 170).">
+    <p><b>سؤال ۲.</b> متغیر زبانی <span class="m">height</span> (سانتی‌متر) سه مقدار دارد:</p>
+    <div class="mb pre">short  : 1 for x ≤ 150,  falls linearly to 0 at x = 170
+medium : triangle (155, 170, 185)
+tall   : 0 for x ≤ 170,  rises linearly to 1 at x = 190</div>
+    <p>قد <span class="m">172</span> را فازی‌سازی کن (دو رقم اعشار).</p>
+    <table class="t"><tr><th>μ_short(172)</th><th>μ_medium(172)</th><th>μ_tall(172)</th></tr>
+      <tr><td><input type="text" data-k="0" aria-label="short در 172"></td><td><input type="text" data-k="0.8667" data-tol="0.01" aria-label="medium در 172"></td><td><input type="text" data-k="0.1" aria-label="tall در 172"></td></tr></table>
+    <button class="check">بررسی</button><div class="fb"></div>
+  </div>
+
+  <div class="q practice" data-hint="اگر برای هر ترکیب ممکن یک قانون بنویسیم، تعداد مقدارهای هر ورودی را در هم ضرب کن.">
+    <p><b>سؤال ۳.</b> اگر برای <b>هر ترکیب</b> مقدارهای ورودی دقیقاً یک قانون بنویسیم (جدول کامل قوانین)، چند قانون لازم است؟</p>
+    <table class="t"><tr><th>ورودی‌ها</th><th>تعداد قانون</th></tr>
+      <tr><td>دو ورودی، هر کدام ۳ مقدار</td><td><input type="text" data-k="9" data-tol="0" aria-label="تعداد قانون 3 در 3"></td></tr>
+      <tr><td>دو ورودی با ۳ و ۴ مقدار</td><td><input type="text" data-k="12" data-tol="0" aria-label="تعداد قانون 3 در 4"></td></tr>
+      <tr><td>دو ورودی با ۵ و ۳ مقدار</td><td><input type="text" data-k="15" data-tol="0" aria-label="تعداد قانون 5 در 3"></td></tr>
+      <tr><td>سه ورودی با ۳، ۳ و ۲ مقدار</td><td><input type="text" data-k="18" data-tol="0" aria-label="تعداد قانون 3 در 3 در 2"></td></tr></table>
+    <button class="check">بررسی</button><div class="fb"></div>
+  </div>
+
+  <div class="q practice" data-hint="اول باید بدانی مسئله چیست، بعد کمیت‌ها (متغیرها)، بعد معنی کلمه‌ها (مجموعه‌ها)، بعد قوانین، و در آخر استنتاج.">
+    <p><b>سؤال ۴.</b> شماره گام هر کار را (۱ تا ۵) بنویس.</p>
+    <table class="t"><tr><th>کار</th><th>گام</th></tr>
+      <tr><td>تعریف قوانین فازی</td><td><input type="text" data-k="4" data-tol="0" aria-label="گام تعریف قوانین"></td></tr>
+      <tr><td>تعریف مسئله</td><td><input type="text" data-k="1" data-tol="0" aria-label="گام تعریف مسئله"></td></tr>
+      <tr><td>استنتاج فازی</td><td><input type="text" data-k="5" data-tol="0" aria-label="گام استنتاج"></td></tr>
+      <tr><td>تعریف مجموعه‌های فازی</td><td><input type="text" data-k="3" data-tol="0" aria-label="گام تعریف مجموعه‌ها"></td></tr>
+      <tr><td>تعریف متغیرهای زبانی</td><td><input type="text" data-k="2" data-tol="0" aria-label="گام تعریف متغیرها"></td></tr></table>
+    <button class="check">بررسی</button><div class="fb"></div>
+  </div>
+
+  <div class="q practice" data-hint="very = μ² (درس ۵). AND = min (درس ۴).">
+    <p><b>سؤال ۵ (مرور درس ۴ و ۵).</b> فرض کن بعد از فازی‌سازی <span class="m">μ_hot = 0.4</span> و <span class="m">μ_humid = 0.7</span>.</p>
+    <table class="t"><tr><th>درجه «very hot»</th><th>درجه شرطِ «hot AND humid»</th></tr>
+      <tr><td><input type="text" data-k="0.16" data-tol="0.005" aria-label="very hot"></td><td><input type="text" data-k="0.4" aria-label="hot and humid"></td></tr></table>
+    <button class="check">بررسی</button><div class="fb"></div>
+  </div>
+
+  <div class="q mcq" data-yes="درست! tall یکی از کلمه‌هایی است که متغیر height می‌تواند بگیرد." data-no="نه. height متغیر زبانی است و tall یکی از مقدارهایش. مجموعه فازی معنی عددیِ tall است.">
+    <p><b>سؤال ۶.</b> در عبارت «height is tall»، کلمه <span class="m">tall</span> چیست؟</p>
+    <div class="opts">
+      <button>متغیر زبانی</button>
+      <button data-ok>مقدار زبانی</button>
+      <button>قاعده فازی</button>
+      <button>عدد قطعی</button>
+    </div><div class="fb"></div>
+  </div>
+
+  <div class="q mcq" data-yes="درست! این فهرست درجه‌ها به ازای هر عنصر است، یعنی همان مجموعه فازیِ معنیِ tall." data-no="نه. عبارتی به شکل (درجه/عنصر، …) یک مجموعه فازی است: برای هر قد یک درجه عضویت می‌دهد.">
+    <p><b>سؤال ۷.</b> عبارت <span class="m">Tall = (0/170, 0.1/175, 0.2/180, 0.3/185, ...)</span> چیست؟</p>
+    <div class="opts">
+      <button>متغیر زبانی</button>
+      <button>مقدار زبانی</button>
+      <button>قاعده فازی</button>
+      <button data-ok>مجموعه فازی</button>
+    </div><div class="fb"></div>
+  </div>
+
+  <div class="q mcq" data-yes="درست! اسلاید ۶۶: پایگاه داده از قوانین فازی و مجموعه‌های فازی تشکیل شده." data-no="نه. اسلاید ۶۶ (و نمودار اسلاید ۶۸) می‌گوید پایگاه داده = قوانین فازی + مجموعه‌های فازی.">
+    <p><b>سؤال ۸.</b> پایگاه داده (پایگاه دانش) یک سیستم استدلال فازی از چه تشکیل شده؟</p>
+    <div class="opts">
+      <button data-ok>قوانین فازی و مجموعه‌های فازی</button>
+      <button>ورودی‌های قطعی و خروجی‌های قطعی</button>
+      <button>فازی‌ساز و غیرفازی‌ساز سیستم</button>
+      <button>موتور استنتاج و خروجی‌های قطعی</button>
+    </div><div class="fb"></div>
+  </div>
+
+  <div class="q mcq" data-yes="درست! temp و pressure در شرط، speed در نتیجه. very فقط قید است، نه متغیر." data-no="نه. متغیرها را بشمار: temp و pressure (در شرط) و speed (در نتیجه). low، medium و very slow مقدار هستند، نه متغیر.">
+    <p><b>سؤال ۹ (اسلاید ۶۴).</b> در Rule3 «If temp is low and pressure is medium then make speed very slow» چند <b>متغیر زبانی</b> هست؟</p>
+    <div class="opts">
+      <button><span class="m">1</span></button>
+      <button><span class="m">2</span></button>
+      <button data-ok><span class="m">3</span></button>
+      <button><span class="m">4</span></button>
+    </div><div class="fb"></div>
+  </div>
+</div></section>
+
+<!-- ===== 5. SUMMARY ===== -->
+<section class="sec"><p class="lab">۵. جمع‌بندی — همین را به خاطر بسپار</p>
+<div class="soft"><ul>
+  <li>پنج گام: <b>مسئله → متغیرهای زبانی → مجموعه‌های فازی → قوانین فازی → استنتاج</b>.</li>
+  <li>متغیر زبانی (height) ≠ مقدار زبانی (tall) ≠ مجموعه فازی (عددهای معنی tall).</li>
+  <li>قانون: <span class="m">if antecedent then consequence</span>؛ در شرط می‌شود <span class="m">and / or / not</span> گذاشت.</li>
+  <li>پایگاه دانش = قوانین فازی + مجموعه‌های فازی. سه بخش دیگر: فازی‌سازی → استنتاج → غیرفازی‌سازی.</li>
+  <li>فازی‌سازی یک عدد = درجه آن عدد در هر مجموعه را از روی ضلع درست بخوان.</li>
+  <li>جدول کامل قوانین: تعداد قانون = حاصل‌ضرب تعداد مقدارهای ورودی‌ها (۳ × ۳ = ۹).</li>
+</ul></div></section>
+
+<!-- ===== 6. SOURCE + ASK ===== -->
+<section class="sec"><p class="lab">منبع اصلی</p>
+<p>جزوه درس، اسلایدهای ۶۱ تا ۶۸ (گام‌ها: ۶۱ تا ۶۶؛ تعریف فازی‌سازی، استنتاج و غیرفازی‌سازی: ۶۷؛ نمودار: ۶۸) · <a href="https://www.wiley.com/en-us/Fuzzy+Logic+with+Engineering+Applications%2C+4th+Edition-p-9781119235866">Ross, <i>Fuzzy Logic with Engineering Applications</i></a> — فصل‌های مربوط به سیستم‌های مبتنی بر قانون (rule-based systems).</p>
+<p class="ask">جایی مبهم بود؟ همین حالا در چت از من (Claude) بپرس — معلم تو هستم و می‌توانم مثال بیشتری بسازم.</p>
+<p><a href="../reference/cheatsheet.html">برگه فرمول‌ها</a> · <a href="../reference/glossary.html">واژه‌نامه</a></p>
+</section>
+
+<div class="nav"><a href="0005-hedges.html">← درس قبل: قیدهای زبانی: خیلی، تا حدی، نه خیلی</a><a href="0007-max-min-inference.html">درس بعد: استنتاج max-min →</a></div>
+</main>
+
+<script>
+/* ===== SHARED JS — copy verbatim into every lesson ===== */
+(function(){
+function norm(s){return s.trim().replace(/[۰-۹]/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)}).replace(/[٠-٩]/g,function(d){return '٠١٢٣٤٥٦٧٨٩'.indexOf(d)}).replace(/[٫,]/g,'.').replace(/\s+/g,'')}
+function val(s){s=norm(s);if(/^-?\d*\.?\d+\/-?\d*\.?\d+$/.test(s)){var p=s.split('/');return +p[0]/+p[1]}return s===''?NaN:+s}
+document.querySelectorAll('.practice').forEach(function(q){
+  var ins=q.querySelectorAll('input[data-k]'),fb=q.querySelector('.fb'),btn=q.querySelector('.check');
+  ins.forEach(function(i){i.addEventListener('input',function(){i.parentNode.classList.remove('ok','no');fb.textContent='';fb.className='fb'})});
+  btn.addEventListener('click',function(){
+    var empty=0,ok=0;
+    ins.forEach(function(i){var c=i.parentNode;c.classList.remove('ok','no');if(!i.value.trim()){empty++;return}
+      var v=val(i.value),k=+i.dataset.k,tol=i.dataset.tol?+i.dataset.tol:0.01;
+      if(!isNaN(v)&&Math.abs(v-k)<=tol+1e-9){ok++;c.classList.add('ok')}else c.classList.add('no')});
+    if(empty){fb.className='fb bad';fb.textContent='اول همه خانه‌ها را پر کن ('+empty+' خانه خالی است).';return}
+    if(ok===ins.length){fb.className='fb good';fb.textContent=q.dataset.yes||('عالی! همه '+ins.length+' جواب درست است.')}
+    else{fb.className='fb bad';fb.textContent=ok+' از '+ins.length+' درست. '+(q.dataset.hint||'خانه‌های قرمز را دوباره حساب کن.')}
+  });
+});
+document.querySelectorAll('.mcq').forEach(function(q){
+  var fb=q.querySelector('.fb');
+  q.querySelectorAll('.opts button').forEach(function(b){b.addEventListener('click',function(){
+    q.querySelectorAll('.opts button').forEach(function(x){x.classList.remove('ok','no')});
+    if(b.hasAttribute('data-ok')){b.classList.add('ok');fb.className='fb good';fb.textContent=q.dataset.yes||'درست!'}
+    else{b.classList.add('no');fb.className='fb bad';fb.textContent=q.dataset.no||'نه، دوباره فکر کن.'}
+  })});
+});
+document.querySelectorAll('.stepper').forEach(function(s){
+  var st=s.querySelectorAll('.st'),n=0,nx=s.querySelector('.next'),al=s.querySelector('.all');
+  function upd(){st.forEach(function(e,i){e.classList.toggle('show',i<n)});if(nx)nx.textContent=n>=st.length?'از اول':'قدم بعدی ('+n+'/'+st.length+')'}
+  if(nx)nx.addEventListener('click',function(){n=n>=st.length?0:n+1;upd()});
+  if(al)al.addEventListener('click',function(){n=st.length;upd()});
+  upd();
+});
+})();
+/* ===== END SHARED JS ===== */
+</script>
+<script>
+/* lesson 6: build-a-variable + clickable system diagram */
+(function(){
+/* ---- part A: linguistic variable + fuzzification ---- */
+function tz(x,a,b,c,d){if(x<a||x>d)return 0;if(x>=b&&x<=c)return 1;if(x<b)return (x-a)/(b-a);return (d-x)/(d-c)}
+var V={
+  temp:{fa:'دما',en:'temp',u:'°C',lo:0,hi:40,step:1,x:24,ticks:[0,10,20,30,40],terms:[['cold',[0,0,10,25]],['hot',[15,30,40,40]]]},
+  height:{fa:'قد',en:'height',u:'cm',lo:140,hi:200,step:1,x:172,ticks:[140,150,165,180,200],terms:[['short',[140,140,150,165]],['medium',[150,165,165,180]],['tall',[165,180,200,200]]]},
+  speed:{fa:'سرعت',en:'speed',u:'km/h',lo:0,hi:120,step:1,x:60,ticks:[0,30,50,70,100,120],terms:[['slow',[0,0,30,70]],['fast',[50,100,120,120]]]},
+  age:{fa:'سن',en:'age',u:'سال',lo:0,hi:80,step:1,x:40,ticks:[0,20,35,45,65,80],terms:[['young',[0,0,20,45]],['old',[35,65,80,80]]]}
+};
+var COL=['var(--c1)','var(--c2)','var(--c3)'];
+var cur='temp',svg=document.getElementById('fzSvg'),sl=document.getElementById('fzx');
+var L=46,R=586,T=14,B=196;
+function Y(v){return B-(B-T)*v}
+function r2(v){return String(Math.round(v*100)/100)}
+var vb=document.getElementById('varBtns');
+Object.keys(V).forEach(function(k){var b=document.createElement('button');b.type='button';b.dataset.v=k;b.innerHTML=V[k].fa+' <span class="en">('+V[k].en+')</span>';
+  b.addEventListener('click',function(){cur=k;setVar()});vb.appendChild(b)});
+function setVar(){var v=V[cur];sl.min=v.lo;sl.max=v.hi;sl.step=v.step;sl.value=v.x;
+  vb.querySelectorAll('button').forEach(function(b){b.classList.toggle('on',b.dataset.v===cur);b.setAttribute('aria-pressed',b.dataset.v===cur)});drawA()}
+function drawA(){
+  var v=V[cur],x=+sl.value;v.x=x;
+  function X(t){return L+(R-L)*(t-v.lo)/(v.hi-v.lo)}
+  var s='<title id="fzTitle">مجموعه‌های فازی متغیر '+v.en+'</title>';
+  [0,0.5,1].forEach(function(g){s+='<line x1="'+L+'" x2="'+R+'" y1="'+Y(g)+'" y2="'+Y(g)+'" stroke="var(--grid)"/><text x="'+(L-8)+'" y="'+(Y(g)+4)+'" text-anchor="end">'+g+'</text>'});
+  s+='<line x1="'+L+'" x2="'+R+'" y1="'+B+'" y2="'+B+'" stroke="var(--text-3)"/><line x1="'+L+'" x2="'+L+'" y1="'+T+'" y2="'+B+'" stroke="var(--text-3)"/>';
+  v.ticks.forEach(function(t){s+='<text x="'+X(t)+'" y="'+(B+17)+'" text-anchor="middle">'+t+'</text>'});
+  s+='<text x="'+R+'" y="'+(B+36)+'" text-anchor="end">'+v.en+' ('+v.u+')</text>';
+  var out=[];
+  v.terms.forEach(function(tm,i){var p=tm[1];
+    s+='<polyline points="'+X(p[0])+','+Y(p[0]===p[1]?1:0)+' '+X(p[1])+','+Y(1)+' '+X(p[2])+','+Y(1)+' '+X(p[3])+','+Y(p[2]===p[3]?1:0)+'" fill="none" stroke="'+COL[i]+'" stroke-width="2.5" stroke-linejoin="round"/>';
+    var lx=X((p[1]+p[2])/2);s+='<text x="'+lx+'" y="'+(T+12)+'" text-anchor="middle" style="fill:'+COL[i]+';font-weight:500">'+tm[0]+'</text>';
+    var m=tz(x,p[0],p[1],p[2],p[3]);out.push(r2(m)+'/'+tm[0]);
+    s+='<circle cx="'+X(x)+'" cy="'+Y(m)+'" r="5" fill="'+COL[i]+'" stroke="var(--surface)" stroke-width="1.5"/>';
+  });
+  s+='<line x1="'+X(x)+'" x2="'+X(x)+'" y1="'+T+'" y2="'+B+'" stroke="var(--text-3)" stroke-dasharray="3 3"/>';
+  svg.innerHTML=s;
+  document.getElementById('fzv').textContent=x+' '+v.u;
+  document.getElementById('fzOut').textContent=v.en+' = '+x+'  →  fuzzified: {'+out.join(', ')+'}';
+}
+sl.addEventListener('input',drawA);
+setVar();
+
+/* ---- part B: clickable diagram (slide 68) ---- */
+var dg=document.getElementById('dgSvg'),info=document.getElementById('dgInfo'),pb=document.getElementById('partBtns');
+var P=[
+ {k:'in',fa:'ورودی قطعی',shape:'r',x:20,y:20,w:130,h:46,l:['Non-Fuzzy','Inputs'],
+  t:'<b>ورودی قطعی (غیرفازی)</b>: یک عدد معمولی از دنیای واقعی که از حسگر یا کاربر می‌آید. مثال پنکه: دمای اتاق <span class="m">x = 24°C</span>.'},
+ {k:'fz',fa:'فازی‌سازی',shape:'e',x:85,y:150,w:130,h:58,l:['Fuzzification','Process'],
+  t:'<b>فازی‌سازی</b> <span class="en">(fuzzification)</span>: تبدیل ورودی به مجموعه‌های فازی با توابع عضویت (اسلاید ۶۷). مثال: <span class="m">24 → {0/cold, 0.6/warm, 0.4/hot}</span>. برای این کار از <b>مجموعه‌های فازی</b> پایگاه دانش استفاده می‌کند.'},
+ {k:'ie',fa:'موتور استنتاج',shape:'r',x:235,y:90,w:130,h:52,l:['Inference','Engine'],
+  t:'<b>موتور استنتاج</b> <span class="en">(inference engine)</span>: با ورودی‌های فازی‌شده و <b>قوانین فازی</b>، خروجی‌های فازی را تولید می‌کند (اسلاید ۶۷). مثال: R2 «warm → medium» با قدرت <span class="m">0.6</span> و R3 «hot → fast» با قدرت <span class="m">0.4</span> روشن می‌شوند. روش دقیقش (max-min) درس ۷ است.'},
+ {k:'kb',fa:'پایگاه دانش',shape:'r',x:195,y:200,w:210,h:84,l:['Fuzzy Rules  +  Fuzzy Sets'],
+  t:'<b>پایگاه داده / دانش</b> <span class="en">(knowledge base)</span>: از <b>قوانین فازی</b> و <b>مجموعه‌های فازی</b> تشکیل شده (اسلاید ۶۶). مثال: سه قانون R1 تا R3 به‌همراه مجموعه‌های cold/warm/hot و slow/medium/fast. هر سه بخش دیگر از آن استفاده می‌کنند.'},
+ {k:'df',fa:'غیرفازی‌سازی',shape:'e',x:515,y:150,w:140,h:58,l:['Defuzzification','Process'],
+  t:'<b>غیرفازی‌سازی</b> <span class="en">(defuzzification)</span>: خروجی‌های فازی قوانین را به یک عدد قطعی تبدیل می‌کند (اسلاید ۶۷). مثال: از ترکیب «medium با 0.6» و «fast با 0.4» یک سرعت مشخص برای پنکه به دست می‌آید. روش‌هایش در درس ۸.'},
+ {k:'out',fa:'خروجی قطعی',shape:'r',x:450,y:20,w:130,h:46,l:['Non-Fuzzy','Outputs'],
+  t:'<b>خروجی قطعی</b>: عددی که واقعاً به دستگاه داده می‌شود، مثلاً «دور پنکه = فلان دور در دقیقه». کاربر هیچ‌وقت مجموعه فازی نمی‌بیند؛ فقط ورودی و خروجی قطعی.'}
+];
+var sel='fz';
+function drawB(){
+  var s='<title id="dgTitle">نمودار سیستم استدلال مبتنی بر قوانین فازی</title><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--text-3)"/></marker></defs>';
+  var A=[['M85 66 L85 120',0],['M150 140 L233 120',0],['M367 120 L447 140',0],['M515 120 L515 68',0],['M300 144 L300 198',1],['M70 180 C 60 260, 130 270, 193 250',0],['M407 250 C 470 270, 540 250, 520 181',0]];
+  A.forEach(function(a){s+='<path class="ar" d="'+a[0]+'" marker-end="url(#ah)"'+(a[1]?' marker-start="url(#ah)"':'')+'/>'});
+  P.forEach(function(p){
+    s+='<g class="bx'+(p.k===sel?' sel':'')+'" data-k="'+p.k+'">';
+    if(p.shape==='r')s+='<rect x="'+p.x+'" y="'+p.y+'" width="'+p.w+'" height="'+p.h+'" rx="6"/>';
+    else s+='<ellipse cx="'+p.x+'" cy="'+p.y+'" rx="'+p.w/2+'" ry="'+p.h/2+'"/>';
+    var cx=p.shape==='r'?p.x+p.w/2:p.x,cy=p.shape==='r'?p.y+p.h/2:p.y;
+    if(p.k==='kb'){
+      s+='<ellipse cx="'+(p.x+55)+'" cy="'+(cy+4)+'" rx="44" ry="28"/><ellipse cx="'+(p.x+155)+'" cy="'+(cy+4)+'" rx="44" ry="28"/>';
+      s+='<text x="'+(p.x+55)+'" y="'+(cy+8)+'" text-anchor="middle">Fuzzy Rules</text><text x="'+(p.x+155)+'" y="'+(cy+8)+'" text-anchor="middle">Fuzzy Sets</text>';
+    }else{
+      p.l.forEach(function(t,i){s+='<text x="'+cx+'" y="'+(cy+(i-(p.l.length-1)/2)*16+5)+'" text-anchor="middle">'+t+'</text>'});
+    }
+    s+='</g>';
+  });
+  dg.innerHTML=s;
+  dg.querySelectorAll('.bx').forEach(function(g){g.addEventListener('click',function(){pick(g.getAttribute('data-k'))})});
+  pb.querySelectorAll('button').forEach(function(b){b.classList.toggle('on',b.dataset.k===sel);b.setAttribute('aria-pressed',b.dataset.k===sel)});
+  P.forEach(function(p){if(p.k===sel)info.innerHTML=p.t});
+}
+function pick(k){sel=k;drawB()}
+P.forEach(function(p){var b=document.createElement('button');b.type='button';b.dataset.k=p.k;b.textContent=p.fa;b.addEventListener('click',function(){pick(p.k)});pb.appendChild(b)});
+drawB();
+})();
+</script>
+</body>
+</html>
