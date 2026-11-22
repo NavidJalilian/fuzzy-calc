@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Loss Function</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Vazirmatn:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="../assets/teacher.css">
+</head>
+<body>
+<main id="app"></main>
+<script src="../assets/teacher.js"></script>
+<script src="../assets/graph.js"></script>
+<script>
+// Lesson 25 — slides 261–272 (Part 7: neural networks — learning, loss function, MSE).
+// Explanations are Persian; numbers, math and technical terms stay in English.
+
+const all = list => Promise.all(list);
+const LTR = s => `⁦${s}⁩`; // keeps a left-to-right run intact inside Persian board text
+const r2 = v => String(+v.toFixed(2));
+const r3 = v => String(+v.toFixed(3));
+const mse = (yp, yt) => yp.reduce((s, p, i) => s + (p - yt[i]) ** 2, 0) / yp.length;
+
+// A table drawn cell by cell. Cell ids: `${id}-${row}-${col}`, header ids: `${id}-h${col}`.
+async function table(b, id, x0, y0, colW, rowH, head, rows, o = {}) {
+  const size = o.size || 26;
+  const W = colW * head.length;
+  await all(head.map((h, c) => b.write(`${id}-h${c}`, x0 + colW * (c + 0.5), y0, h, { size, color: 'blue', bold: true, dur: 150 })));
+  await b.line(`${id}-hl`, x0, y0 + 14, x0 + W, y0 + 14, { color: 'soft', width: 2, dur: 250 });
+  for (let c = 1; c < head.length; c++) await b.line(`${id}-v${c}`, x0 + colW * c, y0 - 26, x0 + colW * c, y0 + 14 + rows.length * rowH, { color: 'soft', width: 2, dur: 200 });
+  for (const [r, row] of rows.entries()) {
+    await all(row.map((v, c) => (v === '' ? null : b.write(`${id}-${r}-${c}`, x0 + colW * (c + 0.5), y0 + 14 + rowH * (r + 0.75), v, { size, color: (o.colors && o.colors[c]) || 'ink', dur: 120 }))));
+  }
+}
+// Fills one column of an existing table.
+async function column(b, id, x0, y0, colW, rowH, c, head, vals, color, extra = 0) {
+  await b.write(`${id}-h${c}`, x0 + colW * (c + 0.5), y0, head, { size: 26, color: 'blue', bold: true, dur: 150 });
+  for (const [r, v] of vals.entries()) await b.write(`${id}-${r}-${c}`, x0 + colW * (c + 0.5), y0 + 14 + rowH * (r + 0.75), v, { size: 26, color, dur: 140 });
+  if (extra) await b.line(`${id}-hl${c}`, x0 + colW * c, y0 + 14, x0 + colW * (c + 1), y0 + 14, { color: 'soft', width: 2, dur: 150 });
+}
+
+function quizBoard(n, question, o = { size: 34 }) {
+  return async b => {
+    await b.clear();
+    await b.write('q-n', 500, 60, `سؤال ${n} از 6`, { size: 24, color: 'soft', fa: true });
+    await b.write('q-q', 500, 140, question, o);
+  };
+}
+
+// The learning loop (slides 265–266): x —w→ neuron → y → Error (with y_t) → e → optimizer → back.
+async function loop(b, o = {}) {
+  await b.write('lp-x', 85, 258, 'x', { size: 34 });
+  await b.arrow('lp-xa', 105, 250, 228, 250, { color: 'ink' });
+  await b.write('lp-w', 165, 236, 'w', { size: 28, color: 'purple' });
+  await b.write('lp-b', 270, 120, 'b', { size: 30, color: 'purple' });
+  await b.arrow('lp-ba', 270, 135, 270, 208);
+  await b.ring('lp-n', 270, 250, 40, 40, { color: 'red', fill: 'red', tilt: 0 });
+  await b.line('lp-act', 252, 268, 288, 232, { color: 'ink' });
+  await b.arrow('lp-ya', 310, 250, 438, 250);
+  await b.write('lp-y', 374, 236, o.y || 'y', { size: 28 });
+  await b.box('lp-err', 440, 215, 160, 70, { color: 'green', fill: 'green' });
+  await b.write('lp-errt', 520, 260, o.err || 'Error', { size: 30, color: 'green', bold: true });
+  await b.write('lp-yt', 520, 120, 'y_t', { size: 32, color: 'blue' });
+  await b.arrow('lp-yta', 520, 135, 520, 213);
+  await b.arrow('lp-ea', 600, 250, 700, 250);
+  await b.write('lp-e', 650, 236, 'e', { size: 28, color: 'red' });
+  if (o.noOpt) return;
+  await b.wire('lp-back1', [[700, 250], [720, 250], [720, 400], [624, 400]], { color: 'ink' });
+  await b.arrow('lp-back1h', 640, 400, 622, 400);
+  await b.box('lp-opt', 460, 365, 160, 70, { color: 'purple', fill: 'soft' });
+  await b.write('lp-optt', 540, 410, 'optimizer', { size: 28, color: 'purple', bold: true });
+  await b.wire('lp-back2', [[460, 400], [270, 400], [270, 310]], { color: 'ink' });
+  await b.arrow('lp-back2h', 270, 320, 270, 292);
+}
+
+// Slide 271 example
+const X = [-2, -1, 0, 1, 2];
+const YT = [2, 1, 0, -1, -2];
+const T = { x0: 330, y0: 120, cw: 110, rh: 52 };
+
+Teacher.start({
+  id: 'L25',
+  number: 25,
+  title: 'تابع خطا (loss)',
+  chapter: 'بخش 7 · شبکه‌ی عصبی',
+  slides: '261–272',
+  intro: 'یادگیری یعنی کم کردن خطا — اول باید خطا را با یک عدد اندازه بگیریم.',
+  next: { href: '0026-gradient-descent.html', title: 'گرادیان کاهشی' },
+  steps: [
+    // ---------------------------------------------------------- 1. intro
+    {
+      say: 'سلام! تا اینجا دیدیم یک نورون با w و b خروجی می‌سازد. ولی یک سؤال بزرگ مانده: این w و b از کجا می‌آیند؟ جواب این درس و دو درس بعد همین است: *آموزش*. قدم اول این است که بفهمیم شبکه چقدر اشتباه می‌کند، یعنی *loss function* یا تابع خطا.',
+      term: ['Loss function', 'تابع اتلاف / تابع خطا'],
+      draw: async b => {
+        await b.write('t1', 500, 170, 'بخش 7 · شبکه‌ی عصبی', { size: 40, color: 'soft', fa: true });
+        await b.write('t2', 500, 270, 'تابع خطا', { size: 72, color: 'blue', bold: true, fa: true });
+        await b.write('t3', 500, 360, 'Loss function', { size: 50, color: 'orange' });
+      },
+    },
+    // ---------------------------------------------------------- 2. slide 261
+    {
+      say: 'مثال اسلاید: دانشجوها را با دو عدد توصیف می‌کنیم، میزان مطالعه و میزان استراحت. دایره‌های آبی رد شده‌اند، یعنی 0، و مربع‌های قرمز قبول، یعنی 1. حالا یک دانشجوی تازه داریم، نقطه‌ی نارنجی. شبکه‌ای که w و b خوبی دارد بین دو گروه یک خط می‌کشد و می‌گوید این یکی احتمالاً رد می‌شود.',
+      draw: async b => {
+        await b.clear();
+        await b.arrow('ax-x', 150, 470, 600, 470, { color: 'ink' });
+        await b.arrow('ax-y', 150, 470, 150, 90, { color: 'ink' });
+        await b.write('ax-xl', 520, 510, 'میزان مطالعه', { size: 24, fa: true });
+        await b.write('ax-yl', 200, 72, 'میزان استراحت', { size: 24, fa: true });
+        const red = [[400, 130], [450, 140], [500, 145], [420, 180], [460, 185], [490, 200], [530, 215], [415, 220], [470, 235], [500, 255], [445, 275]];
+        const blue = [[210, 365], [240, 350], [280, 340], [345, 360], [230, 395], [345, 410], [380, 420], [250, 440], [300, 445], [350, 455], [400, 450]];
+        await all(red.map(([x, y], k) => b.box(`sq${k}`, x - 11, y - 11, 22, 22, { color: 'red', fill: 'red', r: 2, dur: 200 })));
+        await all(blue.map(([x, y], k) => b.ring(`ci${k}`, x, y, 13, 13, { color: 'blue', fill: 'blue', dur: 200 })));
+        await b.ring('new', 300, 395, 13, 13, { color: 'orange', fill: 'orange' });
+        await b.write('lg0', 820, 180, `${LTR('0')} = رد`, { size: 34, color: 'blue', bold: true, fa: true });
+        await b.write('lg1', 820, 240, `${LTR('1')} = قبول`, { size: 34, color: 'red', bold: true, fa: true });
+        await b.line('sep', 230, 230, 600, 400, { color: 'green', width: 3 });
+        await b.write('sepl', 800, 330, 'خط جداکننده = w و b خوب', { size: 26, color: 'green', fa: true });
+        await b.pulse('new');
+      },
+    },
+    // ---------------------------------------------------------- 3. slide 262
+    {
+      say: 'اسلاید بعد همین را با عدد می‌پرسد: سه نمونه داریم، هر کدام با دو ویژگی x_1 و x_2، و جواب درستشان y_r = [0, 1, 0] است. نورون یک ورودی ثابت 1 هم دارد که وزنش w_0 همان bias است. سؤال این است: W چقدر باشد تا y_p به y_r نزدیک شود؟',
+      draw: async b => {
+        await b.clear();
+        await b.write('mx', 70, 285, 'x =', { size: 32 });
+        await b.path('mxl', 'M122 205 L112 205 L112 345 L122 345', { color: 'ink', width: 3 });
+        await b.path('mxr', 'M238 205 L248 205 L248 345 L238 345', { color: 'ink', width: 3 });
+        const M = [[2, 2], [6, 8], [2, 10]];
+        for (const [r, row] of M.entries()) await all(row.map((v, c) => b.write(`m${r}${c}`, 145 + c * 70, 240 + r * 45, String(v), { size: 30, color: 'blue', dur: 120 })));
+        const IN = [['1', 190], ['x_1', 280], ['x_2', 370]];
+        for (const [k, [t, y]] of IN.entries()) {
+          await b.ring(`in${k}`, 340, y, 32, 32, { color: 'blue', fill: 'blue', tilt: 0, dur: 300 });
+          await b.write(`int${k}`, 340, y + 10, t, { size: 28 });
+          await b.arrow(`ia${k}`, 372, y, 502, 280 + (y - 280) * 0.25);
+          await b.write(`iw${k}`, 430, y + (k === 1 ? -12 : (k === 0 ? 4 : 26)), `w_${k}`, { size: 24, color: 'purple', dur: 150 });
+        }
+        await b.ring('z', 540, 280, 36, 36, { color: 'red', fill: 'red', tilt: 0 });
+        await b.write('zt', 540, 291, 'z', { size: 30 });
+        await b.arrow('za', 576, 280, 650, 280);
+        await b.write('yp', 720, 290, 'y_p = ?', { size: 32, color: 'orange' });
+        await b.write('yr', 845, 290, 'y_r =', { size: 30 });
+        await all([0, 1, 0].map((v, k) => b.write(`yr${k}`, 925, 245 + k * 45, String(v), { size: 30, color: 'green', dur: 120 })));
+        await b.write('W', 500, 480, 'W = ?', { size: 56, color: 'orange', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 4. slide 263
+    {
+      say: 'تعریف اسلاید: یادگیری نورون مصنوعی یعنی *یافتن خودکار بهترین مقادیر برای w و b*. کلمه‌ی مهم «خودکار» است: ما w را دستی حدس نمی‌زنیم، خود شبکه با دیدن داده‌ها پیدایش می‌کند.',
+      term: ['Learning (training)', 'یادگیری / آموزش'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 80, 'یادگیری نورون مصنوعی یعنی …', { size: 38, color: 'purple', bold: true, fa: true });
+        await b.box('bx', 200, 120, 600, 80, { color: 'orange', fill: 'orange' });
+        await b.write('def', 500, 172, 'یافتن خودکار بهترین مقادیر برای w و b', { size: 34, bold: true, fa: true });
+        const Y = [290, 360, 450];
+        for (const [k, t] of ['x_1', 'x_2', 'x_m'].entries()) {
+          await b.write(`x${k}`, 260, Y[k] + 10, t, { size: 28 });
+          await b.arrow(`xa${k}`, 290, Y[k], 455, 370 + (Y[k] - 370) * 0.3);
+          await b.write(`w${k}`, 370, Y[k] + (k === 2 ? 30 : -10), `w_${k === 2 ? 'm' : k + 1}`, { size: 26, color: 'purple', dur: 150 });
+        }
+        await b.write('dots', 260, 412, '⋮', { size: 28, color: 'soft' });
+        await b.write('bb', 500, 250, 'b', { size: 30, color: 'purple' });
+        await b.arrow('ba', 500, 262, 500, 325);
+        await b.ring('n', 500, 370, 44, 44, { color: 'red', fill: 'red', tilt: 0 });
+        await b.path('step', 'M478 388 L500 388 L500 352 L522 352', { color: 'ink', width: 4 });
+        await b.arrow('ya', 544, 370, 660, 370);
+        await b.write('y', 690, 380, 'y', { size: 32 });
+        await all([b.ring('rw', 372, 375, 42, 125, { color: 'orange', tilt: 0 }), b.ring('rb', 500, 240, 26, 26, { color: 'orange', tilt: 0 })]);
+      },
+    },
+    // ---------------------------------------------------------- 5. slide 264
+    {
+      say: 'اسلاید یک نیم‌نگاه به یادگیری در مغز خودمان می‌اندازد. سارا تیراندازی تمرین می‌کند: شلیک می‌کند، به هدف نگاه می‌کند، فاصله‌ی تیر تا مرکز را بررسی می‌کند، و مغزش دست را کمی اصلاح می‌کند. دوباره شلیک. این حلقه آن‌قدر تکرار می‌شود تا تیرها وسط بخورند.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'یادگیری در مغز انسان', { size: 38, color: 'purple', bold: true, fa: true });
+        const B = [[170, 130, 'شلیک', 'blue'], [570, 130, 'تیر به هدف می‌خورد', 'ink'], [570, 380, 'بررسی فاصله تا مرکز', 'green'], [170, 380, 'مغز دست را اصلاح می‌کند', 'purple']];
+        for (const [k, [x, y, t, c]] of B.entries()) {
+          await b.box(`c${k}`, x, y, 260, 80, { color: c, fill: c === 'ink' ? 'soft' : c, dur: 400 });
+          await b.write(`ct${k}`, x + 130, y + 50, t, { size: 23, fa: true, bold: true });
+        }
+        await b.arrow('a0', 440, 170, 560, 170, { color: 'green' });
+        await b.arrow('a1', 700, 220, 700, 370, { color: 'green' });
+        await b.arrow('a2', 560, 420, 440, 420, { color: 'green' });
+        await b.arrow('a3', 300, 370, 300, 220, { color: 'green' });
+        await b.write('again', 500, 300, 'تکرار', { size: 34, color: 'orange', bold: true, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 6. slide 265
+    {
+      say: 'نورون مصنوعی دقیقاً همین حلقه را دارد. ورودی x با وزن w و bias b وارد نورون می‌شود و خروجی y بیرون می‌آید؛ این همان شلیک است. بلوک Error خروجی را با جواب درست y_t مقایسه می‌کند و خطای e را می‌دهد؛ این همان نگاه به هدف است. بعد optimizer با توجه به e، مقدار w و b را اصلاح می‌کند؛ این همان مغز است. و دوباره از اول.',
+      term: ['Target (y_t)', 'مقدار هدف / جواب درست'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 60, 'یادگیری نورون مصنوعی', { size: 36, color: 'purple', bold: true, fa: true });
+        await loop(b);
+      },
+    },
+    // ---------------------------------------------------------- 7. slides 266–267
+    {
+      say: 'پس دو مفهوم مهم در یادگیری نورون داریم. اول *loss function* یا تابع اتلاف، که اسلاید به آن تابع خطا هم می‌گوید: همان بلوک سبز که می‌گوید چقدر اشتباه کردیم. دوم *optimization* یا بهینه‌سازی، یعنی بلوک بنفش؛ روشی که این‌جا استفاده می‌کنیم *gradient descent* یا گرادیان کاهشی است که درس بعد می‌خوانیم.',
+      term: ['Optimizer', 'بهینه‌ساز'],
+      draw: async b => {
+        await b.erase('h');
+        await b.write('h2', 500, 60, 'دو مفهوم مهم در یادگیری نورون', { size: 34, color: 'purple', bold: true, fa: true });
+        await b.arrow('la', 600, 222, 770, 160, { color: 'green' });
+        await b.write('l1', 860, 150, 'Loss function', { size: 28, color: 'green', bold: true });
+        await b.write('l1f', 860, 190, 'تابع اتلاف', { size: 26, color: 'green', fa: true });
+        await b.arrow('oa', 520, 437, 425, 468, { color: 'purple' });
+        await b.write('o1', 300, 480, 'Gradient descent', { size: 28, color: 'purple', bold: true });
+        await b.write('o1f', 300, 520, 'گرادیان کاهشی', { size: 26, color: 'purple', fa: true });
+        await b.pulse(['lp-err', 'lp-opt']);
+      },
+    },
+    // ---------------------------------------------------------- 8. slide 268
+    {
+      say: 'تابع اتلاف چه می‌کند؟ تعریف اسلاید: *محاسبه‌ی میزان خطای شبکه در پیش‌بینی*. و خطا یعنی مقدار اختلاف از حالت ایده‌آل: Error = |Target − Prediction|. مثلاً اگر جواب درست 1 باشد و شبکه 0.9 بگوید، خطا |1 − 0.9| = 0.1 است. قدر مطلق می‌گیریم چون فقط *اندازه‌ی* اشتباه برایمان مهم است، نه جهتش.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'تابع اتلاف · loss function', { size: 38, color: 'red', bold: true, fa: true });
+        await b.write('d1', 500, 150, 'محاسبه‌ی میزان خطای شبکه در پیش‌بینی', { size: 32, fa: true });
+        await b.write('d2', 500, 220, 'خطا = مقدار اختلاف از حالت ایده‌آل', { size: 30, color: 'soft', fa: true });
+        await b.box('bx', 230, 255, 540, 80, { color: 'blue', fill: 'blue' });
+        await b.write('f', 500, 308, 'Error = |Target − Prediction|', { size: 38, bold: true });
+        await b.write('ex1', 500, 400, 'Target = 1 ,  Prediction = 0.9', { size: 32, color: 'blue' });
+        await b.write('ex2', 500, 465, 'Error = |1 − 0.9| = 0.1', { size: 38, color: 'green', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 9. slide 269
+    {
+      say: 'ولی یک نمونه نداریم، n نمونه داریم. پس خطای هر نمونه را حساب می‌کنیم و *میانگین* می‌گیریم: loss = (1/n) Σ ℒ(y_p^i, y_r^i). این ℒ خطای یک نمونه است. در مثال اسلاید شبکه برای سه نمونه گفته 0.9، 1.0 و 1.0، در حالی که جواب درست 0، 1 و 0 است.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 60, 'میانگین خطا روی همه‌ی نمونه‌ها', { size: 34, color: 'red', bold: true, fa: true });
+        await table(b, 'tb', 120, 140, 110, 56, ['i', 'y_p', 'y_r'], [['1', '0.9', '0'], ['2', '1.0', '1'], ['3', '1.0', '0']], { colors: ['purple', 'orange', 'green'] });
+        await b.box('fb', 500, 200, 440, 110, { color: 'red', fill: 'red' });
+        await b.write('f', 720, 268, 'loss = (1/n) Σ ℒ(y_p^i , y_r^i)', { size: 32, bold: true });
+        await b.write('fn', 720, 360, 'خطای هر نمونه، بعد میانگین', { size: 26, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 10. cancellation tip
+    {
+      say: 'نکته‌ی مهم: چرا خطاها را همین‌طوری با علامت جمع نمی‌زنیم؟ چون مثبت و منفی همدیگر را خنثی می‌کنند. فرض کن شبکه برای علی 2 واحد زیاد گفته و برای مینا 2 واحد کم: جمع خطاها +2 + (−2) = 0 می‌شود، انگار شبکه بی‌نقص است! پس باید خطا را همیشه مثبت کنیم.',
+      tip: true,
+      draw: async b => {
+        await b.box('tbx', 500, 380, 440, 150, { color: 'orange', fill: 'orange' });
+        await b.write('t1', 720, 420, `علی: ${LTR('+2')}      مینا: ${LTR('−2')}`, { size: 28, fa: true });
+        await b.write('t2', 720, 470, '(+2) + (−2) = 0', { size: 32, color: 'red', bold: true });
+        await b.write('t3', 720, 510, 'دو اشتباه، ولی جمع صفر! ✗', { size: 24, color: 'red', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 11. slide 270 — MSE
+    {
+      say: 'راه حل اسلاید: اختلاف را *به توان 2* برسان. این می‌شود *MSE* یا Mean Squared Error، یعنی میانگین مربع خطاها: MSE = (1/n) Σ (y_p − y_r)^2. مربع دو کار می‌کند: همیشه مثبت است، پس چیزی خنثی نمی‌شود؛ و خطای بزرگ را خیلی بیشتر جریمه می‌کند: خطای 0.1 می‌شود 0.01 ولی خطای 2 می‌شود 4.',
+      term: ['MSE (mean squared error)', 'میانگین مربع خطا'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'MSE loss', { size: 44, color: 'red', bold: true });
+        await b.box('fb', 200, 110, 600, 100, { color: 'red', fill: 'red' });
+        await b.write('f', 500, 175, 'MSE = (1/n) Σ (y_p^i − y_r^i)^2', { size: 36, bold: true });
+        await b.write('p1', 760, 280, '•  همیشه مثبت ← خنثی شدن نداریم', { size: 28, anchor: 'start', fa: true });
+        await b.write('p2', 760, 340, '•  خطای بزرگ، جریمه‌ی خیلی بیشتر', { size: 28, anchor: 'start', fa: true });
+        await b.write('s1', 330, 430, '0.1^2 = 0.01', { size: 34, color: 'green' });
+        await b.write('s2', 670, 430, '2^2 = 4', { size: 34, color: 'red', bold: true });
+        await b.write('s3', 500, 500, `${LTR('0.1')} تقریباً ناپدید، ${LTR('2')} دو برابر شد`, { size: 24, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 12. MSE of slide 269 data
+    {
+      say: 'MSE مثال اسلاید 269 را خودمان حساب کنیم؛ خود اسلاید این عدد را ننوشته. اختلاف‌ها: 0.9 − 0 = 0.9، 1 − 1 = 0، 1 − 0 = 1. مربع‌ها: 0.81، 0 و 1. جمع 1.81، تقسیم بر 3: حدود 0.603. نمونه‌ی 2 درست است؛ نمونه‌ی 3 بیشترین سهم را در خطا دارد.',
+      draw: async b => {
+        await b.clear();
+        await table(b, 'tb', 110, 100, 130, 56, ['i', 'y_p', 'y_r', 'y_p − y_r', '( )^2'], [['1', '0.9', '0', '', ''], ['2', '1.0', '1', '', ''], ['3', '1.0', '0', '', '']], { colors: ['purple', 'orange', 'green'] });
+        const D = [0.9, 0, 1];
+        for (const [r, d] of D.entries()) {
+          await b.write(`tb-${r}-3`, 110 + 130 * 3.5, 114 + 56 * (r + 0.75), r2(d), { size: 26, dur: 150 });
+          await b.write(`tb-${r}-4`, 110 + 130 * 4.5, 114 + 56 * (r + 0.75), r2(d * d), { size: 26, color: 'red', dur: 150 });
+        }
+        await b.ring('big', 110 + 130 * 4.5, 114 + 56 * 2.75 - 10, 40, 26, { color: 'orange' });
+        const m = mse([0.9, 1, 1], [0, 1, 0]);
+        await b.write('sum', 500, 380, `MSE = (0.81 + 0 + 1) / 3 = 1.81 / 3`, { size: 34 });
+        await b.write('ans', 500, 460, `MSE ≈ ${r3(m)}`, { size: 44, color: 'green', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 13. slide 271 — the neuron
+    {
+      say: 'حالا مثال اصلی اسلاید 271: محاسبه‌ی خطا در یک نورون تک‌ورودی. ورودی x با وزن w = 1 وارد می‌شود، bias برابر 0 است، و activation خطی است، یعنی چیزی را عوض نمی‌کند. پس خروجی y_p = 1 × x + 0 = x. بعد بلوک E خروجی را با y_t مقایسه می‌کند و خطای e را می‌دهد.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 55, 'مثال: محاسبه‌ی خطا در نورون تک‌ورودی', { size: 32, color: 'red', bold: true, fa: true });
+        await loop(b, { y: 'y_p', err: 'E', noOpt: true });
+        await b.write('w1', 165, 290, '= 1', { size: 26, color: 'purple' });
+        await b.write('b0', 315, 125, '= 0', { size: 26, color: 'purple' });
+        await b.box('fb', 250, 360, 500, 80, { color: 'blue', fill: 'blue' });
+        await b.write('f', 500, 412, 'y_p = 1 × x + 0 = x', { size: 38, color: 'blue', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 14. table
+    {
+      say: 'جدول اسلاید: پنج ورودی −2، −1، 0، 1، 2. جواب‌های درست y_t برعکس‌شان است: 2، 1، 0، −1، −2؛ یعنی هدف واقعی y_t = −x است. نورون ما چون w = 1 دارد، همان x را تحویل می‌دهد: y_p = −2، −1، 0، 1، 2.',
+      draw: async b => {
+        await b.clear();
+        await table(b, 'tb', T.x0 - 200, T.y0, T.cw, T.rh, ['x', 'y_t', 'y_p'], X.map((x, k) => [String(x), String(YT[k]), '']), { colors: ['ink', 'green'] });
+        for (const [r, x] of X.entries()) await b.write(`tb-${r}-2`, T.x0 - 200 + T.cw * 2.5, T.y0 + 14 + T.rh * (r + 0.75), String(x), { size: 26, color: 'orange', dur: 140 });
+        await b.write('n1', 780, 220, 'هدف واقعی:', { size: 28, fa: true });
+        await b.write('n2', 780, 270, 'y_t = −x', { size: 36, color: 'green', bold: true });
+        await b.write('n3', 780, 350, 'خروجی نورون:', { size: 28, fa: true });
+        await b.write('n4', 780, 400, 'y_p = x', { size: 36, color: 'orange', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 15. differences
+    {
+      say: 'برای هر سطر اختلاف y_p − y_t را می‌نویسیم: −2 − 2 = −4، −1 − 1 = −2، 0، 2 و 4. ببین: جمع این اختلاف‌ها صفر می‌شود، همان تله‌ای که گفتیم! حالا به توان 2: 16، 4، 0، 4، 16.',
+      draw: async b => {
+        await b.erase(['n1', 'n2', 'n3', 'n4']);
+        const x0 = T.x0 - 200;
+        const D = X.map((x, k) => x - YT[k]);
+        await column(b, 'tb', x0, T.y0, T.cw, T.rh, 3, 'y_p − y_t', D.map(String), 'ink', true);
+        await b.line('tb-v3', x0 + T.cw * 3, T.y0 - 26, x0 + T.cw * 3, T.y0 + 14 + 5 * T.rh, { color: 'soft', width: 2, dur: 150 });
+        await b.write('zero', x0 + T.cw * 3.5, T.y0 + 14 + 5 * T.rh + 40, 'Σ = 0 !', { size: 26, color: 'red', bold: true });
+        await b.line('tb-v4', x0 + T.cw * 4, T.y0 - 26, x0 + T.cw * 4, T.y0 + 14 + 5 * T.rh, { color: 'soft', width: 2, dur: 150 });
+        await column(b, 'tb', x0, T.y0, T.cw, T.rh, 4, '( )^2', D.map(d => String(d * d)), 'red', true);
+      },
+    },
+    // ---------------------------------------------------------- 16. MSE = 8
+    {
+      say: 'جمع مربع‌ها: 16 + 4 + 0 + 4 + 16 = 40. تعداد نمونه‌ها 5 است، پس MSE = 40 / 5 = 8. این دقیقاً همان عددی است که اسلاید در ستون MSE نوشته: 8.',
+      draw: async b => {
+        const sq = X.map((x, k) => (x - YT[k]) ** 2);
+        const s = sq.reduce((a, c) => a + c, 0);
+        await b.write('sum', 820, 220, `${sq.join(' + ')}`, { size: 26 });
+        await b.write('sum2', 820, 270, `= ${s}`, { size: 32 });
+        await b.write('mse', 820, 350, `MSE = ${s} / ${X.length}`, { size: 32 });
+        await b.write('ans', 820, 420, `= ${mse(X, YT)}`, { size: 56, color: 'green', bold: true });
+        await b.ring('ra', 830, 405, 60, 40, { color: 'green' });
+      },
+    },
+    // ---------------------------------------------------------- 17. what loss does not say
+    {
+      say: 'اگر وزن w = −1 بود، خروجی −x می‌شد، دقیقاً برابر y_t، و MSE صفر می‌شد. ولی دقت کن: عدد 8 فقط می‌گوید *چقدر* بد هستیم؛ نمی‌گوید w را بالا ببریم یا پایین. پیدا کردن جهت درست کار optimizer است، یعنی gradient descent در درس بعد.',
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        await b.write('a1', 500, 110, 'w = 1  →  MSE = 8', { size: 40, color: 'red' });
+        await b.write('a2', 500, 190, 'w = −1  →  y_p = −x = y_t  →  MSE = 0', { size: 40, color: 'green', bold: true });
+        await b.box('bx', 150, 260, 700, 190, { color: 'purple', fill: 'soft' });
+        await b.write('b1', 500, 320, 'loss می‌گوید چقدر بد هستیم', { size: 32, fa: true });
+        await b.write('b2', 500, 380, 'جهت اصلاح w را optimizer پیدا می‌کند', { size: 32, color: 'purple', bold: true, fa: true });
+        await b.write('b3', 500, 425, `درس بعد: ${LTR('gradient descent')}`, { size: 24, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 18. slide 272
+    {
+      say: 'اسلاید آخر نمودار loss را بر حسب تعداد تکرار نشان می‌دهد. در طول آموزش، loss کمی بالا و پایین می‌رود ولی روند کلی‌اش رو به پایین است. علامت سؤال اسلاید یعنی: چطور loss را پایین بیاوریم؟ جوابش درس بعد است.',
+      draw: async b => {
+        await b.clear();
+        const g = Graph({ x: 150, y: 90, w: 680, h: 360, from: 0, to: 100, min: 0, max: 10 });
+        await g.axes(b, 'ax', { ticks: [], yTicks: [], label: 'iter', yLabel: 'loss' });
+        await g.curve(b, 'lc', t => 1 + 7.5 / (1 + Math.exp((t - 60) / 13)) + 0.6 * Math.sin(t / 2.6) * Math.exp(-t / 35), { color: 'red', lo: 3, hi: 98, dur: 1400 });
+        await b.write('q', 420, 330, '?', { size: 120, color: 'blue', bold: true });
+        await b.write('xl', 760, 505, 'تعداد تکرار', { size: 24, color: 'soft', fa: true });
+        await b.arrow('trend', 300, 150, 760, 400, { color: 'orange' });
+        await b.write('tl', 640, 230, 'روند: پایین', { size: 26, color: 'orange', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 19. summary
+    {
+      say: 'جمع‌بندی کنیم: پنج نکته برای امتحان. یک بار دیگر بخوانیدشان، بعد برویم سراغ سؤال‌ها.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 75, 'یادت باشد', { size: 48, color: 'orange', bold: true, fa: true });
+        const L = [
+          'یادگیری = یافتن خودکار بهترین w و b',
+          `حلقه: نورون ← ${LTR('Error')} ← ${LTR('optimizer')} ← نورون`,
+          `خطا = ${LTR('|Target − Prediction|')}`,
+          `${LTR('MSE = (1/n) Σ (yₚ − yₜ)²')}   — همیشه مثبت`,
+          `مثال اسلاید: ${LTR('w = 1, b = 0')} ← ${LTR('MSE = 40 / 5 = 8')}`,
+        ];
+        for (const [k, l] of L.entries()) await b.write(`m${k}`, 900, 155 + k * 74, '•  ' + l, { size: 27, anchor: 'start', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- quizzes
+    {
+      say: 'نوبت شماست! شبکه برای دو نمونه گفته y_p = [1, 3] و جواب درست y_t = [2, 1] است. MSE چقدر است؟',
+      draw: quizBoard(1, 'y_p = [1, 3] ,  y_t = [2, 1]  →  MSE = ?'),
+      quiz: { answer: ['2.5'], hint: 'اختلاف هر نمونه را به توان 2 برسان، جمع کن، تقسیم بر 2.', explain: '(1 − 2)^2 + (3 − 1)^2 = 1 + 4 = 5، تقسیم بر 2 می‌شود 2.5.' },
+      solve: async b => {
+        await b.write('s1', 500, 250, '(1 − 2)^2 = 1      (3 − 1)^2 = 4', { size: 36 });
+        await b.write('s2', 500, 330, 'MSE = (1 + 4) / 2', { size: 38 });
+        await b.write('s3', 500, 420, `= ${mse([1, 3], [2, 1])}`, { size: 52, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'همان نورون اسلاید 271، با همان داده‌ها، ولی این بار w = 0 (و b = 0). MSE چقدر می‌شود؟',
+      draw: quizBoard(2, 'x = −2 … 2 ,  y_t = −x ,  w = 0  →  MSE = ?'),
+      quiz: { answer: ['2'], hint: 'با w = 0 همه‌ی خروجی‌ها 0 است، پس اختلاف هر سطر همان −y_t است.', explain: 'مربع‌ها 4، 1، 0، 1، 4 هستند؛ جمعشان 10، تقسیم بر 5 می‌شود 2.' },
+      solve: async b => {
+        const yp = X.map(() => 0);
+        await b.write('s1', 500, 240, 'y_p = 0 , 0 , 0 , 0 , 0', { size: 34, color: 'orange' });
+        await b.write('s2', 500, 310, `( )^2 = ${YT.map(t => t * t).join(' , ')}`, { size: 34 });
+        await b.write('s3', 500, 380, 'MSE = 10 / 5', { size: 36 });
+        await b.write('s4', 500, 460, `= ${mse(yp, YT)}`, { size: 52, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'و اگر w = 2 باشد چه؟ دوباره همان داده‌ها. MSE را حساب کنید و با 8 مقایسه کنید.',
+      draw: quizBoard(3, 'x = −2 … 2 ,  y_t = −x ,  w = 2  →  MSE = ?'),
+      quiz: { answer: ['18'], hint: 'y_p = 2x و y_t = −x، پس اختلاف هر سطر 3x است.', explain: 'اختلاف‌ها −6، −3، 0، 3، 6؛ مربع‌ها 36، 9، 0، 9، 36؛ جمع 90، تقسیم بر 5 می‌شود 18. یعنی w را در جهت غلط بردیم و خطا بیشتر شد.' },
+      solve: async b => {
+        const yp = X.map(x => 2 * x);
+        await b.write('s1', 500, 240, `y_p − y_t = ${yp.map((p, k) => p - YT[k]).join(' , ')}`, { size: 32 });
+        await b.write('s2', 500, 310, `( )^2 = ${yp.map((p, k) => (p - YT[k]) ** 2).join(' , ')}`, { size: 32 });
+        await b.write('s3', 500, 380, 'MSE = 90 / 5', { size: 36 });
+        await b.write('s4', 500, 460, `= ${mse(yp, YT)}`, { size: 52, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'یک سؤال مفهومی: چرا در MSE اختلاف‌ها را به توان 2 می‌رسانیم و همین‌طوری جمعشان نمی‌کنیم؟',
+      draw: quizBoard(4, 'چرا اختلاف‌ها را به توان 2 می‌رسانیم؟', { size: 36, fa: true }),
+      quiz: {
+        choices: ['تا محاسبه سریع‌تر شود', 'تا خطاهای مثبت و منفی همدیگر را خنثی نکنند', 'تا loss همیشه کمتر از 1 شود'], correct: 1,
+        explain: 'اگر با علامت جمع کنیم، +2 و −2 صفر می‌شوند؛ مربع همیشه مثبت است و خطای بزرگ را بیشتر جریمه می‌کند.',
+      },
+      solve: async b => {
+        await b.write('s1', 500, 260, '(+2) + (−2) = 0   ✗', { size: 40, color: 'red' });
+        await b.write('s2', 500, 340, '(+2)^2 + (−2)^2 = 8   ✓', { size: 40, color: 'green' });
+      },
+    },
+    {
+      say: 'در حلقه‌ی آموزش، کدام بلوک مقدار w و b را *عوض* می‌کند؟',
+      draw: quizBoard(5, 'کدام بلوک w و b را تغییر می‌دهد؟', { size: 36, fa: true }),
+      quiz: {
+        choices: ['Error (تابع اتلاف)', 'optimizer (بهینه‌ساز)', 'y_t (مقدار هدف)'], correct: 1,
+        explain: 'Error فقط اندازه‌ی خطا را می‌دهد. optimizer با توجه به e، مقدار w و b را اصلاح می‌کند؛ در این درس gradient descent.',
+      },
+      solve: async b => {
+        await b.write('s1', 500, 240, `${LTR('Error')} ← فقط می‌گوید چقدر اشتباه کردیم`, { size: 34, color: 'green', fa: true });
+        await b.write('s2', 500, 320, `${LTR('optimizer')} ← w و b را اصلاح می‌کند`, { size: 34, color: 'purple', bold: true, fa: true });
+      },
+    },
+    {
+      say: 'سؤال آخر: جواب درست 0 است و شبکه 0.9 پیش‌بینی کرده. طبق تعریف اسلاید 268، Error = |Target − Prediction| چقدر است؟',
+      draw: quizBoard(6, 'Target = 0 ,  Prediction = 0.9  →  Error = ?'),
+      quiz: { answer: ['0.9'], hint: 'قدر مطلق یعنی علامت منفی را دور بریز.', explain: '|0 − 0.9| = |−0.9| = 0.9' },
+      solve: async b => {
+        await b.write('s1', 500, 270, '|0 − 0.9| = |−0.9|', { size: 44 });
+        await b.write('s2', 500, 370, '= 0.9', { size: 56, color: 'green', bold: true });
+      },
+    },
+  ],
+});
+</script>
+</body>
+</html>

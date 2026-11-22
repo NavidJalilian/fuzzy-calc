@@ -3,790 +3,603 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>درس ۸ — استنتاج max-product و غیرفازی‌سازی</title>
-<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
-<style>
-/* ===== SHARED STYLE — copy verbatim into every lesson, do not edit per lesson ===== */
-:root{--bg:#fbfaf7;--surface:#ffffff;--surface-1:#f3f1ec;--text:#1f1e1c;--text-2:#5f5e5a;--text-3:#888780;--border:#e3e0d8;--border-strong:#c9c6bc;
---accent:#534AB7;--accent-bg:#EEEDFE;--ok:#3B6D11;--ok-bg:#EAF3DE;--bad:#A32D2D;--bad-bg:#FCEBEB;--warn:#854F0B;--warn-bg:#FAEEDA;
---c1:#7F77DD;--c2:#1D9E75;--c3:#EF9F27;--c4:#D4537E;--grid:#e3e0d8}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1a1a19;--surface:#232322;--surface-1:#2c2c2a;--text:#ecebe6;--text-2:#b4b2a9;--text-3:#888780;--border:#3a3a37;--border-strong:#55554f;
---accent:#AFA9EC;--accent-bg:#26215C;--ok:#97C459;--ok-bg:#173404;--bad:#F09595;--bad-bg:#501313;--warn:#FAC775;--warn-bg:#412402;--grid:#3a3a37}}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:Vazirmatn,Tahoma,sans-serif;font-size:16px;line-height:1.95}
-main{max-width:760px;margin:0 auto;padding:24px 16px 64px}
-a{color:var(--accent)}
-h1{font-size:26px;font-weight:700;line-height:1.5;margin:6px 0 6px}
-h2{font-size:19px;font-weight:500;margin:0 0 8px}
-h3{font-size:16px;font-weight:500;margin:12px 0 4px}
-p{margin:0 0 10px}
-.top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:13px;color:var(--text-2)}
-.goal{color:var(--text-2);margin-bottom:22px}
-.sec{margin:0 0 28px}
-.lab{font-size:13px;color:var(--text-3);margin:0 0 4px;letter-spacing:0}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
-.soft{background:var(--surface-1);border-radius:12px;padding:12px 14px}
-.m{direction:ltr;unicode-bidi:isolate;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14.5px;white-space:nowrap}
-@media (max-width:700px){.m{white-space:normal;display:inline-block;max-width:100%}}
-.mb{direction:ltr;text-align:left;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14.5px;background:var(--surface-1);border-radius:8px;padding:8px 12px;margin:6px 0;overflow-x:auto;line-height:1.8}
-.en{direction:ltr;unicode-bidi:isolate;font-size:13px;color:var(--text-2)}
-b,strong{font-weight:500}
-.key{background:var(--warn-bg);color:var(--warn);border-radius:6px;padding:0 6px}
-.tip{border-right:3px solid var(--accent);background:var(--accent-bg);padding:8px 12px;border-radius:0;margin:8px 0}
-.trap{border-right:3px solid var(--bad);background:var(--bad-bg);padding:8px 12px;border-radius:0;margin:8px 0}
-button{font-family:inherit;font-size:14px;background:var(--surface);color:var(--text);border:1px solid var(--border-strong);border-radius:8px;padding:5px 14px;cursor:pointer}
-button:hover{background:var(--surface-1)}
-button.on{background:var(--accent-bg);border-color:var(--accent);color:var(--accent)}
-input[type=text]{font-family:inherit;font-size:15px;direction:ltr;text-align:center;width:72px;height:34px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text)}
-input[type=range]{width:100%;accent-color:var(--accent);direction:ltr}
-table.t{border-collapse:collapse;direction:ltr;font-size:14.5px;margin:6px 0;display:block;max-width:100%;overflow-x:auto}
-table.t>tbody,table.t>thead{display:table;width:100%}
-table.t th,table.t td{border:1px solid var(--border);padding:5px 6px;text-align:center;font-weight:400}
-table.t th{background:var(--surface-1)}
-.ok{background:var(--ok-bg)!important}.no{background:var(--bad-bg)!important}
-.fb{font-size:14px;margin-top:8px;min-height:1em}.fb.good{color:var(--ok)}.fb.bad{color:var(--bad)}
-.q{margin:0 0 18px}
-.mcq .opts{display:grid;gap:6px;margin-top:6px}
-.mcq .opts button{text-align:right;padding:7px 12px}
-.stepper .st{display:none;padding:6px 0;border-bottom:1px dashed var(--border)}
-.stepper .st.show{display:block}
-.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-svg{max-width:100%;height:auto;direction:ltr}
-svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12px}
-.nav{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:14px;border-top:1px solid var(--border);padding-top:14px;margin-top:28px}
-.ask{font-size:14px;color:var(--text-2)}
-@media print{body{background:#fff}.card,.soft{break-inside:avoid}.stepper .st{display:block}button{display:none}}
-.given{font-size:14px;color:var(--text-2);background:var(--surface-1);border-right:3px solid var(--border-strong);border-radius:0 8px 8px 0;padding:6px 12px;margin:2px 0 10px}
-.given b{color:var(--text)}
-[id]{scroll-margin-top:16px}
-h3:target,.card:target{outline:2px solid var(--accent);outline-offset:6px;border-radius:8px}
-details.sol{margin-top:10px;border:1px dashed var(--border-strong);border-radius:10px;padding:6px 12px;background:var(--surface)}
-details.sol summary{cursor:pointer;color:var(--accent);font-weight:500}
-details.sol[open] summary{margin-bottom:6px}
-.q>details.sol:not([open]){display:inline-block;vertical-align:middle;margin:0;padding:0;border:0;background:none}
-.q>details.sol summary{list-style:none;display:inline-block;font-size:14px;border:1px solid var(--border-strong);border-radius:8px;padding:5px 14px;background:var(--surface)}
-.q>details.sol summary::-webkit-details-marker{display:none}
-.q>details.sol summary:hover{background:var(--surface-1)}
-@media print{details.sol{border-style:solid}}
-/* ===== END SHARED STYLE ===== */
-</style>
-<style>
-/* lesson 8 only */
-.mb{white-space:pre}
-.matw{display:flex;align-items:center;gap:8px;direction:ltr;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14px;margin:6px 0}
-.mat{border-collapse:collapse;border-left:2px solid var(--text-2);border-right:2px solid var(--text-2);border-radius:4px}
-.mat td{padding:2px 10px;text-align:center}
-.charts{display:flex;flex-wrap:wrap;gap:10px}
-.charts>div{flex:1 1 300px;min-width:0}
-.charts h3{margin:4px 0 0}
-.sl{display:grid;grid-template-columns:auto 1fr 52px;gap:10px;align-items:center;font-size:14px}
-.sl span{font-family:"SF Mono",Menlo,Consolas,monospace;direction:ltr}
-/* animated walk-through */
-.anim:focus{outline:none}
-.an-head{display:flex;gap:10px;align-items:stretch}
-.an-cap{flex:1;background:var(--surface-1);border-radius:10px;padding:8px 14px;min-height:8.2em;font-size:15px;line-height:1.85}
-.an-btns{display:flex;flex-direction:column;gap:6px;justify-content:center;min-width:104px}
-#anNext{font-size:16px;font-weight:500;padding:12px 14px}
-.an-btns .cnt{font-size:12.5px;color:var(--text-3);text-align:center}
-.an-f{direction:ltr;text-align:left;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14px;background:var(--surface);border-radius:6px;padding:3px 10px;margin:5px 0;white-space:pre-wrap;line-height:1.7}
-.an-new{margin-top:6px;font-size:13.5px;line-height:1.8;border-right:3px solid var(--warn);background:var(--warn-bg);padding:3px 10px}
-.an-new .an-from{color:var(--text-2)}
-.an-prog{height:4px;background:var(--border);border-radius:2px;margin:8px 0 4px;overflow:hidden}
-.an-prog>i{display:block;height:100%;background:var(--accent);transition:width .4s}
-.an-stage{overflow-x:auto;margin:0 -4px;direction:ltr}
-#anSvg{display:block;width:100%;min-width:500px}
-#anSvg text{font-size:13px}
-#anSvg .mono{font-family:"SF Mono",Menlo,Consolas,monospace;font-size:13px}
-#anSvg .an-ttl{font-size:14px;font-weight:700;fill:var(--text)}
-#anSvg .an-val{font-size:12px;fill:var(--text)}
-#anSvg .an-ax{font-size:11px;fill:var(--text-3)}
-#anSvg .cellt{font-size:13px;fill:var(--text)}
-#anSvg .fly{font-size:15px;font-weight:700}
-#anSvg .flash{animation:anFlash .8s ease-out}
-@keyframes anFlash{from{fill:var(--accent);font-size:17px}to{fill:var(--text)}}
-#anSvg .fd,#anSvg .fd *{transition:opacity .45s}
-#anSvg .an-bar{transition:fill .45s,opacity .45s}
-#anSvg .an-ghost{fill:none;stroke:var(--text-3);stroke-dasharray:4 3}
-#anSvg .an-hl{fill:none;stroke:var(--accent);stroke-width:2.5}
-#anSvg .an-band{fill:var(--accent-bg)}
-.an-swipe{display:none;font-size:12px;color:var(--text-3);margin:2px 0 0}
-button:disabled{opacity:.45;cursor:default}
-details.an-gld{margin-top:10px}
-details.an-gld summary{cursor:pointer;color:var(--accent);font-size:14px}
-table.an-gl{direction:rtl;font-size:14px}
-table.an-gl td,table.an-gl th{text-align:right;vertical-align:top}
-table.an-gl td:first-child{white-space:nowrap}
-@media (max-width:540px){.an-head{flex-direction:column}.an-btns{flex-direction:row;align-items:center}.an-btns #anNext{flex:1}.an-swipe{display:block}#anSvg{min-width:440px}.an-cap{min-height:7em}}
-@media (prefers-reduced-motion:reduce){#anSvg .fd,#anSvg .fd *,#anSvg .an-bar,.an-prog>i{transition:none}#anSvg .flash{animation:none}}
-@media print{.an-btns{display:none}}
-</style>
+<title>Max-Product and Defuzzification</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Vazirmatn:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="../assets/teacher.css">
 </head>
 <body>
-<main>
-<div class="top"><a href="../index.html">← فهرست درس‌ها</a><span>درس ۸ از ۱۱ · فصل ۲ · حدود ۱۵ دقیقه</span></div>
-<h1>استنتاج max-product و غیرفازی‌سازی</h1>
-<p class="goal">هدف: بعد از این درس می‌توانی برای یک ورودی قطعی (مثل «دما ۱۲۵» یا «بارندگی ۸۰») مجموعه خروجی B′ را با max-min و با max-product حساب کنی و آن را با فرمول میانگین وزنی به یک عدد قطعی تبدیل کنی — یعنی دقیقاً تمرین ۲.</p>
-
-<!-- ===== 0. ANIMATED WALK-THROUGH ===== -->
-<section class="sec" id="anim"><p class="lab">از اینجا شروع کن: کل درس در یک انیمیشن قدم به قدم</p>
-<div class="card anim" id="anBox" tabindex="0" aria-label="انیمیشن قدم به قدم حل سؤال اسلاید ۷۴">
-  <div class="an-head">
-    <div class="an-cap" id="anCap" aria-live="polite"></div>
-    <div class="an-btns">
-      <button id="anNext" class="on">بعدی ←</button>
-      <button id="anPrev">→ قبلی</button>
-      <button id="anAgain">↻ دوباره ببین</button>
-      <span class="cnt" id="anCnt"></span>
-    </div>
-  </div>
-  <div class="an-prog"><i id="anBar"></i></div>
-  <div class="an-stage"><svg id="anSvg" viewBox="0 0 640 404" role="img" aria-labelledby="anT"><title id="anT">حل قدم به قدم: دمای ۱۲۵ ← سرعت، با max-min و max-product</title></svg></div>
-  <p class="an-swipe">روی گوشی: اگر تصویر جا نشد، آن را به چپ و راست بکش.</p>
-  <details class="an-gld"><summary>همه نمادها: هر کدام چیست و از کجا آمد</summary>
-    <table class="t an-gl"><tbody id="anGl"></tbody></table>
-  </details>
-</div></section>
-
-<!-- ===== 1. IDEA ===== -->
-<section class="sec"><p class="lab">۱. ایده (همان انیمیشن بالا، به صورت متن)</p>
-<div class="card">
-  <h3 id="aprime">قدم ۱: ورودی قطعی را به بردار A′ تبدیل کن</h3>
-  <p>سؤال اسلاید ۷۴ این است: «اگر درجه ۱۲۵ باشد، سرعت چقدر است؟». عدد ۱۲۵ فازی نیست؛ برای استفاده از ماتریس قانون، اول باید یک بردار <span class="m">A′</span> بسازیم. دستور اسلایدها <span class="en">(slides 73, 77)</span>:</p>
-  <p class="soft">«برای محاسبه <span class="m">A′</span>، مقدار معادل عددی که در صورت مسئله داده شده را قرار داده و بقیه را صفر می‌گذاریم.»</p>
-  <p>یعنی در جای ۱۲۵ همان عضویت ۱۲۵ در A را می‌گذاریم (<span class="m">μ_A(125) = 0.5</span>) و بقیه نقطه‌ها صفر:</p>
-  <div class="mb">A′ = {0/100 , 0.5/125 , 0/150 , 0/175 , 0/200}  =  [0  0.5  0  0  0]</div>
-  <div class="given"><b>به زبان ساده:</b> «یک ردیف پنج‌تایی بساز، یک خانه برای هر دما. در خانه ۱۲۵ عدد 0.5 را بگذار (چون ۱۲۵ با درجه 0.5 نرمال است) و بقیه را صفر».<br>• <span class="m">0.5/125</span> یعنی «دمای ۱۲۵ با درجه 0.5»؛ خط کج تقسیم نیست.<br>• دو نوشتن یک چیزند: شکل آکولاد اسم هر خانه را هم می‌گوید، شکل کروشه فقط عددها را به ترتیب.</div>
-
-  <h3>قدم ۲: B′ = A′ ∘ μ_AB</h3>
-  <p>حالا همان ترکیب درس ۷: <span class="m">b′_j = max_i { min(a′_i , m_ij) }</span>. چون همه عددهای A′ به جز یکی صفرند، فقط <b>یک سطر</b> ماتریس (سطر ۱۲۵) در نتیجه اثر دارد؛ بقیه minها صفر می‌شوند.</p>
-  <div class="tip">میان‌بر: اگر عضویت ورودی را <span class="m">α = μ_A(x0)</span> بنامیم، در max-min داریم <span class="m">b′_j = min(α , b_j)</span>. یعنی B از ارتفاع α <b>بریده</b> می‌شود. این فقط برای بررسی جواب است؛ در امتحان ماتریس و مراحل را کامل بنویس.</div>
-
-  <h3>قدم ۳: غیرفازی‌سازی با میانگین وزنی</h3>
-  <p>غیرفازی‌سازی <span class="en">(defuzzification)</span> یعنی انتخاب یک عدد قطعی بر اساس مجموعه فازی خروجی <span class="en">(slide 73)</span>. فرمولی که اسلایدها به کار می‌برند <span class="en">(slides 73, 79)</span> یک میانگین وزنی <span class="en">(weighted average)</span> است:</p>
-  <div class="mb">         Σ_{j=1..p} b_j * μ_B′(b_j)
-B*  =  ───────────────────────────
-           Σ_{j=1..p} μ_B′(b_j)</div>
-  <div class="given"><b>به زبان ساده:</b> «هر سرعت را در عضویتش ضرب کن و همه را جمع بزن (بالای کسر)؛ بعد تقسیم کن بر جمع عضویت‌ها (پایین کسر)».<br>• <span class="m">Σ_{j=1..p}</span> یعنی «برای همه نقطه‌ها، از اولی تا آخری، جمع بزن».<br>• مثل معدل کلاس است: هر نمره در تعداد واحدش ضرب می‌شود. نقطه‌ای که عضویت بیشتری دارد، جواب را بیشتر به سمت خودش می‌کشد.<br>مثال: سرعت ۲۰ با عضویت 1 و سرعت ۴۰ با عضویت 0.5 ← <span class="m">(20×1 + 40×0.5) / (1 + 0.5) = 40 / 1.5 ≈ 26.7</span>؛ به ۲۰ نزدیک‌تر است، چون ۲۰ وزن بیشتری دارد.</div>
-  <div class="tip">در این فرمول، <span class="m">b_j</span> خود <b>نقطه</b> روی محور y است (۱۰، ۲۰، ۳۰، …) و <span class="m">μ_B′(b_j)</span> عضویت آن. اسلایدها حرف b را هم برای نقطه و هم برای عضویت به کار برده‌اند؛ گیج نشو.</div>
-
-  <h3>max-product: همه چیز مثل قبل، فقط min ← ضرب</h3>
-  <p>اسلاید ۸۰: «این روش در تمامی موارد شبیه روش قبلی است، با این تفاوت که به جای عملگر min از عملگر ضرب استفاده می‌شود.» با خواندن کلمه‌به‌کلمه، هر دو جایی که min داشتیم ضرب می‌شود:</p>
-  <div class="mb">r_ij = a_i · b_j                 (ساختن ماتریس قانون)
-b′_j = max_i { a′_i · r_ij }      (ترکیب max-product)</div>
-  <div class="given"><b>به زبان ساده:</b><br>• خط اول: «خانه سطر i و ستون j جدول قانون = عضویت نقطه i در A <b>ضربدر</b> عضویت نقطه j در B» (در درس ۷ به جای ضرب، کوچک‌تر را برمی‌داشتیم).<br>• خط دوم: «ستون j جدول را بردار، هر عددش را در عدد هم‌ردیفش در ورودی ضرب کن، و از حاصل‌ها <b>بزرگ‌ترین</b> را بردار».<br>• چرا <span class="m">α²</span>؟ ورودی فقط یک خانه غیرصفر دارد (α). سطر همان خانه در جدول <span class="m">α·b_j</span> است، و ورودی یک بار دیگر α ضربش می‌کند: <span class="m">α·α·b_j</span>.<br>مثال: <span class="m">α = 0.5, b_j = 0.6 → 0.5 × 0.5 × 0.6 = 0.15</span>. با max-min همین خانه <span class="m">min(0.5, 0.6) = 0.5</span> می‌شد.</div>
-  <p>برای یک ورودی قطعی با عضویت α: <span class="m">b′_j = α · (α · b_j) = α² · b_j</span>. یعنی B <b>کوچک</b> می‌شود ولی شکلش حفظ می‌شود (به جای اینکه از بالا بریده شود).</p>
-
-  <div class="trap"><b>ابهام ۱ — عدد α یا عدد ۱؟</b> اسلایدها در A′ همان عضویت ورودی (۰٫۵) را می‌گذارند، نه ۱. در بسیاری از کتاب‌ها ورودی قطعی را با ۱ نشان می‌دهند (<span class="m">1/125</span>). در max-min فرقی نمی‌کند (سطر ماتریس از قبل حداکثر ۰٫۵ است). در max-product عضویت‌های B′ فرق می‌کنند (<span class="m">α²·b_j</span> به جای <span class="m">α·b_j</span>) ولی عدد قطعی نهایی یکی است. در امتحان روش اسلاید را بنویس.</div>
-  <div class="trap"><b>ابهام ۲ — کدام min ضرب می‌شود؟</b> اسلاید ۸۰ فقط یک جمله است. در این درس خواندن کلمه‌به‌کلمه را دنبال می‌کنیم (هر دو min ← ضرب). بعضی حل‌ها ماتریس را با min می‌سازند و فقط مرحله ترکیب را ضرب می‌کنند؛ آن‌وقت عددها کمی فرق می‌کنند. اگر مطمئن نیستی، از استاد بپرس کدام را می‌خواهد. پای سؤال تمرین ۲ جواب هر دو حالت را آورده‌ام.</div>
-  <div class="trap"><b>اشتباه تایپی اسلاید ۷۸:</b> در خط b5 نوشته <span class="m">min(0.5,0.5)</span>، اما ستون پنجم ماتریس تمام صفر است، پس درستش <span class="m">min(0.5,0) = 0</span> است. جواب نهایی اسلاید (۰) درست است. و اگر عضویت ورودی صفر باشد (مثلاً دما ۱۰۰)، همه B′ صفر می‌شود و فرمول میانگین وزنی ۰ تقسیم بر ۰ می‌شود — جواب تعریف نشده است.</div>
-</div></section>
-
-<!-- ===== 2. SEE IT ===== -->
-<section class="sec"><p class="lab">۲. ببین چه اتفاقی می‌افتد</p>
-<div class="card">
-  <h3>حالا خودت امتحان کن</h3>
-  <p style="font-size:14px;color:var(--text-2)">مثال کامل را در <a href="#anim">انیمیشن بالای صفحه</a> دیدی. اینجا خودت عددها را عوض کن.</p>
-  <p>α عضویت ورودی قطعی در A است (مثلاً برای دمای ۱۲۵، <span class="m">α = 0.5</span>). خط‌چین = B اصلی؛ ستون‌های رنگی = B′؛ خط عمودی = عدد قطعی <span class="m">y*</span> از میانگین وزنی.</p>
-  <div class="row" id="bPreset">
-    <button class="on" data-p="0">B = سرعت متوسط (اسلاید ۷۴)</button>
-    <button data-p="1">B = سرعت کم (نامتقارن)</button>
-  </div>
-  <div class="soft" style="margin-top:10px">
-    <p style="margin:0 0 4px"><b>این دو نمودار را چطور بخوانی:</b></p>
-    <ul style="margin:0;padding-right:22px">
-      <li><b>محور افقی</b> پنج سرعت است (۱۰ تا ۵۰) و <b>ارتفاع</b> هر ستون، عضویت آن سرعت است.</li>
-      <li><b>جعبه خط‌چین</b> = B اصلی، یعنی خود «سرعت متوسط» قبل از اینکه قانون اجرا شود.</li>
-      <li><b>ستون رنگی</b> = ′B، یعنی خروجی قانون برای این ورودی.</li>
-      <li><b>اسلایدر α</b> = ورودی چقدر در A عضو است (برای دمای ۱۲۵، α = 0.5). هر چه α کمتر، قانون ضعیف‌تر «روشن» می‌شود و ستون‌ها کوتاه‌تر می‌شوند.</li>
-      <li><b>چپ، max-min (بریدن):</b> هر ستون بلندتر از α تا ارتفاع α بریده می‌شود؛ ستون‌های کوتاه‌تر دست نمی‌خورند. خط‌چین بنفش افقی همان ارتفاع α است.</li>
-      <li><b>راست، max-product (کوچک کردن):</b> همه ستون‌ها در یک عدد (α²) ضرب می‌شوند، پس همه به یک نسبت کوتاه می‌شوند و شکل حفظ می‌شود.</li>
-      <li><b>خط عمودی صورتی</b> = y*، عدد قطعی نهایی. ستون‌ها را مثل وزنه روی یک خط‌کش تصور کن: y* نقطه‌ای است که خط‌کش در آن تعادل دارد. ستون بلندتر، y* را بیشتر به سمت خودش می‌کشد.</li>
-    </ul>
-  </div>
-  <div class="sl" style="margin:10px 0"><label for="alpha">α = μ_A(x0)</label><input type="range" id="alpha" min="0" max="1" step="0.05" value="0.5"><span id="alphaV">0.5</span></div>
-  <div class="charts">
-    <div><h3>max-min: بریدن</h3>
-      <svg id="mmSvg" viewBox="0 0 340 230" role="img" aria-labelledby="mmT"><title id="mmT">خروجی max-min: B از ارتفاع α بریده می‌شود</title></svg>
-      <div class="mb" id="mmOut"></div></div>
-    <div><h3>max-product: کوچک کردن</h3>
-      <svg id="mpSvg" viewBox="0 0 340 230" role="img" aria-labelledby="mpT"><title id="mpT">خروجی max-product: B در α به توان دو ضرب و کوچک می‌شود</title></svg>
-      <div class="mb" id="mpOut"></div></div>
-  </div>
-  <p style="margin:10px 0 0"><b>y* دقیقاً چطور حساب شد؟</b> میانگین وزنی: هر سرعت ضربدر عضویتش، جمع؛ تقسیم بر جمع عضویت‌ها.</p>
-  <div class="mb" id="ysCalc"></div>
-  <p style="font-size:14px;color:var(--text-2)">آزمایش کن: با B نامتقارن، α را کم و زیاد کن. y* در max-min جابه‌جا می‌شود، ولی در max-product ثابت می‌ماند — چون همه عضویت‌ها در یک عدد ضرب می‌شوند و این عدد از صورت و مخرج فرمول ساده می‌شود. با B متقارن اسلاید، هر دو همیشه ۳۰ می‌دهند.</p>
-</div></section>
-
-<!-- ===== 3. WORKED EXAMPLES ===== -->
-<section class="sec"><p class="lab">۳. مثال حل‌شده، قدم به قدم</p>
-<div class="card stepper">
-  <h3>الف) مثال اسلایدهای ۷۷–۷۹ (max-min): اگر درجه ۱۲۵ باشد، سرعت چقدر است؟</h3>
-  <div class="mb">Normal temperature (A) = {0/100 , 0.5/125 , 1/150 , 0.5/175 , 0/200}
-Medium velocity (B)    = {0/10 , 0.6/20 , 1/30 , 0.6/40 , 0/50}</div>
-  <div class="st">قدم ۱ — ماتریس قانون (از درس ۷، اسلاید ۷۵):
-    <div class="matw"><span>μ_AB =</span><table class="mat"><tr><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr><tr><td>0</td><td>0.5</td><td>0.5</td><td>0.5</td><td>0</td></tr><tr><td>0</td><td>0.6</td><td>1</td><td>0.6</td><td>0</td></tr><tr><td>0</td><td>0.5</td><td>0.5</td><td>0.5</td><td>0</td></tr><tr><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr></table></div></div>
-  <div class="st">قدم ۲ — عضویت ۱۲۵ در A برابر <span class="m">0.5</span> است؛ پس <span class="m">A′ = {0/100 , 0.5/125 , 0/150 , 0/175 , 0/200} = [0 0.5 0 0 0]</span>.</div>
-  <div class="st">قدم ۳ — <span class="m">b′_j = max{min(a′_i , m_ij)}</span> برای هر ستون:
-    <div class="mb">b1 = max{min(0,0), min(0.5,0), min(0,0), min(0,0), min(0,0)}       = 0
-b2 = max{min(0,0), min(0.5,0.5), min(0,0.6), min(0,0.5), min(0,0)} = 0.5
-b3 = max{min(0,0), min(0.5,0.5), min(0,1), min(0,0.5), min(0,0)}   = 0.5
-b4 = max{min(0,0), min(0.5,0.5), min(0,0.6), min(0,0.5), min(0,0)} = 0.5
-b5 = max{min(0,0), min(0.5,0), min(0,0), min(0,0), min(0,0)}       = 0</div></div>
-  <div class="st">قدم ۴ — مجموعه خروجی: <span class="m">B′ = {0/10 , 0.5/20 , 0.5/30 , 0.5/40 , 0/50}</span> (اسلاید ۷۹). این همان B است که از ارتفاع ۰٫۵ بریده شده.</div>
-  <div class="st">قدم ۵ — غیرفازی‌سازی:
-    <div class="mb">B*_125 = (0×10 + 0.5×20 + 0.5×30 + 0.5×40 + 0×50) / (0 + 0.5 + 0.5 + 0.5 + 0)
-       = (10 + 15 + 20) / 1.5 = 45 / 1.5 = 30</div>
-    جواب: سرعت ≈ <b>۳۰</b>. (چون B′ دور ۳۰ متقارن است، میانگین وزنی دقیقاً وسط می‌افتد.)</div>
-  <div class="row" style="margin-top:8px"><button class="next">قدم بعدی</button><button class="all">نمایش همه</button></div>
-</div>
-
-<div class="card stepper" style="margin-top:12px">
-  <h3>ب) مسئله تازه، هم‌شکل تمرین ۲ (max-product)</h3>
-  <div class="given" id="hw2"><b>صورت تمرین ۲:</b> «قاعده فازی "اگر بارندگی زیاد باشد آنگاه رطوبت زیاد است" را در نظر بگیرید. فرض کنید x متغیر زبانی میزان بارندگی و H مجموعه فازی زیاد، y متغیر زبانی میزان رطوبت و HN مجموعه فازی زیاد باشند. در این صورت قاعده اگر–آنگاه را می‌توان به صورت <span class="m">if x is H then y is HN</span> نوشت. حال با توجه به مجموعه‌های فازی و قانون بالا اگر میزان بارندگی ۸۰ باشد، آنگاه میزان رطوبت چقدر است؟ (از روش Max-product inference استفاده کنید.)»<br><span class="m">H = 0.2/20 + 0.4/40 + 0.6/60 + 0.8/80 + 1/100</span> · <span class="m">HN = 0.1/25 + 0.6/50 + 0.8/75 + 1/100</span><br><i>عددهای مسئله زیر فرق دارد؛ خود تمرین ۲ را در سؤال ۸ بخش ۴ حل می‌کنی.</i></div>
-  <p>قانون: «اگر ترافیک سنگین باشد، آنگاه زمان چراغ سبز طولانی است.» x = تعداد ماشین در دقیقه، T = ترافیک سنگین؛ y = ثانیه‌های چراغ سبز، G = زمان طولانی.</p>
-  <div class="mb">T = 0.1/10 + 0.4/20 + 0.7/30 + 0.9/40 + 1/50
-G = 0.25/20 + 0.5/40 + 0.75/60 + 1/80</div>
-  <p>اگر ۲۰ ماشین در دقیقه بیاید، زمان چراغ سبز چقدر است؟ (از روش Max-product استفاده کنید.)</p>
-  <div class="tip">نوشتار تمرین ۲: <span class="m">0.4/20</span> یعنی «عضویت ۰٫۴ برای نقطه ۲۰» و علامت + یعنی «و این عضو هم هست»، نه جمع عددی (درس ۲).</div>
-  <div class="st">قدم ۱ — ماتریس قانون با ضرب، <span class="m">r_ij = t_i · g_j</span> (سطر = x، ستون = y):
-    <table class="t"><tr><th></th><th>y=20</th><th>y=40</th><th>y=60</th><th>y=80</th></tr>
-      <tr><th>x=10 (0.1)</th><td>0.025</td><td>0.05</td><td>0.075</td><td>0.1</td></tr>
-      <tr><th>x=20 (0.4)</th><td>0.1</td><td>0.2</td><td>0.3</td><td>0.4</td></tr>
-      <tr><th>x=30 (0.7)</th><td>0.175</td><td>0.35</td><td>0.525</td><td>0.7</td></tr>
-      <tr><th>x=40 (0.9)</th><td>0.225</td><td>0.45</td><td>0.675</td><td>0.9</td></tr>
-      <tr><th>x=50 (1)</th><td>0.25</td><td>0.5</td><td>0.75</td><td>1</td></tr></table></div>
-  <div class="st">قدم ۲ — ورودی ۲۰: <span class="m">μ_T(20) = 0.4</span>، پس <span class="m">A′ = 0/10 + 0.4/20 + 0/30 + 0/40 + 0/50 = [0 0.4 0 0 0]</span>.</div>
-  <div class="st">قدم ۳ — <span class="m">b′_j = max_i { a′_i · r_ij }</span>. همه حاصل‌ضرب‌ها جز سطر x=20 صفرند:
-    <div class="mb">b′1 = max{0×0.025, 0.4×0.1, 0×0.175, 0×0.225, 0×0.25} = 0.04
-b′2 = max{0, 0.4×0.2, 0, 0, 0} = 0.08
-b′3 = max{0, 0.4×0.3, 0, 0, 0} = 0.12
-b′4 = max{0, 0.4×0.4, 0, 0, 0} = 0.16</div></div>
-  <div class="st">قدم ۴ — مجموعه خروجی: <span class="m">B′ = 0.04/20 + 0.08/40 + 0.12/60 + 0.16/80</span>. چک سریع: <span class="m">α² · g_j = 0.16 × (0.25, 0.5, 0.75, 1)</span> ✓</div>
-  <div class="st">قدم ۵ — غیرفازی‌سازی:
-    <div class="mb">y* = (20×0.04 + 40×0.08 + 60×0.12 + 80×0.16) / (0.04 + 0.08 + 0.12 + 0.16)
-   = (0.8 + 3.2 + 7.2 + 12.8) / 0.4 = 24 / 0.4 = 60</div>
-    جواب: حدود <b>۶۰ ثانیه</b>.</div>
-  <div class="st">قدم ۶ — مقایسه با max-min روی همین داده: <span class="m">B′ = min(0.4, G) = 0.25/20 + 0.4/40 + 0.4/60 + 0.4/80</span> و <span class="m">y* = 77 / 1.45 ≈ 53.1</span>. max-min قله را صاف می‌کند و جواب را به سمت چپ می‌کشد؛ max-product شکل G را نگه می‌دارد و جوابش همان مرکز G است (۶۰).</div>
-  <div class="row" style="margin-top:8px"><button class="next">قدم بعدی</button><button class="all">نمایش همه</button></div>
-</div></section>
-
-<!-- ===== 4. PRACTICE ===== -->
-<section class="sec"><p class="lab">۴. نوبت توست</p>
-<div class="card">
-  <div class="q practice" id="pq1" data-hint="μ_A(2) = 0.6. پس A′ = [0 0.6 0 0] و هر b′_j = min(0.6, b_j). برای y* هر نقطه را در عضویتش ضرب کن و تقسیم بر جمع عضویت‌ها کن." data-yes="عالی! B′ = (0.6, 0.6, 0.3, 0.1) و y* = 31 / 1.6 = 19.375.">
-    <p>۱) (max-min) قانون «اگر x برابر A است آنگاه y برابر B است» با این مجموعه‌ها داده شده. اگر <span class="m">x = 2</span> باشد، B′ و عدد قطعی y* را حساب کن.</p>
-    <div class="mb">A = {0.2/1 , 0.6/2 , 1/3 , 0.4/4}        B = {1/10 , 0.6/20 , 0.3/30 , 0.1/40}</div>
-    <table class="t"><tr><th></th><th>y=10</th><th>y=20</th><th>y=30</th><th>y=40</th><th>y*</th></tr>
-      <tr><th>B′</th><td><input type="text" data-k="0.6" aria-label="B' در 10"></td><td><input type="text" data-k="0.6" aria-label="B' در 20"></td><td><input type="text" data-k="0.3" aria-label="B' در 30"></td><td><input type="text" data-k="0.1" aria-label="B' در 40"></td><td><input type="text" data-k="19.375" data-tol="0.03" aria-label="y*"></td></tr></table>
-    <button class="check">بررسی</button>
-    <details class="sol"><summary>راه‌حل</summary>
-      <p><b>قدم ۱ — بردار ورودی:</b> <span class="m">μ_A(2) = 0.6</span>، پس <span class="m">A′ = [0 0.6 0 0]</span> و فقط سطر x=2 اثر دارد.</p><p><b>قدم ۲ — B′:</b> هر <span class="m">b′_j = min(0.6, b_j)</span>:</p><div class="mb pre">min(0.6, 1)   = 0.6
-min(0.6, 0.6) = 0.6
-min(0.6, 0.3) = 0.3
-min(0.6, 0.1) = 0.1</div><p><b>قدم ۳ — میانگین وزنی:</b></p><div class="mb pre">y* = (10·0.6 + 20·0.6 + 30·0.3 + 40·0.1) / (0.6 + 0.6 + 0.3 + 0.1)
-   = (6 + 12 + 9 + 4) / 1.6
-   = 31 / 1.6 = 19.375</div>
-    </details><div class="fb"></div>
-  </div>
-
-  <div class="q mcq" data-yes="درست! طبق اسلاید ۷۷، در جای ۱۲۵ عضویت آن در A (یعنی 0.5) قرار می‌گیرد و بقیه صفر می‌شوند." data-no="نه. دستور اسلاید: «مقدار معادل عددی داده‌شده را قرار داده و بقیه را صفر می‌گذاریم». عضویت ۱۲۵ در دمای نرمال 0.5 است.">
-    <p>۲) با قرارداد اسلایدها، برای دمای ورودی ۱۲۵ (با A = دمای نرمال) بردار <span class="m">A′</span> کدام است؟</p>
-    <div class="given"><b>اسلایدهای ۷۴ و ۷۷ چه می‌گویند؟</b> مجموعه «دمای نرمال» این است: <span class="m">A = {0/100, 0.5/125, 1/150, 0.5/175, 0/200}</span>. قرارداد اسلایدها برای ساختن <span class="m">A′</span> از روی یک عدد ورودی در بخش ۱ آمده. <a href="#aprime">↑ بخش ۱، «قدم ۱»</a></div>
-    <div class="opts">
-      <button><span class="m">{0/100, 1/125, 0/150, 0/175, 0/200}</span></button>
-      <button data-ok><span class="m">{0/100, 0.5/125, 0/150, 0/175, 0/200}</span></button>
-      <button><span class="m">{0/100, 0.5/125, 1/150, 0.5/175, 0/200}</span></button>
-      <button><span class="m">{1/100, 0.5/125, 1/150, 1/175, 1/200}</span></button>
-    </div><div class="fb"></div>
-  </div>
-
-  <div class="q practice" data-hint="ماتریس با ضرب: سطر x=2 برابر 0.6 × B است. بعد دوباره در a′ = 0.6 ضرب کن: b′_j = 0.36 × b_j." data-yes="عالی! B′ = (0.36, 0.216, 0.108, 0.036) و y* = 17.5 — همان مرکز خود B، چون فقط کوچک شد.">
-    <p>۳) (max-product) همان داده‌های سؤال ۱ و همان ورودی <span class="m">x = 2</span>، این بار با روش max-product (هر دو min ← ضرب). B′ (با سه رقم اعشار) و y* را حساب کن.</p>
-    <div class="given"><b>سؤال ۱ چه بود؟</b> قانون «اگر x برابر A است آنگاه y برابر B است» با <span class="m">A = {0.2/1 , 0.6/2 , 1/3 , 0.4/4}</span> و <span class="m">B = {1/10 , 0.6/20 , 0.3/30 , 0.1/40}</span>، و ورودی <span class="m">x = 2</span>. <a href="#pq1">↑ سؤال ۱</a></div>
-    <table class="t"><tr><th></th><th>y=10</th><th>y=20</th><th>y=30</th><th>y=40</th><th>y*</th></tr>
-      <tr><th>B′</th><td><input type="text" data-k="0.36" data-tol="0.002" aria-label="B' در 10"></td><td><input type="text" data-k="0.216" data-tol="0.002" aria-label="B' در 20"></td><td><input type="text" data-k="0.108" data-tol="0.002" aria-label="B' در 30"></td><td><input type="text" data-k="0.036" data-tol="0.002" aria-label="B' در 40"></td><td><input type="text" data-k="17.5" data-tol="0.03" aria-label="y*"></td></tr></table>
-    <button class="check">بررسی</button>
-    <details class="sol"><summary>راه‌حل</summary>
-      <p><b>قدم ۱ — ماتریس با ضرب:</b> سطر x=2 می‌شود <span class="m">0.6 × B = (0.6, 0.36, 0.18, 0.06)</span>.</p><p><b>قدم ۲ — ترکیب با ضرب:</b> دوباره در <span class="m">a′ = 0.6</span> ضرب کن:</p><div class="mb pre">0.6 × 0.6  = 0.36
-0.6 × 0.36 = 0.216
-0.6 × 0.18 = 0.108
-0.6 × 0.06 = 0.036</div><p><b>قدم ۳ — میانگین وزنی:</b></p><div class="mb pre">y* = (10·0.36 + 20·0.216 + 30·0.108 + 40·0.036) / (0.36 + 0.216 + 0.108 + 0.036)
-   = (3.6 + 4.32 + 3.24 + 1.44) / 0.72
-   = 12.6 / 0.72 = 17.5</div><p><b>نکته:</b> در max-product شکل B فقط کوچک می‌شود، پس y* همان مرکز خودِ B است (<span class="m">35 / 2 = 17.5</span>). در max-min قله B بریده شد و y* عوض شد.</p>
-    </details><div class="fb"></div>
-  </div>
-
-  <div class="q mcq" data-yes="درست! در max-min ضرب به min و جمع به max تبدیل شده بود؛ در max-product همان min به ضرب برمی‌گردد و max می‌ماند." data-no="نه. اسم روش را بخوان: max-product یعنی max می‌ماند و جای min را ضرب (product) می‌گیرد (اسلاید ۸۰).">
-    <p>۴) تفاوت max-product با max-min در چیست؟</p>
-    <div class="opts">
-      <button>max به ضرب تبدیل می‌شود</button>
-      <button>max به جمع تبدیل می‌شود</button>
-      <button>min به جمع تبدیل می‌شود</button>
-      <button data-ok>min به ضرب تبدیل می‌شود</button>
-    </div><div class="fb"></div>
-  </div>
-
-  <div class="q practice" data-hint="صورت = 2×0.3 + 4×0.6 + 6×0.9 + 8×0.2 ؛ مخرج = 0.3 + 0.6 + 0.9 + 0.2." data-yes="عالی! 10 / 2 = 5. جواب به سمت نقطه ۶ (بیشترین عضویت) کشیده شد ولی ۸ با عضویت کم، آن را کمی برگرداند.">
-    <p>۵) فقط غیرفازی‌سازی: مجموعه خروجی <span class="m">B′ = {0.3/2 , 0.6/4 , 0.9/6 , 0.2/8}</span> است. صورت کسر، مخرج کسر و y* را بنویس.</p>
-    <table class="t"><tr><th>صورت Σ y·μ</th><th>مخرج Σ μ</th><th>y*</th></tr>
-      <tr><td><input type="text" data-k="10" aria-label="صورت"></td><td><input type="text" data-k="2" aria-label="مخرج"></td><td><input type="text" data-k="5" aria-label="y*"></td></tr></table>
-    <button class="check">بررسی</button>
-    <details class="sol"><summary>راه‌حل</summary>
-      <div class="mb pre">numerator   = 2·0.3 + 4·0.6 + 6·0.9 + 8·0.2 = 0.6 + 2.4 + 5.4 + 1.6 = 10
-denominator = 0.3 + 0.6 + 0.9 + 0.2 = 2
-y* = 10 / 2 = 5</div>
-    </details><div class="fb"></div>
-  </div>
-
-  <div class="q mcq" data-yes="درست! B′ = α²·B؛ عدد α² هم در صورت و هم در مخرج میانگین وزنی هست و ساده می‌شود. (این فقط برای یک قانون تنهاست؛ با چند قانون در فصل ۴ ماجرا فرق دارد.)" data-no="نه. در max-product همه عضویت‌های B′ در یک عدد (α²) ضرب می‌شوند. این عدد در صورت و مخرج فرمول هست و ساده می‌شود.">
-    <p>۶) با max-product (به روش این درس) و یک قانون، اگر عضویت ورودی از ۰٫۸ به ۰٫۴ برسد، عدد قطعی y* چه می‌شود؟</p>
-    <div class="opts">
-      <button>نصف می‌شود</button>
-      <button>دو برابر می‌شود</button>
-      <button data-ok>ثابت می‌ماند</button>
-      <button>صفر می‌شود</button>
-    </div><div class="fb"></div>
-  </div>
-
-  <div class="q mcq" data-yes="درست! فازی‌سازی ← استنتاج ← غیرفازی‌سازی (درس ۳ و ۶، اسلاید ۶۶–۶۷)." data-no="نه. ترتیب اجزای سیستم خبره فازی (درس ۶): فازی‌سازی، بعد موتور استنتاج، بعد غیرفازی‌سازی که خروجی قطعی می‌دهد.">
-    <p>۷) (یادآوری درس ۶) غیرفازی‌سازی در کدام جای سیستم خبره فازی انجام می‌شود؟</p>
-    <div class="opts">
-      <button data-ok>بعد از موتور استنتاج</button>
-      <button>قبل از موتور استنتاج</button>
-      <button>قبل از مرحله فازی‌سازی</button>
-      <button>داخل پایگاه دانش فازی</button>
-    </div><div class="fb"></div>
-  </div>
-
-  <div class="q practice" data-hint="μ_H(80) = 0.8 ← A′ = [0 0 0 0.8 0]. سطر x=80 ماتریس ضربی = 0.8 × HN. دوباره در 0.8 ضرب کن: b′_j = 0.64 × HN_j. بعد میانگین وزنی روی 25، 50، 75، 100." data-yes="عالی! B′ = 0.064/25 + 0.384/50 + 0.512/75 + 0.64/100 و رطوبت ≈ 77. حالا جوابت را با برگه تمرینت مقایسه کن.">
-    <p>۸) <b>تمرین ۲ خودت</b> — قانون «اگر بارندگی زیاد باشد آنگاه رطوبت زیاد است»: <span class="m">if x is H then y is HN</span>.</p>
-    <div class="mb">H  = 0.2/20 + 0.4/40 + 0.6/60 + 0.8/80 + 1/100
-HN = 0.1/25 + 0.6/50 + 0.8/75 + 1/100</div>
-    <p>اگر میزان بارندگی ۸۰ باشد، میزان رطوبت چقدر است؟ (از روش Max-product inference استفاده کنید.) عضویت‌های B′ (سه رقم اعشار) و عدد قطعی رطوبت را بنویس.</p>
-    <table class="t"><tr><th></th><th>y=25</th><th>y=50</th><th>y=75</th><th>y=100</th><th>رطوبت y*</th></tr>
-      <tr><th>B′</th><td><input type="text" data-k="0.064" data-tol="0.002" aria-label="B' در 25"></td><td><input type="text" data-k="0.384" data-tol="0.002" aria-label="B' در 50"></td><td><input type="text" data-k="0.512" data-tol="0.002" aria-label="B' در 75"></td><td><input type="text" data-k="0.64" data-tol="0.002" aria-label="B' در 100"></td><td><input type="text" data-k="77" data-tol="0.05" aria-label="رطوبت"></td></tr></table>
-    <button class="check">بررسی</button>
-    <details class="sol"><summary>راه‌حل</summary>
-      <p><b>قدم ۱ — بردار ورودی:</b> <span class="m">μ_H(80) = 0.8</span>، پس <span class="m">A′ = [0 0 0 0.8 0]</span> و فقط سطر x=80 اثر دارد.</p><p><b>قدم ۲ — سطر x=80 ماتریس ضربی:</b> <span class="m">0.8 × HN = (0.08, 0.48, 0.64, 0.8)</span>.</p><p><b>قدم ۳ — ترکیب با ضرب:</b> دوباره در 0.8 ضرب کن، یعنی روی هم <span class="m">0.64 × HN</span>:</p><div class="mb pre">0.64 × 0.1 = 0.064
-0.64 × 0.6 = 0.384
-0.64 × 0.8 = 0.512
-0.64 × 1   = 0.64</div><p><b>قدم ۴ — میانگین وزنی:</b></p><div class="mb pre">y* = (25·0.064 + 50·0.384 + 75·0.512 + 100·0.64) / (0.064 + 0.384 + 0.512 + 0.64)
-   = (1.6 + 19.2 + 38.4 + 64) / 1.6
-   = 123.2 / 1.6 = 77</div>
-    </details><div class="fb"></div>
-    <div class="trap">اگر برگه تو عددهای دیگری دارد، ببین کدام قرارداد را به کار برده‌ای (پایین‌تر هر کدام را روی همین داده حساب کرده‌ام):
-      <br>• ماتریس با min ساخته شده و فقط ترکیب با ضرب: <span class="m">B′ = 0.08/25 + 0.48/50 + 0.64/75 + 0.64/100</span> و <span class="m">y* = 138 / 1.84 = 75</span>.
-      <br>• ورودی به صورت ۱ (نه ۰٫۸) و ماتریس ضربی: <span class="m">B′ = 0.08/25 + 0.48/50 + 0.64/75 + 0.8/100</span> و <span class="m">y* = 77</span>.
-      <br>جوابی که در جدول بالا بررسی می‌شود، روش اسلایدها با خواندن کلمه‌به‌کلمه است.</div>
-  </div>
-</div></section>
-
-<!-- ===== 5. SUMMARY ===== -->
-<section class="sec"><p class="lab">۵. جمع‌بندی — همین را به خاطر بسپار</p>
-<div class="soft"><ul>
-  <li>ورودی قطعی x0 ← <span class="m">A′</span>: در جای x0 عضویت <span class="m">μ_A(x0)</span> را بگذار، بقیه صفر (اسلاید ۷۷).</li>
-  <li><span class="m">B′ = A′ ∘ μ_AB</span>؛ فقط سطر x0 ماتریس اثر دارد.</li>
-  <li>max-min ← B از ارتفاع α بریده می‌شود: <span class="m">b′_j = min(α, b_j)</span>.</li>
-  <li>max-product ← هر min تبدیل به ضرب می‌شود؛ B کوچک می‌شود ولی شکلش می‌ماند: <span class="m">b′_j = α²·b_j</span>.</li>
-  <li>غیرفازی‌سازی اسلایدها = میانگین وزنی: <span class="m">B* = Σ y_j·μ(y_j) / Σ μ(y_j)</span>.</li>
-  <li>مثال اسلاید: دمای ۱۲۵ ← <span class="m">B′ = {0/10, 0.5/20, 0.5/30, 0.5/40, 0/50}</span> ← سرعت ۳۰.</li>
-</ul></div></section>
-
-<!-- ===== 6. SOURCE + ASK ===== -->
-<section class="sec"><p class="lab">منبع اصلی</p>
-<p>جزوه درس، اسلایدهای ۷۳ و ۷۷ تا ۸۰ (شماره صفحه PDF؛ روی خود اسلاید ۲۶ و ۳۰ تا ۳۳) و <a href="#hw2">برگه تمرین ۲</a> · <a href="https://www.wiley.com/en-us/Fuzzy+Logic+with+Engineering+Applications%2C+4th+Edition-p-9781119235866">Timothy J. Ross, Fuzzy Logic with Engineering Applications</a> — بخش‌های ترکیب max-product و روش‌های غیرفازی‌سازی (میانگین وزنی).</p>
-<p><a href="../reference/cheatsheet.html">برگه فرمول‌ها</a> · <a href="../reference/glossary.html">واژه‌نامه</a></p>
-</section>
-
-<div class="nav"><a href="0007-max-min-inference.html">← درس قبل: استنتاج max-min</a><a href="0009-triangle-trapezoid.html">درس بعد: توابع عضویت مثلثی و ذوزنقه‌ای →</a></div>
-</main>
-
+<main id="app"></main>
+<script src="../assets/teacher.js"></script>
+<script src="../assets/graph.js"></script>
 <script>
-/* ===== SHARED JS — copy verbatim into every lesson ===== */
-(function(){
-function norm(s){return s.trim().replace(/[۰-۹]/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)}).replace(/[٠-٩]/g,function(d){return '٠١٢٣٤٥٦٧٨٩'.indexOf(d)}).replace(/[٫,]/g,'.').replace(/\s+/g,'')}
-function val(s){s=norm(s);if(/^-?\d*\.?\d+\/-?\d*\.?\d+$/.test(s)){var p=s.split('/');return +p[0]/+p[1]}return s===''?NaN:+s}
-document.querySelectorAll('.practice').forEach(function(q){
-  var ins=q.querySelectorAll('input[data-k]'),fb=q.querySelector('.fb'),btn=q.querySelector('.check');
-  ins.forEach(function(i){i.addEventListener('input',function(){i.parentNode.classList.remove('ok','no');fb.textContent='';fb.className='fb'})});
-  btn.addEventListener('click',function(){
-    var empty=0,ok=0;
-    ins.forEach(function(i){var c=i.parentNode;c.classList.remove('ok','no');if(!i.value.trim()){empty++;return}
-      var v=val(i.value),k=+i.dataset.k,tol=i.dataset.tol?+i.dataset.tol:0.01;
-      if(!isNaN(v)&&Math.abs(v-k)<=tol+1e-9){ok++;c.classList.add('ok')}else c.classList.add('no')});
-    if(empty){fb.className='fb bad';fb.textContent='اول همه خانه‌ها را پر کن ('+empty+' خانه خالی است).';return}
-    if(ok===ins.length){fb.className='fb good';fb.textContent=q.dataset.yes||('عالی! همه '+ins.length+' جواب درست است.')}
-    else{fb.className='fb bad';fb.textContent=ok+' از '+ins.length+' درست. '+(q.dataset.hint||'خانه‌های قرمز را دوباره حساب کن.')}
-  });
-});
-document.querySelectorAll('.mcq').forEach(function(q){
-  var fb=q.querySelector('.fb');
-  q.querySelectorAll('.opts button').forEach(function(b){b.addEventListener('click',function(){
-    q.querySelectorAll('.opts button').forEach(function(x){x.classList.remove('ok','no')});
-    if(b.hasAttribute('data-ok')){b.classList.add('ok');fb.className='fb good';fb.textContent=q.dataset.yes||'درست!'}
-    else{b.classList.add('no');fb.className='fb bad';fb.textContent=q.dataset.no||'نه، دوباره فکر کن.'}
-  })});
-});
-document.querySelectorAll('.stepper').forEach(function(s){
-  var st=s.querySelectorAll('.st'),n=0,nx=s.querySelector('.next'),al=s.querySelector('.all');
-  function upd(){st.forEach(function(e,i){e.classList.toggle('show',i<n)});if(nx)nx.textContent=n>=st.length?'از اول':'قدم بعدی ('+n+'/'+st.length+')'}
-  if(nx)nx.addEventListener('click',function(){n=n>=st.length?0:n+1;upd()});
-  if(al)al.addEventListener('click',function(){n=st.length;upd()});
-  upd();
-});
-window.addEventListener('beforeprint',function(){document.querySelectorAll('details.sol').forEach(function(d){d.open=true})});
-})();
-/* ===== END SHARED JS ===== */
-</script>
-<script>
-/* ===== lesson 8: max-min vs max-product output sets ===== */
-(function(){
-var NS='http://www.w3.org/2000/svg';
-function f(v){return String(Math.round(v*1000)/1000)}
-function el(svg,tag,attrs,txt){var e=document.createElementNS(NS,tag);for(var k in attrs)e.setAttribute(k,attrs[k]);if(txt!==undefined)e.textContent=txt;svg.appendChild(e);return e}
-function clear(svg){Array.prototype.slice.call(svg.childNodes).forEach(function(n){if(n.nodeName!=='title')svg.removeChild(n)})}
-var sets=[{y:[10,20,30,40,50],b:[0,0.6,1,0.6,0]},{y:[10,20,30,40,50],b:[1,0.7,0.4,0.2,0.1]}];
-var S=0,al=0.5;
-var X0=40,X1=320,Y0=190,Y1=40;
-function xs(v){return X0+(v/60)*(X1-X0)}
-function ys(m){return Y0-m*(Y0-Y1)}
-function wavg(y,m){var s=0,t=0;for(var i=0;i<y.length;i++){s+=m[i];t+=y[i]*m[i]}return s>1e-12?t/s:null}
-function chart(svg,bp,color,showClip,noY){
-  var st=sets[S];clear(svg);
-  [0,0.5,1].forEach(function(g){el(svg,'line',{x1:X0,x2:X1,y1:ys(g),y2:ys(g),style:'stroke:var(--grid)'});el(svg,'text',{x:X0-6,y:ys(g)+4,'text-anchor':'end'},String(g))});
-  st.y.forEach(function(v,i){
-    var x=xs(v);
-    el(svg,'rect',{x:x-14,y:ys(st.b[i]),width:28,height:Math.max(0,Y0-ys(st.b[i])),style:'fill:none;stroke:var(--text-3);stroke-dasharray:4 3'});
-    el(svg,'rect',{x:x-14,y:ys(bp[i]),width:28,height:Math.max(0,Y0-ys(bp[i])),style:'fill:'+color+';opacity:0.85'});
-    el(svg,'text',{x:x,y:Y0+16,'text-anchor':'middle'},String(v));
-    el(svg,'text',{x:x,y:ys(bp[i])-5,'text-anchor':'middle',style:'font-size:11px;fill:var(--text)'},f(bp[i]));
-  });
-  if(showClip){el(svg,'line',{x1:X0,x2:X1,y1:ys(al),y2:ys(al),style:'stroke:var(--c1);stroke-dasharray:6 4'});el(svg,'text',{x:X1+4,y:ys(al)+4,'text-anchor':'start',style:'font-size:11px'},'α')}
-  var c=wavg(st.y,bp);
-  if(noY){}
-  else if(c===null){el(svg,'text',{x:(X0+X1)/2,y:22,'text-anchor':'middle',style:'fill:var(--bad)'},'B′ = 0 ← y* تعریف نشده (0/0)')}
-  else{var x=xs(c);el(svg,'line',{x1:x,x2:x,y1:28,y2:Y0,style:'stroke:var(--c4);stroke-width:2.5'});
-    el(svg,'polygon',{points:(x-6)+','+(Y0+2)+' '+(x+6)+','+(Y0+2)+' '+x+','+(Y0-8),style:'fill:var(--c4)'});
-    el(svg,'text',{x:x,y:22,'text-anchor':'middle',style:'fill:var(--c4);font-weight:700'},'y* = '+(Math.round(c*100)/100))}
-  el(svg,'line',{x1:X0,x2:X1,y1:Y0,y2:Y0,style:'stroke:var(--text-3)'});
-  el(svg,'text',{x:X1,y:Y0+32,'text-anchor':'end'},'y');
-  return c;
-}
-function draw(){
-  var st=sets[S];
-  var mm=st.b.map(function(b){return Math.min(al,b)});
-  var mp=st.b.map(function(b){return al*al*b});
-  var c1=chart(document.getElementById('mmSvg'),mm,'var(--c1)',true);
-  var c2=chart(document.getElementById('mpSvg'),mp,'var(--c3)',false);
-  var o1=document.getElementById('mmOut'),o2=document.getElementById('mpOut');
-  o1.style.whiteSpace=o2.style.whiteSpace='pre';
-  o1.textContent='b′_j = min(α, b_j)\n'+st.y.map(function(y,i){return 'y='+y+': min('+f(al)+', '+f(st.b[i])+') = '+f(mm[i])}).join('\n');
-  o2.textContent='b′_j = α·α·b_j = '+f(al*al)+'·b_j\n'+st.y.map(function(y,i){return 'y='+y+': '+f(al*al)+'·'+f(st.b[i])+' = '+f(mp[i])}).join('\n');
-  function calc(name,bp,c){
-    var num=0,den=0;bp.forEach(function(m,i){num+=st.y[i]*m;den+=m});
-    return name+'\n  B′ = '+bp.map(function(m,i){return f(m)+'/'+st.y[i]}).join(' + ')+
-      '\n  Σ y·μ = '+bp.map(function(m,i){return st.y[i]+'·'+f(m)}).join(' + ')+' = '+f(num)+
-      '\n  Σ μ   = '+bp.map(f).join(' + ')+' = '+f(den)+
-      '\n  y*    = '+(c===null?'0 / 0 → تعریف نشده':f(num)+' / '+f(den)+' = '+f(c));
-  }
-  document.getElementById('ysCalc').textContent=calc('max-min:',mm,c1)+'\n\n'+calc('max-product:',mp,c2);
-}
+// Lesson 8 — slides 73–80 (Part 2: fuzzy operations and inference) and Homework 2.
+// Explanations are Persian; numbers, math and technical terms stay in English.
+// Every matrix cell, every B′ and every y* below is computed in code, not typed by hand.
 
-var r=document.getElementById('alpha'),v=document.getElementById('alphaV');
-r.addEventListener('input',function(){al=+r.value;v.textContent=f(al);draw()});
-Array.prototype.forEach.call(document.querySelectorAll('#bPreset button'),function(b){b.addEventListener('click',function(){
-  S=+b.dataset.p;Array.prototype.forEach.call(document.querySelectorAll('#bPreset button'),function(x){x.classList.toggle('on',x===b)});draw()})});
-draw();
-})();
-</script>
-<script>
-/* ===== lesson 8: animated walk-through (slide 74: temperature 125 → speed) ===== */
-(function(){
-var NS='http://www.w3.org/2000/svg',svg=document.getElementById('anSvg'),box=document.getElementById('anBox');
-var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
-function f(v){return String(Math.round(v*1000)/1000)}
-function el(p,tag,a,txt){var e=document.createElementNS(NS,tag);for(var k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;p.appendChild(e);return e}
-function M(s){return '<span class="m">'+s+'</span>'}
-function F(s){return '<div class="an-f">'+s+'</div>'}
-function op(e,v){e.style.opacity=v}
-function ease(p){return p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2}
-function flash(t){t.classList.remove('flash');void t.getBBox();t.classList.add('flash')}
-var A=[0,.5,1,.5,0],B=[0,.6,1,.6,0],XS=[100,125,150,175,200],YS=[10,20,30,40,50],AP=[0,.5,0,0,0];
-var BPmm=[0,.5,.5,.5,0],BPmp=[0,.15,.25,.15,0];
-var MM=A.map(function(a){return B.map(function(b){return Math.min(a,b)})});
-var MP=A.map(function(a){return B.map(function(b){return Math.round(a*b*1000)/1000})});
-var BY=150,H=100;
-function vy(m){return BY-m*H}
-function ax(i){return 70+i*50}
-function bx(j){return 370+j*50}
-function mx(j){return 330+j*62}
-function my(i){return 252+i*27}
+const f = v => String(+v.toFixed(4));
+const all = list => Promise.all(list);
+const LTR = s => `⁦${s}⁩`; // keeps a left-to-right run intact inside Persian board text
 
-/* ---- two bar charts ---- */
-function chart(cx,lbls,axis){
-  var G=el(svg,'g',{'class':'fd'});
-  var frame=el(G,'rect',{x:cx(0)-58,y:2,width:292,height:BY+42,rx:10,'class':'an-hl fd',style:'opacity:0'});
-  [0,.5,1].forEach(function(m){el(G,'line',{x1:cx(0)-28,x2:cx(4)+28,y1:vy(m),y2:vy(m),style:'stroke:var(--grid)'});el(G,'text',{x:cx(0)-32,y:vy(m)+4,'text-anchor':'end'},String(m))});
-  var ttl=el(G,'text',{x:cx(2),y:22,'text-anchor':'middle',direction:'rtl','class':'an-ttl'},'');
-  var ghosts=[],bars=[],vals=[];
-  for(var i=0;i<5;i++){var x=cx(i);
-    ghosts.push(el(G,'rect',{x:x-15,width:30,y:BY,height:0,'class':'an-ghost fd',style:'opacity:0'}));
-    bars.push(el(G,'rect',{x:x-15,width:30,y:BY,height:0,'class':'an-bar'}));
-    vals.push(el(G,'text',{x:x,y:BY-5,'text-anchor':'middle','class':'an-val fd',style:'opacity:0'},''));
-    el(G,'text',{x:x,y:BY+17,'text-anchor':'middle'},String(lbls[i]));
-  }
-  el(G,'line',{x1:cx(0)-28,x2:cx(4)+28,y1:BY,y2:BY,style:'stroke:var(--text-3)'});
-  el(G,'text',{x:cx(2),y:BY+34,'text-anchor':'middle',direction:'rtl','class':'an-ax'},axis);
-  return {G:G,frame:frame,ttl:ttl,ghosts:ghosts,bars:bars,vals:vals};
-}
-var CA=chart(ax,XS,'محور: دما'),CB=chart(bx,YS,'محور: سرعت');
-CA.ghosts.forEach(function(r,i){r.setAttribute('y',vy(A[i]));r.setAttribute('height',A[i]*H)});
-CB.ghosts.forEach(function(r,i){r.setAttribute('y',vy(B[i]));r.setAttribute('height',B[i]*H)});
-CB.bars2=YS.map(function(v,j){return el(CB.G,'rect',{x:bx(j)+1,width:14,y:vy(BPmp[j]),height:BPmp[j]*H,'class':'an-bar',style:'opacity:0;fill:var(--c3)'})});
-var x0g=el(svg,'g',{'class':'fd',style:'opacity:0'});
-el(x0g,'text',{x:ax(1),y:58,'text-anchor':'middle','class':'mono',style:'fill:var(--c4);font-weight:700'},'x0 = 125');
-el(x0g,'line',{x1:ax(1),x2:ax(1),y1:63,y2:80,style:'stroke:var(--c4);stroke-width:2'});
-el(x0g,'polygon',{points:(ax(1)-5)+',78 '+(ax(1)+5)+',78 '+ax(1)+',86',style:'fill:var(--c4)'});
-var alAg=el(svg,'g',{'class':'fd',style:'opacity:0'});
-el(alAg,'line',{x1:42,x2:ax(1)-15,y1:vy(.5),y2:vy(.5),style:'stroke:var(--c1);stroke-width:2;stroke-dasharray:5 3'});
-el(alAg,'text',{x:44,y:vy(.5)-6,'class':'mono',style:'fill:var(--c1);font-weight:700'},'α=0.5');
-var alBg=el(svg,'g',{'class':'fd',style:'opacity:0'});
-el(alBg,'line',{x1:342,x2:598,y1:vy(.5),y2:vy(.5),style:'stroke:var(--c1);stroke-dasharray:6 4'});
-el(alBg,'text',{x:602,y:vy(.5)+4,'class':'mono',style:'fill:var(--c1)'},'α');
-var ysg=el(svg,'g',{'class':'fd',style:'opacity:0'}),ysx=320+5*30;
-el(ysg,'line',{x1:ysx,x2:ysx,y1:44,y2:BY,style:'stroke:var(--c4);stroke-width:2.5'});
-el(ysg,'polygon',{points:(ysx-6)+','+(BY+2)+' '+(ysx+6)+','+(BY+2)+' '+ysx+','+(BY-8),style:'fill:var(--c4)'});
-el(ysg,'text',{x:ysx+6,y:42,'class':'mono',style:'fill:var(--c4);font-weight:700'},'y* = 30');
-
-/* ---- rule table ---- */
-var ph=el(svg,'text',{x:320,y:300,'text-anchor':'middle',direction:'rtl','class':'fd',style:'fill:var(--text-3)'},'(جدول قانون بعداً اینجا ساخته می‌شود)');
-var MG=el(svg,'g',{'class':'fd',style:'opacity:0'});
-var mFrame=el(MG,'rect',{x:4,y:196,width:632,height:206,rx:10,'class':'an-hl fd',style:'opacity:0'});
-var colBand=el(MG,'rect',{y:200,width:58,height:200,rx:6,'class':'an-band fd',style:'opacity:0'});
-var rowBand=el(MG,'rect',{x:146,width:464,height:26,rx:6,'class':'an-band fd',style:'opacity:0'});
-el(MG,'text',{x:72,y:246,'text-anchor':'middle',direction:'rtl',style:'fill:var(--text);font-weight:700'},'جدول قانون');
-var mMode=el(MG,'text',{x:72,y:272,'text-anchor':'middle','class':'mono',style:'fill:var(--accent)'},'');
-var mForm=el(MG,'text',{x:72,y:296,'text-anchor':'middle','class':'mono'},'');
-el(MG,'text',{x:72,y:320,'text-anchor':'middle',direction:'rtl',style:'font-size:11px;fill:var(--text-3)'},'سطر = دما، ستون = سرعت');
-el(MG,'text',{x:172,y:232,'text-anchor':'middle','class':'mono'},'x');
-el(MG,'text',{x:222,y:214,'text-anchor':'middle','class':'mono',style:'fill:var(--text-3)'},'a_i');
-var apHead=el(MG,'text',{x:274,y:214,'text-anchor':'middle','class':'mono fd',style:'opacity:0;fill:var(--c4)'},'a′_i');
-var bHeadT=YS.map(function(v,j){el(MG,'text',{x:mx(j),y:214,'text-anchor':'middle','class':'mono'},'y='+v);
-  return el(MG,'text',{x:mx(j),y:232,'text-anchor':'middle','class':'mono',style:'opacity:0;font-weight:700;fill:var(--c2)'},'b='+f(B[j]))});
-var rows=[],cells=[],aHeadT=[],apT=[];
-for(var i=0;i<5;i++){
-  var R=el(MG,'g',{'class':'fd'});rows.push(R);
-  el(R,'text',{x:172,y:my(i)+4,'text-anchor':'middle','class':'mono'},String(XS[i]));
-  aHeadT.push(el(R,'text',{x:222,y:my(i)+4,'text-anchor':'middle','class':'mono',style:'opacity:0;font-weight:700;fill:var(--c2)'},f(A[i])));
-  apT.push(el(R,'text',{x:274,y:my(i)+4,'text-anchor':'middle','class':'mono',style:'opacity:0;font-weight:700;fill:var(--c4)'},f(AP[i])));
-  cells.push([]);
-  for(var j=0;j<5;j++){el(R,'rect',{x:mx(j)-28,y:my(i)-12,width:56,height:24,rx:4,style:'fill:none;stroke:var(--border)'});
-    cells[i].push(el(R,'text',{x:mx(j),y:my(i)+5,'text-anchor':'middle','class':'mono cellt'},''))}
-}
-var cellHL=el(MG,'rect',{width:58,height:26,rx:5,'class':'an-hl',style:'opacity:0'});
-var bpLab=el(MG,'text',{x:274,y:my(5)+5,'text-anchor':'middle','class':'mono fd',style:'opacity:0;font-weight:700'},'b′_j');
-var bpT=YS.map(function(v,j){return el(MG,'text',{x:mx(j),y:my(5)+5,'text-anchor':'middle','class':'mono',style:'font-weight:700'},'')});
-var BX=320,BYC=192,BUB=el(svg,'g',{'class':'fd',style:'opacity:0'});
-var bubR=el(BUB,'rect',{rx:12,style:'fill:var(--surface);stroke:var(--accent);stroke-width:2.5'});
-var bubT=el(BUB,'text',{x:BX,y:BYC+9,'text-anchor':'middle','class':'mono',style:'font-size:24px;font-weight:700;fill:var(--text)'},'');
-var FL=el(svg,'g',{});
-
-/* ---- symbols: [symbol, meaning, where it came from] ---- */
-var GL={
- A:[M('A'),'مجموعه فازی «دمای نرمال». هر ستون یک دما؛ ارتفاعش = آن دما چقدر نرمال است.','داده سؤال (اسلاید ۷۴)'],
- sl:[M('0.5/125'),'یعنی «دمای ۱۲۵ با درجه 0.5». خط کج تقسیم نیست.','نوشتن مجموعه فازی (درس ۲)'],
- B:[M('B'),'مجموعه فازی «سرعت متوسط»: پنج سرعت ۱۰ تا ۵۰.','داده سؤال (اسلاید ۷۴)'],
- ai:[M('a_i'),'عدد سطر i جدول = عضویت آن دما در A. '+M('i')+' = شماره سطر.','عددهای بالای ستون‌های نمودار A'],
- bj0:[M('b_j'),'عدد ستون j جدول = عضویت آن سرعت در B. '+M('j')+' = شماره ستون.','عددهای بالای ستون‌های نمودار B'],
- m:[M('m_ij = min(a_i , b_j)'),'عدد خانه سطر i و ستون j: کوچک‌ترِ عدد سطر و عدد ستون.','ساختن جدول با max-min (درس ۷)'],
- x0:[M('x0 = 125'),'عدد ورودی؛ یک عدد معمولی، نه مجموعه فازی.','متن سؤال: «اگر درجه ۱۲۵ باشد»'],
- al:[M('α = μ_A(125) = 0.5'),'ارتفاع ستون ۱۲۵ در A. '+M('μ_A(125)')+' را بخوان «عضویت ۱۲۵ در A».','از روی نمودار A خوانده شد'],
- ap:[M('A′'),'ورودی به شکل ردیف: خانه ۱۲۵ = α، بقیه صفر. ′ یعنی «ساخته‌شده از ورودی».','دستور اسلاید ۷۷'],
- bj:[M('b′_j = max_i { min(a′_i , m_ij) }'),'عضویت سرعت j در جواب: ستون j را با A′ جفت کن، از هر جفت کوچک‌تر، از همه بزرگ‌ترین.','ترکیب max-min (درس ۷)'],
- Bp:[M('B′'),'همه b′_jها کنار هم = جواب فازی (سرعت برای دمای ۱۲۵).','نتیجه ترکیب'],
- ys:[M('y*'),'عدد قطعی نهایی = Σ(سرعت × عضویت) ÷ Σ(عضویت). '+M('Σ')+' = «همه را جمع بزن».','میانگین وزنی (اسلایدهای ۷۳ و ۷۹)'],
- r:[M('r_ij = a_i × b_j'),'خانه جدول در max-product: به جای min، ضرب.','اسلاید ۸۰'],
- a2:[M('α² · b_j'),'ورودی دو بار ضرب می‌شود: یک بار در جدول، یک بار در ترکیب.','نتیجه دو ضرب (اسلاید ۸۰)']
+const OPS = { min: Math.min, prod: (a, b) => a * b };
+const relation = (A, B, op) => A.map(a => B.map(v => OPS[op](a, v)));
+const compose = (Ap, R, op) => R[0].map((_, j) => Math.max(...Ap.map((a, i) => OPS[op](a, R[i][j]))));
+const wavg = (ys, ms) => {
+  const num = ys.reduce((s, y, k) => s + y * ms[k], 0), den = ms.reduce((s, m) => s + m, 0);
+  return { num, den, y: num / den };
 };
 
-/* ---- steps: [changes, new symbols, caption, animation] ---- */
-var base={aOp:.35,aVals:0,aH:A,aGhost:0,aDim:0,aTtl:'دمای نرمال (A)',x0:0,alA:0,
-  bOp:.35,bVals:0,bH:B,bCol:'var(--c2)',bGhost:0,alB:0,bTtl:'سرعت متوسط (B)',ys:0,
-  mat:0,cmp:0,aHead:0,bHead:0,mode:null,aPr:0,dim:0,bp:null,row:-1,col:-1,cell:null,hl:[]};
-var RAW=[
- [{},[],'<b>سؤال (اسلاید ۷۴):</b> قانون می‌گوید «اگر دما <b>نرمال</b> باشد، سرعت <b>متوسط</b> است». دما ۱۲۵ است. سرعت چقدر است؟<br><b>هدف این انیمیشن:</b> از یک عدد دما (۱۲۵) برسیم به یک عدد سرعت. «بعدی» را بزن؛ هر بار یک تکه به تصویر اضافه می‌شود.'],
- [{aOp:1,aVals:1,hl:['A']},['A','sl'],'نمودار چپ <b>A = دمای نرمال</b> است. هر ستون یک دما؛ ارتفاعش = آن دما چقدر نرمال است. ۱۵۰ کاملاً نرمال (1)، ۱۲۵ نیمه (0.5).<br><b>«نیمه‌نرمال» یعنی چه؟</b> یعنی درجه نرمال بودنش 0.5 است: نه کاملاً نرمال، نه اصلاً غیرنرمال؛ وسط این دو.'],
- [{bOp:1,bVals:1,hl:['B']},['B'],'نمودار راست <b>B = سرعت متوسط</b> است. جواب آخر کار یک عدد روی همین محور سرعت است.'],
- [{hl:['B']},[],'<b>نقشه کلی، و چرا دو روش داریم.</b> دمای ۱۲۵ فقط <b>نیمه</b> نرمال است، پس قانون هم فقط نیمه درست است. یعنی جواب نباید خود B باشد، بلکه یک <b>B ضعیف‌شده</b>.<br>B را دو جور می‌شود ضعیف کرد (نمودار راست را ببین):<br>• <b style="color:var(--c1)">max-min = بریدن</b>: یک سقف در ارتفاع 0.5 می‌گذارد؛ هر ستون بلندتر، بریده می‌شود.<br>• <b style="color:var(--c3)">max-product = کوچک کردن</b>: همه ستون‌ها به یک نسبت کوتاه می‌شوند؛ شکل می‌ماند.<br>هر دو را قدم به قدم می‌سازیم و آخر کار کنار هم می‌گذاریم.','preview'],
- [{mat:1,aHead:1,hl:['mat']},['ai'],'<b>ساختن جدول قانون.</b> <b>چرا جدول؟</b> قانون باید برای <b>هر</b> دمایی جواب بدهد، نه فقط ۱۲۵. جدول برای هر جفت (دما، سرعت) می‌گوید قانون چقدر آن جفت را قبول دارد.<br>اول عددهای A پایین می‌آیند و کنار جدول می‌نشینند: <b>هر سطر = یک دما</b>.','flyA'],
- [{bHead:1,hl:['mat']},['bj0'],'عددهای B هم پایین می‌آیند و بالای جدول می‌نشینند: <b>هر ستون = یک سرعت</b>.','flyB'],
- [{mode:'one',row:1,col:2,cell:[1,2]},['m'],'هر خانه = <b>کوچک‌ترِ</b> عدد سطرش و عدد ستونش. اولین خانه: سطر ۱۲۵ (0.5) و ستون ۳۰ (1). حساب، بزرگ وسط تصویر می‌آید؛ بعد جوابش به خانه قاب‌دار می‌رود.'+F('min(0.5, 1) = 0.5'),'cell1'],
- [{mode:'zero'},[],'اول خانه‌های آسان: هر سطر یا ستونی که عددش <b>0</b> است. کوچک‌ترِ 0 و هر عددی همیشه 0 است:'+F('min(0, 0.6) = 0')+'پس همه این خانه‌ها یکجا 0 می‌شوند.','zeros'],
- [{mode:'min'},[],'حالا ۸ خانه باقی‌مانده، <b>یکی‌یکی</b>. برای هر خانه، قاب نشان می‌دهد عدد سطر و عدد ستون از کجا می‌آیند؛ حساب بزرگ وسط تصویر می‌آید؛ بعد جواب به خانه خودش می‌رود.','rest'],
- [{x0:1,aDim:1,hl:['A']},['x0'],'جدول قانون آماده است. حالا <b>ورودی</b>: دمای ۱۲۵ (پیکان صورتی روی نمودار A). این تنها عدد معمولی سؤال است.'],
- [{alA:1},['al'],'از بالای ستون ۱۲۵ به چپ برو تا محور: ارتفاعش 0.5 است. پس '+M('α = 0.5')+'؛ یعنی قانون فقط <b>نیمه‌روشن</b> است.'],
- [{aH:AP,aGhost:1,aDim:0,aTtl:'ورودی (A′)',hl:['A']},['ap'],'ورودی را به شکل یک ردیف می‌نویسیم: در خانه ۱۲۵ عدد α، بقیه صفر (اسلاید ۷۷). <b>چرا؟</b> جدول با یک ردیف پنج‌تایی کار می‌کند، نه با یک عدد تنها. خط‌چین = A اصلی.'+F('A′ = [0  0.5  0  0  0]')],
- [{aPr:1,dim:1,row:1},[],'عددهای A′ کنار جدول می‌روند (ستون صورتی). سطرهایی که a′ آن‌ها صفر است همیشه صفر می‌دهند، پس کم‌رنگ شدند. <b>فقط سطر ۱۲۵ مهم است.</b>','flyAp'],
- [{bp:[null,.5,null,null,null],col:1},['bj'],'<b>ستون ۲۰:</b> قاب از بالا به پایین می‌رود؛ هر خانه با a′ هم‌سطرش مقایسه می‌شود و کوچک‌تر برداشته می‌شود (وسط تصویر). آخر سر <b>بزرگ‌ترینِ</b> این‌ها به ردیف b′ می‌رود:'+F('min(0,0) min(0.5,0.5) min(0,0.6) min(0,0.5) min(0,0)\n= 0, 0.5, 0, 0, 0   →   max = 0.5'),'col'],
- [{bp:BPmm},[],'بقیه ستون‌ها، یکی‌یکی. سطرهای کم‌رنگ همیشه 0 می‌دهند، پس فقط سطر ۱۲۵ حساب می‌شود: min(0.5، عدد خانه).'+F('b′ = [0  0.5  0.5  0.5  0]'),'bpRest'],
- [{bH:BPmm,bCol:'var(--c1)',bGhost:1,alB:1,bTtl:'جواب max-min (B′)',hl:['B']},['Bp'],'این عددها به نمودار سرعت برمی‌گردند: B از ارتفاع α = 0.5 <b>بریده</b> شد. این جواب فازی، B′ است.','up'],
- [{ys:1},['ys'],'<b>یک عدد بساز.</b> <b>چرا؟</b> B′ می‌گوید «۲۰، ۳۰ و ۴۰ هر کدام تا حدی خوب‌اند»، ولی ماشین فقط با <b>یک</b> سرعت می‌تواند برود. میانگین وزنی: بالای کسر = هر سرعت × عضویتش، جمع؛ پایین کسر = جمع عضویت‌ها. حساب‌ها وسط تصویر می‌آیند:'+F('(20×0.5 + 30×0.5 + 40×0.5) / (0.5 + 0.5 + 0.5)\n= 45 / 1.5 = 30')+'<b>جواب max-min: سرعت ۳۰</b> (خط صورتی).','avg'],
- [{mode:'prod',dim:0,bp:null,bH:B,bCol:'var(--c2)',bGhost:0,alB:0,ys:0,bTtl:'سرعت متوسط (B)',hl:['mat']},['r'],'<b>حالا روش دوم: max-product.</b> یادت هست چرا؟ max-min قله را بُرید: ۲۰، ۳۰ و ۴۰ همه شدند 0.5، و دیگر معلوم نیست ۳۰ بهترین بود. (تمرین ۲ هم همین روش را می‌خواهد.)<br><b>فقط یک چیز عوض می‌شود:</b> هر جا min بود، ضرب (اسلاید ۸۰). صفرها صفر می‌مانند (× 0 = 0)؛ ۹ خانه وسط یکی‌یکی از نو حساب می‌شوند.','prod'],
- [{dim:1,row:1,bp:BPmp},['a2'],'ترکیب هم با ضرب: هر خانه سطر ۱۲۵ ضربدر a′ = 0.5، یکی‌یکی (بقیه سطرها × 0 = 0):'+F('0.5 × [0  0.3  0.5  0.3  0] = [0  0.15  0.25  0.15  0]'),'bpProd'],
- [{bH:BPmp,bCol:'var(--c3)',bGhost:1,bTtl:'جواب max-product (B′)',hl:['B']},[],'برمی‌گردند به نمودار: B <b>کوچک</b> شد ولی شکلش ماند (هر ستون × α² = 0.25). بریده نشد. <b>۳۰ هنوز بلندترین ستون است</b>؛ همان اطلاعاتی که max-min گم کرده بود.','up'],
- [{ys:1},[],'همان میانگین وزنی، حساب‌ها وسط تصویر:'+F('(20×0.15 + 30×0.25 + 40×0.15) / (0.15 + 0.25 + 0.15)\n= 16.5 / 0.55 = 30')+'<b>جواب max-product هم ۳۰.</b>','avg'],
- [{cmp:1,bH:BPmm,bCol:'var(--c1)',bGhost:1,alB:1,bVals:0,bTtl:'مقایسه دو جواب',hl:['B']},[],'<b>مقایسه.</b> <b style="color:var(--c1)">بنفش = max-min</b>، <b style="color:var(--c3)">نارنجی = max-product</b>، خط‌چین = B اصلی. هر دو یک حرف می‌زنند: «قانون نیمه درست است، پس جواب هم ضعیف‌تر است». فرق فقط در <b>طرز ضعیف کردن</b> است:<br>• max-min سقف می‌گذارد (هیچ ستونی بالاتر از α = 0.5 نمی‌رود) ← قله صاف شد.<br>• max-product همه را × 0.25 می‌کند ← قله سر جایش ماند؛ ۳۰ هنوز بهترین است.<br>اینجا y* هر دو ۳۰ شد چون B دو طرف یکسان دارد؛ با B نامتقارن (<a href="#alpha">بخش ۲</a>) جوابشان فرق می‌کند.'],
- [{},[],'<b>خلاصه:</b> '+M('x0 → α → A′ → جدول → B′ → y*')+'<br>هر دو روش همین مسیر را می‌روند؛ تنها فرق: max-min <b>min</b> می‌گیرد (می‌بُرد)، max-product <b>ضرب</b> می‌کند (کوچک می‌کند). همه نمادها در جدول زیر تصویر آمده‌اند.']
-];
-var S=[],prev=base;
-RAW.forEach(function(r){var s=Object.assign({},prev,{hl:[],row:-1,col:-1,cell:null},r[0]);prev=s;S.push({s:s,gl:r[1],cap:r[2],anim:r[3]})});
+// ------------------------------------------------------------------ slide 74 data (temperature → speed)
+const T = [100, 125, 150, 175, 200], TA = [0, 0.5, 1, 0.5, 0];   // Normal temperature (A)
+const V = [10, 20, 30, 40, 50], VB = [0, 0.6, 1, 0.6, 0];         // Medium velocity (B)
+const AP = [0, 0.5, 0, 0, 0];                                     // A′ for temperature 125 (slide 77)
+const SLIDE = { xs: T, as: TA, ys: V, bs: VB, ap: AP };
+const MM = { R: relation(TA, VB, 'min'), Bp: compose(AP, relation(TA, VB, 'min'), 'min') };
+const MP = { R: relation(TA, VB, 'prod'), Bp: compose(AP, relation(TA, VB, 'prod'), 'prod') };
+MM.d = wavg(V, MM.Bp); MP.d = wavg(V, MP.Bp);
 
-/* glossary table (review) */
-var glBody=document.getElementById('anGl');
-var hr=document.createElement('tr');hr.innerHTML='<th>نماد</th><th>یعنی</th><th>از کجا آمد</th>';glBody.appendChild(hr);
-Object.keys(GL).forEach(function(g){var tr=document.createElement('tr');tr.innerHTML='<td>'+GL[g][0]+'</td><td>'+GL[g][1]+'</td><td>'+GL[g][2]+'</td>';glBody.appendChild(tr)});
+// ------------------------------------------------------------------ Homework 2 (rainfall → humidity)
+const HX = [20, 40, 60, 80, 100], H = [0.2, 0.4, 0.6, 0.8, 1];
+const HY = [25, 50, 75, 100], HN = [0.1, 0.6, 0.8, 1];
+const HAP = [0, 0, 0, 0.8, 0];
+const HW = { xs: HX, as: H, ys: HY, bs: HN, ap: HAP };
+HW.R = relation(H, HN, 'prod'); HW.Bp = compose(HAP, HW.R, 'prod'); HW.d = wavg(HY, HW.Bp);
+const HW_MINMAT = compose(HAP, relation(H, HN, 'min'), 'prod');   // matrix with min, composition with ×
+const HW_ONE = compose([0, 0, 0, 1, 0], HW.R, 'prod');            // input written as 1
 
-/* ---- drawing the final state of a step ---- */
-var curA=base.aH.slice(),curB=base.bH.slice(),raf=null;
-function setBars(C,h){C.bars.forEach(function(r,i){r.setAttribute('y',vy(h[i]));r.setAttribute('height',Math.max(0,h[i]*H))});C.vals.forEach(function(t,i){t.setAttribute('y',vy(h[i])-5)})}
-function tween(tA,tB){
-  if(raf)cancelAnimationFrame(raf);
-  var fA=curA.slice(),fB=curB.slice(),t0=null,D=reduce?0:800;
-  function fr(now){if(t0===null)t0=now;var p=D?Math.min(1,(now-t0)/D):1,e=ease(p);
-    curA=fA.map(function(v,i){return v+(tA[i]-v)*e});curB=fB.map(function(v,i){return v+(tB[i]-v)*e});
-    setBars(CA,curA);setBars(CB,curB);raf=p<1?requestAnimationFrame(fr):null}
-  raf=requestAnimationFrame(fr);
+// ------------------------------------------------------------------ the matrix board
+// Rows = x points (value, a_i, later a′_i), columns = y points (value, b_j), answer row B′ at the bottom.
+function MF(D) {
+  const n = D.xs.length, p = D.ys.length, step = p === 5 ? 100 : 120;
+  const CX = D.ys.map((_, j) => 340 + j * step);
+  const RY = D.xs.map((_, i) => 172 + i * 55);
+  return { CX, RY, XV: 105, XA: 185, XP: 262, HY: 88, HB: 120, BY: 462, CY: 525, L: 298, R: CX[p - 1] + 50, top: RY[0] - 36, bot: RY[n - 1] + 18 };
 }
-function mark(i,j){cellHL.setAttribute('x',mx(j)-29);cellHL.setAttribute('y',my(i)-13);op(cellHL,1);
-  rowBand.setAttribute('y',my(i)-13);op(rowBand,1);colBand.setAttribute('x',mx(j)-29);op(colBand,1)}
-function bands(s){
-  if(s.cell){cellHL.setAttribute('x',mx(s.cell[1])-29);cellHL.setAttribute('y',my(s.cell[0])-13);op(cellHL,1)}else op(cellHL,0);
-  if(s.row>=0){rowBand.setAttribute('y',my(s.row)-13);op(rowBand,1)}else op(rowBand,0);
-  if(s.col>=0){colBand.setAttribute('x',mx(s.col)-29);op(colBand,1)}else op(colBand,0);
+function bracket(b, id, x, top, bot, side) {
+  const t = side === 'left' ? 12 : -12;
+  return b.wire(id, [[x + t, top], [x, top], [x, bot], [x + t, bot]], { color: 'soft', dur: 250 });
 }
-function snap(s){
-  op(CA.G,s.aOp);op(CB.G,s.bOp);CA.ttl.textContent=s.aTtl;CB.ttl.textContent=s.bTtl;
-  CA.vals.forEach(function(t,i){t.textContent=f(s.aH[i]);op(t,s.aVals)});
-  CB.vals.forEach(function(t,i){t.textContent=f(s.bH[i]);op(t,s.bVals)});
-  CA.bars.forEach(function(r,i){r.style.fill='var(--c2)';op(r,s.aDim&&i!==1?.3:1)});
-  CB.bars.forEach(function(r){r.style.fill=s.bCol;r.setAttribute('width',s.cmp?14:30)});
-  CB.bars2.forEach(function(r){op(r,s.cmp)});
-  CA.ghosts.forEach(function(r){op(r,s.aGhost)});CB.ghosts.forEach(function(r){op(r,s.bGhost)});
-  op(CA.frame,s.hl.indexOf('A')>=0?1:0);op(CB.frame,s.hl.indexOf('B')>=0?1:0);
-  op(x0g,s.x0);op(alAg,s.alA);op(alBg,s.alB);op(ysg,s.ys);
-  op(ph,s.mat?0:1);op(MG,s.mat);op(mFrame,s.hl.indexOf('mat')>=0?1:0);
-  aHeadT.forEach(function(t){op(t,s.aHead)});bHeadT.forEach(function(t){op(t,s.bHead)});
-  var Mx=s.mode==='prod'?MP:MM;
-  cells.forEach(function(rw,i){rw.forEach(function(t,j){t.classList.remove('flash');
-    var on=s.mode==='min'||s.mode==='prod'||(i===1&&j===2&&(s.mode==='one'||s.mode==='zero'))||(s.mode==='zero'&&isZero(i,j));
-    t.textContent=on?f(Mx[i][j]):''})});
-  mMode.textContent=s.mode==='prod'?'max-product':'max-min';
-  mForm.textContent=s.mode==='prod'?'r = a × b':'m = min(a, b)';
-  op(apHead,s.aPr);apT.forEach(function(t){op(t,s.aPr)});
-  rows.forEach(function(R,i){op(R,s.dim&&i!==1?.28:1)});
-  op(bpLab,s.bp?1:0);
-  bpT.forEach(function(t,j){t.classList.remove('flash');t.textContent=s.bp&&s.bp[j]!=null?f(s.bp[j]):'';t.style.fill=s.mode==='prod'?'var(--c3)':'var(--c1)'});
-  bands(s);
-  tween(s.aH,s.bH);
+// op: 'min' | 'prod'. diff: colour the cells where × gives a different number than min.
+async function frame(b, D, op, o = {}) {
+  const L = MF(D), R = relation(D.as, D.bs, op), Rmin = relation(D.as, D.bs, 'min');
+  await all([
+    b.write('hx', L.XV, L.HB, 'x', { size: 22, color: 'soft' }),
+    b.write('ha', L.XA, L.HB, 'a_i', { size: 22, color: 'purple' }),
+    b.write('hy', L.R + 42, L.HY, 'y', { size: 22, color: 'soft' }),
+    b.write('hb', L.R + 42, L.HB, 'b_j', { size: 22, color: 'orange' }),
+    bracket(b, 'mbl', L.L, L.top, L.bot, 'left'), bracket(b, 'mbr', L.R, L.top, L.bot, 'right'),
+  ]);
+  await all(D.ys.map((y, j) => all([
+    b.write(`yv-${j}`, L.CX[j], L.HY, String(y), { size: 24, dur: 150 }),
+    b.write(`yb-${j}`, L.CX[j], L.HB, f(D.bs[j]), { size: 22, color: 'orange', dur: 150 }),
+  ])));
+  for (const [i, x] of D.xs.entries()) {
+    await all([
+      b.write(`xv-${i}`, L.XV, L.RY[i], String(x), { size: 24, dur: 150 }),
+      b.write(`xa-${i}`, L.XA, L.RY[i], f(D.as[i]), { size: 24, color: 'purple', dur: 150 }),
+      ...R[i].map((v, j) => b.write(`r-${i}-${j}`, L.CX[j], L.RY[i], f(v), {
+        size: 24, dur: o.slow ? 300 : 150,
+        color: o.diff && v !== Rmin[i][j] ? 'orange' : 'ink', bold: o.diff && v !== Rmin[i][j],
+      })),
+    ]);
+  }
+  await all([
+    b.write('mode', 890, 205, op === 'min' ? 'max-min' : 'max-product', { size: 22, color: op === 'min' ? 'purple' : 'orange', bold: true }),
+    b.write('modef', 890, 240, op === 'min' ? 'm = min(a, b)' : 'r = a × b', { size: 20, color: 'soft' }),
+  ]);
+}
+// A′ beside the matrix; rows with a′ = 0 are dimmed (they can only give 0).
+async function inputColumn(b, D) {
+  const L = MF(D);
+  await b.write('hp', L.XP, L.HB, 'a′_i', { size: 22, color: 'orange', bold: true });
+  for (const [i, a] of D.ap.entries()) await b.write(`xp-${i}`, L.XP, L.RY[i], f(a), { size: 26, color: 'orange', bold: a > 0, dur: 200 });
+  await b.dim(D.ap.flatMap((a, i) => (a > 0 ? [] : [`r-${i}-*`, `xv-${i}`, `xa-${i}`, `xp-${i}`])), 0.25);
+  await b.write('bpn', L.XP, L.BY, 'B′ =', { size: 28, bold: true });
+  await all(D.ys.map((_, j) => b.write(`bp-${j}`, L.CX[j], L.BY, '?', { size: 26, color: 'soft', dur: 150 })));
+}
+// Column j of B′ = A′ ∘ R: pair a′_i with r_ij (min or ×), then take the max.
+async function column(b, D, op, j) {
+  const L = MF(D), R = relation(D.as, D.bs, op);
+  const terms = D.ap.map((a, i) => OPS[op](a, R[i][j]));
+  const best = Math.max(...terms);
+  const show = D.ap.map((a, i) => (op === 'min' ? `min(${f(a)},${f(R[i][j])})` : `${f(a)}×${f(R[i][j])}`));
+  await b.box('cb', L.CX[j] - 40, L.top + 2, 80, L.bot - L.top - 4, { color: 'orange', dur: 400 });
+  await b.write('calc', 500, L.CY, `b′_${j + 1} = max{${show.join(', ')}} = ${f(best)}`, { size: 20, dur: 500 });
+  await b.write(`bp-${j}`, L.CX[j], L.BY, f(best), { size: 26, color: 'green', bold: true, dur: 250 });
 }
 
-/* ---- the motions inside a step ---- */
-var T=[],FD=1100,GAP=450;
-function later(ms,fn){T.push(setTimeout(fn,ms))}
-function cancelAnim(){T.forEach(clearTimeout);T=[];while(FL.firstChild)FL.removeChild(FL.firstChild);op(BUB,0)}
-/* a number flies from (x1,y1) to (x2,y2); fs0 = start size for numbers leaving the big calculation box */
-function fly(txt,x1,y1,x2,y2,delay,color,done,fs0){later(delay,function(){
-  var t=el(FL,'text',{x:x1,y:y1,'text-anchor':'middle','class':'mono fly',style:'fill:'+color},txt),t0=null;
-  function fr(now){if(!t.parentNode)return;if(t0===null)t0=now;var p=Math.min(1,(now-t0)/FD),e=ease(p);
-    t.setAttribute('x',x1+(x2-x1)*e);t.setAttribute('y',y1+(y2-y1)*e-Math.sin(p*Math.PI)*28);
-    if(fs0)t.style.fontSize=(fs0+(15-fs0)*e)+'px';
-    if(p<1)requestAnimationFrame(fr);else{FL.removeChild(t);if(done)done()}}
-  requestAnimationFrame(fr)})}
-/* big calculation box in the middle of the picture */
-function bubbleShow(txt){bubT.textContent=txt;var w=bubT.getBBox().width+40;
-  bubR.setAttribute('x',BX-w/2);bubR.setAttribute('y',BYC-24);bubR.setAttribute('width',w);bubR.setAttribute('height',46);op(BUB,1)}
-function bubble(txt,at,dur){later(at,function(){bubbleShow(txt)});later(at+dur,function(){op(BUB,0)})}
-/* show "calc" big, then fly "res" from the box to (tx,ty) */
-function calc(txt,res,at,tx,ty,color,done){bubble(txt,at,1300);fly(res,BX,BYC+9,tx,ty,at+1300,color,done,26)}
-var PER=2300; /* time per calculated cell */
-function putCell(i,j,v){var t=cells[i][j];t.textContent=f(v);flash(t)}
-function isZero(i,j){return A[i]===0||B[j]===0}
-var MID=[[1,1],[1,2],[1,3],[2,1],[2,2],[2,3],[3,1],[3,2],[3,3]];
-var ANIM={
- preview:function(k,s){CB.vals.forEach(function(t){op(t,0)});
-   later(500,function(){bubbleShow('max-min');CB.bars.forEach(function(r){r.style.fill='var(--c1)'});op(alBg,1);CB.ghosts.forEach(function(r){op(r,1)});tween(s.aH,BPmm)});
-   later(3300,function(){op(BUB,0);op(alBg,0);CB.bars.forEach(function(r){r.style.fill='var(--c2)'});tween(s.aH,B)});
-   later(4600,function(){bubbleShow('max-product');CB.bars.forEach(function(r){r.style.fill='var(--c3)'});tween(s.aH,BPmp)});
-   later(7400,function(){op(BUB,0);CB.ghosts.forEach(function(r){op(r,0)});CB.bars.forEach(function(r){r.style.fill=s.bCol});tween(s.aH,s.bH)});
-   later(8300,function(){CB.vals.forEach(function(t){op(t,s.bVals)})})},
- flyA:function(){aHeadT.forEach(function(t,i){op(t,0);fly(f(A[i]),ax(i),vy(A[i])-5,222,my(i)+4,300+i*GAP,'var(--c2)',function(){op(t,1);flash(t)})})},
- flyB:function(){bHeadT.forEach(function(t,j){op(t,0);fly(f(B[j]),bx(j),vy(B[j])-5,mx(j),232,300+j*GAP,'var(--c2)',function(){op(t,1);flash(t)})})},
- cell1:function(k,s){cells[1][2].textContent='';
-   calc('min(0.5, 1) = 0.5','0.5',400,mx(2),my(1)+5,'var(--text)',function(){putCell(1,2,.5)})},
- zeros:function(k,s){var Z=[];for(var i=0;i<5;i++)for(var j=0;j<5;j++)if(isZero(i,j)){cells[i][j].textContent='';if(!(i===0&&j===1))Z.push([i,j])}
-   mark(0,1);calc('min(0, 0.6) = 0','0',400,mx(1),my(0)+5,'var(--text)',function(){putCell(0,1,0)});
-   var st=400+1300+FD+300;
-   Z.forEach(function(c,n){later(st+n*110,function(){mark(c[0],c[1]);putCell(c[0],c[1],0)})});
-   later(st+Z.length*110+300,function(){bands(s)})},
- rest:function(k,s){var L=MID.filter(function(c){return !(c[0]===1&&c[1]===2)});
-   L.forEach(function(c){cells[c[0]][c[1]].textContent=''});
-   L.forEach(function(c,n){var i=c[0],j=c[1],at=300+n*PER;
-     later(at,function(){mark(i,j)});
-     calc('min('+f(A[i])+', '+f(B[j])+') = '+f(MM[i][j]),f(MM[i][j]),at,mx(j),my(i)+5,'var(--text)',function(){putCell(i,j,MM[i][j])})});
-   later(300+L.length*PER,function(){bands(s)})},
- flyAp:function(){rows.forEach(function(R){op(R,1)});apT.forEach(function(t,i){op(t,0);fly(f(AP[i]),ax(i),vy(AP[i])-5,274,my(i)+4,300+i*GAP,'var(--c4)',function(){op(t,1);flash(t)})});
-   later(300+5*GAP+FD+400,function(){rows.forEach(function(R,i){op(R,i===1?1:.28)})})},
- col:function(k,s){bpT[1].textContent='';op(rowBand,0);
-   for(var i=0;i<5;i++)(function(i){var at=300+i*1500;
-     later(at,function(){cellHL.setAttribute('x',mx(1)-29);cellHL.setAttribute('y',my(i)-13);op(cellHL,1)});
-     bubble('min('+f(AP[i])+', '+f(MM[i][1])+') = '+f(Math.min(AP[i],MM[i][1])),at,1200)})(i);
-   var at=300+5*1500;later(at,function(){op(cellHL,0)});
-   bubble('max{0, 0.5, 0, 0, 0} = 0.5',at,1500);
-   fly('0.5',BX,BYC+9,mx(1),my(5)+5,at+1500,'var(--c1)',function(){putBp(1,.5)},26)},
- bpRest:function(k,s){[0,2,3,4].forEach(function(j,n){bpT[j].textContent='';var at=300+n*PER;
-   later(at,function(){mark(1,j)});
-   calc('min(0.5, '+f(MM[1][j])+') = '+f(BPmm[j]),f(BPmm[j]),at,mx(j),my(5)+5,'var(--c1)',function(){putBp(j,BPmm[j])})});
-   later(300+4*PER,function(){bands(s)})},
- up:function(k,s){var ps=S[k-1].s;if(raf)cancelAnimationFrame(raf);curB=ps.bH.slice();setBars(CB,curB);
-   CB.bars.forEach(function(r){r.style.fill=ps.bCol});CB.vals.forEach(function(t){op(t,0)});op(alBg,0);
-   s.bH.forEach(function(v,j){fly(f(v),mx(j),my(5)+5,bx(j),vy(v)-5,300+j*GAP,s.bCol,j<4?null:function(){
-     CB.bars.forEach(function(r){r.style.fill=s.bCol});tween(s.aH,s.bH);CB.vals.forEach(function(t){op(t,1)});op(alBg,s.alB)})})},
- avg:function(k,s){var P=s.mode==='prod',c=P?'var(--c3)':'var(--c1)';op(ysg,0);
-   var L=P?['20×0.15 + 30×0.25 + 40×0.15 = 16.5','0.15 + 0.25 + 0.15 = 0.55','16.5 / 0.55 = 30']:['20×0.5 + 30×0.5 + 40×0.5 = 45','0.5 + 0.5 + 0.5 = 1.5','45 / 1.5 = 30'];
-   bubble(L[0],300,2300);bubble(L[1],2900,2000);bubble(L[2],5200,1500);
-   fly('30',BX,BYC+9,ysx,46,6700,'var(--c4)',function(){op(ysg,1)},26)},
- prod:function(k,s){MID.forEach(function(c){cells[c[0]][c[1]].textContent=f(MM[c[0]][c[1]])});
-   MID.forEach(function(c,n){var i=c[0],j=c[1],at=300+n*PER;
-     later(at,function(){mark(i,j)});
-     calc(f(A[i])+' × '+f(B[j])+' = '+f(MP[i][j]),f(MP[i][j]),at,mx(j),my(i)+5,'var(--text)',function(){putCell(i,j,MP[i][j])})});
-   later(300+MID.length*PER,function(){bands(s)})},
- bpProd:function(k,s){bpT.forEach(function(t){t.textContent=''});op(colBand,0);
-   BPmp.forEach(function(v,j){var at=300+j*PER;later(at,function(){mark(1,j)});
-     calc('0.5 × '+f(MP[1][j])+' = '+f(v),f(v),at,mx(j),my(5)+5,'var(--c3)',function(){putBp(j,v)})});
-   later(300+5*PER,function(){bands(s)})}
-};
-function putBp(j,v){var t=bpT[j];t.textContent=f(v);flash(t)}
-
-/* ---- controls ---- */
-var k=0;
-var cap=document.getElementById('anCap'),cnt=document.getElementById('anCnt'),bar=document.getElementById('anBar');
-var bPrev=document.getElementById('anPrev'),bNext=document.getElementById('anNext'),bAgain=document.getElementById('anAgain');
-function show(n,animate){
-  cancelAnim();k=n;var st=S[k];snap(st.s);
-  if(animate&&st.anim&&!reduce)ANIM[st.anim](k,st.s);
-  cap.innerHTML='<b style="color:var(--accent)">قدم '+(k+1)+'.</b> '+st.cap+st.gl.map(function(g){
-    return '<div class="an-new"><b>نماد تازه:</b> '+GL[g][0]+' — '+GL[g][1]+' <span class="an-from">· از کجا آمد: '+GL[g][2]+'</span></div>'}).join('');
-  cnt.textContent=(k+1)+' از '+S.length;bar.style.width=((k+1)/S.length*100)+'%';
-  bPrev.disabled=k===0;bAgain.disabled=!st.anim||reduce;bNext.textContent=k===S.length-1?'از اول ↺':'بعدی ←';
+// ------------------------------------------------------------------ bar graphs
+// Bars are drawn as thin boxes from the x axis up to μ.
+async function bars(b, g, id, xs, ms, { color = 'blue', w = 16, labels = true, dur = 300 } = {}) {
+  for (const [k, x] of xs.entries()) {
+    const m = ms[k];
+    if (m > 0) await b.box(`${id}-${k}`, g.X(x) - w / 2, g.Y(m), w, g.Y(0) - g.Y(m), { color, r: 3, dur });
+    if (labels) await b.write(`${id}v-${k}`, g.X(x), g.Y(m) - 8, f(m), { size: 18, color, dur: 120 });
+  }
 }
-function keepInView(){var r=box.getBoundingClientRect(),sb=svg.getBoundingClientRect();
-  if(r.top<-8||(sb.bottom>innerHeight&&r.top>8))box.scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'})}
-bNext.addEventListener('click',function(){if(k===S.length-1)show(0,false);else show(k+1,true);keepInView()});
-bAgain.addEventListener('click',function(){if(S[k].anim)show(k,true)});
-bPrev.addEventListener('click',function(){if(k>0)show(k-1,false);keepInView()});
-box.addEventListener('keydown',function(e){if(e.key==='ArrowLeft'&&k<S.length-1){show(k+1,true);e.preventDefault()}else if(e.key==='ArrowRight'&&k>0){show(k-1,false);e.preventDefault()}});
-show(0,false);
-})();
+// The crisp answer: an arrow under the axis pointing at y*.
+async function ystar(b, g, id, y, o = {}) {
+  await b.arrow(`${id}-a`, g.X(y), g.Y(0) + 66, g.X(y), g.Y(0) + 34, { color: 'red', head: 10 });
+  await b.write(`${id}-t`, g.X(y), g.Y(0) + 94, `y* = ${f(+y.toFixed(o.digits ?? 4))}`, { size: 24, color: 'red', bold: true });
+}
+
+// ------------------------------------------------------------------ quiz data
+const QA = [0.2, 0.6, 1, 0.4], QB = [1, 0.6, 0.3, 0.1], QY = [10, 20, 30, 40];
+const QAL = QA[1]; // x = 2
+const Q1 = QB.map(v => Math.min(QAL, v)), Q1d = wavg(QY, Q1);
+const Q3row = QB.map(v => QAL * v), Q3 = Q3row.map(v => QAL * v), Q3d = wavg(QY, Q3);
+const Q5y = [2, 4, 6, 8], Q5m = [0.3, 0.6, 0.9, 0.2], Q5d = wavg(Q5y, Q5m);
+
+function quizHead(b, n) {
+  return b.write('q-n', 500, 45, `سؤال ${n} از 6`, { size: 22, color: 'soft', fa: true });
+}
+function quizBoard(n, question, o = { size: 44 }) {
+  return async b => {
+    await b.clear();
+    await quizHead(b, n);
+    await b.write('q-q', 500, 130, question, o);
+  };
+}
+const joinNum = (ys, ms, sep = '·') => ys.map((y, k) => `${y}${sep}${f(ms[k])}`).join(' + ');
+
+Teacher.start({
+  id: 'L08',
+  number: 8,
+  title: 'استنتاج max-product و غیرفازی‌سازی',
+  chapter: 'بخش 2 · عملیات و استنتاج فازی',
+  slides: '73–80',
+  intro: 'از یک عدد ورودی به یک عدد خروجی: A′، ترکیب max-min و max-product، و میانگین وزنی — به‌همراه حل تمرین 2.',
+  next: { href: '0009-triangle-trapezoid.html', title: 'توابع عضویت مثلثی و ذوزنقه‌ای' },
+  steps: [
+    // ---------------------------------------------------------- 1. the road map
+    {
+      say: 'سلام! درس قبل قانون «اگر دما نرمال باشد، سرعت متوسط است» را به ماتریس μ_AB تبدیل کردیم. امروز سؤال اصلی اسلاید 74 را جواب می‌دهیم: اگر دما 125 باشد، سرعت چقدر است؟ مسیر کار پنج ایستگاه دارد: عدد ورودی x_0، درجه‌ی عضویتش α، بردار A′، مجموعه‌ی خروجی B′، و در آخر یک عدد قطعی y*. ایستگاه آخر اسمش *defuzzification* یا غیرفازی‌سازی است: انتخاب یک عدد قطعی بر اساس مجموعه‌ی فازی خروجی (اسلاید 73).',
+      term: ['Defuzzification', 'غیرفازی‌سازی'],
+      draw: async b => {
+        await b.write('h', 500, 75, 'از یک دما تا یک سرعت', { size: 40, color: 'blue', bold: true, fa: true });
+        const X = [130, 300, 470, 640, 830];
+        const S = ['x_0 = 125', 'α', 'A′', 'B′', 'y*'];
+        const F = ['ورودی قطعی', 'درجه‌ی عضویت', 'ورودی فازی', 'خروجی فازی', 'عدد قطعی'];
+        for (let k = 0; k < 5; k++) {
+          await all([
+            b.box(`bx${k}`, X[k] - 70, 195, 140, 75, { color: k === 4 ? 'green' : 'blue', dur: 350 }),
+            b.write(`s${k}`, X[k], 244, S[k], { size: k ? 34 : 26, color: k === 4 ? 'green' : 'ink', bold: true }),
+          ]);
+          await b.write(`f${k}`, X[k], 305, F[k], { size: 18, color: 'soft', fa: true, dur: 200 });
+          if (k < 4) await b.arrow(`ar${k}`, X[k] + 72, 232, X[k + 1] - 72, 232, { color: 'soft', head: 10, dur: 250 });
+        }
+        await b.write('mu', 555, 185, '∘ μ_{AB}', { size: 22, color: 'orange' });
+        await b.line('br', 650, 345, 900, 345, { color: 'green' });
+        await b.write('df', 775, 395, 'غیرفازی‌سازی', { size: 30, color: 'green', bold: true, fa: true });
+        await b.write('dfe', 775, 440, 'defuzzification', { size: 28, color: 'green' });
+        await b.write('dd', 500, 515, 'انتخاب یک عدد قطعی بر اساس مجموعه‌ی فازی خروجی', { size: 22, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 2. the data as bar graphs
+    {
+      say: 'داده‌های اسلاید 74 را به شکل نمودار ببینیم. چپ: A = دمای نرمال؛ هر میله یک دماست و ارتفاعش یعنی آن دما چقدر نرمال است — 150 کاملاً نرمال است و 125 نیمه. راست: B = سرعت متوسط. جواب آخر کار یک عدد روی همین محور سرعت خواهد بود.',
+      draw: async b => {
+        await b.clear();
+        const gA = Graph({ x: 100, y: 120, w: 330, h: 200, from: 90, to: 210 });
+        const gB = Graph({ x: 570, y: 120, w: 330, h: 200, from: 0, to: 60 });
+        await all([
+          b.write('tA', 265, 62, 'A = دمای نرمال', { size: 26, color: 'purple', fa: true }),
+          b.write('tB', 735, 62, 'B = سرعت متوسط', { size: 26, color: 'orange', fa: true }),
+        ]);
+        await all([gA.axes(b, 'ga', { ticks: T, label: 'x' }), gB.axes(b, 'gb', { ticks: V, label: 'y' })]);
+        await bars(b, gA, 'ab', T, TA, { color: 'purple' });
+        await bars(b, gB, 'bb', V, VB, { color: 'orange' });
+      },
+    },
+    // ---------------------------------------------------------- 3. α and A′
+    {
+      say: 'ورودی دمای 125 است. از بالای میله‌ی 125 به محور μ برو: ارتفاعش 0.5 است. اسمش را α می‌گذاریم: α = μ_A(125) = 0.5 — یعنی قانون فقط «نیمه روشن» است. حالا دستور اسلاید 77: مقدار عددی داده‌شده را در جای خودش بگذار و بقیه را صفر. پس A′ = {0/100,0.5/125,0/150,0/175,0/200} = [0 0.5 0 0 0]. چرا یک بردار؟ چون ماتریس با یک ردیف پنج‌تایی کار می‌کند، نه با یک عدد تنها.',
+      term: ['Crisp input', 'ورودی قطعی'],
+      draw: async b => {
+        const gA = Graph({ x: 100, y: 120, w: 330, h: 200, from: 90, to: 210 });
+        await b.recolor('ga-t125', 'red');
+        await gA.guide(b, 'g125', 125, 0.5, { color: 'red' });
+        await b.write('al', 265, 400, 'α = μ_A(125) = 0.5', { size: 28, color: 'red', bold: true });
+        await b.dim(T.flatMap((t, k) => (t === 125 ? [] : [...(TA[k] > 0 ? [`ab-${k}`] : []), `abv-${k}`])), 0.25);
+        await b.write('ap1', 500, 470, 'A′ = {0/100, 0.5/125, 0/150, 0/175, 0/200}', { size: 26, color: 'orange' });
+        await b.write('ap2', 500, 520, '= [0  0.5  0  0  0]', { size: 30, color: 'orange', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 4. A′ beside the rule matrix
+    {
+      say: 'حالا B′ = A′ ∘ μ_AB (اسلاید 77). ماتریس قانون را از درس قبل می‌آوریم و A′ را ستون نارنجی کنارش می‌نویسیم. نکته‌ی مهم: هر سطری که a′ آن صفر است، با min همیشه صفر می‌دهد؛ پس آن سطرها هیچ اثری ندارند و کم‌رنگشان می‌کنیم. فقط سطر 125 مهم است.',
+      draw: async b => {
+        await b.clear();
+        await frame(b, SLIDE, 'min');
+        await inputColumn(b, SLIDE);
+      },
+    },
+    // ---------------------------------------------------------- 5. b′1, b′2
+    {
+      say: 'ستون به ستون جلو می‌رویم، مثل درس قبل. ستون 10: همه‌ی minها صفرند، چون min(0.5,0) = 0؛ پس b′_1 = 0. ستون 20: تنها min غیرصفر min(0.5,0.5) = 0.5 است؛ پس b′_2 = 0.5.',
+      draw: async b => {
+        await column(b, SLIDE, 'min', 0);
+        await column(b, SLIDE, 'min', 1);
+      },
+    },
+    // ---------------------------------------------------------- 6. b′3..b′5 + slide 78 typo
+    {
+      say: 'ستون‌های 30 و 40 هم همین‌طور: min(0.5,0.5) = 0.5. ستون 50 تماماً صفر است، پس b′_5 = 0. غلط تایپی اسلاید 78: در خط b5 نوشته min(0.5,0.5)، ولی ستون پنجم ماتریس صفر است، پس درستش min(0.5,0) = 0 است. جواب نهایی اسلاید، یعنی 0، درست است. نتیجه: B′ = [0 0.5 0.5 0.5 0].',
+      draw: async b => {
+        for (const j of [2, 3, 4]) await column(b, SLIDE, 'min', j);
+        await all([
+          b.write('ty0', 885, 310, 'اسلاید 78:', { size: 18, color: 'red', fa: true }),
+          b.write('ty1', 885, 345, 'min(0.5, 0.5) ✗', { size: 20, color: 'red' }),
+          b.write('ty2', 885, 380, 'min(0.5, 0) = 0', { size: 20, color: 'green' }),
+        ]);
+        await b.erase('cb');
+      },
+    },
+    // ---------------------------------------------------------- 7. B′ is B clipped at α
+    {
+      say: 'این عددها را روی نمودار سرعت برگردانیم: B′ = {0/10,0.5/20,0.5/30,0.5/40,0/50} (اسلاید 79). میله‌های خاکستری B اصلی‌اند و میله‌های سبز B′. می‌بینی؟ B از ارتفاع α = 0.5 *بریده* شده. میان‌بر برای چک کردن: در max-min با یک ورودی قطعی، b′_j = min(α,b_j). ولی در امتحان ماتریس و مراحل را کامل بنویس.',
+      draw: async b => {
+        await b.clear();
+        const g = Graph({ x: 110, y: 120, w: 340, h: 210, from: 0, to: 60 });
+        await g.axes(b, 'g', { ticks: V, label: 'y' });
+        await bars(b, g, 'B', V, VB, { color: 'soft', w: 30, labels: false });
+        await b.line('alpha', g.X(0), g.Y(0.5), g.X(60), g.Y(0.5), { color: 'purple', width: 2 });
+        await b.write('alphal', g.X(60) + 12, g.Y(0.5) + 6, 'α', { size: 24, color: 'purple', anchor: 'start' });
+        await bars(b, g, 'Bp', V, MM.Bp, { color: 'green', w: 14 });
+        await b.write('set', 735, 130, `B′ = {${MM.Bp.map((m, k) => `${f(m)}/${V[k]}`).join(', ')}}`, { size: 21, color: 'green' });
+        await b.write('sc', 735, 185, 'b′_j = min(α , b_j)', { size: 28, color: 'purple' });
+      },
+    },
+    // ---------------------------------------------------------- 8. the weighted-average formula
+    {
+      say: 'B′ یک مجموعه‌ی فازی است: می‌گوید 20، 30 و 40 هر کدام تا حدی خوب‌اند. ولی ماشین فقط با *یک* سرعت می‌تواند برود. فرمول اسلایدهای 73 و 79 یک weighted average یا *میانگین* وزنی است: بالای کسر، هر نقطه ضرب در عضویتش، همه جمع؛ پایین کسر، جمع عضویت‌ها. درست مثل معدل: هر نمره در تعداد واحدش ضرب می‌شود، و نقطه‌ای که عضویت بیشتری دارد جواب را بیشتر به سمت خودش می‌کشد. اسلاید حرف b را هم برای نقطه و هم برای عضویت به کار برده؛ گیج نشو: b_j اینجا خود سرعت است.',
+      term: ['Weighted average', 'میانگین وزنی'],
+      draw: async b => {
+        await b.write('fl1', 760, 240, 'هر نقطه × عضویتش، جمع', { size: 18, color: 'soft', fa: true });
+        await b.write('B*', 585, 312, 'B* =', { size: 32, bold: true });
+        await b.write('num', 775, 290, 'Σ b_j · μ_{B′}(b_j)', { size: 26 });
+        await b.line('bar', 650, 302, 900, 302);
+        await b.write('den', 775, 340, 'Σ μ_{B′}(b_j)', { size: 26 });
+        await b.write('fl2', 760, 372, 'جمع عضویت‌ها', { size: 18, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 9. B* = 30
+    {
+      say: 'حسابش کنیم. بالا: 0×10 + 0.5×20 + 0.5×30 + 0.5×40 + 0×50 = 10 + 15 + 20 = 45. پایین: 0 + 0.5 + 0.5 + 0.5 + 0 = 1.5. پس B*_125 = 45 / 1.5 = 30. جواب: سرعت 30. چون B′ دور 30 متقارن است، میانگین وزنی درست وسط افتاد.',
+      draw: async b => {
+        const g = Graph({ x: 110, y: 120, w: 340, h: 210, from: 0, to: 60 });
+        await b.write('n1', 735, 410, MM.Bp.map((m, k) => `${f(m)}×${V[k]}`).join(' + '), { size: 20 });
+        await b.write('n2', 735, 442, `= 10 + 15 + 20 = ${f(MM.d.num)}`, { size: 22, color: 'blue' });
+        await b.write('d1', 735, 478, `${MM.Bp.map(f).join(' + ')} = ${f(MM.d.den)}`, { size: 22, color: 'blue' });
+        await b.write('res', 735, 528, `B* = ${f(MM.d.num)} / ${f(MM.d.den)} = ${f(MM.d.y)}`, { size: 30, color: 'green', bold: true });
+        await ystar(b, g, 'ys', MM.d.y);
+      },
+    },
+    // ---------------------------------------------------------- 10. max-product: min → ×
+    {
+      say: 'حالا روش دوم: *Max-product* inference. اسلاید 80 فقط یک جمله دارد: همه‌چیز مثل روش قبل است، فقط «به جای عملگر min از عملگر ضرب استفاده می‌شود». اگر کلمه‌به‌کلمه بخوانیم، *هر* دو جایی که min داشتیم ضرب می‌شود: ساختن ماتریس r_ij = a_i · b_j، و ترکیب b′_j = max(a′_i · r_ij). max سر جایش می‌ماند.',
+      term: ['Max-product inference', 'استنتاج max-product'],
+      draw: async b => {
+        await b.clear();
+        await all([
+          b.write('hl', 260, 80, 'max-min', { size: 36, color: 'purple', bold: true }),
+          b.write('hr', 740, 80, 'max-product', { size: 36, color: 'orange', bold: true }),
+        ]);
+        await b.line('div', 500, 110, 500, 340, { color: 'soft', width: 2 });
+        await b.write('k1', 500, 150, 'ساختن ماتریس', { size: 20, color: 'soft', fa: true });
+        await all([
+          b.write('l1', 260, 200, 'm_{ij} = min(a_i , b_j)', { size: 30 }),
+          b.write('r1', 740, 200, 'r_{ij} = a_i · b_j', { size: 30, color: 'orange' }),
+        ]);
+        await b.write('k2', 500, 260, 'ترکیب', { size: 20, color: 'soft', fa: true });
+        await all([
+          b.write('l2', 260, 310, 'b′_j = max_i min(a′_i , m_{ij})', { size: 28 }),
+          b.write('r2', 740, 310, 'b′_j = max_i (a′_i · r_{ij})', { size: 28, color: 'orange' }),
+        ]);
+        await b.write('big', 500, 430, 'هر min ← ضرب ( × )', { size: 40, color: 'orange', bold: true, fa: true });
+        await b.write('keep', 500, 495, 'ولی max همان max می‌ماند', { size: 26, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 11. the product matrix
+    {
+      say: 'ماتریس را از نو با ضرب بسازیم. سطرها و ستون‌های صفر صفر می‌مانند، چون هر چیز × 0 = 0. سطر 150 با درجه‌ی 1 باز هم خودِ B است، چون 1 × b = b. ولی سطرهای 125 و 175 عوض می‌شوند: 0.5 × 0.6 = 0.3 به جای 0.5. خانه‌های نارنجی همان‌هایی‌اند که با min فرق کرده‌اند.',
+      draw: async b => {
+        await b.clear();
+        await frame(b, SLIDE, 'prod', { diff: true, slow: true });
+        const L = MF(SLIDE);
+        await b.ring('rx', L.CX[1], L.RY[1] - 8, 30, 20, { color: 'orange' });
+        await b.write('calc', 500, L.CY, 'r = 0.5 × 0.6 = 0.3      (min: 0.5)', { size: 24, color: 'orange' });
+      },
+    },
+    // ---------------------------------------------------------- 12. composition with ×
+    {
+      say: 'ترکیب هم با ضرب: A′ = [0 0.5 0 0 0] را کنار ماتریس بگذار. سطرهای کم‌رنگ × 0 = 0 می‌دهند؛ فقط سطر 125 می‌ماند و هر خانه‌اش یک بار دیگر در 0.5 ضرب می‌شود: 0.5 × [0 0.3 0.5 0.3 0] = [0 0.15 0.25 0.15 0]. یعنی روی هم b′_j = α · α · b_j = α^2 · b_j = 0.25 · b_j.',
+      draw: async b => {
+        await b.erase(['rx', 'calc']);
+        await inputColumn(b, SLIDE);
+        for (let j = 0; j < 5; j++) await column(b, SLIDE, 'prod', j);
+        await b.erase('cb');
+        await b.write('a2', 890, 330, 'α^2 · b_j', { size: 28, color: 'orange', bold: true });
+        await b.write('a2v', 890, 370, '= 0.25 · b_j', { size: 22, color: 'orange' });
+      },
+    },
+    // ---------------------------------------------------------- 13. scaled, not clipped; y* = 30
+    {
+      say: 'روی نمودار: B بریده نشد، بلکه *کوچک* شد — هر میله × 0.25 و شکلش حفظ شد. 30 هنوز بلندترین میله است. میانگین وزنی: بالا 20×0.15 + 30×0.25 + 40×0.15 = 3 + 7.5 + 6 = 16.5 و پایین 0.15 + 0.25 + 0.15 = 0.55. پس y* = 16.5 / 0.55 = 30 — باز هم 30.',
+      draw: async b => {
+        await b.clear();
+        const g = Graph({ x: 110, y: 120, w: 340, h: 210, from: 0, to: 60 });
+        await g.axes(b, 'g', { ticks: V, label: 'y' });
+        await bars(b, g, 'B', V, VB, { color: 'soft', w: 30, labels: false });
+        await bars(b, g, 'Bp', V, MP.Bp, { color: 'orange', w: 14 });
+        await b.write('set', 735, 130, `B′ = {${MP.Bp.map((m, k) => `${f(m)}/${V[k]}`).join(', ')}}`, { size: 20, color: 'orange' });
+        await b.write('sc', 735, 185, 'b′_j = α^2 · b_j', { size: 28, color: 'orange' });
+        await b.write('n1', 735, 300, MP.Bp.map((m, k) => `${f(m)}×${V[k]}`).join(' + '), { size: 20 });
+        await b.write('n2', 735, 335, `= 3 + 7.5 + 6 = ${f(MP.d.num)}`, { size: 22, color: 'blue' });
+        await b.write('d1', 735, 380, `${MP.Bp.map(f).join(' + ')} = ${f(MP.d.den)}`, { size: 22, color: 'blue' });
+        await b.write('res', 735, 440, `y* = ${f(MP.d.num)} / ${f(MP.d.den)} = ${f(MP.d.y)}`, { size: 30, color: 'green', bold: true });
+        await ystar(b, g, 'ys', MP.d.y);
+      },
+    },
+    // ---------------------------------------------------------- 14. compare the two
+    {
+      say: 'مقایسه. هر دو روش یک حرف می‌زنند: «قانون نیمه درست است، پس جواب ضعیف‌تر است». فرق در طرز ضعیف کردن است: max-min سقف می‌گذارد و قله را صاف می‌کند؛ max-product همه را به یک نسبت کوچک می‌کند و قله سر جایش می‌ماند. اینجا هر دو 30 دادند چون B متقارن است. با یک B نامتقارن مثل [1 0.7 0.4 0.2 0.1] و α = 0.5 جوابشان فرق می‌کند: max-min حدود 23.53 و max-product حدود 20.42. نکته‌ی طلایی: در max-product عدد α^2 از صورت و مخرج کسر ساده می‌شود، پس y* همیشه همان مرکز خودِ B است و به α بستگی ندارد.',
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        const gL = Graph({ x: 90, y: 110, w: 330, h: 170, from: 0, to: 60 });
+        const gR = Graph({ x: 560, y: 110, w: 330, h: 170, from: 0, to: 60 });
+        await all([
+          b.write('tL', 255, 55, `بریدن ${LTR('(max-min)')}`, { size: 26, color: 'green', fa: true }),
+          b.write('tR', 725, 55, `کوچک کردن ${LTR('(max-product)')}`, { size: 26, color: 'orange', fa: true }),
+        ]);
+        await all([gL.axes(b, 'gL', { ticks: V, label: 'y' }), gR.axes(b, 'gR', { ticks: V, label: 'y' })]);
+        await all([bars(b, gL, 'LB', V, VB, { color: 'soft', w: 26, labels: false }), bars(b, gR, 'RB', V, VB, { color: 'soft', w: 26, labels: false })]);
+        await all([bars(b, gL, 'LP', V, MM.Bp, { color: 'green', w: 12 }), bars(b, gR, 'RP', V, MP.Bp, { color: 'orange', w: 12 })]);
+        await all([ystar(b, gL, 'yL', MM.d.y), ystar(b, gR, 'yR', MP.d.y)]);
+        const BA = [1, 0.7, 0.4, 0.2, 0.1];
+        const aMM = wavg(V, BA.map(v => Math.min(0.5, v))).y, aMP = wavg(V, BA.map(v => 0.25 * v)).y;
+        await b.write('as', 500, 445, `یک B نامتقارن: ${LTR('B = [1 0.7 0.4 0.2 0.1]')} و ${LTR('α = 0.5')}`, { size: 22, fa: true });
+        await b.write('av', 500, 485, `max-min → y* ≈ ${f(+aMM.toFixed(2))}        max-product → y* ≈ ${f(+aMP.toFixed(2))}`, { size: 24, color: 'blue' });
+        await b.write('gold', 500, 528, 'در max-product عدد α² از صورت و مخرج ساده می‌شود ← y* به α بستگی ندارد', { size: 20, color: 'orange', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 15. two ambiguities + 0/0 trap
+    {
+      say: 'دو ابهام که باید بدانی. یک: عدد α یا عدد 1؟ اسلایدها در A′ همان عضویت ورودی، یعنی 0.5، را می‌گذارند؛ بعضی کتاب‌ها 1 می‌گذارند. در max-min فرقی نمی‌کند. در max-product عضویت‌های B′ فرق می‌کنند (α^2 · b_j به جای α · b_j) ولی y* نهایی یکی است. در امتحان روش اسلاید را بنویس. دو: کدام min ضرب می‌شود؟ ما هر دو را ضرب کردیم؛ بعضی حل‌ها ماتریس را با min می‌سازند و فقط ترکیب را ضرب می‌کنند — آن‌وقت عددها کمی فرق می‌کنند. اگر مطمئن نیستی، از استاد بپرس. و یک تله: اگر عضویت ورودی صفر باشد، همه‌ی B′ صفر می‌شود و فرمول 0 / 0 می‌دهد — جواب تعریف نشده است.',
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        await b.box('bx', 90, 50, 820, 470, { color: 'red' });
+        await b.write('h', 500, 105, 'ابهام‌ها و تله', { size: 38, color: 'red', bold: true, fa: true });
+        const L = [
+          ['1) در A′ عدد α یا 1؟', 'اسلاید: α. در max-product فقط B′ فرق می‌کند، y* نه'],
+          ['2) کدام min ضرب می‌شود؟', 'اسلاید (کلمه‌به‌کلمه): هر دو. شک داری؟ از استاد بپرس'],
+          [`3) عضویت ورودی = 0`, `همه‌ی B′ صفر ← ${LTR('0 / 0')} ← تعریف نشده`],
+        ];
+        for (const [k, [h, t]] of L.entries()) {
+          await b.write(`h${k}`, 860, 185 + k * 110, h, { size: 28, color: k === 2 ? 'red' : 'blue', anchor: 'start', fa: true });
+          await b.write(`t${k}`, 820, 225 + k * 110, t, { size: 22, anchor: 'start', fa: true });
+        }
+      },
+    },
+    // ---------------------------------------------------------- 16. Homework 2: the problem
+    {
+      say: 'و حالا تمرین 2 خودتان. قاعده: «اگر بارندگی زیاد باشد آنگاه رطوبت زیاد است»، یعنی if x is H then y is HN. H = 0.2/20 + 0.4/40 + 0.6/60 + 0.8/80 + 1/100 و HN = 0.1/25 + 0.6/50 + 0.8/75 + 1/100. اگر بارندگی 80 باشد، رطوبت چقدر است؟ با روش Max-product. یادت باشد: در این نوشتار علامت + یعنی «و این عضو هم هست»، نه جمع عددی؛ و 0.8/80 یعنی نقطه‌ی 80 با درجه‌ی 0.8.',
+      draw: async b => {
+        await b.clear();
+        await b.write('t', 500, 70, 'تمرین 2', { size: 44, color: 'orange', bold: true, fa: true });
+        await b.write('fa', 500, 130, 'اگر بارندگی زیاد باشد آنگاه رطوبت زیاد است', { size: 26, fa: true });
+        await b.write('rule', 500, 185, 'if x is H then y is HN', { size: 34, color: 'blue' });
+        await b.write('H', 500, 260, 'H = 0.2/20 + 0.4/40 + 0.6/60 + 0.8/80 + 1/100', { size: 30, color: 'purple' });
+        await b.write('HN', 500, 320, 'HN = 0.1/25 + 0.6/50 + 0.8/75 + 1/100', { size: 30, color: 'orange' });
+        await b.write('q', 500, 400, `بارندگی = ${LTR('80')}  ←  رطوبت = ؟`, { size: 32, color: 'green', bold: true, fa: true });
+        await b.write('m', 500, 445, '( Max-product inference )', { size: 26, color: 'blue' });
+        await b.write('plus', 500, 510, 'علامت + یعنی «و این عضو هم هست»، نه جمع عددی', { size: 22, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 17. HW2 step 1: the product matrix
+    {
+      say: 'قدم 1: ماتریس قانون با ضرب، r_ij = h_i · hn_j. پنج نقطه‌ی بارندگی سطر می‌شوند و چهار نقطه‌ی رطوبت ستون؛ پس جدول 5×4 است. مثلاً خانه‌ی سطر 80 و ستون 75: 0.8 × 0.8 = 0.64. سطر 100 با درجه‌ی 1 خودِ HN است.',
+      draw: async b => {
+        await b.clear();
+        await frame(b, HW, 'prod', { slow: true });
+        const L = MF(HW);
+        await b.ring('rx', L.CX[2], L.RY[3] - 8, 32, 20, { color: 'orange' });
+        await b.write('calc', 500, L.CY, `r = 0.8 × 0.8 = ${f(HW.R[3][2])}`, { size: 26, color: 'orange' });
+        await b.write('eqHN', 890, L.RY[4], '= HN', { size: 24, color: 'green', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 18. HW2 step 2: α and A′
+    {
+      say: 'قدم 2: ورودی بارندگی 80 است. α = μ_H(80) = 0.8. با قرارداد اسلاید: A′ = [0 0 0 0.8 0] — در جای 80 عدد 0.8 و بقیه صفر. پس فقط سطر 80 در جواب اثر دارد و بقیه کم‌رنگ می‌شوند.',
+      draw: async b => {
+        await b.erase(['rx', 'calc', 'eqHN']);
+        await inputColumn(b, HW);
+        await b.write('al', 500, MF(HW).CY, 'α = μ_H(80) = 0.8    →    A′ = [0  0  0  0.8  0]', { size: 24, color: 'orange' });
+      },
+    },
+    // ---------------------------------------------------------- 19. HW2 step 3: compose with ×
+    {
+      say: 'قدم 3: ترکیب با ضرب. هر خانه‌ی سطر 80 یک بار دیگر در 0.8 ضرب می‌شود: 0.8 × [0.08 0.48 0.64 0.8] = [0.064 0.384 0.512 0.64]. چک سریع: α^2 · HN = 0.64 × [0.1 0.6 0.8 1] — همان عددها. پس B′ = 0.064/25 + 0.384/50 + 0.512/75 + 0.64/100.',
+      draw: async b => {
+        await b.erase('al');
+        for (let j = 0; j < 4; j++) await column(b, HW, 'prod', j);
+        await b.erase('cb');
+        await b.write('a2', 890, 330, 'α^2 · HN', { size: 26, color: 'orange', bold: true });
+        await b.write('a2v', 890, 370, '= 0.64 · HN', { size: 22, color: 'orange' });
+      },
+    },
+    // ---------------------------------------------------------- 20. HW2 step 4: y* = 77
+    {
+      say: 'قدم 4: میانگین وزنی. بالا: 25×0.064 + 50×0.384 + 75×0.512 + 100×0.64 = 1.6 + 19.2 + 38.4 + 64 = 123.2. پایین: 0.064 + 0.384 + 0.512 + 0.64 = 1.6. پس y* = 123.2 / 1.6 = 77. جواب تمرین 2: رطوبت حدود 77.',
+      draw: async b => {
+        await b.clear();
+        const g = Graph({ x: 100, y: 120, w: 350, h: 210, from: 0, to: 110 });
+        await b.write('tt', 275, 62, `${LTR('HN')} (خاکستری) و ${LTR('B′')} (نارنجی)`, { size: 24, color: 'orange', fa: true });
+        await g.axes(b, 'g', { ticks: HY, label: 'y' });
+        await bars(b, g, 'B', HY, HN, { color: 'soft', w: 30, labels: false });
+        await bars(b, g, 'Bp', HY, HW.Bp, { color: 'orange', w: 14 });
+        await b.write('set', 735, 110, `B′ = ${HW.Bp.map((m, k) => `${f(m)}/${HY[k]}`).join(' + ')}`, { size: 20, color: 'orange' });
+        await b.write('n1', 735, 200, HY.map((y, k) => `${y}×${f(HW.Bp[k])}`).join(' + '), { size: 20 });
+        await b.write('n2', 735, 240, `= ${HY.map((y, k) => f(y * HW.Bp[k])).join(' + ')} = ${f(HW.d.num)}`, { size: 22, color: 'blue' });
+        await b.write('d1', 735, 300, `${HW.Bp.map(f).join(' + ')} = ${f(HW.d.den)}`, { size: 22, color: 'blue' });
+        await b.write('res', 735, 370, `y* = ${f(HW.d.num)} / ${f(HW.d.den)} = ${f(HW.d.y)}`, { size: 32, color: 'green', bold: true });
+        await b.write('ans', 735, 440, `رطوبت ≈ ${LTR(f(HW.d.y))}`, { size: 34, color: 'green', bold: true, fa: true });
+        await ystar(b, g, 'ys', HW.d.y);
+      },
+    },
+    // ---------------------------------------------------------- 21. HW2: other conventions
+    {
+      say: 'اگر برگه‌ی شما عدد دیگری دارد، ببینید کدام قرارداد را به کار برده‌اید. روش اسلاید، یعنی هر دو min ضرب، می‌دهد 77. اگر ماتریس را با min بسازی و فقط ترکیب را ضرب کنی: B′ = [0.08 0.48 0.64 0.64] و y* = 138 / 1.84 = 75. اگر ورودی را 1 بگیری، نه 0.8، با ماتریس ضربی: B′ = [0.08 0.48 0.64 0.8] و باز y* = 77. جواب اصلی ما روش اسلاید است.',
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        await all([
+          b.write('h0', 790, 90, 'قرارداد', { size: 24, color: 'soft', fa: true }),
+          b.write('h1', 450, 90, 'B′', { size: 26, color: 'soft' }),
+          b.write('h2', 140, 90, 'y*', { size: 26, color: 'soft' }),
+        ]);
+        await b.line('hl', 70, 110, 930, 110, { color: 'soft', width: 2 });
+        const rows = [
+          ['روش اسلاید: هر دو min ← ×', HW.Bp, 'green'],
+          ['ماتریس با min، ترکیب با ×', HW_MINMAT, 'blue'],
+          ['ورودی 1 (نه 0.8)، ماتریس با ×', HW_ONE, 'blue'],
+        ];
+        for (const [k, [lab, bp, c]] of rows.entries()) {
+          const y = 190 + k * 105;
+          await all([
+            b.write(`l${k}`, 790, y, lab, { size: 22, color: c, fa: true }),
+            b.write(`v${k}`, 450, y, `(${bp.map(f).join(', ')})`, { size: 26, color: c }),
+            b.write(`y${k}`, 140, y, f(wavg(HY, bp).y), { size: 34, color: c, bold: true }),
+          ]);
+        }
+        await b.box('best', 70, 145, 860, 65, { color: 'green' });
+        await b.write('n', 500, 500, 'جواب اصلی: روش اسلاید ← رطوبت 77', { size: 26, color: 'green', bold: true, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 22. summary
+    {
+      say: 'جمع‌بندی: این هفت نکته را به خاطر بسپار، بعد برویم سراغ سؤال‌ها.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 65, 'یادت باشد', { size: 44, color: 'orange', bold: true, fa: true });
+        const L = [
+          ['ورودی قطعی: در جای خودش α، بقیه 0', 'A′ = [0 … α … 0]'],
+          ['قاعده‌ی زاده؛ فقط سطر ورودی اثر دارد', 'B′ = A′ ∘ μ_{AB}'],
+          ['max-min: بریدن در ارتفاع α', 'b′_j = min(α , b_j)'],
+          ['max-product: هر min ← ×، کوچک کردن', 'b′_j = α^2 · b_j'],
+          ['غیرفازی‌سازی = میانگین وزنی', 'y* = Σ y·μ / Σ μ'],
+          ['مثال اسلاید: دمای 125', 'y* = 30'],
+          ['تمرین 2: بارندگی 80', 'y* = 77'],
+        ];
+        for (const [k, [fa, m]] of L.entries()) {
+          const y = 130 + k * 60;
+          await all([
+            b.write(`f${k}`, 930, y, '•  ' + fa, { size: 23, anchor: 'start', fa: true }),
+            b.write(`m${k}`, 70, y, m, { size: 27, anchor: 'start', color: 'blue' }),
+          ]);
+        }
+      },
+    },
+    // ---------------------------------------------------------- quizzes
+    {
+      say: 'نوبت شماست! قانون «اگر x برابر A است آنگاه y برابر B است» با مجموعه‌های روی تخته. اگر x = 2 باشد، با روش max-min عدد قطعی y* را حساب کنید.',
+      draw: async b => {
+        await b.clear();
+        await quizHead(b, 1);
+        await b.write('A', 500, 110, 'A = {0.2/1, 0.6/2, 1/3, 0.4/4}', { size: 32, color: 'purple' });
+        await b.write('B', 500, 165, 'B = {1/10, 0.6/20, 0.3/30, 0.1/40}', { size: 32, color: 'orange' });
+        await b.write('q', 500, 235, 'x = 2 ,  max-min  →  y* = ?', { size: 34, color: 'green', bold: true });
+      },
+      quiz: { answer: ['19.375', '19.38', '19.4'], hint: 'α = μ_A(2) = 0.6. هر b_j را با 0.6 مقایسه کن (min)، بعد میانگین وزنی.', explain: 'α = 0.6، پس B′ = [0.6 0.6 0.3 0.1]. بالا 6 + 12 + 9 + 4 = 31 و پایین 1.6؛ پس y* = 31 / 1.6 = 19.375.' },
+      solve: async b => {
+        await b.write('s1', 500, 300, `α = μ_A(2) = ${f(QAL)}    →    B′ = min(${f(QAL)}, B) = (${Q1.map(f).join(', ')})`, { size: 24, color: 'purple' });
+        await b.write('s2', 500, 360, `(${joinNum(QY, Q1)}) / (${Q1.map(f).join(' + ')})`, { size: 22 });
+        await b.write('s3', 500, 420, `= ${f(Q1d.num)} / ${f(Q1d.den)}`, { size: 28, color: 'blue' });
+        await b.write('s4', 500, 490, `y* = ${f(Q1d.y)}`, { size: 40, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'با قرارداد اسلایدها، برای دمای ورودی 125 (با A = دمای نرمال) بردار A′ کدام است؟',
+      draw: quizBoard(2, 'A = {0/100, 0.5/125, 1/150, 0.5/175, 0/200} ,  x = 125  →  A′ = ?', { size: 26 }),
+      quiz: {
+        choices: ['{0/100, 1/125, 0/150, 0/175, 0/200}', '{0/100, 0.5/125, 0/150, 0/175, 0/200}', '{0/100, 0.5/125, 1/150, 0.5/175, 0/200}', '{1/100, 0.5/125, 1/150, 1/175, 1/200}'],
+        correct: 1,
+        hint: 'اسلاید 77: «مقدار معادل عددی» را در جای خودش بگذار، بقیه صفر.',
+        explain: 'در جای 125 همان عضویتش یعنی 0.5 و بقیه صفر. گزینه‌ی 1 روش بعضی کتاب‌هاست (عدد 1)، نه روش اسلاید؛ گزینه‌ی 3 خودِ A است.',
+      },
+      solve: async b => {
+        await b.write('s1', 500, 260, 'α = μ_A(125) = 0.5', { size: 34, color: 'purple' });
+        await b.write('s2', 500, 340, 'A′ = {0/100, 0.5/125, 0/150, 0/175, 0/200}', { size: 30, color: 'green', bold: true });
+        await b.write('s3', 500, 410, 'در جای 125 خود α، بقیه صفر', { size: 26, color: 'soft', fa: true });
+      },
+    },
+    {
+      say: 'همان داده‌های سؤال 1 و همان ورودی x = 2، این بار با روش max-product (هر دو min ضرب می‌شوند). y* را حساب کنید.',
+      draw: async b => {
+        await b.clear();
+        await quizHead(b, 3);
+        await b.write('A', 500, 110, 'A = {0.2/1, 0.6/2, 1/3, 0.4/4}', { size: 32, color: 'purple' });
+        await b.write('B', 500, 165, 'B = {1/10, 0.6/20, 0.3/30, 0.1/40}', { size: 32, color: 'orange' });
+        await b.write('q', 500, 235, 'x = 2 ,  max-product  →  y* = ?', { size: 34, color: 'green', bold: true });
+      },
+      quiz: { answer: ['17.5'], hint: 'سطر x=2 ماتریس = 0.6 × B؛ ترکیب دوباره در 0.6 ضرب می‌کند.', explain: 'B′ = 0.36 × B = [0.36 0.216 0.108 0.036]. بالا 12.6 و پایین 0.72؛ پس y* = 17.5 — همان مرکز خودِ B، یعنی 35 / 2.' },
+      solve: async b => {
+        await b.write('s1', 500, 290, `r(x=2) = 0.6 × B = (${Q3row.map(f).join(', ')})`, { size: 24, color: 'purple' });
+        await b.write('s2', 500, 335, `B′ = 0.6 × r = (${Q3.map(f).join(', ')})`, { size: 24, color: 'orange' });
+        await b.write('s3', 500, 390, `(${joinNum(QY, Q3)}) / ${f(Q3d.den)}`, { size: 22 });
+        await b.write('s4', 500, 440, `= ${f(Q3d.num)} / ${f(Q3d.den)}`, { size: 28, color: 'blue' });
+        await b.write('s5', 500, 505, `y* = ${f(Q3d.y)}`, { size: 40, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'تفاوت max-product با max-min در چیست؟',
+      draw: quizBoard(4, 'max-min  →  max-product :  ?'),
+      quiz: {
+        choices: ['max → ×', 'max → +', 'min → +', 'min → ×'], correct: 3,
+        hint: 'اسم روش را ببین: کدام کلمه عوض شده؟',
+        explain: 'اسلاید 80: به جای عملگر min از ضرب استفاده می‌شود؛ max سر جایش می‌ماند.',
+      },
+      solve: async b => {
+        await b.write('s1', 300, 300, 'max-min', { size: 44, color: 'purple' });
+        await b.arrow('s2', 420, 290, 560, 290, { color: 'soft' });
+        await b.write('s3', 700, 300, 'max-product', { size: 44, color: 'orange' });
+        await b.write('s4', 500, 400, 'min → ×    ,    max → max', { size: 38, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'فقط غیرفازی‌سازی: مجموعه‌ی خروجی B′ = {0.3/2,0.6/4,0.9/6,0.2/8} است. y* را با میانگین وزنی حساب کنید.',
+      draw: quizBoard(5, 'B′ = {0.3/2, 0.6/4, 0.9/6, 0.2/8}  →  y* = ?', { size: 38 }),
+      quiz: { answer: ['5'], hint: 'بالا: هر نقطه × عضویتش، جمع. پایین: جمع عضویت‌ها.', explain: 'بالا 0.6 + 2.4 + 5.4 + 1.6 = 10 و پایین 0.3 + 0.6 + 0.9 + 0.2 = 2؛ پس y* = 10 / 2 = 5.' },
+      solve: async b => {
+        await b.write('s1', 500, 260, joinNum(Q5y, Q5m, '×'), { size: 30 });
+        await b.write('s1b', 500, 305, `= ${Q5y.map((y, k) => f(y * Q5m[k])).join(' + ')} = ${f(Q5d.num)}`, { size: 28, color: 'blue' });
+        await b.write('s2', 500, 370, `${Q5m.map(f).join(' + ')} = ${f(Q5d.den)}`, { size: 28, color: 'blue' });
+        await b.write('s3', 500, 460, `y* = ${f(Q5d.num)} / ${f(Q5d.den)} = ${f(Q5d.y)}`, { size: 44, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'سؤال آخر: با max-product (به روش این درس) و یک قانون، اگر عضویت ورودی از 0.8 به 0.4 برسد، عدد قطعی y* چه می‌شود؟',
+      draw: async b => {
+        await quizBoard(6, `اگر ${LTR('α')} از ${LTR('0.8')} به ${LTR('0.4')} برسد، ${LTR('y*')} چه می‌شود؟`, { size: 34, fa: true })(b);
+        await b.write('q-m', 500, 200, '( max-product )', { size: 30, color: 'orange' });
+      },
+      quiz: {
+        choices: ['نصف می‌شود', 'دو برابر می‌شود', 'ثابت می‌ماند', 'صفر می‌شود'], correct: 2,
+        hint: 'B′ = α^2 · B. این α^2 در صورت و مخرج کسر چه می‌شود؟',
+        explain: 'α^2 هم در صورت و هم در مخرج میانگین وزنی ضرب می‌شود و ساده می‌شود؛ پس y* همان مرکز B می‌ماند. فقط ارتفاع B′ کم می‌شود.',
+      },
+      solve: async b => {
+        await b.write('s1', 500, 270, 'y* = Σ y · α²b  /  Σ α²b', { size: 40 });
+        await b.write('s1b', 500, 320, 'α² در صورت و مخرج یکی است و ساده می‌شود', { size: 24, color: 'red', fa: true });
+        await b.write('s2', 500, 395, '= Σ y · b  /  Σ b', { size: 40, color: 'green', bold: true });
+        await b.write('s3', 500, 470, 'به α بستگی ندارد ← ثابت می‌ماند', { size: 30, color: 'green', fa: true });
+      },
+    },
+  ],
+});
 </script>
 </body>
 </html>

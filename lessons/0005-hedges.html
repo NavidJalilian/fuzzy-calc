@@ -3,346 +3,401 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>درس ۵ — قیدهای زبانی</title>
-<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
-<style>
-/* ===== SHARED STYLE — copy verbatim into every lesson, do not edit per lesson ===== */
-:root{--bg:#fbfaf7;--surface:#ffffff;--surface-1:#f3f1ec;--text:#1f1e1c;--text-2:#5f5e5a;--text-3:#888780;--border:#e3e0d8;--border-strong:#c9c6bc;
---accent:#534AB7;--accent-bg:#EEEDFE;--ok:#3B6D11;--ok-bg:#EAF3DE;--bad:#A32D2D;--bad-bg:#FCEBEB;--warn:#854F0B;--warn-bg:#FAEEDA;
---c1:#7F77DD;--c2:#1D9E75;--c3:#EF9F27;--c4:#D4537E;--grid:#e3e0d8}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1a1a19;--surface:#232322;--surface-1:#2c2c2a;--text:#ecebe6;--text-2:#b4b2a9;--text-3:#888780;--border:#3a3a37;--border-strong:#55554f;
---accent:#AFA9EC;--accent-bg:#26215C;--ok:#97C459;--ok-bg:#173404;--bad:#F09595;--bad-bg:#501313;--warn:#FAC775;--warn-bg:#412402;--grid:#3a3a37}}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:Vazirmatn,Tahoma,sans-serif;font-size:16px;line-height:1.95}
-main{max-width:760px;margin:0 auto;padding:24px 16px 64px}
-a{color:var(--accent)}
-h1{font-size:26px;font-weight:700;line-height:1.5;margin:6px 0 6px}
-h2{font-size:19px;font-weight:500;margin:0 0 8px}
-h3{font-size:16px;font-weight:500;margin:12px 0 4px}
-p{margin:0 0 10px}
-.top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:13px;color:var(--text-2)}
-.goal{color:var(--text-2);margin-bottom:22px}
-.sec{margin:0 0 28px}
-.lab{font-size:13px;color:var(--text-3);margin:0 0 4px;letter-spacing:0}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
-.soft{background:var(--surface-1);border-radius:12px;padding:12px 14px}
-.m{direction:ltr;unicode-bidi:isolate;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14.5px;white-space:nowrap}
-@media (max-width:700px){.m{white-space:normal;display:inline-block;max-width:100%}}
-.mb{direction:ltr;text-align:left;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14.5px;background:var(--surface-1);border-radius:8px;padding:8px 12px;margin:6px 0;overflow-x:auto;line-height:1.8}
-.en{direction:ltr;unicode-bidi:isolate;font-size:13px;color:var(--text-2)}
-b,strong{font-weight:500}
-.key{background:var(--warn-bg);color:var(--warn);border-radius:6px;padding:0 6px}
-.tip{border-right:3px solid var(--accent);background:var(--accent-bg);padding:8px 12px;border-radius:0;margin:8px 0}
-.trap{border-right:3px solid var(--bad);background:var(--bad-bg);padding:8px 12px;border-radius:0;margin:8px 0}
-button{font-family:inherit;font-size:14px;background:var(--surface);color:var(--text);border:1px solid var(--border-strong);border-radius:8px;padding:5px 14px;cursor:pointer}
-button:hover{background:var(--surface-1)}
-button.on{background:var(--accent-bg);border-color:var(--accent);color:var(--accent)}
-input[type=text]{font-family:inherit;font-size:15px;direction:ltr;text-align:center;width:72px;height:34px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text)}
-input[type=range]{width:100%;accent-color:var(--accent);direction:ltr}
-table.t{border-collapse:collapse;direction:ltr;font-size:14.5px;margin:6px 0;display:block;max-width:100%;overflow-x:auto}
-table.t>tbody,table.t>thead{display:table;width:100%}
-table.t th,table.t td{border:1px solid var(--border);padding:5px 6px;text-align:center;font-weight:400}
-table.t th{background:var(--surface-1)}
-.ok{background:var(--ok-bg)!important}.no{background:var(--bad-bg)!important}
-.fb{font-size:14px;margin-top:8px;min-height:1em}.fb.good{color:var(--ok)}.fb.bad{color:var(--bad)}
-.q{margin:0 0 18px}
-.mcq .opts{display:grid;gap:6px;margin-top:6px}
-.mcq .opts button{text-align:right;padding:7px 12px}
-.stepper .st{display:none;padding:6px 0;border-bottom:1px dashed var(--border)}
-.stepper .st.show{display:block}
-.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-svg{max-width:100%;height:auto;direction:ltr}
-svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12px}
-.nav{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:14px;border-top:1px solid var(--border);padding-top:14px;margin-top:28px}
-.ask{font-size:14px;color:var(--text-2)}
-@media print{body{background:#fff}.card,.soft{break-inside:avoid}.stepper .st{display:block}button{display:none}}
-.given{font-size:14px;color:var(--text-2);background:var(--surface-1);border-right:3px solid var(--border-strong);border-radius:0 8px 8px 0;padding:6px 12px;margin:2px 0 10px}
-.given b{color:var(--text)}
-[id]{scroll-margin-top:16px}
-h3:target,.card:target{outline:2px solid var(--accent);outline-offset:6px;border-radius:8px}
-details.sol{margin-top:10px;border:1px dashed var(--border-strong);border-radius:10px;padding:6px 12px;background:var(--surface)}
-details.sol summary{cursor:pointer;color:var(--accent);font-weight:500}
-details.sol[open] summary{margin-bottom:6px}
-.q>details.sol:not([open]){display:inline-block;vertical-align:middle;margin:0;padding:0;border:0;background:none}
-.q>details.sol summary{list-style:none;display:inline-block;font-size:14px;border:1px solid var(--border-strong);border-radius:8px;padding:5px 14px;background:var(--surface)}
-.q>details.sol summary::-webkit-details-marker{display:none}
-.q>details.sol summary:hover{background:var(--surface-1)}
-@media print{details.sol{border-style:solid}}
-/* ===== END SHARED STYLE ===== */
-</style>
-<style>
-.mb.pre{white-space:pre}
-#hedgeBtns button i{display:inline-block;width:16px;height:0;border-top:3px solid;margin-left:6px;vertical-align:middle}
-#hedgeTable tr.off td{opacity:.45}
-</style>
+<title>Linguistic Hedges</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Vazirmatn:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="../assets/teacher.css">
 </head>
 <body>
-<main>
-<div class="top"><a href="../index.html">← فهرست درس‌ها</a><span>درس ۵ از ۱۱ · فصل ۲ · حدود ۱۵ دقیقه</span></div>
-<h1>قیدهای زبانی: خیلی، تا حدی، نه خیلی</h1>
-<p class="goal">هدف: بعد از این درس می‌توانی از یک مجموعه فازی مثل «بلند» مجموعه‌های «خیلی بلند»، «خیلی خیلی بلند»، «تا حدی بلند»، «واقعاً بلند» و «نه خیلی بلند» را جدول به جدول حساب کنی — سؤال ۲ تمرین ۱.</p>
-
-<!-- ===== 1. IDEA ===== -->
-<section class="sec"><p class="lab">۱. ایده</p>
-<div class="card" id="hedges">
-  <p>در زبان روزمره فقط نمی‌گوییم «بلند»؛ می‌گوییم «<b>خیلی</b> بلند»، «<b>تا حدی</b> بلند»، «<b>کمی</b> سرد». به این کلمه‌ها <b>قید زبانی</b> <span class="en">(linguistic hedge)</span> می‌گویند. اسلاید ۵۱ مثال «هوا سرد است؟» را می‌زند: در منطق بولی جواب فقط «بله/۱» یا «نه/۰» است، اما در فازی می‌توان گفت «خیلی زیاد/0.9»، «کمی/0.25»، «خیلی کم/0.1».</p>
-  <p>قید یک <b>مجموعه فازی جدید</b> از روی مجموعه قبلی می‌سازد، و این کار را <span class="key">نقطه به نقطه</span> با یک فرمول ساده روی <span class="m">μ_A(x)</span> انجام می‌دهد:</p>
-  <table class="t">
-    <tr><th>قید</th><th>نام</th><th>فرمول (اسلایدهای ۵۲ و ۵۳)</th></tr>
-    <tr><td>not (نه)</td><td>مکمل</td><td><span class="m">μ_Ā(x) = 1 − μ_A(x)</span></td></tr>
-    <tr><td>very (خیلی)</td><td>con(A) — تمرکز <span class="en">(concentration)</span></td><td><span class="m">μ_con(A)(x) = (μ_A(x))²</span></td></tr>
-    <tr><td>very very (خیلی خیلی)</td><td>pow(A)</td><td><span class="m">μ_pow(A)(x) = (μ_A(x))³</span></td></tr>
-    <tr><td>not very (نه خیلی)</td><td>—</td><td><span class="m">μ_B(x) = 1 − (μ_A(x))²</span></td></tr>
-    <tr><td>somewhat / more or less (تا حدی)</td><td>Dil(A) — اتساع <span class="en">(dilation)</span></td><td><span class="m">μ_Dil(A)(x) = (μ_A(x))^0.5</span></td></tr>
-    <tr><td>indeed (واقعاً)</td><td>int(A) — تشدید <span class="en">(intensification)</span></td><td><table class="t" style="direction:rtl;margin:4px auto"><tr><th>حالت</th><th>وقتی</th><th>فرمول</th></tr><tr><td>۱</td><td><span class="m" style="white-space:nowrap">0 ≤ μ_A ≤ 0.5</span></td><td><span class="m" style="white-space:nowrap">2(μ_A)²</span></td></tr><tr><td>۲</td><td><span class="m" style="white-space:nowrap">0.5 ≤ μ_A ≤ 1</span></td><td><span class="m" style="white-space:nowrap">1 − 2(1 − μ_A)²</span></td></tr></table></td></tr>
-  </table>
-
-  <h3>شهود: چرا توان؟</h3>
-  <p>درجه‌ها بین ۰ و ۱ هستند. عددِ بین ۰ و ۱ وقتی <b>به توان ۲ یا ۳</b> می‌رسد <b>کوچک‌تر</b> می‌شود (<span class="m">0.7² = 0.49</span>)؛ پس «خیلی بلند» سخت‌گیرتر است و منحنی جمع‌تر می‌شود. <b>جذر</b> عدد را <b>بزرگ‌تر</b> می‌کند (<span class="m">√0.49 = 0.7</span>)؛ پس «تا حدی بلند» آسان‌گیرتر است و منحنی پهن‌تر. «واقعاً» درجه‌های زیر ۰٫۵ را پایین‌تر و بالای ۰٫۵ را بالاتر می‌برد، یعنی مرز را تیزتر می‌کند. نقطه‌های <span class="m">0</span> و <span class="m">1</span> در همه این قیدها (به جز not و not very) ثابت می‌مانند.</p>
-
-  <div class="trap"><b>تله «خیلی خیلی»:</b> اسلاید ۵۲ برای very very نوشته <span class="m">(μ_A)³</span> و اسمش را <span class="m">pow(A)</span> گذاشته. در بیشتر کتاب‌ها (مثلاً Ross و Negnevitsky) «خیلی خیلی» یعنی دو بار «خیلی»: <span class="m">((μ_A)²)² = (μ_A)⁴</span>؛ Negnevitsky توان ۳ را برای قید دیگری به نام extremely (به‌شدت) به کار می‌برد. چون امتحان از جزوه استاد است، <b>در این درس توان ۳ را جواب اصلی گرفته‌ایم</b>. در امتحان فرمول را هم بنویس (مثلاً «very very = μ³ طبق جزوه») تا اگر تصحیح‌کننده μ⁴ می‌خواست، روشت معلوم باشد.</div>
-  <div class="tip"><b>slightly (کمی):</b> اسلاید ۵۱ اسمش را آورده ولی هیچ فرمولی برایش در جزوه نیست؛ پس در امتحان انتظار محاسبه‌اش را نداشته باش.</div>
-
-  <h3 id="combo">ترکیب قیدها: «نه خیلی کوتاه و نه خیلی بلند» (اسلاید ۵۳)</h3>
-  <div class="mb">[1 − (μ_tall(x))²] ∧ [1 − (μ_short(x))²]</div>
-  <p><span class="m">∧</span> یعنی AND، و از درس ۴ می‌دانی AND در فازی همان <span class="m">min</span> است. پس اول «نه خیلی بلند» و «نه خیلی کوتاه» را جدا حساب کن، بعد کوچک‌تر را بردار.</p>
-</div></section>
-
-<!-- ===== 2. SEE IT ===== -->
-<section class="sec"><p class="lab">۲. ببین چه اتفاقی می‌افتد</p>
-<div class="card">
-  <p>منحنی ضخیم همان <span class="m">Tall</span> <a href="#hw1-q2">تمرین ۱</a> است (نقطه‌ها را خطی به هم وصل کرده‌ایم). قیدها را روشن و خاموش کن و با لغزنده <span class="m">x</span> را جابه‌جا کن.</p>
-  <div class="row" id="hedgeBtns" role="group" aria-label="قیدها"></div>
-  <svg id="hedgeSvg" viewBox="0 0 600 270" role="img" aria-labelledby="hedgeTitle"><title id="hedgeTitle">منحنی بلند و منحنی‌های قیدها</title></svg>
-  <label for="hx" class="row" style="justify-content:space-between"><span>x = <span class="m" id="hxv">60</span></span><span style="font-size:13px;color:var(--text-3)">۰ تا ۱۰۰</span></label>
-  <input type="range" id="hx" min="0" max="100" step="1" value="60">
-  <table class="t" id="hedgeTable"></table>
-</div></section>
-
-<!-- ===== 3. WORKED EXAMPLE ===== -->
-<section class="sec"><p class="lab">۳. مثال حل‌شده، قدم به قدم — دقیقاً سؤال ۲ تمرین ۱</p>
-<div class="card stepper">
-  <div class="given" id="hw1-q2"><b>صورت تمرین ۱، سؤال ۲:</b> «اگر مجموعه فازی tall به صورت زیر باشد، آنگاه مجموعه‌های فازی <span class="m">somewhat tall</span>، <span class="m">indeed tall</span>، <span class="m">very tall</span>، <span class="m">very very tall</span> و <span class="m">not very tall</span> را به دست آورید.»<br><span class="m">Tall = {(0,0), (20,0.2), (40,0.4), (60,0.7), (80,1), (100,1)}</span></div>
-  <div class="tip">در این تمرین هر جفت به شکل <span class="m">(x, μ)</span> است: اول عنصر، بعد درجه. این <b>برعکسِ</b> نوشتار <span class="m">μ/x</span> است. پس <span class="m">(60,0.7)</span> یعنی «عنصر ۶۰ با درجه ۰٫۷». جواب‌ها را هم با همین شکل بنویس.</div>
-  <div class="st">قدم ۱ — very tall: هر درجه را به توان ۲ برسان.
-    <table class="t"><tr><th>x</th><th>0</th><th>20</th><th>40</th><th>60</th><th>80</th><th>100</th></tr><tr><th>μ_tall</th><td>0</td><td>0.2</td><td>0.4</td><td>0.7</td><td>1</td><td>1</td></tr><tr><th>μ²</th><td>0</td><td>0.04</td><td>0.16</td><td>0.49</td><td>1</td><td>1</td></tr></table>
-    <div class="mb">very tall = {(0,0), (20,0.04), (40,0.16), (60,0.49), (80,1), (100,1)}</div></div>
-  <div class="st">قدم ۲ — very very tall (طبق اسلاید ۵۲، توان ۳): <span class="m">0.2³ = 0.008</span>، <span class="m">0.4³ = 0.064</span>، <span class="m">0.7³ = 0.343</span>.
-    <div class="mb">very very tall = {(0,0), (20,0.008), (40,0.064), (60,0.343), (80,1), (100,1)}</div>
-    <p style="font-size:14px;color:var(--text-2)">اگر توان ۴ (نسخه کتاب‌ها) را بخواهند: <span class="m">0, 0.0016, 0.0256, 0.2401, 1, 1</span>.</p></div>
-  <div class="st">قدم ۳ — not very tall: <span class="m">1 − μ²</span>، یعنی از ستون «very» استفاده کن و از ۱ کم کن: <span class="m">1−0=1</span>، <span class="m">1−0.04=0.96</span>، <span class="m">1−0.16=0.84</span>، <span class="m">1−0.49=0.51</span>، <span class="m">1−1=0</span>.
-    <div class="mb">not very tall = {(0,1), (20,0.96), (40,0.84), (60,0.51), (80,0), (100,0)}</div></div>
-  <div class="st">قدم ۴ — somewhat tall: جذر هر درجه. <span class="m">√0.2 ≈ 0.447</span>، <span class="m">√0.4 ≈ 0.632</span>، <span class="m">√0.7 ≈ 0.837</span>.
-    <div class="mb">somewhat tall = {(0,0), (20,0.447), (40,0.632), (60,0.837), (80,1), (100,1)}</div></div>
-  <div class="st">قدم ۵ — indeed tall: اول ببین هر درجه از ۰٫۵ کمتر است یا بیشتر.
-    <table class="t"><tr><th>μ</th><th>کدام حالت؟</th><th>حساب</th></tr>
-      <tr><td>0</td><td dir="rtl">حالت ۱ (<span class="m">μ ≤ 0.5</span>)</td><td>2·0² = 0</td></tr>
-      <tr><td>0.2</td><td dir="rtl">حالت ۱ (<span class="m">μ ≤ 0.5</span>)</td><td>2·0.04 = 0.08</td></tr>
-      <tr><td>0.4</td><td dir="rtl">حالت ۱ (<span class="m">μ ≤ 0.5</span>)</td><td>2·0.16 = 0.32</td></tr>
-      <tr><td>0.7</td><td dir="rtl">حالت ۲ (<span class="m">μ ≥ 0.5</span>)</td><td>1 − 2·(0.3)² = 1 − 0.18 = 0.82</td></tr>
-      <tr><td>1</td><td dir="rtl">حالت ۲ (<span class="m">μ ≥ 0.5</span>)</td><td>1 − 2·0² = 1</td></tr></table>
-    <div class="mb">indeed tall = {(0,0), (20,0.08), (40,0.32), (60,0.82), (80,1), (100,1)}</div></div>
-  <div class="row" style="margin-top:8px"><button class="next">قدم بعدی</button><button class="all">نمایش همه</button></div>
-</div></section>
-
-<!-- ===== 4. PRACTICE ===== -->
-<section class="sec"><p class="lab">۴. نوبت توست</p>
-<div class="card">
-  <p>در سؤال ۱ و ۲ از این مجموعه استفاده کن (درجه‌ها را تا دو یا سه رقم اعشار بنویس):</p>
-  <div class="mb">Tall′ = {(150,0.1), (160,0.3), (170,0.5), (180,0.8), (190,1)}</div>
-
-  <div class="q practice" data-hint="very = μ²، very very = μ³ (طبق اسلاید ۵۲)، not very = 1 − μ². مثلاً 0.3² = 0.09.">
-    <p><b>سؤال ۱.</b> very، very very و not very را حساب کن.</p>
-    <table class="t"><tr><th></th><th>150</th><th>160</th><th>170</th><th>180</th><th>190</th></tr>
-      <tr><th>very</th><td><input type="text" data-k="0.01" data-tol="0.005" aria-label="very در 150"></td><td><input type="text" data-k="0.09" data-tol="0.005" aria-label="very در 160"></td><td><input type="text" data-k="0.25" data-tol="0.005" aria-label="very در 170"></td><td><input type="text" data-k="0.64" data-tol="0.005" aria-label="very در 180"></td><td><input type="text" data-k="1" data-tol="0.005" aria-label="very در 190"></td></tr>
-      <tr><th>very very</th><td><input type="text" data-k="0.001" data-tol="0.0005" aria-label="very very در 150"></td><td><input type="text" data-k="0.027" data-tol="0.005" aria-label="very very در 160"></td><td><input type="text" data-k="0.125" data-tol="0.005" aria-label="very very در 170"></td><td><input type="text" data-k="0.512" data-tol="0.005" aria-label="very very در 180"></td><td><input type="text" data-k="1" data-tol="0.005" aria-label="very very در 190"></td></tr>
-      <tr><th>not very</th><td><input type="text" data-k="0.99" data-tol="0.005" aria-label="not very در 150"></td><td><input type="text" data-k="0.91" data-tol="0.005" aria-label="not very در 160"></td><td><input type="text" data-k="0.75" data-tol="0.005" aria-label="not very در 170"></td><td><input type="text" data-k="0.36" data-tol="0.005" aria-label="not very در 180"></td><td><input type="text" data-k="0" data-tol="0.005" aria-label="not very در 190"></td></tr></table>
-    <button class="check">بررسی</button>
-    <details class="sol"><summary>راه‌حل</summary>
-      <p>از <span class="m">Tall′</span> درجه‌ها به ترتیب <span class="m">0.1, 0.3, 0.5, 0.8, 1</span> هستند. برای هر ستون فرمول را بزن:</p><div class="mb pre">                 150     160     170     180     190
-μ                0.1     0.3     0.5     0.8     1
-very      = μ²   0.01    0.09    0.25    0.64    1
-very very = μ³   0.001   0.027   0.125   0.512   1
-not very  = 1−μ² 0.99    0.91    0.75    0.36    0</div><p>مثلاً در ۱۸۰: <span class="m">0.8² = 0.64</span>، <span class="m">0.8³ = 0.512</span> و <span class="m">1 − 0.64 = 0.36</span>.</p>
-    </details><div class="fb"></div>
-  </div>
-
-  <div class="q practice" data-hint="somewhat = جذر (√0.1 ≈ 0.316). indeed دو حالت دارد: (۱) وقتی ⁦μ ≤ 0.5⁩ باشد، جواب ⁦2μ²⁩ است. (۲) وقتی ⁦μ ≥ 0.5⁩ باشد، جواب ⁦1 − 2(1 − μ)²⁩ است. در 0.5 هر دو حالت 0.5 می‌دهند.">
-    <p><b>سؤال ۲.</b> somewhat و indeed را حساب کن (برای جذرها دو رقم اعشار کافی است).</p>
-    <table class="t"><tr><th></th><th>150</th><th>160</th><th>170</th><th>180</th><th>190</th></tr>
-      <tr><th>somewhat</th><td><input type="text" data-k="0.316" data-tol="0.01" aria-label="somewhat در 150"></td><td><input type="text" data-k="0.548" data-tol="0.01" aria-label="somewhat در 160"></td><td><input type="text" data-k="0.707" data-tol="0.01" aria-label="somewhat در 170"></td><td><input type="text" data-k="0.894" data-tol="0.01" aria-label="somewhat در 180"></td><td><input type="text" data-k="1" data-tol="0.01" aria-label="somewhat در 190"></td></tr>
-      <tr><th>indeed</th><td><input type="text" data-k="0.02" data-tol="0.005" aria-label="indeed در 150"></td><td><input type="text" data-k="0.18" data-tol="0.005" aria-label="indeed در 160"></td><td><input type="text" data-k="0.5" data-tol="0.005" aria-label="indeed در 170"></td><td><input type="text" data-k="0.92" data-tol="0.005" aria-label="indeed در 180"></td><td><input type="text" data-k="1" data-tol="0.005" aria-label="indeed در 190"></td></tr></table>
-    <button class="check">بررسی</button>
-    <details class="sol"><summary>راه‌حل</summary>
-      <p><b>قدم ۱ — somewhat = جذر:</b></p><div class="mb pre">√0.1 ≈ 0.316   √0.3 ≈ 0.548   √0.5 ≈ 0.707   √0.8 ≈ 0.894   √1 = 1</div><p><b>قدم ۲ — indeed:</b> اول ببین μ کمتر از ۰٫۵ است یا بیشتر، بعد حالت درست را بزن:</p><div class="mb pre">150: μ = 0.1 ≤ 0.5  →  2·0.1²         = 0.02
-160: μ = 0.3 ≤ 0.5  →  2·0.3²         = 0.18
-170: μ = 0.5        →  2·0.5²         = 0.5
-180: μ = 0.8 ≥ 0.5  →  1 − 2·(1−0.8)² = 1 − 0.08 = 0.92
-190: μ = 1          →  1 − 2·0²       = 1</div>
-    </details><div class="fb"></div>
-  </div>
-
-  <div class="q practice" data-hint="اول هر کروشه را جدا حساب کن: 1 − 0.4² و 1 − 0.5². بعد ∧ یعنی min (درس ۴).">
-    <p><b>سؤال ۳ (اسلاید ۵۳ + درس ۴).</b> قد علی طوری است که <span class="m">μ_tall = 0.4</span> و <span class="m">μ_short = 0.5</span>. درجه «نه خیلی کوتاه و نه خیلی بلند» چقدر است؟</p>
-    <div class="given"><b>اسلاید ۵۳ چه می‌گوید؟</b> «نه خیلی کوتاه و نه خیلی بلند» = <span class="m">[1 − (μ_tall)²] ∧ [1 − (μ_short)²]</span>. علامت <span class="m">∧</span> یعنی «و» (AND) که در فازی همان <span class="m">min</span> است (درس ۴). <a href="#combo">↑ بخش ۱، «ترکیب قیدها»</a></div>
-    <table class="t"><tr><th>1 − (μ_tall)²</th><th>1 − (μ_short)²</th><th>حاصل نهایی</th></tr>
-      <tr><td><input type="text" data-k="0.84" data-tol="0.005" aria-label="نه خیلی بلند"></td><td><input type="text" data-k="0.75" data-tol="0.005" aria-label="نه خیلی کوتاه"></td><td><input type="text" data-k="0.75" data-tol="0.005" aria-label="حاصل نهایی"></td></tr></table>
-    <button class="check">بررسی</button>
-    <details class="sol"><summary>راه‌حل</summary>
-      <p><b>قدم ۱:</b> هر کروشه را جدا حساب کن.</p><div class="mb pre">not very tall  = 1 − 0.4² = 1 − 0.16 = 0.84
-not very short = 1 − 0.5² = 1 − 0.25 = 0.75</div><p><b>قدم ۲:</b> <span class="m">∧</span> یعنی «و» که در فازی min است: <span class="m">min(0.84, 0.75) = 0.75</span>.</p>
-    </details><div class="fb"></div>
-  </div>
-
-  <div class="q mcq" data-yes="درست! اسلاید ۵۲: μ_pow(A)(x) = (μ_A(x))³. فقط یادت باشد بیشتر کتاب‌ها μ⁴ می‌نویسند." data-no="نه. اسلاید ۵۲ برای very very نوشته μ_pow(A) = (μ_A)³. توان ۲ مال very است و 0.5 مال somewhat.">
-    <p><b>سؤال ۴.</b> طبق اسلاید ۵۲ جزوه، فرمول «very very» کدام است؟</p>
-    <div class="given"><b>اسلاید ۵۲ چه می‌گوید؟</b> جدول فرمول قیدهاست: برای هر قید (very، very very، somewhat و …) می‌گوید درجه <span class="m">μ_A</span> را به چه توانی برسانی. <a href="#hedges">↑ همین جدول در بخش ۱</a></div>
-    <div class="opts">
-      <button><span class="m">(μ_A)^0.5</span></button>
-      <button><span class="m">(μ_A)^2.0</span></button>
-      <button data-ok><span class="m">(μ_A)^3.0</span></button>
-      <button><span class="m">(μ_A)^4.0</span></button>
-    </div><div class="fb"></div>
-  </div>
-
-  <div class="q mcq" data-yes="درست! 0.3 ≤ 0.5، پس حالت ۱: 2 × 0.3² = 2 × 0.09 = 0.18." data-no="نه. 0.3 کمتر از 0.5 است، پس حالت ۱ indeed: 2(μ)² = 2 × 0.09. (0.09 فقط very است، 0.55 جذر است، 0.91 هم not very.)">
-    <p><b>سؤال ۵.</b> اگر <span class="m">μ_A(x) = 0.3</span>، درجه «indeed A» چقدر است؟</p>
-    <div class="opts">
-      <button><span class="m">0.09</span></button>
-      <button data-ok><span class="m">0.18</span></button>
-      <button><span class="m">0.55</span></button>
-      <button><span class="m">0.91</span></button>
-    </div><div class="fb"></div>
-  </div>
-
-  <div class="q mcq" data-yes="درست! not very = 1 − μ² = 1 − 0.36 = 0.64. ترتیب مهم است: اول very، بعد not." data-no="نه. not very یعنی «نه (خیلی بلند)»: اول very → 0.6² = 0.36، بعد not → 1 − 0.36. عدد 0.16 مال «خیلی (نه بلند)» است: (1 − 0.6)².">
-    <p><b>سؤال ۶ (مرور مکمل از درس ۴).</b> اگر <span class="m">μ_tall(x) = 0.6</span>، درجه «not very tall» چقدر است؟</p>
-    <div class="opts">
-      <button><span class="m">0.16</span></button>
-      <button><span class="m">0.36</span></button>
-      <button><span class="m">0.40</span></button>
-      <button data-ok><span class="m">0.64</span></button>
-    </div><div class="fb"></div>
-  </div>
-
-  <div class="q mcq" data-yes="درست! indeed(0.5) = 2 × 0.25 = 0.5. «واقعاً» نقطه ۰٫۵ را ثابت نگه می‌دارد و فقط دو طرفش را از هم دور می‌کند." data-no="نه. امتحانش کن: very → 0.25، somewhat → 0.707، not very → 0.75، ولی indeed → 2 × 0.5² = 0.5.">
-    <p><b>سؤال ۷.</b> کدام قید درجه <span class="m">0.5</span> را بدون تغییر نگه می‌دارد؟</p>
-    <div class="opts">
-      <button data-ok>واقعاً <span class="en">(indeed)</span></button>
-      <button>خیلی <span class="en">(very)</span></button>
-      <button>تا حدی <span class="en">(somewhat)</span></button>
-      <button>نه خیلی <span class="en">(not very)</span></button>
-    </div><div class="fb"></div>
-  </div>
-</div></section>
-
-<!-- ===== 5. SUMMARY ===== -->
-<section class="sec"><p class="lab">۵. جمع‌بندی — همین را به خاطر بسپار</p>
-<div class="soft"><ul>
-  <li>قید = فرمولی روی درجه، نقطه به نقطه:<table class="t" style="direction:rtl;margin:4px auto"><tr><th>قید</th><th>فرمول</th></tr><tr><td>not</td><td><span class="m" style="white-space:nowrap">1 − μ</span></td></tr><tr><td>very</td><td><span class="m" style="white-space:nowrap">μ²</span></td></tr><tr><td>very very</td><td><span class="m" style="white-space:nowrap">μ³</span> (جزوه؛ کتاب‌ها <span class="m" style="white-space:nowrap">μ⁴</span>)</td></tr><tr><td>not very</td><td><span class="m" style="white-space:nowrap">1 − μ²</span></td></tr><tr><td>somewhat</td><td><span class="m" style="white-space:nowrap">μ^0.5</span> (همان <span class="m" style="white-space:nowrap">√μ</span>)</td></tr></table></li>
-  <li><span class="m">indeed</span> دو حالت دارد؛ درجه ۰٫۵ ثابت می‌ماند:<table class="t" style="direction:rtl;margin:4px auto"><tr><th>حالت</th><th>وقتی</th><th>فرمول</th></tr><tr><td>۱</td><td><span class="m" style="white-space:nowrap">μ ≤ 0.5</span></td><td><span class="m" style="white-space:nowrap">2μ²</span></td></tr><tr><td>۲</td><td><span class="m" style="white-space:nowrap">μ ≥ 0.5</span></td><td><span class="m" style="white-space:nowrap">1 − 2(1−μ)²</span></td></tr></table></li>
-  <li>توان بیشتر = سخت‌گیرتر (منحنی جمع‌تر)؛ جذر = آسان‌گیرتر (منحنی پهن‌تر). ۰ و ۱ با توان عوض نمی‌شوند.</li>
-  <li>«not very» ≠ «very not»: اولی <span class="m">1 − μ²</span>، دومی <span class="m">(1 − μ)²</span>.</li>
-  <li>«نه خیلی کوتاه و نه خیلی بلند» = <span class="m">min(1 − μ_tall², 1 − μ_short²)</span>.</li>
-  <li>در <a href="#hw1-q2">تمرین ۱</a> جفت‌ها <span class="m">(x, μ)</span> هستند، نه <span class="m">μ/x</span>.</li>
-</ul></div></section>
-
-<!-- ===== 6. SOURCE + ASK ===== -->
-<section class="sec"><p class="lab">منبع اصلی</p>
-<p>جزوه درس، اسلایدهای ۵۱ تا ۵۳ · <a href="#hw1-q2">تمرین ۱، سؤال ۲</a> · <a href="https://www.wiley.com/en-us/Fuzzy+Logic+with+Engineering+Applications%2C+4th+Edition-p-9781119235866">Ross, <i>Fuzzy Logic with Engineering Applications</i></a> — بخش «linguistic hedges» (concentration، dilation، intensification).</p>
-<p><a href="../reference/cheatsheet.html">برگه فرمول‌ها</a> · <a href="../reference/glossary.html">واژه‌نامه</a></p>
-</section>
-
-<div class="nav"><a href="0004-union-intersection-complement.html">← درس قبل: اجتماع، اشتراک و مکمل</a><a href="0006-fuzzy-expert-system.html">درس بعد: ساخت یک سیستم خبره فازی →</a></div>
-</main>
-
+<main id="app"></main>
+<script src="../assets/teacher.js"></script>
+<script src="../assets/graph.js"></script>
 <script>
-/* ===== SHARED JS — copy verbatim into every lesson ===== */
-(function(){
-function norm(s){return s.trim().replace(/[۰-۹]/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)}).replace(/[٠-٩]/g,function(d){return '٠١٢٣٤٥٦٧٨٩'.indexOf(d)}).replace(/[٫,]/g,'.').replace(/\s+/g,'')}
-function val(s){s=norm(s);if(/^-?\d*\.?\d+\/-?\d*\.?\d+$/.test(s)){var p=s.split('/');return +p[0]/+p[1]}return s===''?NaN:+s}
-document.querySelectorAll('.practice').forEach(function(q){
-  var ins=q.querySelectorAll('input[data-k]'),fb=q.querySelector('.fb'),btn=q.querySelector('.check');
-  ins.forEach(function(i){i.addEventListener('input',function(){i.parentNode.classList.remove('ok','no');fb.textContent='';fb.className='fb'})});
-  btn.addEventListener('click',function(){
-    var empty=0,ok=0;
-    ins.forEach(function(i){var c=i.parentNode;c.classList.remove('ok','no');if(!i.value.trim()){empty++;return}
-      var v=val(i.value),k=+i.dataset.k,tol=i.dataset.tol?+i.dataset.tol:0.01;
-      if(!isNaN(v)&&Math.abs(v-k)<=tol+1e-9){ok++;c.classList.add('ok')}else c.classList.add('no')});
-    if(empty){fb.className='fb bad';fb.textContent='اول همه خانه‌ها را پر کن ('+empty+' خانه خالی است).';return}
-    if(ok===ins.length){fb.className='fb good';fb.textContent=q.dataset.yes||('عالی! همه '+ins.length+' جواب درست است.')}
-    else{fb.className='fb bad';fb.textContent=ok+' از '+ins.length+' درست. '+(q.dataset.hint||'خانه‌های قرمز را دوباره حساب کن.')}
-  });
-});
-document.querySelectorAll('.mcq').forEach(function(q){
-  var fb=q.querySelector('.fb');
-  q.querySelectorAll('.opts button').forEach(function(b){b.addEventListener('click',function(){
-    q.querySelectorAll('.opts button').forEach(function(x){x.classList.remove('ok','no')});
-    if(b.hasAttribute('data-ok')){b.classList.add('ok');fb.className='fb good';fb.textContent=q.dataset.yes||'درست!'}
-    else{b.classList.add('no');fb.className='fb bad';fb.textContent=q.dataset.no||'نه، دوباره فکر کن.'}
-  })});
-});
-document.querySelectorAll('.stepper').forEach(function(s){
-  var st=s.querySelectorAll('.st'),n=0,nx=s.querySelector('.next'),al=s.querySelector('.all');
-  function upd(){st.forEach(function(e,i){e.classList.toggle('show',i<n)});if(nx)nx.textContent=n>=st.length?'از اول':'قدم بعدی ('+n+'/'+st.length+')'}
-  if(nx)nx.addEventListener('click',function(){n=n>=st.length?0:n+1;upd()});
-  if(al)al.addEventListener('click',function(){n=st.length;upd()});
-  upd();
-});
-window.addEventListener('beforeprint',function(){document.querySelectorAll('details.sol').forEach(function(d){d.open=true})});
-})();
-/* ===== END SHARED JS ===== */
-</script>
-<script>
-/* lesson 5: hedges visual */
-(function(){
-var svg=document.getElementById('hedgeSvg'),sl=document.getElementById('hx');
-var L=46,R=586,T=14,B=222;
-function X(x){return L+(R-L)*x/100}
-function Y(v){return B-(B-T)*v}
-var P=[[0,0],[20,0.2],[40,0.4],[60,0.7],[80,1],[100,1]];
-function tall(x){for(var i=1;i<P.length;i++){if(x<=P[i][0]){var a=P[i-1],b=P[i];return a[1]+(b[1]-a[1])*(x-a[0])/(b[0]-a[0])}}return 1}
-function ind(m){return m<=0.5?2*m*m:1-2*(1-m)*(1-m)}
-var H=[
- {k:'very',fa:'خیلی',en:'very',fm:'μ²',f:function(m){return m*m},c:'var(--c1)',d:'',on:true},
- {k:'vv',fa:'خیلی خیلی',en:'very very',fm:'μ³ (جزوه)',f:function(m){return m*m*m},c:'var(--c1)',d:'7 4',on:false},
- {k:'vv4',fa:'خیلی خیلی',en:'کتاب‌ها',fm:'μ⁴',f:function(m){return m*m*m*m},c:'var(--c1)',d:'2 4',on:false},
- {k:'some',fa:'تا حدی',en:'somewhat',fm:'μ^0.5',f:function(m){return Math.sqrt(m)},c:'var(--c2)',d:'',on:true},
- {k:'ind',fa:'واقعاً',en:'indeed',fm:'2μ² یا 1−2(1−μ)²',f:ind,c:'var(--c3)',d:'',on:false},
- {k:'nv',fa:'نه خیلی',en:'not very',fm:'1 − μ²',f:function(m){return 1-m*m},c:'var(--c4)',d:'',on:false},
- {k:'not',fa:'نه',en:'not',fm:'1 − μ',f:function(m){return 1-m},c:'var(--c4)',d:'7 4',on:false}
-];
-var box=document.getElementById('hedgeBtns');
-H.forEach(function(h){
-  var b=document.createElement('button');b.type='button';
-  b.innerHTML='<i style="border-color:'+h.c+';border-top-style:'+(h.d?(h.d==='2 4'?'dotted':'dashed'):'solid')+'"></i>'+h.fa+' <span class="en">('+h.en+')</span>';
-  b.setAttribute('aria-pressed',h.on);b.classList.toggle('on',h.on);
-  b.addEventListener('click',function(){h.on=!h.on;b.classList.toggle('on',h.on);b.setAttribute('aria-pressed',h.on);draw()});
-  box.appendChild(b);
-});
-function f3(v){return String(Math.round(v*1000)/1000)}
-function draw(){
-  var x=+sl.value,m=tall(x),s='<title id="hedgeTitle">منحنی بلند و منحنی‌های قیدها</title>';
-  [0,0.25,0.5,0.75,1].forEach(function(v){s+='<line x1="'+L+'" x2="'+R+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="var(--grid)"/><text x="'+(L-8)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+v+'</text>'});
-  [0,20,40,60,80,100].forEach(function(t){s+='<text x="'+X(t)+'" y="'+(B+18)+'" text-anchor="middle">'+t+'</text>'});
-  s+='<line x1="'+L+'" x2="'+L+'" y1="'+T+'" y2="'+B+'" stroke="var(--text-3)"/><line x1="'+L+'" x2="'+R+'" y1="'+B+'" y2="'+B+'" stroke="var(--text-3)"/>';
-  s+='<text x="14" y="'+(T+6)+'" text-anchor="middle">μ</text><text x="'+R+'" y="'+(B+36)+'" text-anchor="end">x</text>';
-  function path(fn){var d='';for(var k=0;k<=200;k++){var xx=k/2;d+=(k?'L':'M')+X(xx).toFixed(1)+' '+Y(fn(tall(xx))).toFixed(1)}return d}
-  H.forEach(function(h){if(h.on)s+='<path d="'+path(h.f)+'" fill="none" stroke="'+h.c+'" stroke-width="2.2"'+(h.d?' stroke-dasharray="'+h.d+'"':'')+'/>'});
-  s+='<path d="'+path(function(v){return v})+'" fill="none" stroke="var(--text)" stroke-width="3.5"/>';
-  P.forEach(function(p){s+='<circle cx="'+X(p[0])+'" cy="'+Y(p[1])+'" r="4" fill="var(--text)"/>'});
-  s+='<line x1="'+X(x)+'" x2="'+X(x)+'" y1="'+T+'" y2="'+B+'" stroke="var(--text-3)" stroke-dasharray="3 3"/>';
-  H.forEach(function(h){if(h.on)s+='<circle cx="'+X(x)+'" cy="'+Y(h.f(m))+'" r="5" fill="'+h.c+'" stroke="var(--surface)" stroke-width="1.5"/>'});
-  s+='<circle cx="'+X(x)+'" cy="'+Y(m)+'" r="5.5" fill="var(--text)" stroke="var(--surface)" stroke-width="1.5"/>';
-  svg.innerHTML=s;
-  document.getElementById('hxv').textContent=x;
-  var t='<tr><th>قید</th><th>فرمول</th><th>درجه در x = '+x+'</th></tr><tr><td>tall (خودِ مجموعه)</td><td>μ</td><td><b>'+f3(m)+'</b></td></tr>';
-  H.forEach(function(h){t+='<tr class="'+(h.on?'':'off')+'"><td>'+h.en+(h.k==='vv4'?' (very very)':'')+'</td><td>'+h.fm+'</td><td>'+f3(h.f(m))+'</td></tr>'});
-  document.getElementById('hedgeTable').innerHTML=t;
+// Lesson 5 — slides 51–53 (linguistic hedges) + homework 1, question 2.
+// Explanations are Persian; numbers, math and technical terms stay in English.
+
+const fmt = n => String(+(+n).toFixed(3));
+const all = list => Promise.all(list);
+const LTR = s => `⁦${s}⁩`;  // keeps a left-to-right run intact inside Persian board text
+const RTL = s => `⁧${s}⁩`;  // keeps a Persian quiz choice right-to-left inside its button
+
+// The hedges of slides 52–53, as functions of the membership degree m.
+const H = {
+  very: m => m ** 2,
+  veryvery: m => m ** 3,               // slide 52: pow(A) = μ^3
+  notvery: m => 1 - m ** 2,
+  somewhat: m => Math.sqrt(m),
+  indeed: m => (m <= 0.5 ? 2 * m ** 2 : 1 - 2 * (1 - m) ** 2),
+};
+
+// Writes one table row: a label at lx, then one value per column. Cell ids: `${id}-${c}`.
+async function row(b, id, lx, xs, y, label, vals, o = {}) {
+  const size = o.size || 26;
+  await b.write(`${id}-l`, lx, y, label, { size: o.ls || size, color: o.lc || 'purple', dur: 200 });
+  for (const [c, v] of vals.entries()) {
+    await b.write(`${id}-${c}`, xs[c], y, fmt(v), { size, color: o.colorOf?.(v, c) || o.color || 'ink', dur: o.dur ?? 160 });
+  }
 }
-sl.addEventListener('input',draw);
-draw();
-})();
+
+function quizBoard(n, lines) {
+  return async b => {
+    await b.clear();
+    await b.write('q-n', 500, 55, `سؤال ${n} از 6`, { size: 24, color: 'soft', fa: true });
+    for (const [k, [t, o]] of lines.entries()) await b.write(`q-${k}`, 500, 115 + k * 52, t, { size: 32, ...o });
+  };
+}
+
+// ---- formula table (steps 3–7)
+const FY = { not: 82, very: 150, vv: 218, nv: 286, sw: 354, in1: 430, in2: 480 };
+const FX = { name: 870, f: 480, ex: 130 };
+
+// ---- homework 1, question 2: Tall = {(0,0), (20,0.2), (40,0.4), (60,0.7), (80,1), (100,1)}
+const TALL = { x: [0, 20, 40, 60, 80, 100], m: [0, 0.2, 0.4, 0.7, 1, 1] };
+const XT = [330, 445, 560, 675, 790, 905];
+const YT = { x: 70, m: 118, very: 180, vv: 232, nv: 284, sw: 336, in: 388 };
+
+// ---- quiz set: Tall′ = {(150,0.1), (160,0.3), (170,0.5), (180,0.8), (190,1)}
+const TALL2 = 'Tall′ = {(150, 0.1), (160, 0.3), (170, 0.5), (180, 0.8), (190, 1)}';
+
+const gH = Graph({ x: 140, y: 85, w: 460, h: 380, from: 0, to: 1 });
+const gT = Graph({ x: 130, y: 90, w: 600, h: 330, from: 0, to: 100 });
+
+Teacher.start({
+  id: 'L05',
+  number: 5,
+  title: 'قیدهای زبانی',
+  chapter: 'بخش 2 · عملیات و استنتاج فازی',
+  slides: '51–53',
+  intro: 'very، very very، not very، somewhat و indeed — هر قید یک فرمول ساده روی درجه‌ی عضویت است.',
+  next: { href: '0006-fuzzy-expert-system.html', title: 'ساخت یک سیستم خبره‌ی فازی' },
+  steps: [
+    // ---------------------------------------------------------- 1. slide 51
+    {
+      say: 'اسلاید 51 می‌پرسد: «هوا سرد است؟» در منطق بولی فقط دو جواب داریم: بله یعنی 1، نه یعنی 0. ولی در منطق فازی می‌توانیم بگوییم «خیلی زیاد» با درجه‌ی 0.9، «کمی» با 0.25 و «خیلی کم» با 0.1. یعنی آدم‌ها با *کلمه* درجه را عوض می‌کنند.',
+      draw: async b => {
+        await b.box('q1', 70, 120, 190, 60, { color: 'blue', fill: 'blue' });
+        await b.write('q1t', 165, 160, 'Is it cold?', { size: 26 });
+        await all([b.line('l1', 260, 150, 380, 100, { color: 'soft' }), b.line('l2', 260, 150, 380, 205, { color: 'soft' })]);
+        await b.write('y1', 460, 108, 'Yes / 1', { size: 28 });
+        await b.write('n1', 460, 213, 'No / 0', { size: 28 });
+        await b.write('bl', 720, 165, 'Boolean logic', { size: 30, color: 'purple', bold: true });
+        await b.box('q2', 70, 330, 190, 60, { color: 'blue', fill: 'blue' });
+        await b.write('q2t', 165, 370, 'Is it cold?', { size: 26 });
+        await all([b.line('l3', 260, 360, 380, 290, { color: 'soft' }), b.line('l4', 260, 360, 380, 362, { color: 'soft' }), b.line('l5', 260, 360, 380, 435, { color: 'soft' })]);
+        await b.write('f1', 500, 298, 'Very much / 0.9', { size: 28, color: 'orange' });
+        await b.write('f2', 500, 370, 'Little / 0.25', { size: 28, color: 'orange' });
+        await b.write('f3', 500, 443, 'Very less / 0.1', { size: 28, color: 'orange' });
+        await b.write('fl', 780, 375, 'Fuzzy logic', { size: 30, color: 'purple', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 2. what a hedge is
+    {
+      say: 'به کلمه‌هایی مثل very یعنی خیلی، slightly یعنی کمی، و somewhat یعنی تا حدی، linguistic hedge یا قید زبانی می‌گوییم. قید از یک مجموعه‌ی فازی، مثل «بلند»، یک مجموعه‌ی تازه می‌سازد، مثل «خیلی بلند». روشش ساده است: برای هر x یک فرمول روی همان درجه‌ی μ_A(x) می‌زنیم.',
+      term: ['Linguistic hedge', 'قید زبانی'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 90, 'قید زبانی', { size: 44, color: 'orange', bold: true, fa: true });
+        const W = [['very', 'خیلی'], ['slightly', 'کمی'], ['somewhat', 'تا حدی']];
+        for (const [k, [e, f]] of W.entries()) {
+          await b.write(`we${k}`, 250 + k * 250, 170, e, { size: 32, color: 'blue' });
+          await b.write(`wf${k}`, 250 + k * 250, 210, f, { size: 24, color: 'soft', fa: true });
+        }
+        await b.write('in', 200, 360, 'μ_A(x)', { size: 38, color: 'blue' });
+        await b.arrow('a1', 280, 350, 390, 350, { color: 'soft' });
+        await b.box('bx', 400, 310, 200, 80, { color: 'orange' });
+        await b.write('bxt', 500, 360, 'فرمول قید', { size: 28, color: 'orange', fa: true });
+        await b.arrow('a2', 610, 350, 720, 350, { color: 'soft' });
+        await b.write('out', 820, 360, 'درجه‌ی تازه', { size: 30, color: 'green', bold: true, fa: true });
+        await b.write('ex', 500, 470, `«بلند»  ⇐  «خیلی بلند»`, { size: 30, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 3. not, very
+    {
+      say: 'اسلاید 52. اولی not همان مکمل درس 4 است: 1 − μ. دومی *very* یا خیلی: درجه را به توان 2 می‌رسانیم. اسمش con(A) است، از *concentration* یعنی تمرکز. مثلاً 0.7 به توان 2 می‌شود 0.49؛ عدد بین 0 و 1 با توان *کوچک‌تر* می‌شود، پس «خیلی بلند» سخت‌گیرتر از «بلند» است.',
+      term: ['Concentration — very', 'تمرکز'],
+      draw: async b => {
+        await b.clear();
+        await b.write('ex-h', FX.ex, 40 + 6, 'μ = 0.7', { size: 22, color: 'soft' });
+        await b.write('not-n', FX.name, FY.not, 'not', { size: 28, color: 'orange', bold: true });
+        await b.write('not-f', FX.f, FY.not, 'μ_{Ā}(x) = 1 − μ_A(x)', { size: 30 });
+        await b.write('not-e', FX.ex, FY.not, '0.3', { size: 26, color: 'blue' });
+        await b.write('very-n', FX.name, FY.very, 'very', { size: 28, color: 'orange', bold: true });
+        await b.write('very-f', FX.f, FY.very, 'μ_{con(A)}(x) = (μ_A(x))^2', { size: 30 });
+        await b.write('very-e', FX.ex, FY.very, fmt(H.very(0.7)), { size: 26, color: 'blue' });
+      },
+    },
+    // ---------------------------------------------------------- 4. very very
+    {
+      say: 'very very یا خیلی خیلی: طبق اسلاید 52 درجه را به توان 3 می‌رسانیم و اسمش pow(A) است. 0.7 به توان 3 می‌شود 0.343؛ باز هم کوچک‌تر، یعنی باز هم سخت‌گیرتر.',
+      draw: async b => {
+        await b.write('vv-n', FX.name, FY.vv, 'very very', { size: 28, color: 'orange', bold: true });
+        await b.write('vv-f', FX.f, FY.vv, 'μ_{pow(A)}(x) = (μ_A(x))^3', { size: 30 });
+        await b.write('vv-e', FX.ex, FY.vv, fmt(H.veryvery(0.7)), { size: 26, color: 'blue' });
+      },
+    },
+    // ---------------------------------------------------------- 5. not very
+    {
+      say: 'not very یا نه خیلی: اول very را حساب کن، بعد مکملش را بگیر: 1 − μ^2. برای 0.7: یعنی 1 − 0.49 = 0.51. ترتیب مهم است: «not very» یعنی 1 − μ^2، نه (1 − μ)^2.',
+      draw: async b => {
+        await b.write('nv-n', FX.name, FY.nv, 'not very', { size: 28, color: 'orange', bold: true });
+        await b.write('nv-f', FX.f, FY.nv, 'μ_B(x) = 1 − (μ_A(x))^2', { size: 30 });
+        await b.write('nv-e', FX.ex, FY.nv, fmt(H.notvery(0.7)), { size: 26, color: 'blue' });
+      },
+    },
+    // ---------------------------------------------------------- 6. somewhat
+    {
+      say: 'اسلاید 53. *somewhat* یا more or less، یعنی تا حدی: به توان 0.5، یعنی جذر. اسمش Dil(A) است، از *dilation* یعنی اتساع. جذرِ عدد بین 0 و 1 آن را *بزرگ‌تر* می‌کند: جذر 0.7 تقریباً 0.837 است. پس «تا حدی بلند» آسان‌گیرتر است.',
+      term: ['Dilation — somewhat', 'اتساع'],
+      draw: async b => {
+        await b.write('sw-n', FX.name, FY.sw, 'somewhat', { size: 28, color: 'orange', bold: true });
+        await b.write('sw-f', FX.f, FY.sw, 'μ_{Dil(A)}(x) = (μ_A(x))^{0.5}', { size: 30 });
+        await b.write('sw-e', FX.ex, FY.sw, fmt(H.somewhat(0.7)), { size: 26, color: 'blue' });
+      },
+    },
+    // ---------------------------------------------------------- 7. indeed
+    {
+      say: '*indeed* یا واقعاً، دو حالت دارد. اسمش int(A) است، از *intensification* یعنی تشدید. اگر درجه بین 0 و 0.5 باشد: 2μ^2. اگر بین 0.5 و 1 باشد: 1 − 2(1 − μ)^2. برای 0.7 حالت دوم است: 1 − 2 × 0.3^2 = 1 − 0.18 = 0.82. اول همیشه نگاه کن درجه از 0.5 کمتر است یا بیشتر.',
+      term: ['Intensification — indeed', 'تشدید'],
+      draw: async b => {
+        await b.write('in-n', FX.name, 455, 'indeed', { size: 28, color: 'orange', bold: true });
+        await b.write('in-f1', FX.f, FY.in1, 'μ_{int(A)} = 2(μ_A)^2          0 ≤ μ_A ≤ 0.5', { size: 26 });
+        await b.write('in-f2', FX.f, FY.in2, 'μ_{int(A)} = 1 − 2(1 − μ_A)^2    0.5 ≤ μ_A ≤ 1', { size: 26 });
+        await b.write('in-e', FX.ex, 455, fmt(H.indeed(0.7)), { size: 26, color: 'blue' });
+        await b.ring('in-r', FX.f, FY.in2 - 9, 270, 26, { color: 'orange' });
+      },
+    },
+    // ---------------------------------------------------------- 8. the picture
+    {
+      say: 'حالا همه را با هم ببینیم. محور افقی درجه‌ی اصلی است و محور عمودی درجه بعد از قید. خط‌چینِ قطر یعنی بدون قید. very و very very *زیر* قطرند، یعنی درجه را کم می‌کنند و منحنی را جمع‌تر می‌کنند. somewhat *بالای* قطر است و منحنی را پهن‌تر می‌کند. indeed زیر 0.5 پایین می‌برد و بالای 0.5 بالا، یعنی مرز را تیزتر می‌کند. 0 و 1 در همه ثابت می‌مانند و indeed نقطه‌ی 0.5 را هم ثابت نگه می‌دارد.',
+      draw: async b => {
+        await b.clear();
+        await gH.axes(b, 'ax', { ticks: [0, 0.5, 1], label: 'μ_A' });
+        await gH.poly(b, 'c0', [[0, 0], [1, 1]], { color: 'soft', width: 2 });
+        const C = [['very', H.very, 'blue'], ['veryvery', H.veryvery, 'purple'], ['somewhat', H.somewhat, 'green'], ['indeed', H.indeed, 'orange']];
+        const names = { very: 'very:  μ^2', veryvery: 'very very:  μ^3', somewhat: 'somewhat:  μ^{0.5}', indeed: 'indeed' };
+        await b.write('lg0', 740, 120, 'μ  (بدون قید)', { size: 24, color: 'soft', fa: true });
+        for (const [k, [id, f, color]] of C.entries()) {
+          await gH.curve(b, `c-${id}`, f, { color, dur: 600 });
+          await b.line(`lgl${k}`, 680, 165 + k * 48, 720, 165 + k * 48, { color, width: 5, dur: 150 });
+          await b.write(`lg${k + 1}`, 735, 173 + k * 48, names[id], { size: 24, color, anchor: 'start' });
+        }
+        await b.dot('fix', gH.X(0.5), gH.Y(0.5), { color: 'orange', r: 7 });
+        await b.write('n1', 790, 420, 'زیر قطر: سخت‌گیرتر', { size: 22, color: 'blue', fa: true });
+        await b.write('n2', 790, 460, 'بالای قطر: آسان‌گیرتر', { size: 22, color: 'green', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 9. traps
+    {
+      say: 'سه تله. یک: جزوه برای very very توان 3 نوشته، ولی بیشتر کتاب‌ها، مثل Ross و Negnevitsky، «خیلی خیلی» را دو بار «خیلی» می‌گیرند، یعنی توان 4؛ Negnevitsky توان 3 را برای قید دیگری به اسم extremely می‌گذارد. امتحان از جزوه است، پس توان 3 بنویسید و خود فرمول را هم کنارش بنویسید. دو: slightly در اسلاید 51 آمده ولی جزوه برایش فرمول نداده. سه: not very یعنی 1 − μ^2، که با (1 − μ)^2 فرق دارد.',
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        await b.box('bx', 70, 60, 860, 450, { color: 'red', fill: 'red' });
+        await b.write('h', 500, 115, 'تله‌های امتحان ⚠', { size: 38, color: 'red', bold: true, fa: true });
+        await b.write('t1', 860, 190, '1.', { size: 30, color: 'red', bold: true });
+        await b.write('t1a', 480, 190, 'very very = μ^3   (pow)', { size: 30, color: 'green' });
+        await b.write('t1b', 480, 235, `کتاب‌ها: ${LTR('μ⁴')}   ·   ${LTR('Negnevitsky: extremely = μ³')}`, { size: 22, color: 'soft', fa: true });
+        await b.write('t1c', 480, 275, 'طبق جزوه؛ در امتحان فرمول را هم بنویس', { size: 22, color: 'soft', fa: true });
+        await b.write('t2', 860, 345, '2.', { size: 30, color: 'red', bold: true });
+        await b.write('t2a', 480, 345, `${LTR('slightly')}: در جزوه فرمول ندارد`, { size: 28, fa: true });
+        await b.write('t3', 860, 440, '3.', { size: 30, color: 'red', bold: true });
+        await b.write('t3a', 480, 440, 'not very = 1 − μ^2   ≠   (1 − μ)^2', { size: 30, color: 'blue' });
+      },
+    },
+    // ---------------------------------------------------------- 10. homework 1, question 2
+    {
+      say: 'حالا سؤال 2 تمرین 1: از مجموعه‌ی tall، مجموعه‌های somewhat tall، indeed tall، very tall، very very tall و not very tall را بسازید. حواستان به نماد باشد: اینجا هر جفت به شکل (x, μ) است، یعنی اول *عنصر*، بعد *درجه*. این برعکس نماد μ/x است. پس (60, 0.7) یعنی عنصر 60 با درجه‌ی 0.7، همان چیزی که با نماد دیگر 0.7/60 می‌نویسیم.',
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        await b.write('hh', 500, 62, 'تمرین 1 · سؤال 2', { size: 32, color: 'orange', bold: true, fa: true });
+        await b.write('hT', 500, 125, 'Tall = {(0,0), (20,0.2), (40,0.4), (60,0.7), (80,1), (100,1)}', { size: 28, color: 'blue' });
+        await b.write('hQ', 500, 180, 'somewhat · indeed · very · very very · not very', { size: 26, color: 'green' });
+        await b.box('fb', 180, 230, 640, 280, { color: 'purple' });
+        await b.write('p1', 360, 310, '(60, 0.7)', { size: 46, color: 'blue', bold: true });
+        await b.write('p1a', 300, 360, 'عنصر', { size: 22, color: 'purple', fa: true });
+        await b.write('p1b', 410, 360, 'درجه', { size: 22, color: 'purple', fa: true });
+        await b.write('eq', 500, 310, '=', { size: 46, color: 'soft' });
+        await b.write('p2', 640, 310, '0.7/60', { size: 46, color: 'blue', bold: true });
+        await b.write('p2a', 605, 360, 'درجه', { size: 22, color: 'purple', fa: true });
+        await b.write('p2b', 690, 360, 'عنصر', { size: 22, color: 'purple', fa: true });
+        await b.write('fl', 500, 445, `زوج مرتب ${LTR('(x, μ)')}: اول عنصر، بعد درجه`, { size: 26, color: 'red', bold: true, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 11. very tall
+    {
+      say: 'جدول درجه‌ها را می‌نویسیم. very tall: هر درجه به توان 2: 0، 0.04، 0.16، 0.49، 1، 1. پس very tall = {(0,0), (20,0.04), (40,0.16), (60,0.49), (80,1), (100,1)}.',
+      draw: async b => {
+        await b.clear();
+        await b.line('tv', 250, 45, 250, 410, { color: 'soft', width: 2 });
+        await b.line('th', 90, 140, 960, 140, { color: 'soft', width: 2 });
+        await row(b, 't-x', 165, XT, YT.x, 'x', TALL.x, { lc: 'soft', color: 'soft' });
+        await row(b, 't-m', 165, XT, YT.m, 'μ_tall', TALL.m, { lc: 'blue', color: 'blue' });
+        await row(b, 't-very', 165, XT, YT.very, 'very', TALL.m.map(H.very), { color: 'green', ls: 24 });
+        await b.write('nt', 500, 470, '(μ)^2', { size: 30, color: 'orange' });
+      },
+    },
+    // ---------------------------------------------------------- 12. very very tall
+    {
+      say: 'very very tall، طبق اسلاید 52 به توان 3: 0.2^3 = 0.008، 0.4^3 = 0.064، 0.7^3 = 0.343، و 0 و 1 همان می‌مانند. اگر استاد نسخه‌ی کتاب‌ها یعنی توان 4 را بخواهد، جواب 0، 0.0016، 0.0256، 0.2401، 1، 1 می‌شود.',
+      draw: async b => {
+        await row(b, 't-vv', 165, XT, YT.vv, 'very very', TALL.m.map(H.veryvery), { color: 'green', ls: 22 });
+        await b.write('nt', 500, 470, '(μ)^3', { size: 30, color: 'orange' });
+        await b.write('nt2', 500, 520, `با توان ${LTR('4')} (کتاب‌ها): ${LTR('0,  0.0016,  0.0256,  0.2401,  1,  1')}`, { size: 22, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 13. not very tall
+    {
+      say: 'not very tall: از ردیف very استفاده کن و از 1 کم کن: 1، 0.96، 0.84، 0.51، 0، 0. ببینید جایی که tall برابر 1 بود، حالا 0 شده.',
+      draw: async b => {
+        await b.erase('nt*');
+        await row(b, 't-nv', 165, XT, YT.nv, 'not very', TALL.m.map(H.notvery), { color: 'green', ls: 22 });
+        await b.write('nt', 500, 470, '1 − (μ)^2   =   1 − very', { size: 30, color: 'orange' });
+      },
+    },
+    // ---------------------------------------------------------- 14. somewhat tall
+    {
+      say: 'somewhat tall: جذر هر درجه. جذر 0.2 تقریباً 0.447، جذر 0.4 تقریباً 0.632، جذر 0.7 تقریباً 0.837. همه بزرگ‌تر از درجه‌ی اصلی شدند.',
+      draw: async b => {
+        await b.erase('nt*');
+        await row(b, 't-sw', 165, XT, YT.sw, 'somewhat', TALL.m.map(H.somewhat), { color: 'green', ls: 22 });
+        await b.write('nt', 500, 470, '(μ)^{0.5} = √μ', { size: 30, color: 'orange' });
+      },
+    },
+    // ---------------------------------------------------------- 15. indeed tall
+    {
+      say: 'indeed tall: اول حالت را پیدا کن. 0، 0.2 و 0.4 زیر 0.5 هستند، پس 2μ^2: یعنی 0، 0.08 و 0.32. 0.7 و 1 بالای 0.5 هستند: برای 0.7 داریم 1 − 2 × 0.3^2 = 0.82، و برای 1 داریم 1 − 0 = 1.',
+      draw: async b => {
+        await b.erase('nt*');
+        await row(b, 't-in', 165, XT, YT.in, 'indeed', TALL.m.map(H.indeed), { ls: 24, colorOf: (v, c) => (TALL.m[c] <= 0.5 ? 'blue' : 'orange') });
+        await b.write('nt', 330, 470, 'μ ≤ 0.5:   2μ^2', { size: 28, color: 'blue' });
+        await b.write('nt2', 700, 470, 'μ ≥ 0.5:   1 − 2(1 − μ)^2', { size: 28, color: 'orange' });
+        await b.write('nt3', 500, 525, '0.7  →  1 − 2(0.3)^2 = 1 − 0.18 = 0.82', { size: 26, color: 'green' });
+      },
+    },
+    // ---------------------------------------------------------- 16. the curves
+    {
+      say: 'روی نمودار: tall خط سیاه است. very tall، آبی، زیر آن است و جمع‌تر شده؛ برای اینکه «خیلی بلند» حساب شوی، قد بیشتری لازم است. somewhat tall، سبز، بالای آن است و پهن‌تر. نقطه‌ها را خطی به هم وصل کرده‌ایم.',
+      draw: async b => {
+        await b.clear();
+        await gT.axes(b, 'ax', { ticks: TALL.x, label: 'x' });
+        const pts = f => TALL.x.map((x, c) => [x, f(TALL.m[c])]);
+        await gT.poly(b, 'p-tall', pts(m => m), { color: 'ink', width: 4 });
+        await gT.poly(b, 'p-very', pts(H.very), { color: 'blue' });
+        await gT.poly(b, 'p-sw', pts(H.somewhat), { color: 'green' });
+        await b.write('lg1', 790, 150, 'somewhat tall', { size: 26, color: 'green', anchor: 'start' });
+        await b.write('lg2', 790, 200, 'tall', { size: 26, color: 'ink', anchor: 'start' });
+        await b.write('lg3', 790, 250, 'very tall', { size: 26, color: 'blue', anchor: 'start' });
+        await gT.guide(b, 'g60', 60, 0.49, { color: 'blue' });
+        await b.write('n60', gT.X(60) + 70, gT.Y(0.49) + 30, '0.49', { size: 22, color: 'blue' });
+      },
+    },
+    // ---------------------------------------------------------- 17. not very short and not very tall
+    {
+      say: 'آخرین چیز اسلاید 53: «نه خیلی کوتاه و نه خیلی بلند». هر تکه یک not very است و علامت ∧ یعنی AND، که از درس 4 می‌دانیم در فازی همان min است. مثلاً اگر μ_tall = 0.7 و μ_short = 0.2: not very tall = 1 − 0.49 = 0.51، not very short = 1 − 0.04 = 0.96، و جواب min(0.51, 0.96) = 0.51.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 80, 'نه خیلی کوتاه و نه خیلی بلند', { size: 36, color: 'orange', bold: true, fa: true });
+        await b.write('f', 500, 160, '[1 − (μ_tall(x))^2]  ∧  [1 − (μ_short(x))^2]', { size: 32 });
+        await b.write('and', 500, 215, '∧ = AND = min', { size: 28, color: 'purple' });
+        await b.write('g', 500, 290, 'μ_tall = 0.7        μ_short = 0.2', { size: 30, color: 'blue' });
+        await b.write('s1', 300, 360, '1 − 0.49 = 0.51', { size: 30 });
+        await b.write('s2', 700, 360, '1 − 0.04 = 0.96', { size: 30 });
+        await b.write('s1l', 300, 400, 'not very tall', { size: 22, color: 'soft' });
+        await b.write('s2l', 700, 400, 'not very short', { size: 22, color: 'soft' });
+        await b.write('ans', 500, 480, 'min(0.51, 0.96) = 0.51', { size: 40, color: 'green', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 18. summary
+    {
+      say: 'جمع‌بندی: این فرمول‌ها را حفظ کنید و تله‌ها را یادتان باشد. بعد برویم سراغ سؤال‌ها.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 65, 'یادت باشد', { size: 44, color: 'orange', bold: true, fa: true });
+        const L = [['not', '1 − μ'], ['very', 'μ^2'], ['very very', 'μ^3'], ['not very', '1 − μ^2'], ['somewhat', 'μ^{0.5}'],
+          ['indeed', '2μ^2   |   1 − 2(1 − μ)^2']];
+        for (const [k, [n, f]] of L.entries()) {
+          await all([b.write(`sn${k}`, 820, 130 + k * 46, n, { size: 26, color: 'orange', bold: true }),
+            b.write(`sf${k}`, 480, 130 + k * 46, f, { size: 26 })]);
+        }
+        await b.write('m1', 500, 440, `indeed: اول ببین درجه از ${LTR('0.5')} کمتر است یا بیشتر`, { size: 22, color: 'soft', fa: true });
+        await b.write('m2', 500, 480, `${LTR('not very ≠ (1 − μ)²')}   ·   ${LTR('∧ = min')}`, { size: 22, color: 'soft', fa: true });
+        await b.write('m3', 500, 520, `در تمرین 1 جفت‌ها ${LTR('(x, μ)')} هستند: اول عنصر`, { size: 22, color: 'red', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- quizzes
+    {
+      say: 'نوبت شماست! با این مجموعه، درجه‌ی عنصر 180 در very very tall چقدر است؟ طبق جزوه حساب کنید.',
+      draw: quizBoard(1, [[TALL2, { size: 26, color: 'blue' }], ['very very tall  at  x = 180 :  μ = ?', { color: 'orange' }]]),
+      quiz: { answer: ['0.512'], hint: 'جفت (180, 0.8) یعنی درجه 0.8 است. very very طبق اسلاید 52 یعنی توان 3.', explain: '0.8^3 = 0.512' },
+      solve: async b => {
+        await b.write('s1', 500, 300, '(180, 0.8)  →  μ = 0.8', { size: 32, color: 'blue' });
+        await b.write('s2', 500, 380, '0.8^3 = 0.8 × 0.8 × 0.8 = 0.512', { size: 36, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'همان مجموعه: درجه‌ی عنصر 180 در indeed tall چقدر است؟',
+      draw: quizBoard(2, [[TALL2, { size: 26, color: 'blue' }], ['indeed tall  at  x = 180 :  μ = ?', { color: 'orange' }]]),
+      quiz: { answer: ['0.92'], hint: 'درجه 0.8 از 0.5 بیشتر است، پس حالت دوم: 1 − 2(1 − μ)^2.', explain: '1 − 2 × 0.2^2 = 1 − 0.08 = 0.92' },
+      solve: async b => {
+        await b.write('s1', 500, 290, '0.8 ≥ 0.5  →  1 − 2(1 − μ)^2', { size: 30, color: 'orange' });
+        await b.write('s2', 500, 360, '1 − 2(0.2)^2 = 1 − 2 × 0.04 = 1 − 0.08', { size: 30 });
+        await b.write('s3', 500, 440, '= 0.92', { size: 44, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'همان مجموعه: درجه‌ی عنصر 160 در somewhat tall تقریباً چقدر است؟',
+      draw: quizBoard(3, [[TALL2, { size: 26, color: 'blue' }], ['somewhat tall  at  x = 160 :  μ ≈ ?', { color: 'orange' }]]),
+      quiz: {
+        choices: ['0.09', '0.3', '0.548', '0.91'], correct: 2,
+        explain: 'somewhat یعنی جذر: جذر 0.3 تقریباً 0.548 است. 0.09 جواب very است، نه somewhat.',
+      },
+      solve: async b => {
+        await b.write('s1', 500, 300, '(160, 0.3)  →  μ = 0.3', { size: 32, color: 'blue' });
+        await b.write('s2', 500, 380, '(0.3)^{0.5} = √0.3 ≈ 0.548', { size: 38, color: 'green', bold: true });
+        await b.write('s3', 500, 450, `${LTR('0.548 > 0.3')}: ${LTR('somewhat')} آسان‌گیرتر است`, { size: 24, color: 'soft', fa: true });
+      },
+    },
+    {
+      say: 'سؤال تله‌ای: اگر μ_tall(x) = 0.6 باشد، درجه‌ی not very tall چقدر است؟',
+      draw: quizBoard(4, [['μ_tall(x) = 0.6', { color: 'blue' }], ['not very tall :  μ = ?', { color: 'orange' }]]),
+      quiz: {
+        choices: ['0.16', '0.36', '0.4', '0.64'], correct: 3,
+        explain: 'اول very: 0.6^2 = 0.36، بعد مکمل: 1 − 0.36 = 0.64. جواب 0.16 همان (1 − 0.6)^2 است که اشتباه است.',
+      },
+      solve: async b => {
+        await b.write('s1', 500, 290, 'very:   0.6^2 = 0.36', { size: 32 });
+        await b.write('s2', 500, 360, 'not very:   1 − 0.36 = 0.64', { size: 38, color: 'green', bold: true });
+        await b.write('s3', 500, 440, '(1 − 0.6)^2 = 0.16   ✗', { size: 30, color: 'red' });
+        await b.line('s3x', 380, 432, 620, 424, { color: 'red' });
+      },
+    },
+    {
+      say: 'اسلاید 53: قد علی طوری است که μ_tall = 0.4 و μ_short = 0.5. درجه‌ی «نه خیلی کوتاه و نه خیلی بلند» چقدر است؟',
+      draw: quizBoard(5, [['μ_tall = 0.4        μ_short = 0.5', { color: 'blue' }], ['[1 − (μ_tall)^2]  ∧  [1 − (μ_short)^2] = ?', { color: 'orange', size: 30 }]]),
+      quiz: { answer: ['0.75'], hint: 'هر کروشه را جدا حساب کن، بعد ∧ یعنی min.', explain: '1 − 0.16 = 0.84 و 1 − 0.25 = 0.75، پس min(0.84, 0.75) = 0.75' },
+      solve: async b => {
+        await b.write('s1', 300, 300, '1 − 0.4^2 = 0.84', { size: 30 });
+        await b.write('s2', 700, 300, '1 − 0.5^2 = 0.75', { size: 30 });
+        await b.write('s3', 500, 390, 'min(0.84, 0.75) = 0.75', { size: 40, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'سؤال آخر: طبق اسلاید 52 جزوه، فرمول very very کدام است؟',
+      draw: quizBoard(6, [['very very :  μ_{pow(A)}(x) = ?', { color: 'orange' }]]),
+      quiz: {
+        choices: ['(μ_A(x))^{0.5}', '(μ_A(x))^2', '(μ_A(x))^3', '(μ_A(x))^4'], correct: 2,
+        explain: 'جزوه very very را pow(A) با توان 3 تعریف کرده. توان 4 نسخه‌ی کتاب‌هاست؛ در امتحان فرمول جزوه را بنویسید.',
+      },
+      solve: async b => {
+        await b.write('s1', 500, 260, 'μ_{pow(A)}(x) = (μ_A(x))^3', { size: 40, color: 'green', bold: true });
+        await b.write('s2', 500, 340, 'very = μ^2      very very = μ^3', { size: 30 });
+        await b.write('s3', 500, 410, `${LTR('μ⁴')} مال کتاب‌هاست، نه جزوه`, { size: 26, color: 'soft', fa: true });
+      },
+    },
+  ],
+});
 </script>
 </body>
 </html>

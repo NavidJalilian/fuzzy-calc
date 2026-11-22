@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Optimization</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Vazirmatn:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="../assets/teacher.css">
+</head>
+<body>
+<main id="app"></main>
+<script src="../assets/teacher.js"></script>
+<script src="../assets/graph.js"></script>
+<script>
+// Lesson 28 — slides 305–315 (Part 8: optimization algorithms).
+// Explanations are Persian; numbers, math and technical terms stay as written in English.
+
+const all = list => Promise.all(list);
+const LTR = s => `⁦${s}⁩`; // keeps a left-to-right run (numbers, math) intact inside Persian board text
+const QUIZZES = 6;
+
+function quizBoard(n, lines) {
+  return async b => {
+    await b.clear();
+    await b.write('q-n', 500, 60, `سؤال ${n} از ${QUIZZES}`, { size: 24, color: 'soft', fa: true });
+    for (const [k, l] of lines.entries()) await b.write(`q-l${k}`, 500, 130 + k * 52, l.text, { size: l.size || 34, fa: l.fa, color: l.color || 'ink' });
+  };
+}
+
+// The weighted objective of slide 307, with my own route numbers (time in minutes, cost in thousand toman).
+const F = (w1, f1, w2, f2) => +(w1 * f1 + w2 * f2).toFixed(4);
+const ROUTES = [['A', 40, 20], ['B', 30, 50]];
+
+// The 4-step process boxes (slides 309–313).
+const STEPS = ['فرموله کردن', 'مدل‌سازی', 'بهینه‌سازی', 'استقرار'];
+const SX = [830, 610, 390, 170]; // right to left, like Persian reading order
+
+Teacher.start({
+  id: 'L28',
+  number: 28,
+  title: 'بهینه‌سازی و فرآیند آن',
+  chapter: 'بخش 8 · الگوریتم‌های بهینه‌سازی',
+  slides: '305–315',
+  intro: 'تابع هدف، متغیرهای طراحی، مسئله‌های چندهدفی و بامحدودیت، چهار گام فرآیند بهینه‌سازی و الگوریتم‌های اکتشافی.',
+  next: { href: '0029-swarm-algorithms.html', title: 'PSO، کرم شب‌تاب و کلونی مورچه' },
+  steps: [
+    // ---------------------------------------------------------- 1. intro
+    {
+      say: 'به آخرین بخش درس خوش آمدید: *optimization* یعنی بهینه‌سازی. در درس‌های شبکه‌ی عصبی، gradient descent یک روش بهینه‌سازی بود. حالا خود ایده را از اول و کلی‌تر می‌بینیم.',
+      term: ['Optimization', 'بهینه‌سازی'],
+      draw: async b => {
+        await b.write('t1', 500, 190, 'بخش 8', { size: 66, color: 'blue', bold: true, fa: true });
+        await b.write('t2', 500, 280, 'الگوریتم‌های بهینه‌سازی', { size: 46, fa: true });
+        await b.write('t3', 500, 360, 'Optimization algorithms', { size: 42, color: 'orange' });
+      },
+    },
+    // ---------------------------------------------------------- 2. the goal
+    {
+      say: 'اسلاید 306 هدف را این‌طور می‌گوید: پیدا کردن *بهترین جواب قابل قبول*، با توجه به *محدودیت‌ها* و *نیازهای* مسئله. دقت کنید: بهترین جواب «قابل قبول»، نه هر جوابی.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 90, 'هدف بهینه‌سازی', { size: 44, color: 'orange', bold: true, fa: true });
+        await b.box('bx', 150, 140, 700, 110, { color: 'blue', fill: 'blue' });
+        await b.write('g', 500, 210, 'پیدا کردن بهترین جوابِ قابل قبول', { size: 38, fa: true });
+        await b.arrow('a1', 330, 260, 300, 330, { color: 'soft' });
+        await b.arrow('a2', 670, 260, 700, 330, { color: 'soft' });
+        await b.write('c1', 290, 370, 'با توجه به محدودیت‌ها', { size: 30, color: 'red', fa: true });
+        await b.write('c2', 710, 370, 'و نیازهای مسئله', { size: 30, color: 'purple', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 3. objective function
+    {
+      say: 'یک مسئله معمولاً چند جواب مختلف دارد. برای مقایسه‌ی آن‌ها و انتخاب بهترین، یک تابع تعریف می‌کنیم به اسم *objective function* یا تابع هدف. مثال اسلاید: در شبکه‌ی حمل‌ونقل، تابع هدف رایج *زمان سفر* یا *هزینه* است. سه مسیر از خانه تا کار را با زمان سفرشان ببینید.',
+      term: ['Objective function', 'تابع هدف'],
+      draw: async b => {
+        await b.clear();
+        await b.write('home', 860, 290, 'خانه', { size: 30, bold: true, fa: true });
+        await b.write('work', 140, 290, 'محل کار', { size: 30, bold: true, fa: true });
+        await b.path('rA', 'M800 270 Q500 90 210 270', { color: 'blue' });
+        await b.path('rB', 'M800 285 L210 285', { color: 'blue' });
+        await b.path('rC', 'M800 305 Q500 480 210 305', { color: 'blue' });
+        await all([
+          b.write('tA', 500, 160, `مسیر ${LTR('A')}: ${LTR('45')} دقیقه`, { size: 28, fa: true }),
+          b.write('tB', 500, 272, `مسیر ${LTR('B')}: ${LTR('35')} دقیقه`, { size: 28, fa: true }),
+          b.write('tC', 500, 420, `مسیر ${LTR('C')}: ${LTR('50')} دقیقه`, { size: 28, fa: true }),
+        ]);
+        await b.write('f', 500, 515, `${LTR('f')} = زمان سفر`, { size: 32, color: 'orange', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 4. pick the best
+    {
+      say: 'حالا با تابع هدف مقایسه ساده است: اگر هدف کمترین زمان باشد، مسیر B با 35 دقیقه بهترین است. ولی اگر تابع هدف «هزینه» بود، شاید جواب عوض می‌شد. برای همین اسلاید می‌گوید انتخاب تابع هدف مناسب یکی از *مهم‌ترین گام‌های* بهینه‌سازی است و به طبیعت مسئله بستگی دارد.',
+      draw: async b => {
+        await b.recolor('rB', 'green');
+        await b.recolor('tB', 'green');
+        await b.dim(['rA', 'rC', 'tA', 'tC'], 0.3);
+      },
+    },
+    // ---------------------------------------------------------- 5. design variables
+    {
+      say: 'هر مسئله‌ی بهینه‌سازی چند متغیر مستقل دارد که به آن‌ها *design variables* یا متغیرهای طراحی می‌گوییم. آن‌ها را با یک بردار n بعدی x نشان می‌دهیم: x = (x_1, x_2, …, x_n). کار بهینه‌سازی این است که x را طوری انتخاب کند که تابع هدف *کمینه* یا *بیشینه* شود.',
+      term: ['Design variables', 'متغیرهای طراحی'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 90, 'متغیرهای طراحی', { size: 44, color: 'orange', bold: true, fa: true });
+        await b.write('x', 500, 180, 'x = (x_1, x_2, … , x_n)', { size: 48, color: 'blue' });
+        await b.write('xn', 500, 230, 'یک بردار n بعدی', { size: 24, color: 'soft', fa: true });
+        await b.write('goal', 500, 330, 'x را طوری پیدا کن که f(x) کمینه یا بیشینه شود', { size: 32, fa: true });
+        await all([
+          b.write('min', 330, 420, 'min f(x)', { size: 40, color: 'green' }),
+          b.write('max', 670, 420, 'max f(x)', { size: 40, color: 'green' }),
+          b.write('or', 500, 420, 'یا', { size: 30, color: 'soft', fa: true }),
+        ]);
+      },
+    },
+    // ---------------------------------------------------------- 6. picture of a minimum
+    {
+      say: 'تصویرش این است: تابع هدف f را برحسب متغیر طراحی x رسم کنید. بهینه‌سازی دنبال x ای می‌گردد که منحنی در آن *پایین‌ترین* نقطه را دارد. اینجا x = 3 و مقدار کمینه f = 10 است.',
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        const g = Graph({ x: 220, y: 90, w: 560, h: 360, from: 0, to: 6, min: 0, max: 50 });
+        const f = x => 4 * (x - 3) ** 2 + 10;
+        await g.axes(b, 'ax', { ticks: [0, 1, 2, 3, 4, 5, 6], yTicks: [0, 10, 25, 50], label: 'x', yLabel: 'f(x)' });
+        await g.curve(b, 'curve', f, { color: 'blue' });
+        await g.guide(b, 'opt', 3, 10, { color: 'green' });
+        await b.write('lab', g.X(3), g.Y(10) - 22, 'کمینه', { size: 24, color: 'green', bold: true, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 7. multi-objective
+    {
+      say: 'گاهی چند هدف را *هم‌زمان* می‌خواهیم؛ مثلاً هم زمان سفر کم، هم هزینه‌ی کم. به این‌ها *multi-objective* یا مسئله‌های چندهدفی می‌گوییم. سخت است، چون مسیر ارزان معمولاً کندتر است.',
+      term: ['Multi-objective problem', 'مسئله‌ی چندهدفی'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 90, 'مسئله‌ی چندهدفی', { size: 44, color: 'orange', bold: true, fa: true });
+        await all([
+          b.write('f1', 330, 180, `${LTR('f₁')} = زمان`, { size: 36, color: 'blue', fa: true }),
+          b.write('f2', 670, 180, `${LTR('f₂')} = هزینه`, { size: 36, color: 'purple', fa: true }),
+        ]);
+        await b.write('both', 500, 260, 'هر دو باید کم شوند', { size: 30, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 8. weighted sum
+    {
+      say: 'ساده‌ترین راه طبق اسلاید 307: یک تابع هدف *جدید* بسازیم که ترکیب خطی تابع‌های اصلی است: F = w_1 f_1 + w_2 f_2. هر وزن w نشان می‌دهد آن هدف چقدر برای ما مهم است. حالا دوباره فقط یک تابع داریم.',
+      term: ['Weighted sum (linear combination)', 'ترکیب خطی وزن‌دار'],
+      draw: async b => {
+        await b.box('bx', 200, 310, 600, 100, { color: 'green', fill: 'green' });
+        await b.write('F', 500, 375, 'F = w_1 f_1 + w_2 f_2', { size: 46, color: 'green', bold: true });
+        await b.write('w', 500, 465, 'وزن هر هدف = میزان اثرگذاری آن', { size: 26, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 9. worked example
+    {
+      say: 'یک مثال عددی خودم: مسیر A زمانش 40 و هزینه‌اش 20، مسیر B زمانش 30 و هزینه‌اش 50. زمان برایمان مهم‌تر است، پس w_1 = 0.6 و w_2 = 0.4. برای A: 0.6 × 40 + 0.4 × 20 = 24 + 8 = 32. برای B: 0.6 × 30 + 0.4 × 50 = 18 + 20 = 38. چون می‌خواهیم کمینه شود، A برنده است، با اینکه کندتر است.',
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        await b.write('w', 500, 70, 'w_1 = 0.6    w_2 = 0.4', { size: 32, color: 'purple' });
+        for (const [k, [name, t, c]] of ROUTES.entries()) {
+          const y = 170 + k * 150;
+          await b.write(`r${k}`, 860, y, `مسیر ${LTR(name)}`, { size: 30, bold: true, fa: true });
+          await b.write(`d${k}`, 860, y + 40, `زمان ${LTR(t)} · هزینه ${LTR(c)}`, { size: 22, color: 'soft', fa: true });
+          await b.write(`e${k}`, 430, y, `F = 0.6×${t} + 0.4×${c}`, { size: 32 });
+          await b.write(`v${k}`, 430, y + 50, `= ${F(0.6, t, 0, 0)} + ${F(0, 0, 0.4, c)} = ${F(0.6, t, 0.4, c)}`, { size: 32, color: 'green' });
+        }
+        await b.ring('best', 520, 220, 55, 30, { color: 'green' });
+        await b.write('ans', 500, 520, 'کمترین F: مسیر A', { size: 32, color: 'green', bold: true, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 10. constraints
+    {
+      say: 'اسلاید 308 مسئله‌ها را دو دسته می‌کند. *بدون محدودیت*: فقط تابع هدف را کمینه یا بیشینه کن، هر x ای مجاز است. *بامحدودیت*: x باید شرط‌هایی را رعایت کند که از رفتار و عملکرد سیستم می‌آیند. بیشتر مسئله‌های واقعی بامحدودیت هستند؛ مثلاً «بودجه حداکثر 30».',
+      term: ['Constrained / unconstrained', 'بامحدودیت / بدون محدودیت'],
+      draw: async b => {
+        await b.clear();
+        await b.box('b1', 520, 90, 420, 220, { color: 'blue', fill: 'blue' });
+        await b.write('h1', 730, 150, 'بدون محدودیت', { size: 34, color: 'blue', bold: true, fa: true });
+        await b.write('l1', 730, 210, 'فقط f(x) را کمینه یا بیشینه کن', { size: 24, fa: true });
+        await b.write('l1b', 730, 260, 'هر x مجاز است', { size: 24, color: 'soft', fa: true });
+        await b.box('b2', 60, 90, 420, 220, { color: 'red', fill: 'red' });
+        await b.write('h2', 270, 150, 'بامحدودیت', { size: 34, color: 'red', bold: true, fa: true });
+        await b.write('l2', 270, 210, 'x باید شرط‌هایی را رعایت کند', { size: 24, fa: true });
+        await b.write('l2b', 270, 260, `مثلاً: هزینه ${LTR('≤ 30')}`, { size: 24, color: 'soft', fa: true });
+        await b.write('note', 500, 400, 'بیشتر مسئله‌های کاربردی بامحدودیت هستند', { size: 30, color: 'orange', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 11. constraint changes the answer
+    {
+      say: 'دوباره مثال مسیرها: اگر محدودیت «هزینه ≤ 30» را بگذاریم، مسیر B با هزینه‌ی 50 اصلاً *مجاز نیست* و قبل از مقایسه کنار می‌رود. محدودیت اول جواب‌های غیرمجاز را حذف می‌کند، بعد تابع هدف بین بقیه انتخاب می‌کند.',
+      draw: async b => {
+        await b.write('rb', 500, 480, `مسیر ${LTR('B')}: هزینه ${LTR('50 > 30')} ← غیرمجاز`, { size: 30, color: 'red', fa: true });
+        await b.line('xb', 340, 470, 660, 488, { color: 'red' });
+      },
+    },
+    // ---------------------------------------------------------- 12. the 4 steps
+    {
+      say: 'حالا *فرآیند* بهینه‌سازی، اسلاید 309. چهار گام دارد، به همین ترتیب: 1 فرموله کردن مسئله، 2 مدل‌سازی مسئله، 3 بهینه‌سازی مسئله، 4 استقرار. ترتیب این چهار گام در امتحان زیاد پرسیده می‌شود.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 80, 'فرآیند بهینه‌سازی', { size: 44, color: 'orange', bold: true, fa: true });
+        for (const [k, s] of STEPS.entries()) {
+          await b.box(`s${k}`, SX[k] - 90, 180, 180, 90, { color: 'blue', fill: 'blue' });
+          await b.write(`sn${k}`, SX[k], 215, String(k + 1), { size: 26, color: 'purple', bold: true });
+          await b.write(`st${k}`, SX[k], 252, s, { size: 26, fa: true });
+          if (k < 3) await b.arrow(`sa${k}`, SX[k] - 95, 225, SX[k + 1] + 95, 225, { color: 'soft' });
+        }
+      },
+    },
+    // ---------------------------------------------------------- 13. formulate
+    {
+      say: 'گام 1، *فرموله کردن* (اسلاید 310): مسئله را همراه با یک ساختار کلی تعریف می‌کنیم. این ساختار ممکن است خیلی دقیق نباشد، اما وضعیت کلی را می‌گوید: ورودی‌ها، خروجی‌ها و اهداف مسئله.',
+      draw: async b => {
+        await b.pulse('s0');
+        await b.write('d0', 500, 360, 'تعریف مسئله + ساختار کلی', { size: 32, color: 'blue', fa: true });
+        await b.write('d0b', 500, 410, 'ورودی‌ها · خروجی‌ها · اهداف (لازم نیست خیلی دقیق باشد)', { size: 24, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 14. model
+    {
+      say: 'گام 2، *مدل‌سازی* (اسلاید 311): یک مدل *ریاضی* کلی برای مسئله می‌سازیم. این گام مسئله را به یک یا چند مدل بهینه‌سازی تجزیه می‌کند؛ یعنی همان تابع هدف، متغیرهای طراحی و محدودیت‌ها.',
+      draw: async b => {
+        await b.erase(['d0', 'd0b']);
+        await b.pulse('s1');
+        await b.write('d1', 500, 360, 'ساخت مدل ریاضی', { size: 32, color: 'blue', fa: true });
+        await b.write('d1b', 500, 410, 'تجزیه به یک یا چند مدل بهینه‌سازی', { size: 24, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 15. optimize + trap
+    {
+      say: 'گام 3، *بهینه‌سازی* (اسلاید 312): روال حل، یک راه‌حل خوب تولید می‌کند که ممکن است بهینه یا *تقریباً* بهینه باشد. تله‌ی امتحان: این راه‌حل، راه‌حلِ *مدل* است، نه خود مسئله‌ی واقعی. اگر مدل خوب ساخته نشده باشد، جواب هم برای دنیای واقعی خوب نیست.',
+      tip: true,
+      draw: async b => {
+        await b.erase(['d1', 'd1b']);
+        await b.pulse('s2');
+        await b.write('d2', 500, 360, 'راه‌حل بهینه یا تقریباً بهینه', { size: 32, color: 'blue', fa: true });
+        await b.box('trap', 180, 395, 640, 60, { color: 'red', fill: 'red' });
+        await b.write('d2b', 500, 435, '⚠ راه‌حلِ مدل است، نه مسئله‌ی واقعی', { size: 26, color: 'red', bold: true, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 16. deploy + loop
+    {
+      say: 'گام 4، *استقرار* (اسلاید 313): تصمیم‌گیرنده راه‌حل را بررسی می‌کند. اگر قابل قبول بود، استفاده می‌شود. اگر نبود، مدل یا الگوریتم بهینه‌سازی باید توسعه داده شود و فرآیند *تکرار* می‌شود؛ پس این چهار گام یک حلقه است.',
+      draw: async b => {
+        await b.erase(['d2', 'trap', 'd2b']);
+        await b.pulse('s3');
+        await b.wire('loop', [[SX[3], 275], [SX[3], 320], [SX[1], 320], [SX[1], 285]], { color: 'orange' });
+        await b.arrow('loopa', SX[1], 300, SX[1], 278, { color: 'orange', head: 10 });
+        await b.write('d3', 390, 360, 'قابل قبول نبود؟ مدل یا الگوریتم را بهتر کن و تکرار کن', { size: 24, color: 'orange', fa: true });
+        await b.write('d3b', 500, 430, 'قابل قبول بود ← استفاده می‌شود', { size: 28, color: 'green', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 17. heuristic
+    {
+      say: 'بسیاری از مسئله‌ها آن‌قدر بزرگ‌اند که پیدا کردن بهترین جواب دقیق، زمان خیلی زیادی می‌خواهد. *heuristic algorithm* یا الگوریتم اکتشافی (اسلاید 314) جوابی در یک *زمان قابل قبول* می‌دهد. ممکن است بهترین جواب واقعی نباشد، ولی نزدیک به بهترین است.',
+      term: ['Heuristic algorithm', 'الگوریتم اکتشافی'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 90, 'الگوریتم اکتشافی', { size: 44, color: 'orange', bold: true, fa: true });
+        await b.write('l1', 500, 170, 'جواب در زمان قابل قبول', { size: 34, color: 'green', fa: true });
+        await b.write('l2', 500, 230, 'شاید بهترین نباشد، ولی نزدیک به بهترین است', { size: 30, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 18. metaheuristic
+    {
+      say: '*metaheuristic* یا الگوریتم فرااکتشافی یک لایه بالاتر است: ترکیبی از الگوریتم‌های اکتشافی که طراحی شده تا در هر مرحله یک روش اکتشافی را پیدا، تولید یا انتخاب کند. برای مسئله‌های سخت بهینه‌سازی جواب‌های خوبی می‌دهد. الگوریتم‌های درس‌های بعد از این نوع‌اند.',
+      term: ['Metaheuristic algorithm', 'الگوریتم فرااکتشافی'],
+      draw: async b => {
+        await b.write('h2', 500, 330, 'الگوریتم فرااکتشافی', { size: 40, color: 'purple', bold: true, fa: true });
+        await b.write('m1', 500, 395, 'ترکیبی از الگوریتم‌های اکتشافی', { size: 30, fa: true });
+        await b.write('m2', 500, 450, 'در هر مرحله یک روش اکتشافی را پیدا، تولید یا انتخاب می‌کند', { size: 26, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 19. famous algorithms
+    {
+      say: 'اسلاید 315 چهار الگوریتم مهم را نام می‌برد: 1 *PSO* یا ازدحام ذرات، 2 کرم شب‌تاب یا *firefly*، 3 کلونی مورچگان یا *ant colony*، و 4 الگوریتم *genetic* یا ژنتیک. سه‌تای اول در درس بعد و ژنتیک در درس آخر.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 80, 'الگوریتم‌های مهم بهینه‌سازی', { size: 42, color: 'orange', bold: true, fa: true });
+        const L = [['ازدحام ذرات', 'PSO'], ['کرم شب‌تاب', 'Firefly'], ['کلونی مورچگان', 'Ant colony'], ['ژنتیک', 'Genetic algorithm']];
+        for (const [k, [fa, en]] of L.entries()) {
+          await b.write(`n${k}`, 860, 170 + k * 85, String(k + 1), { size: 32, color: 'purple', bold: true });
+          await b.write(`fa${k}`, 800, 170 + k * 85, fa, { size: 32, anchor: 'start', fa: true });
+          await b.write(`en${k}`, 300, 170 + k * 85, en, { size: 32, color: 'blue' });
+        }
+      },
+    },
+    // ---------------------------------------------------------- 20. summary
+    {
+      say: 'جمع‌بندی، پنج نکته برای امتحان. یک بار بخوانیدشان، بعد سراغ سؤال‌ها برویم.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 75, 'یادت باشد', { size: 48, color: 'orange', bold: true, fa: true });
+        const L = [
+          'هدف: بهترین جواب قابل قبول با توجه به محدودیت‌ها',
+          `تابع هدف جواب‌ها را مقایسه می‌کند؛ x = متغیرهای طراحی`,
+          `چندهدفی ← ${LTR('F = w₁f₁ + w₂f₂')}`,
+          'فرموله کردن ← مدل‌سازی ← بهینه‌سازی ← استقرار',
+          'اکتشافی: نزدیک به بهترین، در زمان قابل قبول',
+        ];
+        for (const [k, l] of L.entries()) await b.write(`m${k}`, 900, 160 + k * 75, '•  ' + l, { size: 27, anchor: 'start', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- quizzes
+    {
+      say: 'سؤال اول: مسیری زمان 50 و هزینه‌ی 10 دارد. با وزن‌های w_1 = 0.7 برای زمان و w_2 = 0.3 برای هزینه، تابع هدف ترکیبی F چند است؟',
+      draw: quizBoard(1, [
+        { text: 'F = w_1 f_1 + w_2 f_2', size: 40 },
+        { text: 'f_1 = 50    f_2 = 10', size: 34, color: 'blue' },
+        { text: 'w_1 = 0.7    w_2 = 0.3', size: 34, color: 'purple' },
+        { text: 'F = ?', size: 40, color: 'orange' },
+      ]),
+      quiz: { answer: [String(F(0.7, 50, 0.3, 10))], hint: 'هر هدف را در وزن خودش ضرب کن، بعد جمع کن.', explain: '0.7 × 50 + 0.3 × 10 = 35 + 3 = 38' },
+      solve: async b => {
+        await b.write('s1', 500, 400, '0.7×50 + 0.3×10', { size: 36 });
+        await b.write('s2', 500, 460, `= 35 + 3 = ${F(0.7, 50, 0.3, 10)}`, { size: 40, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'ترتیب درست چهار گام فرآیند بهینه‌سازی کدام است؟',
+      draw: quizBoard(2, [{ text: 'ترتیب گام‌های فرآیند بهینه‌سازی؟', fa: true, size: 40 }]),
+      quiz: {
+        choices: [
+          'مدل‌سازی، فرموله کردن، بهینه‌سازی، استقرار',
+          'فرموله کردن، مدل‌سازی، بهینه‌سازی، استقرار',
+          'فرموله کردن، بهینه‌سازی، مدل‌سازی، استقرار',
+          'استقرار، فرموله کردن، مدل‌سازی، بهینه‌سازی',
+        ],
+        correct: 1,
+        explain: 'اول مسئله را فرموله می‌کنیم، بعد مدل ریاضی می‌سازیم، بعد مدل را بهینه می‌کنیم و آخر راه‌حل را مستقر می‌کنیم.',
+      },
+      solve: async b => {
+        for (const [k, s] of STEPS.entries()) {
+          await b.box(`qs${k}`, SX[k] - 90, 260, 180, 80, { color: 'green', fill: 'green' });
+          await b.write(`qt${k}`, SX[k], 310, `${k + 1}. ${s}`, { size: 24, fa: true });
+          if (k < 3) await b.arrow(`qa${k}`, SX[k] - 95, 300, SX[k + 1] + 95, 300, { color: 'soft' });
+        }
+      },
+    },
+    {
+      say: 'سه مسیر داریم با زمان و هزینه: A زمان 40 و هزینه 20، B زمان 30 و هزینه 50، C زمان 35 و هزینه 28. هدف: کمترین زمان، با محدودیت هزینه ≤ 30. کدام مسیر جواب است؟ فقط حرف مسیر را بنویسید.',
+      draw: quizBoard(3, [
+        { text: 'A: (40, 20)    B: (30, 50)    C: (35, 28)', size: 32, color: 'blue' },
+        { text: `(زمان، هزینه) · هدف: کمترین زمان`, size: 26, fa: true, color: 'soft' },
+        { text: `محدودیت: ${LTR('cost ≤ 30')}`, size: 32, fa: true, color: 'red' },
+      ]),
+      quiz: { answer: ['C'], hint: 'اول مسیرهایی را که محدودیت را رعایت نمی‌کنند کنار بگذار.', explain: 'B با هزینه‌ی 50 غیرمجاز است. بین A با زمان 40 و C با زمان 35، مسیر C سریع‌تر است.' },
+      solve: async b => {
+        await b.write('s1', 500, 340, `مسیر ${LTR('B')}: ${LTR('50 > 30')} ← غیرمجاز`, { size: 30, color: 'red', fa: true });
+        await b.write('s2', 500, 400, `مسیر ${LTR('A')}: ${LTR('40')} دقیقه     مسیر ${LTR('C')}: ${LTR('35')} دقیقه`, { size: 30, fa: true });
+        await b.write('s3', 500, 470, `جواب: مسیر ${LTR('C')}`, { size: 38, color: 'green', bold: true, fa: true });
+      },
+    },
+    {
+      say: 'اسلاید 312 درباره‌ی راه‌حلی که در گام بهینه‌سازی به دست می‌آید یک هشدار می‌دهد. کدام جمله درست است؟',
+      draw: quizBoard(4, [{ text: 'راه‌حل گام 3 برای چیست؟', fa: true, size: 40 }]),
+      quiz: {
+        choices: [
+          'همیشه بهترین جواب ممکن برای مسئله‌ی واقعی است',
+          'راه‌حلی برای مدل طراحی‌شده است، نه برای مسئله‌ی واقعی',
+          'فقط در مسئله‌های بدون محدودیت معتبر است',
+          'نیازی به بررسی تصمیم‌گیرنده ندارد',
+        ],
+        correct: 1,
+        explain: 'روال حل روی مدل کار می‌کند؛ جوابش بهینه یا تقریباً بهینه برای مدل است، نه لزوماً برای مسئله‌ی واقعی. برای همین گام 4 آن را بررسی می‌کند.',
+      },
+      solve: async b => {
+        await b.box('sb', 160, 260, 680, 90, { color: 'green', fill: 'green' });
+        await b.write('s1', 500, 318, 'راه‌حلِ مدل ≠ راه‌حلِ مسئله‌ی واقعی', { size: 34, color: 'green', bold: true, fa: true });
+        await b.write('s2', 500, 420, 'گام 4: تصمیم‌گیرنده بررسی می‌کند', { size: 28, color: 'soft', fa: true });
+      },
+    },
+    {
+      say: 'کدام جمله الگوریتم اکتشافی را درست توصیف می‌کند؟',
+      draw: quizBoard(5, [{ text: 'الگوریتم اکتشافی (heuristic)؟', fa: true, size: 40 }]),
+      quiz: {
+        choices: [
+          'همیشه بهترین جواب دقیق را پیدا می‌کند',
+          'در زمان قابل قبول جوابی نزدیک به بهترین می‌دهد',
+          'فقط برای مسئله‌های چندهدفی به کار می‌رود',
+          'همان مدل‌سازی ریاضی مسئله است',
+        ],
+        correct: 1,
+        explain: 'هدف اکتشافی، جواب مناسب در زمان قابل قبول است؛ ممکن است بهترین جواب واقعی نباشد ولی نزدیک به آن است.',
+      },
+      solve: async b => {
+        await b.write('s1', 500, 300, 'زمان قابل قبول ✓', { size: 34, color: 'green', fa: true });
+        await b.write('s2', 500, 370, 'نزدیک به بهترین ✓    لزوماً بهترین ✗', { size: 30, fa: true });
+      },
+    },
+    {
+      say: 'سؤال آخر: ساده‌ترین راه حل یک مسئله‌ی چندهدفی طبق اسلاید 307 چیست؟',
+      draw: quizBoard(6, [{ text: 'ساده‌ترین راه برای مسئله‌ی چندهدفی؟', fa: true, size: 40 }]),
+      quiz: {
+        choices: [
+          'فقط مهم‌ترین هدف را نگه داریم و بقیه را حذف کنیم',
+          'یک تابع هدف جدید با ترکیب خطی وزن‌دار هدف‌ها بسازیم',
+          'هر هدف را جداگانه بهینه کنیم و میانگین جواب‌ها را بگیریم',
+          'تعداد متغیرهای طراحی را کم کنیم',
+        ],
+        correct: 1,
+        explain: 'F = w_1 f_1 + w_2 f_2 + … ؛ وزن هر تابع، میزان اثرگذاری آن را مشخص می‌کند.',
+      },
+      solve: async b => {
+        await b.write('s1', 500, 320, 'F = w_1 f_1 + w_2 f_2 + …', { size: 44, color: 'green', bold: true });
+        await b.write('s2', 500, 390, 'وزن = میزان اثرگذاری هر هدف', { size: 28, color: 'soft', fa: true });
+      },
+    },
+  ],
+});
+</script>
+</body>
+</html>

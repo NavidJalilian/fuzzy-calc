@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aggregation and Defuzzification</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Vazirmatn:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="../assets/teacher.css">
+</head>
+<body>
+<main id="app"></main>
+<script src="../assets/teacher.js"></script>
+<script src="../assets/graph.js"></script>
+<script>
+// Lesson 15 — slides 116–121 (part 4: fuzzy reasoning and inference systems).
+// Stage 4 (aggregation with max) and stage 5 (defuzzification: centroid, bisector, MOM, SOM, LOM).
+// Explanations are Persian; numbers, math and technical terms stay in English.
+
+const fmt = (n, d = 2) => String(+n.toFixed(d));
+const all = list => Promise.all(list);
+const LTR = s => s; // the player now keeps English / number runs in order inside Persian text by itself
+
+// ---- the slide-117 rain example with lesson 14's shapes (the slide draws the sets without numbers)
+const tri = (a, m, c) => z => Math.max(0, Math.min((z - a) / (m - a), (c - z) / (c - m)));
+const C1 = tri(5, 7, 9);    // بارش زیاد
+const C2 = tri(2, 4, 6);    // بارش کم
+const AL1 = 0.3, AL2 = 0.2; // α_1, α_2 from slides 113–117
+const C1c = z => Math.min(AL1, C1(z));
+const C2c = z => Math.min(AL2, C2(z));
+const AGG = z => Math.max(C1c(z), C2c(z));
+const ZS = Array.from({ length: 11 }, (_, k) => k);
+const AGG_PTS = [[0, 0], [2, 0], [2.4, 0.2], [5.4, 0.2], [5.6, 0.3], [8.4, 0.3], [9, 0], [10, 0]];
+const NUM = ZS.reduce((s, z) => s + z * AGG(z), 0);   // 8.7
+const DEN = ZS.reduce((s, z) => s + AGG(z), 0);       // 1.5
+const ZC = NUM / DEN;                                 // 5.8 (whole-number z only)
+// continuous centroid (same as lesson 14): ∫ z·μ dz / ∫ μ dz = 52/9 ≈ 5.78
+const ZCC = (() => { let m = 0, a = 0; for (let z = 0.0005; z < 10; z += 0.001) { m += z * AGG(z); a += AGG(z); } return m / a; })();
+
+// ---- slide 121: trapmf(x, [-10 -8 -4 7])
+const TRAP = [[-10, 0], [-8, 1], [-4, 1], [7, 0]];
+const T_AREA = [1, 4, 5.5];                 // left triangle, rectangle, right triangle
+const T_CX = [-10 + 2 * 2 / 3, -6, -4 + 11 / 3];
+const T_MOM = T_AREA.reduce((s, a, k) => s + a * T_CX[k], 0); // -34.5
+const T_C = T_MOM / 10.5;                                       // -3.2857
+const T_B = -4 + (11 - Math.sqrt(121 - 22 * 0.25));            // -3.747 (continuous bisector)
+
+const G = Graph({ x: 130, y: 110, w: 650, h: 360, from: 0, to: 10 });
+const GT = Graph({ x: 120, y: 130, w: 700, h: 300, from: -10, to: 10 });
+
+async function rainAxes(b) {
+  await G.axes(b, 'ax', { ticks: ZS, yTicks: [0.2, 0.3, 1], label: 'z' });
+}
+async function trapAxes(b) {
+  await GT.axes(b, 'tx', { ticks: [-10, -8, -6, -4, 0, 4, 7, 10], yTicks: [0.5, 1], label: 'x' });
+  await GT.poly(b, 'trap', TRAP, { color: 'blue' });
+  await b.write('trapl', GT.X(6.5), GT.Y(0.3), 'mf', { size: 24, color: 'blue' });
+}
+
+function quizBoard(n, question, o = { size: 40 }) {
+  return async b => {
+    await b.clear();
+    await b.write('q-n', 500, 60, `سؤال ${n} از 6`, { size: 24, color: 'soft', fa: true });
+    await b.write('q-q', 500, 130, question, o);
+  };
+}
+
+Teacher.start({
+  id: 'L15',
+  number: 15,
+  title: 'تجمیع و غیرفازی‌سازی',
+  chapter: 'بخش 4 · برهان و سیستم استنتاج فازی',
+  slides: '116–121',
+  intro: 'خروجی همه‌ی قاعده‌ها را با max یکی کن، بعد آن را با centroid، bisector، MOM، SOM یا LOM به یک عدد تبدیل کن.',
+  next: { href: '0016-ch4-practice.html', title: 'تمرین بخش 4' },
+  steps: [
+    // ---------------------------------------------------------- 1. where we are
+    {
+      say: 'سلام! سیستم استنتاج فازی ممدانی پنج مرحله دارد (اسلاید 108). سه مرحله‌ی اول را در درس‌های 12 تا 14 دیدیم: *fuzzification* یا فازی‌سازی، عملگر AND / OR، و *implication* یا استلزام. امروز دو مرحله‌ی آخر را یاد می‌گیریم: *تجمیع* و *غیرفازی‌سازی*.',
+      draw: async b => {
+        await b.write('t1', 500, 80, 'پنج مرحله‌ی سیستم استنتاج فازی', { size: 40, color: 'blue', bold: true, fa: true });
+        const S = [['فازی‌سازی', 'fuzzification'], ['عملگر AND / OR', 'fuzzy operator'], ['استلزام', 'implication'], ['تجمیع', 'aggregation'], ['غیرفازی‌سازی', 'defuzzification']];
+        for (const [k, [fa, en]] of S.entries()) {
+          const x = 780 - k * 180, hot = k >= 3;
+          await b.write(`sn${k}`, x + 80, 190, String(k + 1), { size: 26, color: 'purple', bold: true, dur: 150 });
+          await b.box(`sb${k}`, x, 210, 160, 110, { color: hot ? 'orange' : 'soft', fill: hot ? 'orange' : undefined, dur: 350 });
+          await all([
+            b.write(`sf${k}`, x + 80, 258, fa, { size: 21, fa: true, bold: hot, dur: 250 }),
+            b.write(`se${k}`, x + 80, 296, en, { size: 18, color: 'soft', dur: 250 }),
+          ]);
+          if (k < 4) await b.arrow(`sa${k}`, x - 2, 265, x - 18, 265, { color: 'soft', head: 8, dur: 150 });
+        }
+        await b.line('br1', 420, 345, 940, 345, { color: 'soft' });
+        await b.write('br1t', 680, 385, `درس‌های ${LTR('12')} تا ${LTR('14')}`, { size: 24, color: 'soft', fa: true });
+        await b.line('br2', 60, 345, 400, 345, { color: 'orange' });
+        await b.write('br2t', 230, 385, 'این درس', { size: 28, color: 'orange', bold: true, fa: true });
+        await b.write('src', 500, 480, `اسلایدهای ${LTR('116–121')}`, { size: 22, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 2. aggregation: what it is
+    {
+      say: 'تصمیم نهایی باید بر اساس *همه‌ی* قاعده‌ها گرفته شود (اسلاید 116). هر قاعده بعد از استلزام یک مجموعه‌ی فازی خروجی می‌دهد. *Aggregation* یا تجمیع یعنی این مجموعه‌ها را با هم ترکیب کنیم تا فقط *یک* مجموعه‌ی فازی بماند. این کار برای هر متغیر خروجی فقط یک بار انجام می‌شود، درست قبل از غیرفازی‌سازی.',
+      term: ['Aggregation', 'تجمیع'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 80, 'تجمیع خروجی‌ها', { size: 46, color: 'orange', bold: true, fa: true });
+        await b.write('he', 500, 125, 'Aggregation', { size: 30, color: 'soft' });
+        const L = [
+          'هر قاعده بعد از استلزام یک مجموعه‌ی فازی خروجی می‌دهد',
+          'تجمیع همه را با هم ترکیب می‌کند ← یک مجموعه‌ی فازی',
+          'برای هر متغیر خروجی فقط یک بار',
+          'درست قبل از مرحله‌ی آخر، یعنی غیرفازی‌سازی',
+        ];
+        for (const [k, l] of L.entries()) await b.write(`l${k}`, 880, 200 + k * 58, '•  ' + l, { size: 26, anchor: 'start', fa: true });
+        await b.write('f', 500, 480, 'C_1′ ,  C_2′ , …   →   C′', { size: 42, color: 'blue' });
+      },
+    },
+    // ---------------------------------------------------------- 3. three methods
+    {
+      say: 'اسلاید 116 می‌گوید MATLAB سه روش برای تجمیع دارد: *max* یعنی بزرگ‌ترین را بردار، *probor* یعنی OR احتمالاتی a + b − ab، و *sum* یعنی جمع ساده. با دو عدد 0.3 و 0.2 ببینیم: max می‌شود 0.3، probor می‌شود 0.44، sum می‌شود 0.5. مثال اسلایدها با max است و ما هم با max کار می‌کنیم.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 75, `سه روش تجمیع در ${LTR('MATLAB')}`, { size: 38, color: 'blue', bold: true, fa: true });
+        await b.write('ex', 500, 130, 'a = 0.3 ,  b = 0.2', { size: 30, color: 'soft' });
+        const M = [['max', 'max(a, b)', '0.3'], ['probor', 'a + b − a·b', '0.3 + 0.2 − 0.06 = 0.44'], ['sum', 'a + b', '0.3 + 0.2 = 0.5']];
+        const X = [800, 500, 200];
+        for (const [k, [n, f, v]] of M.entries()) {
+          await b.write(`mn${k}`, X[k], 210, n, { size: 40, color: k === 0 ? 'orange' : 'ink', bold: true, dur: 250 });
+          await b.write(`mf${k}`, X[k], 280, f, { size: 30, dur: 300 });
+          await b.write(`mv${k}`, X[k], 345, v, { size: 24, color: 'green', dur: 350 });
+        }
+        await b.ring('rmax', 800, 270, 120, 110, { color: 'orange' });
+        await b.write('n1', 800, 430, 'روش مثال اسلایدها', { size: 24, color: 'orange', fa: true });
+        await b.write('n3', 200, 430, `ممکن است از ${LTR('1')} بیشتر شود`, { size: 22, color: 'red', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 4. recap of the rain example
+    {
+      say: 'برگردیم به مثال بارش اسلایدها. سرعت باد x = 8 و فشار y = 5 است. قاعده‌ی 1 با درجه‌ی min(0.6, 0.3) = 0.3 روشن شد و قاعده‌ی 2 با درجه‌ی min(0.2, 0.7) = 0.2. با استلزام min، خروجی هر قاعده در ارتفاع α خودش بریده می‌شود.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 660, 70, 'مثال اسلاید 117', { size: 32, color: 'blue', bold: true, fa: true });
+        await b.write('hx', 330, 70, 'x = 8 ,  y = 5', { size: 32, color: 'blue', bold: true });
+        await b.write('r1', 900, 140, `قاعده‌ی ${LTR('1')}:  باد شدید ${LTR('(A1)')} و فشار پایین ${LTR('(B1)')}  ←  بارش زیاد ${LTR('(C1)')}`, { size: 25, anchor: 'start', fa: true });
+        await b.write('r1m', 500, 195, 'α_1 = min( μ_{A1}(8) , μ_{B1}(5) ) = min(0.6, 0.3) = 0.3', { size: 28, color: 'orange' });
+        await b.write('r2', 900, 275, `قاعده‌ی ${LTR('2')}:  باد متوسط ${LTR('(A2)')} و فشار بالا ${LTR('(B2)')}  ←  بارش کم ${LTR('(C2)')}`, { size: 25, anchor: 'start', fa: true });
+        await b.write('r2m', 500, 330, 'α_2 = min( μ_{A2}(8) , μ_{B2}(5) ) = min(0.2, 0.7) = 0.2', { size: 28, color: 'blue' });
+        await b.write('imp', 500, 420, 'استلزام min: هر خروجی در ارتفاع α خودش بریده می‌شود', { size: 26, fa: true });
+        await b.write('impf', 500, 480, 'C_1′ = min(0.3 , C_1)          C_2′ = min(0.2 , C_2)', { size: 30, color: 'green' });
+      },
+    },
+    // ---------------------------------------------------------- 5. the two clipped sets
+    {
+      say: 'روی نمودار ببینیم. اسلاید شکل‌ها را بدون عدد کشیده، پس همان شکل‌های درس 14 را برمی‌داریم: «بارش کم» C2 مثلثی از 2 تا 6 و «بارش زیاد» C1 مثلثی از 5 تا 9. C2 در ارتفاع 0.2 و C1 در ارتفاع 0.3 بریده می‌شود؛ دو ذوزنقه‌ی کوتاه C2′ و C1′ به دست می‌آید.',
+      draw: async b => {
+        await b.clear();
+        await rainAxes(b);
+        await b.write('own', 640, 55, 'شکل‌ها همان درس 14 است', { size: 18, color: 'soft', fa: true });
+        await all([
+          G.poly(b, 'c2', [[2, 0], [4, 1], [6, 0]], { color: 'soft' }),
+          G.poly(b, 'c1', [[5, 0], [7, 1], [9, 0]], { color: 'soft' }),
+        ]);
+        await all([
+          b.write('lc2', G.X(4) - 28, 98, 'C_2', { size: 24, color: 'soft' }),
+          b.write('lc2f', G.X(4) + 22, 100, 'کم', { size: 20, color: 'soft', fa: true }),
+          b.write('lc1', G.X(7) - 28, 98, 'C_1', { size: 24, color: 'soft' }),
+          b.write('lc1f', G.X(7) + 26, 100, 'زیاد', { size: 20, color: 'soft', fa: true }),
+        ]);
+        await b.line('cut3', G.X(0), G.Y(0.3), G.X(10), G.Y(0.3), { color: 'orange', width: 2 });
+        await b.write('al1', 890, G.Y(0.3) + 8, 'α_1 = 0.3', { size: 24, color: 'orange' });
+        await b.line('cut2', G.X(0), G.Y(0.2), G.X(10), G.Y(0.2), { color: 'blue', width: 2 });
+        await b.write('al2', 890, G.Y(0.2) + 14, 'α_2 = 0.2', { size: 24, color: 'blue' });
+        await G.poly(b, 'c2c', [[2, 0], [2.4, 0.2], [5.6, 0.2], [6, 0]], { color: 'blue' });
+        await b.write('lc2c', G.X(3.2), G.Y(0.2) - 14, 'C_2′', { size: 26, color: 'blue', bold: true });
+        await G.poly(b, 'c1c', [[5, 0], [5.6, 0.3], [8.4, 0.3], [9, 0]], { color: 'orange' });
+        await b.write('lc1c', G.X(7.6), G.Y(0.3) - 14, 'C_1′', { size: 26, color: 'orange', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 6. max aggregation
+    {
+      say: 'حالا تجمیع با max: در هر نقطه‌ی z، از بین C1′ و C2′ هر کدام *بالاتر* است را نگه می‌داریم. نتیجه همان شکل پله‌ای اسلاید 117 است: یک پله‌ی پایین 0.2 در سمت چپ و یک پله‌ی بالاتر 0.3 در سمت راست. اسمش را C′ = C1′ ∪ C2′ می‌گذاریم؛ اجتماع فازی همان max است.',
+      draw: async b => {
+        await b.dim(['c1', 'c2', 'lc1', 'lc2', 'lc1f', 'lc2f', 'cut2', 'cut3'], 0.25);
+        await G.poly(b, 'agg', AGG_PTS, { color: 'green', width: 6, dur: 1100 });
+        await b.write('aggl', G.X(5.4), G.Y(0.3) - 50, 'C′ = C_1′ ∪ C_2′', { size: 30, color: 'green', bold: true });
+        await b.ring('rstep', G.X(5.5), G.Y(0.25), 26, 40, { color: 'red' });
+        await b.write('rstept', G.X(4.3), G.Y(0.36), 'پله', { size: 22, color: 'red', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 7. point by point
+    {
+      say: 'همین را با عدد ببینیم، نقطه به نقطه. در هر ستون عدد بزرگ‌تر را برمی‌داریم. در عددهای صحیح، هیچ ستونی دو عدد غیرصفر ندارد؛ جایی که فقط یکی غیرصفر است، همان می‌ماند. دو مجموعه فقط بین z = 5 و z = 6 روی هم می‌افتند. مثلاً در z = 5.5 داریم C1′ = 0.25 و C2′ = 0.2، پس max برابر 0.25 است. سطر آخر مجموعه‌ی نهایی C′ است.',
+      draw: async b => {
+        await b.clear();
+        const X = z => 200 + z * 70, R = { z: 110, c1: 175, c2: 235, c: 310 };
+        await all([
+          b.write('tl-z', 110, R.z, 'z', { size: 28, color: 'purple', bold: true }),
+          b.write('tl-c1', 110, R.c1, 'C_1′', { size: 26, color: 'orange' }),
+          b.write('tl-c2', 110, R.c2, 'C_2′', { size: 26, color: 'blue' }),
+          b.write('tl-c', 110, R.c, 'C′ = max', { size: 22, color: 'green', bold: true }),
+        ]);
+        await b.line('tg-h', 60, 135, 935, 135, { color: 'soft', width: 2 });
+        await b.line('tg-h2', 60, 270, 935, 270, { color: 'soft', width: 2 });
+        await b.line('tg-v', 165, 80, 165, 335, { color: 'soft', width: 2 });
+        for (const z of ZS) {
+          await all([
+            b.write(`t-z${z}`, X(z), R.z, String(z), { size: 26, color: 'purple', dur: 80 }),
+            b.write(`t-a${z}`, X(z), R.c1, fmt(C1c(z)), { size: 24, color: C1c(z) ? 'orange' : 'soft', dur: 80 }),
+            b.write(`t-b${z}`, X(z), R.c2, fmt(C2c(z)), { size: 24, color: C2c(z) ? 'blue' : 'soft', dur: 80 }),
+          ]);
+        }
+        await b.ring('both', (X(5) + X(6)) / 2, 205, 72, 58, { color: 'red' });
+        for (const z of ZS) await b.write(`t-c${z}`, X(z), R.c, fmt(AGG(z)), { size: 26, color: AGG(z) ? 'green' : 'soft', bold: !!AGG(z), dur: 90 });
+        await b.write('why', 500, 410, `در ${LTR('z = 5.5')}:  ${LTR('max(0.25 , 0.2) = 0.25')}`, { size: 28, fa: true });
+        await b.write('why2', 500, 470, 'بین 5 و 6 دو مجموعه روی هم می‌افتند؛ عدد بزرگ‌تر را برمی‌داریم', { size: 24, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 8. defuzzification
+    {
+      say: 'مرحله‌ی 5: *Defuzzification* یا غیرفازی‌سازی (اسلاید 118). خروجی تجمیع یک مجموعه‌ی فازی است، یعنی بازه‌ای از عددها که هر کدام یک درجه‌ی عضویت دارند. ولی موتور یا شیر آب یک عدد می‌خواهد، نه یک مجموعه. غیرفازی‌سازی این مجموعه را به *یک عدد قطعی* تبدیل می‌کند؛ دقیقاً عکس فازی‌سازی. MATLAB پنج روش دارد و رایج‌ترینشان centroid است.',
+      term: ['Defuzzification', 'غیرفازی‌سازی'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 75, 'غیرفازی‌سازی', { size: 46, color: 'orange', bold: true, fa: true });
+        await b.write('he', 500, 120, 'Defuzzification', { size: 30, color: 'soft' });
+        await b.wire('mini', [[110, 300], [150, 300], [170, 270], [230, 270], [240, 250], [330, 250], [350, 300], [380, 300]], { color: 'green', dur: 600 });
+        await b.write('minil', 245, 340, 'مجموعه‌ی فازی', { size: 22, color: 'green', fa: true });
+        await b.arrow('ar', 410, 280, 560, 280, { color: 'ink' });
+        await b.write('num', 660, 292, 'z* = ?', { size: 44, color: 'blue', bold: true });
+        await b.write('numl', 660, 340, 'یک عدد قطعی', { size: 22, color: 'blue', fa: true });
+        await b.write('rev', 500, 400, 'دقیقاً عکس فازی‌سازی', { size: 26, fa: true });
+        await b.write('m5', 500, 465, 'centroid  ·  bisector  ·  mom  ·  som  ·  lom', { size: 32, color: 'purple' });
+        await b.ring('rc', 225, 458, 85, 28, { color: 'orange' });
+        await b.write('m5l', 225, 515, 'رایج‌ترین', { size: 20, color: 'orange', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 9. centroid formula
+    {
+      say: 'روش اول *centroid* یا مرکز ثقل است: مرکز ناحیه‌ی زیر منحنی. فرمول اسلاید 118: هر نقطه x_i را در عضویتش mf_i ضرب کن، همه را جمع کن، بعد تقسیم بر جمع عضویت‌ها. مثل الاکلنگ: نقطه‌ای که شکل روی آن تعادل دارد. نقطه‌ای که عضویت بیشتری دارد، جواب را بیشتر به طرف خودش می‌کشد.',
+      term: ['Centroid (center of gravity)', 'مرکز ثقل'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'مرکز ثقل — centroid', { size: 38, color: 'orange', bold: true, fa: true });
+        await b.write('f', 500, 160, 'x_{cg} = Σ_i ( mf_i · x_i )  /  Σ_i mf_i', { size: 44, color: 'ink' });
+        await b.write('ff', 500, 215, 'هر نقطه × عضویتش، همه را جمع کن؛ تقسیم بر جمع عضویت‌ها', { size: 24, color: 'soft', fa: true });
+        await b.line('plank', 220, 390, 780, 390, { color: 'ink' });
+        await b.path('ful', 'M560 392 L535 440 L585 440 Z', { color: 'orange' });
+        for (const [k, [x, h]] of [[260, 40], [320, 40], [380, 40], [440, 60], [500, 60], [560, 60], [620, 60], [680, 60]].entries()) {
+          await b.box(`w${k}`, x - 22, 388 - h, 44, h, { color: h > 40 ? 'orange' : 'blue', r: 4, dur: 150 });
+        }
+        await b.write('bal', 560, 490, 'نقطه‌ی تعادل', { size: 24, color: 'orange', fa: true });
+        await b.write('wl', 330, 320, 'عضویت کمتر', { size: 20, color: 'blue', fa: true });
+        await b.write('wr', 650, 300, 'عضویت بیشتر', { size: 20, color: 'orange', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 10. centroid of our C′
+    {
+      say: 'روی C′ خودمان حساب کنیم، با عددهای صحیح z. نقطه‌های غیرصفر z = 3 تا 8 هستند. سه نقطه‌ی اول عضویت 0.2 دارند و سه نقطه‌ی بعدی 0.3. صورت کسر: 0.2 × (3+4+5) + 0.3 × (6+7+8) = 2.4 + 6.3 = 8.7. مخرج: 3 × 0.2 + 3 × 0.3 = 1.5. پس z* = 8.7 / 1.5 = 5.8.',
+      draw: async b => {
+        await b.clear();
+        const P = ZS.filter(z => AGG(z) > 0), X = k => 190 + k * 85;
+        await all([
+          b.write('cl-z', 95, 100, 'z', { size: 28, color: 'purple', bold: true }),
+          b.write('cl-m', 95, 160, 'μ', { size: 28, color: 'green', bold: true }),
+          b.write('cl-p', 95, 220, 'z·μ', { size: 26, bold: true }),
+        ]);
+        await b.line('cg-h', 50, 125, 950, 125, { color: 'soft', width: 2 });
+        await b.line('cg-v', 140, 70, 140, 245, { color: 'soft', width: 2 });
+        for (const [k, z] of P.entries()) {
+          await all([
+            b.write(`c-z${k}`, X(k), 100, String(z), { size: 26, color: 'purple', dur: 80 }),
+            b.write(`c-m${k}`, X(k), 160, fmt(AGG(z)), { size: 26, color: 'green', dur: 80 }),
+          ]);
+          await b.write(`c-p${k}`, X(k), 220, fmt(z * AGG(z)), { size: 26, dur: 120 });
+        }
+        await b.write('c-sh', 900, 100, 'Σ', { size: 30, color: 'orange', bold: true });
+        await b.write('c-sm', 900, 160, fmt(DEN), { size: 28, color: 'orange', bold: true });
+        await b.write('c-sp', 900, 220, fmt(NUM), { size: 28, color: 'orange', bold: true });
+        await b.write('num', 500, 310, 'Σ z·μ = 0.2×(3+4+5) + 0.3×(6+7+8) = 2.4 + 6.3 = 8.7', { size: 26 });
+        await b.write('den', 500, 360, 'Σ μ = 3×0.2 + 3×0.3 = 0.6 + 0.9 = 1.5', { size: 26 });
+        await b.write('res', 500, 440, `z* = 8.7 / 1.5 = ${fmt(ZC)}`, { size: 46, color: 'green', bold: true });
+        await b.write('why', 500, 505, 'کمی راست‌تر از وسط؛ پله‌ی بلندتر 0.3 جواب را به طرف خودش کشید', { size: 22, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 11. slide 120
+    {
+      say: 'این همان کاری است که اسلاید 120 کرده: centroid روی C′ مرحله‌ی 4، با z در بازه‌ی [0, 10]. علامت دایره‌ی چهارخانه روی شکل اسلاید همان مرکز ثقل است. اگر به جای عددهای صحیح، کل سطح زیر شکل را حساب کنیم، با شکل‌های درس 14 جواب z* ≈ 5.78 می‌شود؛ همان عدد درس 14. جواب اسلاید z = 6 است. فرق از این‌جاست که اسلاید شکل‌های C را فقط کشیده و عددشان را نداده؛ پس عدد 6 از شکل‌های خود اسلاید آمده، نه از این شکل‌ها. ایده دقیقاً یکی است: خط عمودی از نقطه‌ی تعادل شکل.',
+      draw: async b => {
+        await b.clear();
+        await rainAxes(b);
+        await G.poly(b, 'agg', AGG_PTS, { color: 'green', width: 6 });
+        await b.write('aggl', G.X(7), G.Y(0.3) - 16, 'C′', { size: 28, color: 'green', bold: true });
+        await b.line('cz', G.X(ZCC), G.Y(0), G.X(ZCC), G.Y(0.55), { color: 'red' });
+        await b.ring('cg', G.X(ZCC), G.Y(0.13), 13, 13, { color: 'red', tilt: 0 });
+        await b.line('cgx', G.X(ZCC) - 13, G.Y(0.13), G.X(ZCC) + 13, G.Y(0.13), { color: 'red', width: 2, dur: 150 });
+        await b.write('czl', G.X(ZCC), G.Y(0.55) - 14, `z* ≈ ${fmt(ZCC)}`, { size: 30, color: 'red', bold: true });
+        await b.write('s120', 890, 230, `اسلاید ${LTR('120')}`, { size: 24, color: 'blue', fa: true });
+        await b.write('s120z', 890, 275, 'z = 6', { size: 32, color: 'blue', bold: true });
+        await b.write('s120n', 880, 320, 'شکل‌های اسلاید عدد ندارند', { size: 18, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 12. the other four methods
+    {
+      say: 'چهار روش دیگر اسلاید 119: *bisector* یا نیمساز، نقطه‌ای است که مساحت زیر نمودار را به دو نیمه‌ی *مساوی* تقسیم می‌کند. سه روش بعدی فقط به نقطه‌هایی نگاه می‌کنند که عضویت در آن‌ها *ماکزیمم* است: MOM وسط آن نقطه‌ها را می‌دهد، SOM کوچک‌ترینشان را و LOM بزرگ‌ترینشان را.',
+      term: ['Bisector', 'نیمساز'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, `چهار روش دیگر (اسلاید ${LTR('119')})`, { size: 36, color: 'blue', bold: true, fa: true });
+        const M = [
+          ['bisector', 'نیمساز', 'مساحت زیر نمودار را دو نیمه‌ی مساوی می‌کند'],
+          ['mom', 'میانه‌ی ماکزیمم', 'وسطِ نقطه‌هایی که عضویتشان ماکزیمم است'],
+          ['som', 'کوچک‌ترین ماکزیمم', 'کوچک‌ترینِ همان نقطه‌ها'],
+          ['lom', 'بزرگ‌ترین ماکزیمم', 'بزرگ‌ترینِ همان نقطه‌ها'],
+        ];
+        for (const [k, [en, fa, d]] of M.entries()) {
+          const y = 150 + k * 95;
+          await b.write(`me${k}`, 110, y, en, { size: 34, color: k ? 'purple' : 'orange', bold: true, dur: 250 });
+          await b.write(`mf${k}`, 900, y - 6, fa, { size: 26, anchor: 'start', bold: true, fa: true, dur: 300 });
+          await b.write(`md${k}`, 900, y + 34, d, { size: 22, anchor: 'start', color: 'soft', fa: true, dur: 400 });
+        }
+        await b.line('brk', 200, 225, 200, 480, { color: 'purple', width: 2 });
+        await b.write('brkt', 330, 365, 'فقط نقطه‌های ماکزیمم', { size: 20, color: 'purple', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 13. slide 121 code
+    {
+      say: 'مثال اسلاید 121 در MATLAB است. تابع defuzz(x, mf, type) یک تابع عضویت می‌گیرد و با روشی که در type نوشته شده، یک عدد برمی‌گرداند. اینجا mf یک ذوزنقه است: trapmf با نقطه‌های -10، -8، -4 و 7، روی x از -10 تا 10 با گام 0.1.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'Out = defuzz(x, mf, type)', { size: 40, color: 'blue', bold: true });
+        await b.write('h2', 500, 115, `اسلاید ${LTR('121')}`, { size: 22, color: 'soft', fa: true });
+        const L = ['x = -10:0.1:10;', 'mf = trapmf(x, [-10 -8 -4 7]);', "xx1 = defuzz(x, mf, 'centroid');", "xx2 = defuzz(x, mf, 'bisector');", "xx3 … xx5 :  'mom' ,  'som' ,  'lom'"];
+        for (const [k, l] of L.entries()) await b.write(`c${k}`, 170, 180 + k * 52, l, { size: 28, anchor: 'start', dur: 350 });
+        await b.write('abcd', 500, 480, 'a = -10    b = -8    c = -4    d = 7', { size: 30, color: 'purple' });
+        await b.ring('rp', 470, 232, 140, 26, { color: 'orange' });
+      },
+    },
+    // ---------------------------------------------------------- 14. the trapezoid
+    {
+      say: 'ذوزنقه را بکشیم: از -10 بالا می‌رود و در -8 به 1 می‌رسد، تا -4 صاف می‌ماند، و بعد با یک شیب *بلند* تا 7 پایین می‌آید. این شکل متقارن نیست: دم سمت راستش خیلی بلندتر است. همین باعث می‌شود جواب روش‌ها با هم فرق کنند.',
+      draw: async b => {
+        await b.clear();
+        await trapAxes(b);
+        await b.write('tail', GT.X(3.5), GT.Y(0.5), 'دم بلند', { size: 24, color: 'red', fa: true });
+        await b.arrow('taila', GT.X(2.2), GT.Y(0.43), GT.X(1.2), GT.Y(0.48), { color: 'red', head: 10 });
+      },
+    },
+    // ---------------------------------------------------------- 15. SOM, MOM, LOM
+    {
+      say: 'اول سه روش ساده. ماکزیمم عضویت 1 است و روی کل بازه‌ی -8 تا -4 رخ می‌دهد. SOM اولین نقطه‌اش است: -8. LOM آخرین نقطه‌اش: -4. MOM وسط این بازه: (-8 + -4) / 2 = -6. خروجی اسلاید برای som و lom خط تیره گذاشته؛ جوابشان -8 و -4 است. یک اشتباه تایپی کوچک هم دارد: متغیرها xx1 تا xx5 هستند ولی خروجی را [x1 … x5] نوشته.',
+      term: ['Mean / Smallest / Largest of Maximum', 'میانه / کوچک‌ترین / بزرگ‌ترین ماکزیمم'],
+      draw: async b => {
+        await b.dim(['tail', 'taila'], 0.25);
+        await b.line('plat', GT.X(-8), GT.Y(1), GT.X(-4), GT.Y(1), { color: 'orange' });
+        const P = [['som', -8], ['mom', -6], ['lom', -4]];
+        for (const [k, [n, v]] of P.entries()) {
+          await b.dot(`pd${k}`, GT.X(v), GT.Y(1), { color: 'purple', r: 7 });
+          await b.write(`pn${k}`, GT.X(v), GT.Y(1) - 16, n.toUpperCase(), { size: 22, color: 'purple', bold: true, dur: 200 });
+          await b.write(`pv${k}`, GT.X(v), GT.Y(1) + 34, String(v), { size: 24, color: 'purple', dur: 200 });
+        }
+        await b.write('res', 500, 515, 'SOM = -8      MOM = (-8 + -4) / 2 = -6      LOM = -4', { size: 28, color: 'green' });
+      },
+    },
+    // ---------------------------------------------------------- 16. centroid of the trapezoid
+    {
+      say: 'حالا centroid. شکل را سه تکه می‌کنیم: مثلث چپ با مساحت ½ × 2 × 1 = 1، مستطیل با مساحت 4 × 1 = 4، و مثلث راست با مساحت ½ × 11 × 1 = 5.5؛ کل مساحت 10.5. مرکز هر مثلث در یک‌سوم قاعده از ضلع عمودی‌اش است: -8.67 و -0.33؛ مرکز مستطیل -6. گشتاور کل: 1 × (-8.67) + 4 × (-6) + 5.5 × (-0.33) = -34.5. پس centroid = -34.5 / 10.5 ≈ -3.29، همان عدد اسلاید.',
+      draw: async b => {
+        await b.erase('res');
+        await all([
+          b.line('dv1', GT.X(-8), GT.Y(0), GT.X(-8), GT.Y(1), { color: 'soft', width: 2 }),
+          b.line('dv2', GT.X(-4), GT.Y(0), GT.X(-4), GT.Y(1), { color: 'soft', width: 2 }),
+        ]);
+        await all([
+          b.write('ar1', GT.X(-8.9), GT.Y(0.2), '1', { size: 24, color: 'blue', bold: true }),
+          b.write('ar2', GT.X(-6), GT.Y(0.4), '4', { size: 28, color: 'blue', bold: true }),
+          b.write('ar3', GT.X(-1.2), GT.Y(0.2), '5.5', { size: 28, color: 'blue', bold: true }),
+        ]);
+        await b.write('mom', 500, 495, 'moment = 1×(-8.67) + 4×(-6) + 5.5×(-0.33) = -34.5', { size: 26 });
+        await b.write('cen', 500, 538, `centroid = -34.5 / 10.5 ≈ ${fmt(T_C)}`, { size: 30, color: 'green', bold: true });
+        await b.line('cl', GT.X(T_C), GT.Y(0), GT.X(T_C), GT.Y(0.95), { color: 'red' });
+        await b.write('cll', 525, 200, `centroid ≈ ${fmt(T_C)}`, { size: 22, color: 'red', anchor: 'start' });
+        await b.arrow('cla', 518, 195, GT.X(T_C) + 6, 205, { color: 'red', head: 9 });
+      },
+    },
+    // ---------------------------------------------------------- 17. bisector of the trapezoid
+    {
+      say: 'bisector: نصف مساحت 10.5 / 2 = 5.25 است. از چپ جمع کنیم: مثلث چپ 1 و مستطیل 4، یعنی تا x = -4 مساحت 5 داریم. فقط 0.25 دیگر لازم است، و ارتفاع آنجا تقریباً 1 است، پس حدود 0.25 جلوتر می‌رویم: bisector ≈ -3.75. MATLAB با گام 0.1 کار می‌کند و آن را -3.7 گزارش کرده؛ هر دو درست‌اند.',
+      draw: async b => {
+        await b.erase(['mom', 'cen']);
+        await b.write('half', 500, 495, 'half = 10.5 / 2 = 5.25        1 + 4 = 5   (up to x = -4)', { size: 26 });
+        await b.write('bis', 500, 538, 'bisector ≈ -4 + 0.25 = -3.75     (MATLAB: -3.7)', { size: 28, color: 'green', bold: true });
+        await b.line('bl', GT.X(T_B), GT.Y(0), GT.X(T_B), GT.Y(0.95), { color: 'purple' });
+        await b.write('bll', 525, 250, 'bisector ≈ -3.75', { size: 22, color: 'purple', anchor: 'start' });
+        await b.arrow('bla', 518, 245, GT.X(T_B) + 6, 262, { color: 'purple', head: 9 });
+      },
+    },
+    // ---------------------------------------------------------- 18. compare
+    {
+      say: 'پنج جواب را روی یک خط بگذاریم: SOM = -8، MOM = -6، LOM = -4، bisector ≈ -3.75 و centroid ≈ -3.29. نکته‌ی جالب: centroid حتی از LOM هم بزرگ‌تر شد! چون دم بلند سمت راست مساحت زیادی دارد و مرکز ثقل را به راست می‌کشد، ولی سه روش ماکزیمم فقط قسمت صاف بالا را می‌بینند.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, `پنج جواب اسلاید ${LTR('121')}`, { size: 36, color: 'blue', bold: true, fa: true });
+        const X = v => 100 + (v + 10) * 80;
+        await b.arrow('nl', 80, 300, 930, 300, { color: 'soft', head: 10 });
+        await all([-10, -8, -6, -4, -2, 0].map(v => b.write(`nt${v}`, X(v), 335, String(v), { size: 20, color: 'soft', dur: 120 })));
+        const P = [['SOM', -8, 'purple', 240], ['MOM', -6, 'purple', 240], ['LOM', -4, 'purple', 240], ['bisector', T_B, 'purple', 400], ['centroid', T_C, 'red', 175]];
+        for (const [k, [n, v, c, y]] of P.entries()) {
+          await b.dot(`np${k}`, X(v), 300, { color: c, r: 7 });
+          const tx = k === 4 ? X(v) + 70 : k === 3 ? X(v) + 40 : X(v);
+          if (k >= 3) await b.line(`nk${k}`, X(v), 300, tx, y + (k === 4 ? 8 : -28), { color: c, width: 2, dur: 200 });
+          await b.write(`nn${k}`, tx, y, `${n} = ${fmt(v)}`, { size: 22, color: c, bold: true, dur: 200 });
+        }
+        await b.write('msg', 500, 480, 'دم بلند سمت راست، centroid را از کل ناحیه‌ی ماکزیمم جلوتر برده', { size: 24, color: 'red', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 19. exam tips
+    {
+      say: 'سه نکته‌ی امتحانی: یک، MOM و SOM و LOM فقط به نقطه‌های ماکزیمم نگاه می‌کنند، نه به کل شکل. دو، اگر قله فقط *یک* نقطه باشد، مثل مثلث، هر سه با هم برابرند. سه، اگر شکل متقارن باشد، centroid و bisector و MOM همه روی محور تقارن می‌افتند. پس جواب‌ها فقط وقتی فرق می‌کنند که شکل کج باشد.',
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        await b.box('bx', 70, 60, 860, 430, { color: 'red', fill: 'red' });
+        await b.write('h', 500, 120, 'نکته‌ی امتحان', { size: 40, color: 'red', bold: true, fa: true });
+        const L = [
+          'فقط نقطه‌های ماکزیمم را می‌بینند: MOM / SOM / LOM',
+          `قله‌ی تک‌نقطه (مثلث):  ${LTR('SOM = MOM = LOM')}`,
+          `شکل متقارن:  ${LTR('centroid = bisector = MOM')}`,
+          `شکل کج (دم بلند):  ${LTR('centroid')} به طرف دم کشیده می‌شود`,
+        ];
+        for (const [k, l] of L.entries()) await b.write(`l${k}`, 880, 200 + k * 70, '•  ' + l, { size: 26, anchor: 'start', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 20. summary
+    {
+      say: 'جمع‌بندی کنیم. این پنج نکته را یک بار دیگر بخوانید، بعد برویم سراغ سؤال‌ها.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 75, 'یادت باشد', { size: 48, color: 'orange', bold: true, fa: true });
+        const L = [
+          `تجمیع: خروجی همه‌ی قاعده‌ها ← یک مجموعه؛ روش اسلایدها ${LTR('max')}`,
+          `روش‌های تجمیع در ${LTR('MATLAB')}:  ${LTR('max ،  probor = a + b − ab ،  sum')}`,
+          'مرکز ثقل (centroid): نقطه‌ی تعادل شکل، تقسیمِ دو جمع',
+          'نیمساز (bisector): مساحت را دو نیمه‌ی مساوی می‌کند',
+          'اول / وسط / آخرِ نقطه‌های ماکزیمم: SOM / MOM / LOM',
+        ];
+        for (const [k, l] of L.entries()) await b.write(`m${k}`, 890, 160 + k * 72, '•  ' + l, { size: 25, anchor: 'start', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- quizzes
+    {
+      say: 'نوبت شماست! در یک نقطه C1′ = 0.3 و C2′ = 0.2 است. اگر تجمیع را با probor انجام دهیم، عضویت نهایی چند می‌شود؟',
+      draw: quizBoard(1, 'probor(0.3 , 0.2) = ?', { size: 48 }),
+      quiz: { answer: ['0.44', '.44'], hint: 'probor(a, b) = a + b − a·b', explain: '0.3 + 0.2 − 0.3 × 0.2 = 0.5 − 0.06 = 0.44' },
+      solve: async b => {
+        await b.write('s1', 500, 250, 'probor(a, b) = a + b − a·b', { size: 36, color: 'blue' });
+        await b.write('s2', 500, 330, '0.3 + 0.2 − 0.3×0.2 = 0.5 − 0.06', { size: 36 });
+        await b.write('s3', 500, 420, '= 0.44', { size: 50, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'مجموعه‌ی خروجی گسسته B′ = {0.5/1 , 1/2 , 0.5/5} است. با فرمول centroid اسلاید 118، عدد قطعی خروجی چند است؟',
+      draw: quizBoard(2, 'B′ = { 0.5/1 , 1/2 , 0.5/5 }    centroid = ?', { size: 38 }),
+      quiz: { answer: ['2.5'], hint: 'صورت: هر نقطه × عضویتش. مخرج: جمع عضویت‌ها.', explain: '(1×0.5 + 2×1 + 5×0.5) / (0.5 + 1 + 0.5) = 5 / 2 = 2.5' },
+      solve: async b => {
+        const X = [380, 500, 620];
+        await all([b.write('sl-x', 260, 230, 'x', { size: 28, color: 'purple', bold: true }), b.write('sl-m', 260, 285, 'μ', { size: 28, color: 'green', bold: true }), b.write('sl-p', 260, 340, 'x·μ', { size: 26, bold: true })]);
+        for (const [k, [x, m]] of [[1, 0.5], [2, 1], [5, 0.5]].entries()) {
+          await all([b.write(`sx${k}`, X[k], 230, String(x), { size: 28, color: 'purple' }), b.write(`sm${k}`, X[k], 285, String(m), { size: 28, color: 'green' })]);
+          await b.write(`sp${k}`, X[k], 340, fmt(x * m), { size: 28 });
+        }
+        await all([b.write('ssm', 740, 285, 'Σ = 2', { size: 28, color: 'orange', bold: true }), b.write('ssp', 740, 340, 'Σ = 5', { size: 28, color: 'orange', bold: true })]);
+        await b.write('sr', 500, 440, 'centroid = 5 / 2 = 2.5', { size: 46, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'یک مجموعه‌ی ذوزنقه‌ای trapmf با نقطه‌های [1 3 7 8] داریم. خروجی mom چند است؟',
+      draw: quizBoard(3, 'trapmf(x, [1 3 7 8])    mom = ?', { size: 40 }),
+      quiz: { answer: ['5'], hint: 'عضویت از 3 تا 7 برابر 1 (ماکزیمم) است. وسط این بازه کجاست؟', explain: 'ماکزیمم روی بازه‌ی 3 تا 7 است؛ MOM = (3 + 7) / 2 = 5' },
+      solve: async b => {
+        const g = Graph({ x: 200, y: 230, w: 600, h: 200, from: 0, to: 10 });
+        await g.axes(b, 'qa', { ticks: [0, 1, 3, 5, 7, 8, 10], yTicks: [1] });
+        await g.poly(b, 'qt', [[0, 0], [1, 0], [3, 1], [7, 1], [8, 0], [10, 0]], { color: 'blue' });
+        await b.line('qp', g.X(3), g.Y(1), g.X(7), g.Y(1), { color: 'orange' });
+        for (const [k, [n, v]] of [['SOM', 3], ['MOM', 5], ['LOM', 7]].entries()) {
+          await b.dot(`qd${k}`, g.X(v), g.Y(1), { color: 'purple', r: 7 });
+          await b.write(`qn${k}`, g.X(v), g.Y(1) + 34, n, { size: 22, color: 'purple', bold: true });
+        }
+        await b.write('qr', 500, 520, 'MOM = (3 + 7) / 2 = 5', { size: 36, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'کدام روش غیرفازی‌سازی نقطه‌ای را می‌دهد که مساحت زیر نمودار را به دو نیمه‌ی مساوی تقسیم می‌کند؟',
+      draw: quizBoard(4, 'کدام روش مساحت را نصف می‌کند؟', { size: 40, fa: true }),
+      quiz: { choices: ['centroid', 'bisector', 'mom', 'lom'], correct: 1, explain: 'bisector یعنی نیمساز: خط عمودی‌ای که دو طرفش مساحت برابر دارد. centroid نقطه‌ی تعادل است، که در شکل کج با آن فرق می‌کند.' },
+      solve: async b => {
+        const g = Graph({ x: 200, y: 230, w: 600, h: 200, from: -10, to: 10 });
+        await g.axes(b, 'qa', { ticks: [-10, -4, 7], yTicks: [1] });
+        await g.poly(b, 'qt', TRAP, { color: 'blue' });
+        await b.line('qb', g.X(T_B), g.Y(0), g.X(T_B), g.Y(1), { color: 'purple' });
+        await b.write('ql', g.X(-7), g.Y(0.4), '5.25', { size: 26, color: 'purple', bold: true });
+        await b.write('qr', g.X(-1), g.Y(0.25), '5.25', { size: 26, color: 'purple', bold: true });
+        await b.write('qt2', 500, 510, 'bisector: دو طرف خط، مساحت برابر', { size: 28, color: 'green', fa: true });
+      },
+    },
+    {
+      say: 'تجمیع دقیقاً کجای سیستم استنتاج فازی انجام می‌شود؟',
+      draw: quizBoard(5, 'تجمیع کِی انجام می‌شود؟', { size: 42, fa: true }),
+      quiz: {
+        choices: ['برای هر قاعده جداگانه، قبل از استلزام', 'برای هر متغیر خروجی فقط یک بار، درست قبل از غیرفازی‌سازی', 'قبل از فازی‌سازی ورودی‌ها'],
+        correct: 1,
+        explain: 'اسلاید 116: تجمیع برای هر متغیر خروجی فقط یک بار و درست قبل از مرحله‌ی نهایی، یعنی غیرفازی‌سازی، انجام می‌شود.',
+      },
+      solve: async b => {
+        const S = ['فازی‌سازی', 'عملگر', 'استلزام', 'تجمیع', 'غیرفازی‌سازی'];
+        for (const [k, s] of S.entries()) {
+          const x = 800 - k * 175;
+          await b.box(`qb${k}`, x - 75, 250, 150, 70, { color: k === 3 ? 'orange' : 'soft', dur: 200 });
+          await b.write(`qs${k}`, x, 295, s, { size: 20, fa: true, bold: k === 3, dur: 150 });
+        }
+        await b.write('qn', 450, 390, 'یک بار، درست قبل از آخر', { size: 30, color: 'green', fa: true });
+      },
+    },
+    {
+      say: 'سؤال آخر، از اسلاید 121: برای trapmf(x, [-10 -8 -4 7])، جواب روش lom کدام است؟',
+      draw: quizBoard(6, "defuzz(x, trapmf(x, [-10 -8 -4 7]), 'lom') = ?", { size: 34 }),
+      quiz: { choices: ['-8', '-6', '-4', '-3.29'], correct: 2, explain: 'ماکزیمم (عضویت 1) روی بازه‌ی -8 تا -4 است. lom بزرگ‌ترین نقطه‌ی این بازه است: -4. (‎-8 جواب som، ‎-6 جواب mom و ‎-3.29 جواب centroid است.)' },
+      solve: async b => {
+        const g = Graph({ x: 200, y: 230, w: 600, h: 200, from: -10, to: 10 });
+        await g.axes(b, 'qa', { ticks: [-10, -8, -4, 7], yTicks: [1] });
+        await g.poly(b, 'qt', TRAP, { color: 'blue' });
+        await b.line('qp', g.X(-8), g.Y(1), g.X(-4), g.Y(1), { color: 'orange' });
+        await b.dot('qd', g.X(-4), g.Y(1), { color: 'green', r: 8 });
+        await b.write('qr', 500, 520, 'LOM = -4', { size: 40, color: 'green', bold: true });
+      },
+    },
+  ],
+});
+</script>
+</body>
+</html>

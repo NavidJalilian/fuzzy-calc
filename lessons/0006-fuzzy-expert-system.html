@@ -3,434 +3,411 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>درس ۶ — ساخت یک سیستم خبره فازی</title>
-<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
-<style>
-/* ===== SHARED STYLE — copy verbatim into every lesson, do not edit per lesson ===== */
-:root{--bg:#fbfaf7;--surface:#ffffff;--surface-1:#f3f1ec;--text:#1f1e1c;--text-2:#5f5e5a;--text-3:#888780;--border:#e3e0d8;--border-strong:#c9c6bc;
---accent:#534AB7;--accent-bg:#EEEDFE;--ok:#3B6D11;--ok-bg:#EAF3DE;--bad:#A32D2D;--bad-bg:#FCEBEB;--warn:#854F0B;--warn-bg:#FAEEDA;
---c1:#7F77DD;--c2:#1D9E75;--c3:#EF9F27;--c4:#D4537E;--grid:#e3e0d8}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1a1a19;--surface:#232322;--surface-1:#2c2c2a;--text:#ecebe6;--text-2:#b4b2a9;--text-3:#888780;--border:#3a3a37;--border-strong:#55554f;
---accent:#AFA9EC;--accent-bg:#26215C;--ok:#97C459;--ok-bg:#173404;--bad:#F09595;--bad-bg:#501313;--warn:#FAC775;--warn-bg:#412402;--grid:#3a3a37}}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:Vazirmatn,Tahoma,sans-serif;font-size:16px;line-height:1.95}
-main{max-width:760px;margin:0 auto;padding:24px 16px 64px}
-a{color:var(--accent)}
-h1{font-size:26px;font-weight:700;line-height:1.5;margin:6px 0 6px}
-h2{font-size:19px;font-weight:500;margin:0 0 8px}
-h3{font-size:16px;font-weight:500;margin:12px 0 4px}
-p{margin:0 0 10px}
-.top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:13px;color:var(--text-2)}
-.goal{color:var(--text-2);margin-bottom:22px}
-.sec{margin:0 0 28px}
-.lab{font-size:13px;color:var(--text-3);margin:0 0 4px;letter-spacing:0}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
-.soft{background:var(--surface-1);border-radius:12px;padding:12px 14px}
-.m{direction:ltr;unicode-bidi:isolate;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14.5px;white-space:nowrap}
-@media (max-width:700px){.m{white-space:normal;display:inline-block;max-width:100%}}
-.mb{direction:ltr;text-align:left;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14.5px;background:var(--surface-1);border-radius:8px;padding:8px 12px;margin:6px 0;overflow-x:auto;line-height:1.8}
-.en{direction:ltr;unicode-bidi:isolate;font-size:13px;color:var(--text-2)}
-b,strong{font-weight:500}
-.key{background:var(--warn-bg);color:var(--warn);border-radius:6px;padding:0 6px}
-.tip{border-right:3px solid var(--accent);background:var(--accent-bg);padding:8px 12px;border-radius:0;margin:8px 0}
-.trap{border-right:3px solid var(--bad);background:var(--bad-bg);padding:8px 12px;border-radius:0;margin:8px 0}
-button{font-family:inherit;font-size:14px;background:var(--surface);color:var(--text);border:1px solid var(--border-strong);border-radius:8px;padding:5px 14px;cursor:pointer}
-button:hover{background:var(--surface-1)}
-button.on{background:var(--accent-bg);border-color:var(--accent);color:var(--accent)}
-input[type=text]{font-family:inherit;font-size:15px;direction:ltr;text-align:center;width:72px;height:34px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text)}
-input[type=range]{width:100%;accent-color:var(--accent);direction:ltr}
-table.t{border-collapse:collapse;direction:ltr;font-size:14.5px;margin:6px 0;display:block;max-width:100%;overflow-x:auto}
-table.t>tbody,table.t>thead{display:table;width:100%}
-table.t th,table.t td{border:1px solid var(--border);padding:5px 6px;text-align:center;font-weight:400}
-table.t th{background:var(--surface-1)}
-.ok{background:var(--ok-bg)!important}.no{background:var(--bad-bg)!important}
-.fb{font-size:14px;margin-top:8px;min-height:1em}.fb.good{color:var(--ok)}.fb.bad{color:var(--bad)}
-.q{margin:0 0 18px}
-.mcq .opts{display:grid;gap:6px;margin-top:6px}
-.mcq .opts button{text-align:right;padding:7px 12px}
-.stepper .st{display:none;padding:6px 0;border-bottom:1px dashed var(--border)}
-.stepper .st.show{display:block}
-.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-svg{max-width:100%;height:auto;direction:ltr}
-svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12px}
-.nav{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:14px;border-top:1px solid var(--border);padding-top:14px;margin-top:28px}
-.ask{font-size:14px;color:var(--text-2)}
-@media print{body{background:#fff}.card,.soft{break-inside:avoid}.stepper .st{display:block}button{display:none}}
-.given{font-size:14px;color:var(--text-2);background:var(--surface-1);border-right:3px solid var(--border-strong);border-radius:0 8px 8px 0;padding:6px 12px;margin:2px 0 10px}
-.given b{color:var(--text)}
-[id]{scroll-margin-top:16px}
-h3:target,.card:target{outline:2px solid var(--accent);outline-offset:6px;border-radius:8px}
-details.sol{margin-top:10px;border:1px dashed var(--border-strong);border-radius:10px;padding:6px 12px;background:var(--surface)}
-details.sol summary{cursor:pointer;color:var(--accent);font-weight:500}
-details.sol[open] summary{margin-bottom:6px}
-.q>details.sol:not([open]){display:inline-block;vertical-align:middle;margin:0;padding:0;border:0;background:none}
-.q>details.sol summary{list-style:none;display:inline-block;font-size:14px;border:1px solid var(--border-strong);border-radius:8px;padding:5px 14px;background:var(--surface)}
-.q>details.sol summary::-webkit-details-marker{display:none}
-.q>details.sol summary:hover{background:var(--surface-1)}
-@media print{details.sol{border-style:solid}}
-/* ===== END SHARED STYLE ===== */
-</style>
-<style>
-.mb.pre{white-space:pre}
-#dgSvg .bx{cursor:pointer}
-#dgSvg .bx rect,#dgSvg .bx ellipse{fill:var(--surface);stroke:var(--border-strong);stroke-width:1.5}
-#dgSvg .bx.sel rect,#dgSvg .bx.sel ellipse{fill:var(--accent-bg);stroke:var(--accent);stroke-width:2.5}
-#dgSvg .bx text{fill:var(--text);font-size:13px}
-#dgSvg .ar{stroke:var(--text-3);stroke-width:1.5;fill:none}
-#dgInfo{margin-top:8px}
-</style>
+<title>Fuzzy Expert System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Vazirmatn:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="../assets/teacher.css">
 </head>
 <body>
-<main>
-<div class="top"><a href="../index.html">← فهرست درس‌ها</a><span>درس ۶ از ۱۱ · فصل ۲ · حدود ۱۵ دقیقه</span></div>
-<h1>ساخت یک سیستم خبره فازی</h1>
-<p class="goal">هدف: بعد از این درس می‌توانی پنج گام ساخت سیستم خبره فازی را به ترتیب نام ببری، متغیر زبانی و مقدار زبانی و مجموعه فازی را از هم تشخیص بدهی، و یک عدد قطعی را روی چند مجموعه مثلثی فازی‌سازی کنی.</p>
-
-<!-- ===== 1. IDEA ===== -->
-<section class="sec"><p class="lab">۱. ایده</p>
-<div class="card">
-  <p><b>سیستم خبره فازی</b> <span class="en">(fuzzy expert system)</span> برنامه‌ای است که دانش یک آدم خبره را به شکل جمله‌های «اگر … آنگاه …» با کلمه‌های مبهم (مثل «گرم»، «تند») نگه می‌دارد و با آن تصمیم می‌گیرد. اسلایدهای ۶۱ تا ۶۶ ساختنش را در <span class="key">پنج گام</span> می‌گویند:</p>
-  <ol>
-    <li><b>تعریف مسئله</b> (اسلاید ۶۱): دقیقاً چه چیزی را می‌خواهیم تصمیم بگیریم یا کنترل کنیم؟</li>
-    <li><b>تعریف متغیرهای زبانی</b> <span class="en">(linguistic variables)</span> (اسلاید ۶۲): متغیرهایی که به جای عدد، <b>کلمه‌های مبهم</b> مقدارشان هستند.</li>
-    <li><b>تعریف مجموعه‌های فازی</b> (اسلاید ۶۳): برای هر کلمه یک مجموعه فازی (یعنی یک تابع عضویت) می‌سازیم.</li>
-    <li><b>تعریف قوانین فازی</b> <span class="en">(fuzzy rules)</span> (اسلایدهای ۶۴ و ۶۵): جمله‌های «اگر–آنگاه» که دانش خبره را می‌سازند.</li>
-    <li><b>استنتاج فازی</b> <span class="en">(fuzzy inference)</span> (اسلاید ۶۶): فرایند نگاشت ورودی به خروجی با منطق فازی.</li>
-  </ol>
-
-  <h3 id="vars">متغیر زبانی، مقدار زبانی، مجموعه فازی</h3>
-  <table class="t">
-    <tr><th>Fuzzy variable (متغیر زبانی)</th><th>value (مقدارهای زبانی)</th></tr>
-    <tr><td>temp</td><td>hot, cold</td></tr>
-    <tr><td>height</td><td>short, medium, tall</td></tr>
-    <tr><td>speed</td><td>slow, fast</td></tr>
-    <tr><td>age</td><td>young, old</td></tr>
-  </table>
-  <p>جدول اسلاید ۶۲. <b>متغیر زبانی</b> مثل <span class="m">height</span> اسمِ کمیت است؛ <b>مقدار زبانی</b> <span class="en">(linguistic value)</span> مثل <span class="m">tall</span> یک کلمه از مقدارهای آن است؛ و <b>مجموعه فازی</b> همان چیزی است که معنی دقیق آن کلمه را با عدد می‌گوید.</p>
-  <div class="soft"><b>مثال اسلاید ۶۳:</b> جمله «علی قد بلند است» مبهم است. مجموعه فازی «قد بلند» را این‌طور تعریف می‌کنیم:
-    <div class="mb">Tall = (0/170, 0.1/175, 0.2/180, 0.3/185, ...)</div>
-    حالا می‌گوییم «علی با درجه <span class="m">0.3</span> به مجموعه tall تعلق دارد» و از روی مجموعه می‌فهمیم قد علی <span class="m">185 cm</span> است. ابهام برطرف شد. (مجموعه‌های فازی را با توابع عضویت نشان می‌دهند.)</div>
-
-  <h3>قانون فازی (اسلایدهای ۶۴ و ۶۵)</h3>
-  <p>قلب سیستم یک <b>پایگاه دانش</b> از قوانین اگر–آنگاه است. شکل کلی: <span class="m">if antecedent(s) then consequence(s)</span>؛ بخش «اگر» را <b>شرط</b> <span class="en">(antecedent)</span> و بخش «آنگاه» را <b>نتیجه</b> <span class="en">(consequence)</span> می‌گویند.</p>
-  <div class="mb pre">If A = a and B = b then C = c
-Rule1: If speed is slow then make acceleration high.
-Rule2: If height is tall then weight is heavy.
-Rule3: If temp is low and pressure is medium then make speed very slow.</div>
-  <p>در شرط می‌توان چند مجموعه فازی را با عملگرهای <span class="m">and, or, not</span> ترکیب کرد (همان min، max و 1−μ درس ۴). در Rule3 حتی قید «very» از درس ۵ هم آمده.</p>
-
-  <h3>سه بخش استنتاج (اسلایدهای ۶۶ و ۶۷)</h3>
-  <p><b>پایگاه داده</b> (پایگاه دانش) سیستم از <b>قوانین فازی</b> و <b>مجموعه‌های فازی</b> تشکیل شده. علاوه بر آن سه بخش داریم:</p>
-  <ul>
-    <li><b>فازی‌سازی</b> <span class="en">(fuzzification)</span>: تبدیل داده ورودی به مجموعه‌های فازی با استفاده از توابع عضویت.</li>
-    <li><b>استنتاج</b> <span class="en">(inferencing)</span>: با ورودی‌های فازی‌شده و قوانین فازی، خروجی‌های فازی را می‌سازد.</li>
-    <li><b>غیرفازی‌سازی</b> <span class="en">(defuzzification)</span>: خروجی‌های فازی قوانین را به عدد قطعی (غیرفازی) تبدیل می‌کند.</li>
-  </ul>
-  <div class="tip">اسلاید ۶۷ می‌گوید فازی‌سازی «تبدیل داده‌های <b>کلامی</b> به مجموعه فازی» است. در محاسبه‌ها، ورودی معمولاً یک <b>عدد قطعی</b> است (مثلاً دمای ۲۴ درجه) و فازی‌سازی یعنی: برای هر مقدار زبانی، درجه عضویت این عدد را از تابع عضویتش بخوان. پایین همین را امتحان می‌کنی.</div>
-</div></section>
-
-<!-- ===== 2. SEE IT ===== -->
-<section class="sec"><p class="lab">۲. ببین چه اتفاقی می‌افتد</p>
-<div class="card">
-  <h3 style="margin-top:0">الف) یک متغیر زبانی بساز و فازی‌سازی کن</h3>
-  <p>یکی از متغیرهای جدول اسلاید ۶۲ را انتخاب کن. هر مقدار زبانی یک مجموعه فازی دارد. با لغزنده یک عدد قطعی بده و ببین در هر مجموعه چه درجه‌ای می‌گیرد. (این مجموعه‌ها نمونه‌اند؛ هر طراح می‌تواند مرزها را خودش انتخاب کند. در مثال پنکه پایین‌تر، برای دما سه مجموعهٔ دیگر تعریف می‌کنیم.)</p>
-  <div class="row" id="varBtns" role="group" aria-label="متغیر زبانی"></div>
-  <svg id="fzSvg" viewBox="0 0 600 250" role="img" aria-labelledby="fzTitle"><title id="fzTitle">مجموعه‌های فازی یک متغیر زبانی</title></svg>
-  <label for="fzx" class="row" style="justify-content:space-between"><span>ورودی قطعی: <span class="m" id="fzv"></span></span></label>
-  <input type="range" id="fzx">
-  <div class="mb" id="fzOut"></div>
-</div>
-
-<div class="card" style="margin-top:10px">
-  <h3 style="margin-top:0">ب) نمودار سیستم استدلال فازی (اسلایدهای ۶۶ و ۶۸)</h3>
-  <p>روی هر بخش بزن تا کارش را در مثال «پنکه هوشمند» (دمای اتاق ۲۴ درجه) ببینی.</p>
-  <div class="row" id="partBtns" role="group" aria-label="بخش‌های سیستم"></div>
-  <svg id="dgSvg" viewBox="0 0 600 300" role="img" aria-labelledby="dgTitle"><title id="dgTitle">نمودار سیستم استدلال مبتنی بر قوانین فازی</title></svg>
-  <div class="soft" id="dgInfo" aria-live="polite"></div>
-</div></section>
-
-<!-- ===== 3. WORKED EXAMPLE ===== -->
-<section class="sec"><p class="lab">۳. مثال حل‌شده، قدم به قدم — پنکه هوشمند</p>
-<div class="card stepper">
-  <p style="margin:0">می‌خواهیم با پنج گام اسلایدها یک سیستم کوچک بسازیم و در آخر دمای <span class="m">24°C</span> را فازی‌سازی کنیم.</p>
-  <div class="st">گام ۱ — <b>تعریف مسئله</b>: سرعت پنکه را بر اساس دمای اتاق تنظیم کن.</div>
-  <div class="st">گام ۲ — <b>متغیرهای زبانی</b>: ورودی <span class="m">temp</span> با مقدارهای <span class="m">cold, warm, hot</span>؛ خروجی <span class="m">fan</span> با مقدارهای <span class="m">slow, medium, fast</span>. (اسلاید فقط hot و cold دارد؛ ما warm را اضافه کرده‌ایم.)</div>
-  <div class="st">گام ۳ — <b>مجموعه‌های فازی</b> (دما به درجه سانتی‌گراد):
-    <div class="mb pre">cold : 1 for x ≤ 10,  falls linearly to 0 at x = 20
-warm : triangle (10, 20, 30)  → 0 at 10, peak 1 at 20, 0 at 30
-hot  : 0 for x ≤ 20,  rises linearly to 1 at x = 30, then stays 1</div>
-    یعنی cold و hot «شانه‌ای» (یک طرفشان صاف روی ۱) هستند و warm یک مثلث است.</div>
-  <div class="st">گام ۴ — <b>قوانین فازی</b>: یک ورودی با ۳ مقدار ← ۳ قانون:
-    <div class="mb pre">R1: If temp is cold then fan is slow
-R2: If temp is warm then fan is medium
-R3: If temp is hot  then fan is fast</div></div>
-  <div class="st">گام ۵ — <b>استنتاج</b>، اول فازی‌سازی <span class="m">x = 24</span>:
-    <div class="mb pre">μ_cold(24) = 0                          (24 ≥ 20)
-μ_warm(24) = (30 − 24)/(30 − 20) = 0.6   (falling side)
-μ_hot(24)  = (24 − 20)/(30 − 20) = 0.4   (rising side)</div>
-    برای warm، عدد ۲۴ روی ضلع پایین‌روندهٔ مثلث (بین ۲۰ و ۳۰) است؛ برای hot روی ضلع بالارونده.
-    پس R2 با قدرت <span class="m">0.6</span> و R3 با قدرت <span class="m">0.4</span> فعال می‌شوند و R1 خاموش است. ترکیب این خروجی‌ها و تبدیلشان به یک عدد، موضوع درس‌های ۷ و ۸ است.</div>
-  <div class="row" style="margin-top:8px"><button class="next">قدم بعدی</button><button class="all">نمایش همه</button></div>
-</div></section>
-
-<!-- ===== 4. PRACTICE ===== -->
-<section class="sec"><p class="lab">۴. نوبت توست</p>
-<div class="card">
-  <div class="q practice" data-hint="فقط ضلعی را استفاده کن که x روی آن است. cold بین 10 و 20: (20 − x)/10. warm بین 10 و 20: (x − 10)/10. hot زیر 20 صفر است.">
-    <p><b>سؤال ۱.</b> با همان مجموعه‌های مثال پنکه، دمای <span class="m">17°C</span> را فازی‌سازی کن.</p>
-    <table class="t"><tr><th>μ_cold(17)</th><th>μ_warm(17)</th><th>μ_hot(17)</th></tr>
-      <tr><td><input type="text" data-k="0.3" aria-label="cold در 17"></td><td><input type="text" data-k="0.7" aria-label="warm در 17"></td><td><input type="text" data-k="0" aria-label="hot در 17"></td></tr></table>
-    <button class="check">بررسی</button>
-    <details class="sol"><summary>راه‌حل</summary>
-      <p>مجموعه‌های مثال پنکه: cold تا ۱۰ برابر ۱ و در ۲۰ صفر؛ warm مثلث (10, 20, 30)؛ hot تا ۲۰ صفر و در ۳۰ یک. عدد ۱۷ بین ۱۰ و ۲۰ است:</p><div class="mb pre">cold(17) = (20 − 17)/10 = 0.3   (falling side)
-warm(17) = (17 − 10)/10 = 0.7   (rising side)
-hot(17)  = 0                    (17 < 20)</div><p><b>بررسی:</b> <span class="m">0.3 + 0.7 = 1</span>، همان‌طور که در مثال ۲۴ درجه <span class="m">0.6 + 0.4 = 1</span> بود.</p>
-    </details><div class="fb"></div>
-  </div>
-
-  <div class="q practice" data-hint="short بعد از 170 صفر است. medium: 172 روی ضلع پایین‌رونده است → (185 − 172)/(185 − 170). tall: (172 − 170)/(190 − 170).">
-    <p><b>سؤال ۲.</b> متغیر زبانی <span class="m">height</span> (سانتی‌متر) سه مقدار دارد:</p>
-    <div class="mb pre">short  : 1 for x ≤ 150,  falls linearly to 0 at x = 170
-medium : triangle (155, 170, 185)
-tall   : 0 for x ≤ 170,  rises linearly to 1 at x = 190</div>
-    <p>قد <span class="m">172</span> را فازی‌سازی کن (دو رقم اعشار).</p>
-    <table class="t"><tr><th>μ_short(172)</th><th>μ_medium(172)</th><th>μ_tall(172)</th></tr>
-      <tr><td><input type="text" data-k="0" aria-label="short در 172"></td><td><input type="text" data-k="0.8667" data-tol="0.01" aria-label="medium در 172"></td><td><input type="text" data-k="0.1" aria-label="tall در 172"></td></tr></table>
-    <button class="check">بررسی</button>
-    <details class="sol"><summary>راه‌حل</summary>
-      <p>برای هر مجموعه ببین ۱۷۲ روی کدام تکه است:</p><div class="mb pre">short(172)  = 0                                       (short is 0 from 170)
-medium(172) = (185 − 172)/(185 − 170) = 13/15 ≈ 0.87   (falling side)
-tall(172)   = (172 − 170)/(190 − 170) = 2/20  = 0.1</div><p>قله medium در ۱۷۰ است و ۱۷۲ کمی بعد از قله، روی ضلع پایین‌رونده.</p>
-    </details><div class="fb"></div>
-  </div>
-
-  <div class="q practice" data-hint="اگر برای هر ترکیب ممکن یک قانون بنویسیم، تعداد مقدارهای هر ورودی را در هم ضرب کن.">
-    <p><b>سؤال ۳.</b> اگر برای <b>هر ترکیب</b> مقدارهای ورودی دقیقاً یک قانون بنویسیم (جدول کامل قوانین)، چند قانون لازم است؟</p>
-    <table class="t"><tr><th>ورودی‌ها</th><th>تعداد قانون</th></tr>
-      <tr><td>دو ورودی، هر کدام ۳ مقدار</td><td><input type="text" data-k="9" data-tol="0" aria-label="تعداد قانون 3 در 3"></td></tr>
-      <tr><td>دو ورودی با ۳ و ۴ مقدار</td><td><input type="text" data-k="12" data-tol="0" aria-label="تعداد قانون 3 در 4"></td></tr>
-      <tr><td>دو ورودی با ۵ و ۳ مقدار</td><td><input type="text" data-k="15" data-tol="0" aria-label="تعداد قانون 5 در 3"></td></tr>
-      <tr><td>سه ورودی با ۳، ۳ و ۲ مقدار</td><td><input type="text" data-k="18" data-tol="0" aria-label="تعداد قانون 3 در 3 در 2"></td></tr></table>
-    <button class="check">بررسی</button>
-    <details class="sol"><summary>راه‌حل</summary>
-      <p>هر مقدارِ ورودی اول باید با هر مقدارِ ورودی دوم (و سوم) جفت شود، پس تعدادها <b>ضرب</b> می‌شوند، نه جمع:</p><div class="mb pre">3 × 3     = 9
-3 × 4     = 12
-5 × 3     = 15
-3 × 3 × 2 = 18</div>
-    </details><div class="fb"></div>
-  </div>
-
-  <div class="q practice" data-hint="اول باید بدانی مسئله چیست، بعد کمیت‌ها (متغیرها)، بعد معنی کلمه‌ها (مجموعه‌ها)، بعد قوانین، و در آخر استنتاج.">
-    <p><b>سؤال ۴.</b> شماره گام هر کار را (۱ تا ۵) بنویس.</p>
-    <table class="t"><tr><th>کار</th><th>گام</th></tr>
-      <tr><td>تعریف قوانین فازی</td><td><input type="text" data-k="4" data-tol="0" aria-label="گام تعریف قوانین"></td></tr>
-      <tr><td>تعریف مسئله</td><td><input type="text" data-k="1" data-tol="0" aria-label="گام تعریف مسئله"></td></tr>
-      <tr><td>استنتاج فازی</td><td><input type="text" data-k="5" data-tol="0" aria-label="گام استنتاج"></td></tr>
-      <tr><td>تعریف مجموعه‌های فازی</td><td><input type="text" data-k="3" data-tol="0" aria-label="گام تعریف مجموعه‌ها"></td></tr>
-      <tr><td>تعریف متغیرهای زبانی</td><td><input type="text" data-k="2" data-tol="0" aria-label="گام تعریف متغیرها"></td></tr></table>
-    <button class="check">بررسی</button>
-    <details class="sol"><summary>راه‌حل</summary>
-      <p>هر گام به گام قبلی نیاز دارد: اول باید بدانی مسئله چیست، بعد کمیت‌ها، بعد معنی کلمه‌ها، بعد قوانین، و در آخر استنتاج.</p><ol style="margin:0 0 6px;padding-right:22px"><li>تعریف مسئله ← 1</li><li>تعریف متغیرهای زبانی ← 2</li><li>تعریف مجموعه‌های فازی ← 3</li><li>تعریف قوانین فازی ← 4</li><li>استنتاج فازی ← 5</li></ol>
-    </details><div class="fb"></div>
-  </div>
-
-  <div class="q practice" data-hint="very = μ² (درس ۵). AND = min (درس ۴).">
-    <p><b>سؤال ۵ (مرور درس ۴ و ۵).</b> فرض کن بعد از فازی‌سازی <span class="m">μ_hot = 0.4</span> و <span class="m">μ_humid = 0.7</span>.</p>
-    <table class="t"><tr><th>درجه «very hot»</th><th>درجه شرطِ «hot AND humid»</th></tr>
-      <tr><td><input type="text" data-k="0.16" data-tol="0.005" aria-label="very hot"></td><td><input type="text" data-k="0.4" aria-label="hot and humid"></td></tr></table>
-    <button class="check">بررسی</button>
-    <details class="sol"><summary>راه‌حل</summary>
-      <div class="mb pre">very hot      = 0.4²            = 0.16
-hot AND humid = min(0.4, 0.7)   = 0.4</div><p>very یعنی توان ۲ (درس ۵) و AND یعنی کوچک‌تر (درس ۴).</p>
-    </details><div class="fb"></div>
-  </div>
-
-  <div class="q mcq" data-yes="درست! tall یکی از کلمه‌هایی است که متغیر height می‌تواند بگیرد." data-no="نه. height متغیر زبانی است و tall یکی از مقدارهایش. مجموعه فازی معنی عددیِ tall است.">
-    <p><b>سؤال ۶.</b> در عبارت «height is tall»، کلمه <span class="m">tall</span> چیست؟</p>
-    <div class="opts">
-      <button>متغیر زبانی</button>
-      <button data-ok>مقدار زبانی</button>
-      <button>قاعده فازی</button>
-      <button>عدد قطعی</button>
-    </div><div class="fb"></div>
-  </div>
-
-  <div class="q mcq" data-yes="درست! این فهرست درجه‌ها به ازای هر عنصر است، یعنی همان مجموعه فازیِ معنیِ tall." data-no="نه. عبارتی به شکل (درجه/عنصر، …) یک مجموعه فازی است: برای هر قد یک درجه عضویت می‌دهد.">
-    <p><b>سؤال ۷.</b> عبارت <span class="m">Tall = (0/170, 0.1/175, 0.2/180, 0.3/185, ...)</span> چیست؟</p>
-    <div class="opts">
-      <button>متغیر زبانی</button>
-      <button>مقدار زبانی</button>
-      <button>قاعده فازی</button>
-      <button data-ok>مجموعه فازی</button>
-    </div><div class="fb"></div>
-  </div>
-
-  <div class="q mcq" data-yes="درست! اسلاید ۶۶: پایگاه داده از قوانین فازی و مجموعه‌های فازی تشکیل شده." data-no="نه. اسلاید ۶۶ (و نمودار اسلاید ۶۸) می‌گوید پایگاه داده = قوانین فازی + مجموعه‌های فازی.">
-    <p><b>سؤال ۸.</b> پایگاه داده (پایگاه دانش) یک سیستم استدلال فازی از چه تشکیل شده؟</p>
-    <div class="opts">
-      <button data-ok>قوانین فازی و مجموعه‌های فازی</button>
-      <button>ورودی‌های قطعی و خروجی‌های قطعی</button>
-      <button>فازی‌ساز و غیرفازی‌ساز سیستم</button>
-      <button>موتور استنتاج و خروجی‌های قطعی</button>
-    </div><div class="fb"></div>
-  </div>
-
-  <div class="q mcq" data-yes="درست! temp و pressure در شرط، speed در نتیجه. very فقط قید است، نه متغیر." data-no="نه. متغیرها را بشمار: temp و pressure (در شرط) و speed (در نتیجه). low، medium و very slow مقدار هستند، نه متغیر.">
-    <p><b>سؤال ۹ (اسلاید ۶۴).</b> در Rule3 «If temp is low and pressure is medium then make speed very slow» چند <b>متغیر زبانی</b> هست؟</p>
-    <div class="given"><b>اسلاید ۶۴ چه می‌گوید؟</b> شکل کلی قانون فازی <span class="m">If A = a and B = b then C = c</span> است. <span class="m">A, B, C</span> متغیر زبانی‌اند (اسم یک کمیت، مثل height) و <span class="m">a, b, c</span> مقدار زبانی (یک کلمه برای آن کمیت، مثل tall). <a href="#vars">↑ فرق این دو در بخش ۱</a></div>
-    <div class="opts">
-      <button><span class="m">1</span></button>
-      <button><span class="m">2</span></button>
-      <button data-ok><span class="m">3</span></button>
-      <button><span class="m">4</span></button>
-    </div><div class="fb"></div>
-  </div>
-</div></section>
-
-<!-- ===== 5. SUMMARY ===== -->
-<section class="sec"><p class="lab">۵. جمع‌بندی — همین را به خاطر بسپار</p>
-<div class="soft"><ul>
-  <li>پنج گام: <b>مسئله → متغیرهای زبانی → مجموعه‌های فازی → قوانین فازی → استنتاج</b>.</li>
-  <li>متغیر زبانی (height) ≠ مقدار زبانی (tall) ≠ مجموعه فازی (عددهای معنی tall).</li>
-  <li>قانون: <span class="m">if antecedent then consequence</span>؛ در شرط می‌شود <span class="m">and / or / not</span> گذاشت.</li>
-  <li>پایگاه دانش = قوانین فازی + مجموعه‌های فازی. سه بخش دیگر: فازی‌سازی → استنتاج → غیرفازی‌سازی.</li>
-  <li>فازی‌سازی یک عدد = درجه آن عدد در هر مجموعه را از روی ضلع درست بخوان.</li>
-  <li>جدول کامل قوانین: تعداد قانون = حاصل‌ضرب تعداد مقدارهای ورودی‌ها (۳ × ۳ = ۹).</li>
-</ul></div></section>
-
-<!-- ===== 6. SOURCE + ASK ===== -->
-<section class="sec"><p class="lab">منبع اصلی</p>
-<p>جزوه درس، اسلایدهای ۶۱ تا ۶۸ (گام‌ها: ۶۱ تا ۶۶؛ تعریف فازی‌سازی، استنتاج و غیرفازی‌سازی: ۶۷؛ نمودار: ۶۸) · <a href="https://www.wiley.com/en-us/Fuzzy+Logic+with+Engineering+Applications%2C+4th+Edition-p-9781119235866">Ross, <i>Fuzzy Logic with Engineering Applications</i></a> — فصل‌های مربوط به سیستم‌های مبتنی بر قانون (rule-based systems).</p>
-<p><a href="../reference/cheatsheet.html">برگه فرمول‌ها</a> · <a href="../reference/glossary.html">واژه‌نامه</a></p>
-</section>
-
-<div class="nav"><a href="0005-hedges.html">← درس قبل: قیدهای زبانی: خیلی، تا حدی، نه خیلی</a><a href="0007-max-min-inference.html">درس بعد: استنتاج max-min →</a></div>
-</main>
-
+<main id="app"></main>
+<script src="../assets/teacher.js"></script>
+<script src="../assets/graph.js"></script>
 <script>
-/* ===== SHARED JS — copy verbatim into every lesson ===== */
-(function(){
-function norm(s){return s.trim().replace(/[۰-۹]/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)}).replace(/[٠-٩]/g,function(d){return '٠١٢٣٤٥٦٧٨٩'.indexOf(d)}).replace(/[٫,]/g,'.').replace(/\s+/g,'')}
-function val(s){s=norm(s);if(/^-?\d*\.?\d+\/-?\d*\.?\d+$/.test(s)){var p=s.split('/');return +p[0]/+p[1]}return s===''?NaN:+s}
-document.querySelectorAll('.practice').forEach(function(q){
-  var ins=q.querySelectorAll('input[data-k]'),fb=q.querySelector('.fb'),btn=q.querySelector('.check');
-  ins.forEach(function(i){i.addEventListener('input',function(){i.parentNode.classList.remove('ok','no');fb.textContent='';fb.className='fb'})});
-  btn.addEventListener('click',function(){
-    var empty=0,ok=0;
-    ins.forEach(function(i){var c=i.parentNode;c.classList.remove('ok','no');if(!i.value.trim()){empty++;return}
-      var v=val(i.value),k=+i.dataset.k,tol=i.dataset.tol?+i.dataset.tol:0.01;
-      if(!isNaN(v)&&Math.abs(v-k)<=tol+1e-9){ok++;c.classList.add('ok')}else c.classList.add('no')});
-    if(empty){fb.className='fb bad';fb.textContent='اول همه خانه‌ها را پر کن ('+empty+' خانه خالی است).';return}
-    if(ok===ins.length){fb.className='fb good';fb.textContent=q.dataset.yes||('عالی! همه '+ins.length+' جواب درست است.')}
-    else{fb.className='fb bad';fb.textContent=ok+' از '+ins.length+' درست. '+(q.dataset.hint||'خانه‌های قرمز را دوباره حساب کن.')}
-  });
-});
-document.querySelectorAll('.mcq').forEach(function(q){
-  var fb=q.querySelector('.fb');
-  q.querySelectorAll('.opts button').forEach(function(b){b.addEventListener('click',function(){
-    q.querySelectorAll('.opts button').forEach(function(x){x.classList.remove('ok','no')});
-    if(b.hasAttribute('data-ok')){b.classList.add('ok');fb.className='fb good';fb.textContent=q.dataset.yes||'درست!'}
-    else{b.classList.add('no');fb.className='fb bad';fb.textContent=q.dataset.no||'نه، دوباره فکر کن.'}
-  })});
-});
-document.querySelectorAll('.stepper').forEach(function(s){
-  var st=s.querySelectorAll('.st'),n=0,nx=s.querySelector('.next'),al=s.querySelector('.all');
-  function upd(){st.forEach(function(e,i){e.classList.toggle('show',i<n)});if(nx)nx.textContent=n>=st.length?'از اول':'قدم بعدی ('+n+'/'+st.length+')'}
-  if(nx)nx.addEventListener('click',function(){n=n>=st.length?0:n+1;upd()});
-  if(al)al.addEventListener('click',function(){n=st.length;upd()});
-  upd();
-});
-window.addEventListener('beforeprint',function(){document.querySelectorAll('details.sol').forEach(function(d){d.open=true})});
-})();
-/* ===== END SHARED JS ===== */
-</script>
-<script>
-/* lesson 6: build-a-variable + clickable system diagram */
-(function(){
-/* ---- part A: linguistic variable + fuzzification ---- */
-function tz(x,a,b,c,d){if(x<a||x>d)return 0;if(x>=b&&x<=c)return 1;if(x<b)return (x-a)/(b-a);return (d-x)/(d-c)}
-var V={
-  temp:{fa:'دما',en:'temp',u:'°C',lo:0,hi:40,step:1,x:24,ticks:[0,10,20,30,40],terms:[['cold',[0,0,10,25]],['hot',[15,30,40,40]]]},
-  height:{fa:'قد',en:'height',u:'cm',lo:140,hi:200,step:1,x:172,ticks:[140,150,165,180,200],terms:[['short',[140,140,150,165]],['medium',[150,165,165,180]],['tall',[165,180,200,200]]]},
-  speed:{fa:'سرعت',en:'speed',u:'km/h',lo:0,hi:120,step:1,x:60,ticks:[0,30,50,70,100,120],terms:[['slow',[0,0,30,70]],['fast',[50,100,120,120]]]},
-  age:{fa:'سن',en:'age',u:'سال',lo:0,hi:80,step:1,x:40,ticks:[0,20,35,45,65,80],terms:[['young',[0,0,20,45]],['old',[35,65,80,80]]]}
+// Lesson 6 — slides 61–68 (building a fuzzy expert system).
+// Explanations are Persian; numbers, math and technical terms stay in English.
+
+const fmt = n => String(+(+n).toFixed(2));
+const all = list => Promise.all(list);
+const LTR = s => `⁦${s}⁩`;  // keeps a left-to-right run intact inside Persian board text
+const RTL = s => `⁧${s}⁩`;  // keeps a Persian quiz choice right-to-left inside its button
+
+// The smart-fan example (our own, not from the slides): room temperature in °C.
+const FAN = {
+  cold: x => (x <= 10 ? 1 : x >= 20 ? 0 : (20 - x) / 10),
+  warm: x => (x <= 10 || x >= 30 ? 0 : x <= 20 ? (x - 10) / 10 : (30 - x) / 10),
+  hot: x => (x <= 20 ? 0 : x >= 30 ? 1 : (x - 20) / 10),
 };
-var COL=['var(--c1)','var(--c2)','var(--c3)'];
-var cur='temp',svg=document.getElementById('fzSvg'),sl=document.getElementById('fzx');
-var L=46,R=586,T=14,B=196;
-function Y(v){return B-(B-T)*v}
-function r2(v){return String(Math.round(v*100)/100)}
-var vb=document.getElementById('varBtns');
-Object.keys(V).forEach(function(k){var b=document.createElement('button');b.type='button';b.dataset.v=k;b.innerHTML=V[k].fa+' <span class="en">('+V[k].en+')</span>';
-  b.addEventListener('click',function(){cur=k;setVar()});vb.appendChild(b)});
-function setVar(){var v=V[cur];sl.min=v.lo;sl.max=v.hi;sl.step=v.step;sl.value=v.x;
-  vb.querySelectorAll('button').forEach(function(b){b.classList.toggle('on',b.dataset.v===cur);b.setAttribute('aria-pressed',b.dataset.v===cur)});drawA()}
-function drawA(){
-  var v=V[cur],x=+sl.value;v.x=x;
-  function X(t){return L+(R-L)*(t-v.lo)/(v.hi-v.lo)}
-  var s='<title id="fzTitle">مجموعه‌های فازی متغیر '+v.en+'</title>';
-  [0,0.5,1].forEach(function(g){s+='<line x1="'+L+'" x2="'+R+'" y1="'+Y(g)+'" y2="'+Y(g)+'" stroke="var(--grid)"/><text x="'+(L-8)+'" y="'+(Y(g)+4)+'" text-anchor="end">'+g+'</text>'});
-  s+='<line x1="'+L+'" x2="'+R+'" y1="'+B+'" y2="'+B+'" stroke="var(--text-3)"/><line x1="'+L+'" x2="'+L+'" y1="'+T+'" y2="'+B+'" stroke="var(--text-3)"/>';
-  v.ticks.forEach(function(t){s+='<text x="'+X(t)+'" y="'+(B+17)+'" text-anchor="middle">'+t+'</text>'});
-  s+='<text x="'+R+'" y="'+(B+36)+'" text-anchor="end">'+v.en+' ('+v.u+')</text>';
-  var out=[];
-  v.terms.forEach(function(tm,i){var p=tm[1];
-    s+='<polyline points="'+X(p[0])+','+Y(p[0]===p[1]?1:0)+' '+X(p[1])+','+Y(1)+' '+X(p[2])+','+Y(1)+' '+X(p[3])+','+Y(p[2]===p[3]?1:0)+'" fill="none" stroke="'+COL[i]+'" stroke-width="2.5" stroke-linejoin="round"/>';
-    var lx=X((p[1]+p[2])/2);s+='<text x="'+lx+'" y="'+(T+12)+'" text-anchor="middle" style="fill:'+COL[i]+';font-weight:500">'+tm[0]+'</text>';
-    var m=tz(x,p[0],p[1],p[2],p[3]);out.push(r2(m)+'/'+tm[0]);
-    s+='<circle cx="'+X(x)+'" cy="'+Y(m)+'" r="5" fill="'+COL[i]+'" stroke="var(--surface)" stroke-width="1.5"/>';
-  });
-  s+='<line x1="'+X(x)+'" x2="'+X(x)+'" y1="'+T+'" y2="'+B+'" stroke="var(--text-3)" stroke-dasharray="3 3"/>';
-  svg.innerHTML=s;
-  document.getElementById('fzv').textContent=x+' '+v.u;
-  document.getElementById('fzOut').textContent=v.en+' = '+x+'  →  fuzzified: {'+out.join(', ')+'}';
-}
-sl.addEventListener('input',drawA);
-setVar();
+const gF = Graph({ x: 110, y: 105, w: 480, h: 250, from: 0, to: 40 });
 
-/* ---- part B: clickable diagram (slide 68) ---- */
-var dg=document.getElementById('dgSvg'),info=document.getElementById('dgInfo'),pb=document.getElementById('partBtns');
-var P=[
- {k:'in',fa:'ورودی قطعی',shape:'r',x:20,y:20,w:130,h:46,l:['Non-Fuzzy','Inputs'],
-  t:'<b>ورودی قطعی (غیرفازی)</b>: یک عدد معمولی از دنیای واقعی که از حسگر یا کاربر می‌آید. مثال پنکه: دمای اتاق <span class="m">x = 24°C</span>.'},
- {k:'fz',fa:'فازی‌سازی',shape:'e',x:85,y:150,w:130,h:58,l:['Fuzzification','Process'],
-  t:'<b>فازی‌سازی</b> <span class="en">(fuzzification)</span>: تبدیل ورودی به مجموعه‌های فازی با توابع عضویت (اسلاید ۶۷). مثال: <span class="m">24 → {0/cold, 0.6/warm, 0.4/hot}</span>. برای این کار از <b>مجموعه‌های فازی</b> پایگاه دانش استفاده می‌کند.'},
- {k:'ie',fa:'موتور استنتاج',shape:'r',x:235,y:90,w:130,h:52,l:['Inference','Engine'],
-  t:'<b>موتور استنتاج</b> <span class="en">(inference engine)</span>: با ورودی‌های فازی‌شده و <b>قوانین فازی</b>، خروجی‌های فازی را تولید می‌کند (اسلاید ۶۷). مثال: R2 «warm → medium» با قدرت <span class="m">0.6</span> و R3 «hot → fast» با قدرت <span class="m">0.4</span> روشن می‌شوند. روش دقیقش (max-min) درس ۷ است.'},
- {k:'kb',fa:'پایگاه دانش',shape:'r',x:195,y:200,w:210,h:84,l:['Fuzzy Rules  +  Fuzzy Sets'],
-  t:'<b>پایگاه داده / دانش</b> <span class="en">(knowledge base)</span>: از <b>قوانین فازی</b> و <b>مجموعه‌های فازی</b> تشکیل شده (اسلاید ۶۶). مثال: سه قانون R1 تا R3 به‌همراه مجموعه‌های cold/warm/hot و slow/medium/fast. هر سه بخش دیگر از آن استفاده می‌کنند.'},
- {k:'df',fa:'غیرفازی‌سازی',shape:'e',x:515,y:150,w:140,h:58,l:['Defuzzification','Process'],
-  t:'<b>غیرفازی‌سازی</b> <span class="en">(defuzzification)</span>: خروجی‌های فازی قوانین را به یک عدد قطعی تبدیل می‌کند (اسلاید ۶۷). مثال: از ترکیب «medium با 0.6» و «fast با 0.4» یک سرعت مشخص برای پنکه به دست می‌آید. روش‌هایش در درس ۸.'},
- {k:'out',fa:'خروجی قطعی',shape:'r',x:450,y:20,w:130,h:46,l:['Non-Fuzzy','Outputs'],
-  t:'<b>خروجی قطعی</b>: عددی که واقعاً به دستگاه داده می‌شود، مثلاً «دور پنکه = فلان دور در دقیقه». کاربر هیچ‌وقت مجموعه فازی نمی‌بیند؛ فقط ورودی و خروجی قطعی.'}
-];
-var sel='fz';
-function drawB(){
-  var s='<title id="dgTitle">نمودار سیستم استدلال مبتنی بر قوانین فازی</title><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--text-3)"/></marker></defs>';
-  var A=[['M85 66 L85 120',0],['M150 140 L233 120',0],['M367 120 L447 140',0],['M515 120 L515 68',0],['M300 144 L300 198',1],['M70 180 C 60 260, 130 270, 193 250',0],['M407 250 C 470 270, 540 250, 520 181',0]];
-  A.forEach(function(a){s+='<path class="ar" d="'+a[0]+'" marker-end="url(#ah)"'+(a[1]?' marker-start="url(#ah)"':'')+'/>'});
-  P.forEach(function(p){
-    s+='<g class="bx'+(p.k===sel?' sel':'')+'" data-k="'+p.k+'">';
-    if(p.shape==='r')s+='<rect x="'+p.x+'" y="'+p.y+'" width="'+p.w+'" height="'+p.h+'" rx="6"/>';
-    else s+='<ellipse cx="'+p.x+'" cy="'+p.y+'" rx="'+p.w/2+'" ry="'+p.h/2+'"/>';
-    var cx=p.shape==='r'?p.x+p.w/2:p.x,cy=p.shape==='r'?p.y+p.h/2:p.y;
-    if(p.k==='kb'){
-      s+='<ellipse cx="'+(p.x+55)+'" cy="'+(cy+4)+'" rx="44" ry="28"/><ellipse cx="'+(p.x+155)+'" cy="'+(cy+4)+'" rx="44" ry="28"/>';
-      s+='<text x="'+(p.x+55)+'" y="'+(cy+8)+'" text-anchor="middle">Fuzzy Rules</text><text x="'+(p.x+155)+'" y="'+(cy+8)+'" text-anchor="middle">Fuzzy Sets</text>';
-    }else{
-      p.l.forEach(function(t,i){s+='<text x="'+cx+'" y="'+(cy+(i-(p.l.length-1)/2)*16+5)+'" text-anchor="middle">'+t+'</text>'});
-    }
-    s+='</g>';
-  });
-  dg.innerHTML=s;
-  dg.querySelectorAll('.bx').forEach(function(g){g.addEventListener('click',function(){pick(g.getAttribute('data-k'))})});
-  pb.querySelectorAll('button').forEach(function(b){b.classList.toggle('on',b.dataset.k===sel);b.setAttribute('aria-pressed',b.dataset.k===sel)});
-  P.forEach(function(p){if(p.k===sel)info.innerHTML=p.t});
+function quizBoard(n, lines, size = 32) {
+  return async b => {
+    await b.clear();
+    await b.write('q-n', 500, 55, `سؤال ${n} از 6`, { size: 24, color: 'soft', fa: true });
+    for (const [k, [t, o]] of lines.entries()) await b.write(`q-${k}`, 500, 112 + k * 50, t, { size, ...o });
+  };
 }
-function pick(k){sel=k;drawB()}
-P.forEach(function(p){var b=document.createElement('button');b.type='button';b.dataset.k=p.k;b.textContent=p.fa;b.addEventListener('click',function(){pick(p.k)});pb.appendChild(b)});
-drawB();
-})();
+
+const STEPS5 = [
+  ['تعریف مسئله', '61'],
+  ['تعریف متغیرهای زبانی', '62'],
+  ['تعریف مجموعه‌های فازی', '63'],
+  ['تعریف قوانین فازی', '64–65'],
+  ['استنتاج فازی', '66'],
+];
+
+Teacher.start({
+  id: 'L06',
+  number: 6,
+  title: 'ساخت یک سیستم خبره‌ی فازی',
+  chapter: 'بخش 2 · عملیات و استنتاج فازی',
+  slides: '61–68',
+  intro: 'پنج گام ساخت: مسئله، متغیرهای زبانی، مجموعه‌های فازی، قوانین و استنتاج — و فازی‌سازی یک عدد.',
+  next: { href: '0007-max-min-inference.html', title: 'استنتاج max-min' },
+  steps: [
+    // ---------------------------------------------------------- 1. intro
+    {
+      say: 'یک fuzzy expert system یا سیستم خبره‌ی فازی، برنامه‌ای است که دانش یک آدم خبره را به شکل جمله‌های «اگر … آنگاه …» نگه می‌دارد، با کلمه‌های مبهمی مثل «گرم» یا «تند»، و با همین جمله‌ها تصمیم می‌گیرد. در این درس می‌بینیم چطور ساخته می‌شود.',
+      term: ['Fuzzy expert system', 'سیستم خبره‌ی فازی'],
+      draw: async b => {
+        await b.write('t1', 500, 110, 'سیستم خبره‌ی فازی', { size: 50, color: 'blue', bold: true, fa: true });
+        await b.write('t2', 500, 180, 'fuzzy expert system', { size: 40, color: 'orange' });
+        await b.box('bx', 170, 250, 660, 110, { color: 'purple', fill: 'purple' });
+        await b.write('r1', 500, 300, '«اگر دما گرم است، آنگاه پنکه تند باشد»', { size: 32, fa: true });
+        await b.write('r2', 500, 340, 'If temp is warm then fan is fast', { size: 24, color: 'soft' });
+        await b.write('n', 500, 450, 'دانش خبره + کلمه‌های مبهم  ⇐  تصمیم', { size: 30, color: 'green', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 2. five steps
+    {
+      say: 'اسلایدهای 61 تا 66 ساختن این سیستم را در پنج گام می‌گویند. گام 1: *تعریف* مسئله، یعنی دقیقاً چه چیزی را می‌خواهیم تصمیم بگیریم یا کنترل کنیم. بعد متغیرهای زبانی، بعد مجموعه‌های فازی، بعد قوانین، و در آخر استنتاج. هر گام به گام قبلی نیاز دارد، پس ترتیب مهم است.',
+      draw: async b => {
+        await b.clear();
+        for (const [k, [t, s]] of STEPS5.entries()) {
+          const y = 65 + k * 95;
+          await b.box(`s${k}`, 260, y, 480, 62, { color: k === 0 ? 'orange' : 'blue', fill: k === 0 ? 'orange' : undefined, dur: 350 });
+          await b.write(`s${k}t`, 500, y + 42, `${k + 1}. ${t}`, { size: 28, fa: true, bold: k === 0 });
+          await b.write(`s${k}s`, 160, y + 40, `slide ${s}`, { size: 20, color: 'purple' });
+          if (k < 4) await b.arrow(`s${k}a`, 500, y + 64, 500, y + 92, { color: 'soft', head: 10, dur: 200 });
+        }
+      },
+    },
+    // ---------------------------------------------------------- 3. linguistic variables (slide 62)
+    {
+      say: 'گام 2: linguistic variable یا متغیر زبانی، که اسلاید به آن متغیر فازی هم می‌گوید. متغیر زبانی متغیری است که به جای عدد، کلمه‌های مبهم را به عنوان مقدار می‌گیرد. جدول اسلاید 62: temp مقدارهای hot و cold دارد؛ height مقدارهای short، medium و tall؛ speed مقدارهای slow و fast؛ و age مقدارهای young و old.',
+      term: ['Linguistic variable', 'متغیر زبانی (متغیر فازی)'],
+      draw: async b => {
+        await b.clear();
+        await b.write('d', 500, 75, 'متغیر زبانی: مقدارش به جای عدد، یک کلمه‌ی مبهم است', { size: 28, color: 'orange', fa: true });
+        await b.write('h1', 330, 150, 'Fuzzy variable', { size: 28, color: 'blue', bold: true });
+        await b.write('h2', 660, 150, 'value', { size: 28, color: 'green', bold: true });
+        await b.line('hl', 180, 168, 820, 168, { color: 'soft', width: 2 });
+        await b.line('vl', 470, 120, 470, 430, { color: 'soft', width: 2 });
+        const R = [['temp', 'hot, cold'], ['height', 'short, medium, tall'], ['speed', 'slow, fast'], ['age', 'young, old']];
+        for (const [k, [v, w]] of R.entries()) {
+          await all([b.write(`v${k}`, 330, 215 + k * 55, v, { size: 30, color: 'blue', dur: 250 }), b.write(`w${k}`, 660, 215 + k * 55, w, { size: 30, color: 'green', dur: 300 })]);
+        }
+        await b.write('more', 500, 470, '…', { size: 30, color: 'soft' });
+      },
+    },
+    // ---------------------------------------------------------- 4. variable vs value vs set
+    {
+      say: 'سه چیز را با هم قاطی نکنید. height *متغیر* زبانی است، یعنی اسم یک کمیت. tall *مقدار* زبانی است، یعنی یکی از کلمه‌هایی که آن کمیت می‌گیرد. و مجموعه‌ی فازی tall همان عددهایی است که معنی دقیق این کلمه را می‌گوید.',
+      term: ['Linguistic value', 'مقدار زبانی'],
+      tip: true,
+      draw: async b => {
+        await b.ring('r-h', 330, 270, 80, 30, { color: 'orange' });
+        await b.ring('r-t', 740, 270, 60, 30, { color: 'orange' });
+        await b.erase(['d']);
+        await b.dim(['v0', 'v2', 'v3', 'w0', 'w2', 'w3'], 0.25);
+        await b.write('lv', 330, 75, 'height = متغیر زبانی', { size: 26, color: 'blue', fa: true });
+        await b.write('lw', 700, 75, 'tall = مقدار زبانی', { size: 26, color: 'green', fa: true });
+        await b.write('ls', 500, 520, `مجموعه‌ی فازی: ${LTR('Tall = (0/170, 0.1/175, 0.2/180, …)')}`, { size: 24, color: 'purple', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 5. fuzzy sets (slide 63)
+    {
+      say: 'گام 3: تعریف مجموعه‌های فازی. برای هر مقدار زبانی یک مجموعه‌ی فازی می‌سازیم. مثال اسلاید 63: جمله‌ی «علی قد بلند است» ابهام دارد؛ چقدر بلند؟ مجموعه‌ی فازی «قد بلند» را این‌طور تعریف می‌کنیم: Tall = (0/170, 0.1/175, 0.2/180, 0.3/185, …).',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 80, '«علی قد بلند است»  — چقدر بلند؟', { size: 34, fa: true });
+        await b.write('set', 500, 180, 'Tall = (0/170,  0.1/175,  0.2/180,  0.3/185,  …)', { size: 34, color: 'blue' });
+        await b.write('nt', 500, 240, `نماد ${LTR('μ/x')}: درجه بالای خط، قد (عنصر) زیر خط`, { size: 22, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 6. reading the set
+    {
+      say: 'حالا جمله‌ی مبهم را دقیق می‌گوییم: «علی با درجه‌ی 0.3 به مجموعه‌ی tall تعلق دارد». از روی مجموعه، درجه‌ی 0.3 مال عنصر 185 است؛ پس می‌فهمیم قد علی 185 سانتی‌متر است و ابهام برطرف شد. نکته‌ی اسلاید: مجموعه‌های فازی را با *توابع* عضویت نشان می‌دهند.',
+      draw: async b => {
+        await b.ring('r185', 778, 170, 85, 32, { color: 'orange' });
+        await b.write('s1', 500, 330, '«علی با درجه‌ی 0.3 به tall تعلق دارد»', { size: 30, color: 'orange', fa: true });
+        await b.arrow('a', 778, 205, 778, 380, { color: 'orange' });
+        await b.write('s2', 778, 425, '185 cm', { size: 40, color: 'green', bold: true });
+        await b.write('s3', 330, 425, 'ابهام برطرف شد', { size: 30, color: 'green', fa: true });
+        await b.write('s4', 500, 505, 'مجموعه‌ی فازی = تابع عضویت μ(x)', { size: 26, color: 'purple', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 7. fuzzy rules (slide 64)
+    {
+      say: 'گام 4: قوانین فازی. سیستم‌های فازی بر پایه‌ی قانون هستند؛ قلب سیستم یک *پایگاه* دانش از قانون‌های اگر–آنگاه است. سه مثال اسلاید 64 را ببینید. یک نکته: اسلاید نوشته made، که غلط تایپی است و باید make باشد.',
+      term: ['Fuzzy rule (if–then)', 'قانون فازی (اگر–آنگاه)'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 80, 'پایگاه دانش = قانون‌های اگر–آنگاه', { size: 34, color: 'orange', bold: true, fa: true });
+        await b.write('r1', 120, 180, 'Rule1:  If speed is slow then make acceleration high.', { size: 26, anchor: 'start' });
+        await b.write('r2', 120, 250, 'Rule2:  If height is tall then weight is heavy.', { size: 26, anchor: 'start' });
+        await b.write('r3', 120, 320, 'Rule3:  If temp is low and pressure is medium', { size: 26, anchor: 'start' });
+        await b.write('r3b', 220, 362, 'then make speed very slow.', { size: 26, anchor: 'start' });
+        await b.write('typo', 500, 460, `اسلاید نوشته ${LTR('made')}؛ درستش ${LTR('make')} است`, { size: 24, color: 'red', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 8. general form (slide 65)
+    {
+      say: 'اسلاید 65 شکل کلی را می‌دهد: if antecedent then consequence. بخش «اگر» را *antecedent* یا شرط می‌گوییم و بخش «آنگاه» را *consequence* یا نتیجه. در شرط می‌شود چند مجموعه‌ی فازی را با and، or و not ترکیب کرد، یعنی همان min، max و 1 − μ درس 4. در Rule3 حتی قید very از درس 5 هم آمده.',
+      term: ['Antecedent / Consequence', 'شرط / نتیجه'],
+      draw: async b => {
+        await b.clear();
+        await b.write('g', 500, 90, 'if antecedent(s) then consequence(s)', { size: 36 });
+        await b.write('ga', 330, 140, 'شرط', { size: 26, color: 'blue', fa: true });
+        await b.write('gc', 720, 140, 'نتیجه', { size: 26, color: 'green', fa: true });
+        await b.write('f', 500, 230, 'If A = a and B = b then C = c', { size: 40, color: 'purple' });
+        await b.write('op', 500, 320, 'and → min      or → max      not → 1 − μ', { size: 30, color: 'orange' });
+        await b.write('opn', 500, 365, 'از درس 4', { size: 22, color: 'soft', fa: true });
+        await b.write('hv', 500, 450, '… then make speed  very  slow', { size: 30 });
+        await b.write('hvn', 500, 495, `${LTR('very = μ²')}  از درس 5`, { size: 22, color: 'soft', fa: true });
+        await b.ring('hvr', 588, 440, 50, 26, { color: 'orange' });
+      },
+    },
+    // ---------------------------------------------------------- 9. inference (slide 66)
+    {
+      say: 'گام 5: *inference* یا استنتاج فازی: فرایند نگاشت ورودی به خروجی با منطق فازی. اسلاید 66 می‌گوید پایگاه داده، یا پایگاه دانش، سیستم از دو چیز ساخته شده: قوانین فازی و مجموعه‌های فازی. و علاوه بر آن، سیستم سه بخش دارد: فازی‌سازی، استنتاج و غیرفازی‌سازی.',
+      term: ['Fuzzy inference', 'استنتاج فازی'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 80, 'استنتاج: ورودی  ⇐  خروجی، با منطق فازی', { size: 32, color: 'orange', bold: true, fa: true });
+        await b.box('kb', 250, 130, 500, 130, { color: 'purple', fill: 'purple' });
+        await b.write('kbt', 500, 170, 'پایگاه دانش', { size: 28, color: 'purple', bold: true, fa: true });
+        await b.write('kb1', 500, 225, 'قوانین فازی  +  مجموعه‌های فازی', { size: 28, fa: true });
+        const P = ['فازی‌سازی', 'استنتاج', 'غیرفازی‌سازی'];
+        for (const [k, p] of P.entries()) {
+          await b.box(`p${k}`, 690 - k * 250, 330, 200, 70, { color: 'blue', dur: 350 });
+          await b.write(`p${k}t`, 790 - k * 250, 375, p, { size: 26, color: 'blue', fa: true });
+          if (k < 2) await b.arrow(`p${k}a`, 685 - k * 250, 365, 645 - k * 250, 365, { color: 'soft', head: 10 });
+        }
+        await b.write('n3', 500, 460, '+ سه بخش', { size: 26, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 10. three parts (slide 67)
+    {
+      say: 'اسلاید 67 هر بخش را تعریف می‌کند. *fuzzification* یا فازی‌سازی: تبدیل داده‌ی ورودی به مجموعه‌های فازی با توابع عضویت. در محاسبه‌ها ورودی معمولاً یک عدد قطعی است، مثل دمای 24 درجه، و فازی‌سازی یعنی درجه‌ی آن عدد را در هر مجموعه بخوانیم. *inferencing* یا استنتاج: با ورودی‌های فازی‌شده و قوانین، خروجی‌های فازی را می‌سازد. *defuzzification* یا غیرفازی‌سازی: خروجی‌های فازی را به یک عدد قطعی تبدیل می‌کند.',
+      term: ['Fuzzification / Defuzzification', 'فازی‌سازی / غیرفازی‌سازی'],
+      draw: async b => {
+        await b.clear();
+        const R = [
+          ['fuzzification', 'ورودی  ⇐  مجموعه‌های فازی (با توابع عضویت)', 'blue'],
+          ['inferencing', 'ورودی فازی + قوانین  ⇐  خروجی فازی', 'orange'],
+          ['defuzzification', 'خروجی فازی  ⇐  عدد قطعی', 'green'],
+        ];
+        for (const [k, [e, f, c]] of R.entries()) {
+          await b.write(`e${k}`, 500, 95 + k * 150, e, { size: 36, color: c, bold: true });
+          await b.write(`f${k}`, 500, 145 + k * 150, f, { size: 26, fa: true });
+        }
+      },
+    },
+    // ---------------------------------------------------------- 11. diagram (slide 68)
+    {
+      say: 'این نمودار اسلاید 68 است: ورودی غیرفازی وارد فازی‌سازی می‌شود، بعد موتور استنتاج با کمک پایگاه دانش، یعنی قوانین و مجموعه‌های فازی، خروجی فازی می‌سازد، و غیرفازی‌سازی آن را به یک خروجی غیرفازی تبدیل می‌کند. فازی‌سازی و غیرفازی‌سازی هم از همان مجموعه‌های فازی استفاده می‌کنند.',
+      draw: async b => {
+        await b.clear();
+        await b.box('in', 90, 55, 180, 70, { color: 'ink' });
+        await b.write('int', 180, 100, 'Non-Fuzzy Inputs', { size: 20 });
+        await b.arrow('a1', 180, 128, 180, 200, { color: 'soft' });
+        await b.ring('fz', 180, 250, 115, 48, { color: 'blue', tilt: 0 });
+        await b.write('fzt', 180, 245, 'Fuzzification', { size: 22, color: 'blue' });
+        await b.write('fzf', 180, 275, 'فازی‌سازی', { size: 18, color: 'soft', fa: true });
+        await b.arrow('a2', 298, 245, 395, 222, { color: 'soft' });
+        await b.box('ie', 400, 180, 200, 75, { color: 'orange', fill: 'orange' });
+        await b.write('iet', 500, 215, 'Inference Engine', { size: 22, color: 'orange' });
+        await b.write('ief', 500, 242, 'موتور استنتاج', { size: 18, color: 'soft', fa: true });
+        await b.arrow('a3', 603, 222, 702, 245, { color: 'soft' });
+        await b.ring('dz', 820, 250, 115, 48, { color: 'green', tilt: 0 });
+        await b.write('dzt', 820, 245, 'Defuzzification', { size: 22, color: 'green' });
+        await b.write('dzf', 820, 275, 'غیرفازی‌سازی', { size: 18, color: 'soft', fa: true });
+        await b.arrow('a4', 820, 200, 820, 128, { color: 'soft' });
+        await b.box('out', 730, 55, 180, 70, { color: 'ink' });
+        await b.write('outt', 820, 100, 'Non-Fuzzy Outputs', { size: 20 });
+        await all([b.arrow('a5', 485, 258, 485, 370, { color: 'soft' }), b.arrow('a6', 515, 370, 515, 258, { color: 'soft' })]);
+        await b.box('kb', 320, 375, 360, 140, { color: 'purple', fill: 'purple' });
+        await b.ring('kr', 415, 440, 70, 42, { color: 'purple', tilt: 0 });
+        await b.write('krt', 415, 448, 'Fuzzy Rules', { size: 20, color: 'purple' });
+        await b.ring('ks', 585, 440, 70, 42, { color: 'purple', tilt: 0 });
+        await b.write('kst', 585, 448, 'Fuzzy Sets', { size: 20, color: 'purple' });
+        await b.write('kbf', 500, 505, 'پایگاه دانش', { size: 18, color: 'soft', fa: true });
+        await all([b.path('c1', 'M180 300 Q180 445 315 445', { color: 'soft', width: 2.5 }), b.path('c2', 'M685 445 Q820 445 820 300', { color: 'soft', width: 2.5 })]);
+      },
+    },
+    // ---------------------------------------------------------- 12. fan: steps 1–2
+    {
+      say: 'حالا یک مثال کامل، که مال ما است و در اسلایدها نیست: پنکه‌ی هوشمند. گام 1، مسئله: سرعت پنکه را بر اساس دمای اتاق تنظیم کن. گام 2، متغیرهای زبانی: ورودی temp با مقدارهای cold، warm و hot؛ و خروجی fan با مقدارهای slow، medium و fast. اسلاید برای temp فقط hot و cold دارد؛ ما warm را اضافه کرده‌ایم.',
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 75, 'مثال: پنکه‌ی هوشمند', { size: 40, color: 'orange', bold: true, fa: true });
+        await b.write('s1', 820, 160, 'گام 1', { size: 28, color: 'purple', bold: true, fa: true });
+        await b.write('s1t', 440, 160, 'سرعت پنکه را بر اساس دمای اتاق تنظیم کن', { size: 28, fa: true });
+        await b.write('s2', 820, 260, 'گام 2', { size: 28, color: 'purple', bold: true, fa: true });
+        await b.write('s2a', 440, 260, 'temp:   cold,  warm,  hot', { size: 32, color: 'blue' });
+        await b.write('s2b', 440, 320, 'fan:   slow,  medium,  fast', { size: 32, color: 'green' });
+        await b.write('s2c', 440, 365, `ورودی: ${LTR('temp')}   ·   خروجی: ${LTR('fan')}`, { size: 22, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 13. fan: step 3 (sets)
+    {
+      say: 'گام 3، مجموعه‌های فازی دما، به درجه‌ی سانتی‌گراد. cold تا 10 درجه برابر 1 است و تا 20 درجه خطی به 0 می‌رسد. warm یک مثلث است: در 10 صفر، در 20 قله‌ی 1، و در 30 دوباره صفر. hot تا 20 صفر است، تا 30 خطی به 1 می‌رسد و بعد 1 می‌ماند. cold و hot «شانه‌ای» هستند، یعنی یک طرفشان صاف روی 1 است.',
+      draw: async b => {
+        await b.clear();
+        await gF.axes(b, 'ax', { ticks: [0, 10, 20, 30, 40], label: '°C' });
+        await gF.poly(b, 'cC', [[0, 1], [10, 1], [20, 0], [40, 0]], { color: 'blue' });
+        await b.write('cCl', gF.X(4), gF.Y(1) - 12, 'cold', { size: 24, color: 'blue', bold: true });
+        await gF.poly(b, 'cW', [[0, 0], [10, 0], [20, 1], [30, 0], [40, 0]], { color: 'orange' });
+        await b.write('cWl', gF.X(20), gF.Y(1) - 12, 'warm', { size: 24, color: 'orange', bold: true });
+        await gF.poly(b, 'cH', [[0, 0], [20, 0], [30, 1], [40, 1]], { color: 'red' });
+        await b.write('cHl', gF.X(36), gF.Y(1) - 12, 'hot', { size: 24, color: 'red', bold: true });
+        await b.write('g3', 800, 120, 'گام 3', { size: 28, color: 'purple', bold: true, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 14. fan: step 4 (rules)
+    {
+      say: 'گام 4، قوانین: یک ورودی با سه مقدار، پس سه قانون. R1: اگر دما cold است، پنکه slow. R2: اگر warm است، medium. R3: اگر hot است، fast.',
+      draw: async b => {
+        await b.write('g4', 800, 200, 'گام 4', { size: 28, color: 'purple', bold: true, fa: true });
+        await b.write('rh', 770, 240, 'If temp is … then fan is …', { size: 18, color: 'soft' });
+        await b.write('R1', 770, 285, 'R1:  cold → slow', { size: 26, color: 'blue' });
+        await b.write('R2', 770, 325, 'R2:  warm → medium', { size: 26, color: 'orange' });
+        await b.write('R3', 770, 365, 'R3:  hot → fast', { size: 26, color: 'red' });
+      },
+    },
+    // ---------------------------------------------------------- 15. fan: fuzzify 24
+    {
+      say: 'گام 5 با فازی‌سازی شروع می‌شود. دمای اتاق 24 درجه است. از 24 مستقیم بالا برو. cold: صفر، چون 24 از 20 بیشتر است. warm: عدد 24 روی ضلع *پایین‌رونده‌ی* مثلث است، بین 20 و 30: (30 − 24)/(30 − 20) = 0.6. hot: روی ضلع بالارونده: (24 − 20)/(30 − 20) = 0.4.',
+      term: ['Crisp input', 'ورودی قطعی'],
+      draw: async b => {
+        await b.line('x24', gF.X(24), gF.Y(0), gF.X(24), gF.Y(1), { color: 'purple', width: 2 });
+        await b.write('x24l', gF.X(24), gF.Y(0) + 50, 'x = 24', { size: 22, color: 'purple', bold: true });
+        await all([b.dot('d-w', gF.X(24), gF.Y(0.6), { color: 'orange', r: 7 }), b.dot('d-h', gF.X(24), gF.Y(0.4), { color: 'red', r: 7 })]);
+        await b.write('c1', 360, 455, 'μ_cold(24) = 0', { size: 24, color: 'blue' });
+        await b.write('c2', 360, 492, 'μ_warm(24) = (30 − 24)/(30 − 20) = 0.6', { size: 24, color: 'orange' });
+        await b.write('c3', 360, 529, 'μ_hot(24) = (24 − 20)/(30 − 20) = 0.4', { size: 24, color: 'red' });
+      },
+    },
+    // ---------------------------------------------------------- 16. fan: which rules fire
+    {
+      say: 'پس R2 با قدرت 0.6 روشن می‌شود و R3 با قدرت 0.4؛ R1 خاموش است، چون درجه‌ی cold صفر است. ببینید 0.6 + 0.4 = 1. اینکه این خروجی‌ها چطور ترکیب می‌شوند و به یک عدد برای سرعت پنکه تبدیل می‌شوند، موضوع درس‌های 7 و 8 است.',
+      draw: async b => {
+        await b.dim(['R1', 'c1'], 0.3);
+        await b.write('R2v', 945, 325, '0.6', { size: 26, color: 'green', bold: true });
+        await b.write('R3v', 945, 365, '0.4', { size: 26, color: 'green', bold: true });
+        await b.write('R1v', 945, 285, '0', { size: 26, color: 'soft' });
+        await b.write('sum', 800, 445, '0.6 + 0.4 = 1', { size: 26, color: 'green' });
+        await b.write('nx', 800, 500, 'ادامه: درس 7 و 8', { size: 22, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 17. how many rules
+    {
+      say: 'نکته‌ی امتحان: اگر برای هر ترکیب مقدارهای ورودی دقیقاً یک قانون بنویسیم، یعنی جدول کامل قوانین، تعداد قانون‌ها *حاصل‌ضرب* تعداد مقدارهاست، نه جمعشان. مثلاً دو ورودی temp و humidity، هر کدام با 3 مقدار: هر مقدار اولی با هر مقدار دومی جفت می‌شود، پس 3 × 3 = 9 قانون.',
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'تعداد قانون‌ها = حاصل‌ضرب', { size: 36, color: 'orange', bold: true, fa: true });
+        const C = ['low', 'mid', 'high'], R = ['cold', 'warm', 'hot'];
+        await b.write('th', 610, 135, 'humidity', { size: 24, color: 'green' });
+        await b.write('tt', 220, 330, 'temp', { size: 24, color: 'blue' });
+        for (const [c, n] of C.entries()) await b.write(`hc${c}`, 490 + c * 120, 180, n, { size: 22, color: 'green', dur: 150 });
+        for (const [r, n] of R.entries()) await b.write(`hr${r}`, 350, 245 + r * 80, n, { size: 22, color: 'blue', dur: 150 });
+        for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) {
+          await b.box(`cell${r}${c}`, 440 + c * 120, 205 + r * 80, 100, 62, { color: 'purple', dur: 120 });
+          await b.write(`ct${r}${c}`, 490 + c * 120, 245 + r * 80, `R${r * 3 + c + 1}`, { size: 22, color: 'purple', dur: 100 });
+        }
+        await b.write('ans', 500, 500, '3 × 3 = 9', { size: 44, color: 'green', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 18. summary
+    {
+      say: 'جمع‌بندی: پنج نکته برای امتحان. بعد سؤال‌ها.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 75, 'یادت باشد', { size: 46, color: 'orange', bold: true, fa: true });
+        const L = [
+          'پنج گام: مسئله ← متغیرهای زبانی ← مجموعه‌های فازی ← قوانین ← استنتاج',
+          `متغیر زبانی (${LTR('height')}) ≠ مقدار زبانی (${LTR('tall')}) ≠ مجموعه‌ی فازی`,
+          `قانون: ${LTR('if antecedent then consequence')} — در شرط ${LTR('and / or / not')}`,
+          'پایگاه دانش = قوانین + مجموعه‌ها؛ سه بخش: فازی‌سازی، استنتاج، غیرفازی‌سازی',
+          `جدول کامل قوانین: حاصل‌ضرب تعداد مقدارها (${LTR('3 × 3 = 9')})`,
+        ];
+        for (const [k, l] of L.entries()) await b.write(`m${k}`, 940, 160 + k * 76, '•  ' + l, { size: 24, anchor: 'start', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- quizzes
+    {
+      say: 'نوبت شماست! با همان مجموعه‌های مثال پنکه، دمای 17 درجه را فازی‌سازی کنید. درجه‌اش در warm چقدر است؟',
+      draw: quizBoard(1, [['cold: 1 until 10, falls to 0 at 20', { size: 26, color: 'blue' }], ['warm: triangle (10, 20, 30)', { size: 26, color: 'orange' }], ['hot: 0 until 20, rises to 1 at 30', { size: 26, color: 'red' }], ['μ_warm(17) = ?', {}]]),
+      quiz: { answer: ['0.7'], hint: '17 بین 10 و 20 است، یعنی روی ضلع بالارونده‌ی مثلث warm.', explain: '(17 − 10)/(20 − 10) = 0.7؛ و cold(17) = 0.3، hot(17) = 0' },
+      solve: async b => {
+        await b.write('s1', 500, 360, '10 ≤ 17 ≤ 20  →  rising side', { size: 28, color: 'soft' });
+        await b.write('s2', 500, 425, 'μ_warm(17) = (17 − 10)/(20 − 10) = 0.7', { size: 32, color: 'green', bold: true });
+        await b.write('s3', 500, 490, 'μ_cold(17) = 0.3      μ_hot(17) = 0', { size: 26, color: 'blue' });
+      },
+    },
+    {
+      say: 'متغیر زبانی height سه مقدار دارد. قد 172 را فازی‌سازی کنید: درجه‌اش در medium چقدر است؟ دو رقم اعشار کافی است.',
+      draw: quizBoard(2, [['short: 1 until 150, falls to 0 at 170', { size: 26, color: 'blue' }], ['medium: triangle (155, 170, 185)', { size: 26, color: 'orange' }], ['tall: 0 until 170, rises to 1 at 190', { size: 26, color: 'red' }], ['μ_medium(172) ≈ ?', {}]]),
+      quiz: { answer: ['0.87', '0.867', '0.8667', '13/15'], hint: 'قله‌ی medium در 170 است؛ 172 کمی بعد از قله، روی ضلع پایین‌رونده است.', explain: '(185 − 172)/(185 − 170) = 13/15 ≈ 0.87؛ و short(172) = 0، tall(172) = 0.1' },
+      solve: async b => {
+        await b.write('s1', 500, 360, '170 ≤ 172 ≤ 185  →  falling side', { size: 28, color: 'soft' });
+        await b.write('s2', 500, 425, 'μ_medium(172) = (185 − 172)/(185 − 170) = 13/15 ≈ 0.87', { size: 28, color: 'green', bold: true });
+        await b.write('s3', 500, 490, 'μ_short(172) = 0      μ_tall(172) = 2/20 = 0.1', { size: 26, color: 'blue' });
+      },
+    },
+    {
+      say: 'جدول کامل قوانین: سه ورودی داریم با 3، 3 و 2 مقدار. اگر برای هر ترکیب یک قانون بنویسیم، چند قانون لازم است؟',
+      draw: quizBoard(3, [['3 inputs:   3,  3,  2  values', { color: 'blue' }], ['number of rules = ?', { color: 'orange' }]]),
+      quiz: { answer: ['18'], hint: 'تعدادها ضرب می‌شوند، نه جمع.', explain: '3 × 3 × 2 = 18' },
+      solve: async b => {
+        await b.write('s1', 500, 320, '3 × 3 × 2 = 18', { size: 48, color: 'green', bold: true });
+        await b.write('s2', 500, 400, `${LTR('3 + 3 + 2 = 8')}  غلط است`, { size: 28, color: 'red', fa: true });
+      },
+    },
+    {
+      say: 'در عبارت «height is tall»، کلمه‌ی tall چیست؟',
+      draw: quizBoard(4, [['height is tall', { size: 44, color: 'blue' }], ['tall = ?', { color: 'orange' }]]),
+      quiz: {
+        choices: [RTL('متغیر زبانی'), RTL('مقدار زبانی'), RTL('قانون فازی'), RTL('عدد قطعی')], correct: 1,
+        explain: 'height متغیر زبانی است، یعنی اسم کمیت؛ tall یکی از مقدارهای زبانی آن است.',
+      },
+      solve: async b => {
+        await b.write('s1', 330, 330, 'height', { size: 40, color: 'blue' });
+        await b.write('s1f', 330, 380, 'متغیر زبانی', { size: 26, color: 'soft', fa: true });
+        await b.write('s2', 670, 330, 'tall', { size: 40, color: 'green', bold: true });
+        await b.write('s2f', 670, 380, 'مقدار زبانی', { size: 26, color: 'green', fa: true });
+      },
+    },
+    {
+      say: 'طبق اسلاید 66، پایگاه داده یا پایگاه دانش یک سیستم استدلال فازی از چه تشکیل شده است؟',
+      draw: quizBoard(5, [['پایگاه دانش = ?', { fa: true, color: 'orange' }]]),
+      quiz: {
+        choices: [RTL('ورودی‌های قطعی و خروجی‌های قطعی'), RTL('قوانین فازی و مجموعه‌های فازی'), RTL('فازی‌ساز و غیرفازی‌ساز')], correct: 1,
+        explain: 'پایگاه دانش از قوانین فازی و مجموعه‌های فازی ساخته شده. فازی‌سازی، استنتاج و غیرفازی‌سازی سه بخش دیگر سیستم‌اند.',
+      },
+      solve: async b => {
+        await b.write('s1', 500, 260, 'قوانین فازی  +  مجموعه‌های فازی', { size: 34, color: 'green', bold: true, fa: true });
+        await b.write('s2', 500, 340, 'سه بخش دیگر: فازی‌سازی ← استنتاج ← غیرفازی‌سازی', { size: 26, color: 'soft', fa: true });
+      },
+    },
+    {
+      say: 'سؤال آخر، اسلاید 64: در Rule3 چند متغیر زبانی هست؟',
+      draw: quizBoard(6, [['If temp is low and pressure is medium', { size: 30 }], ['then make speed very slow', { size: 30 }], ['?', { color: 'orange' }]]),
+      quiz: {
+        choices: ['1', '2', '3', '4'], correct: 2,
+        explain: 'temp، pressure و speed سه متغیر زبانی‌اند. low، medium و slow مقدارهای زبانی‌اند و very یک قید است.',
+      },
+      solve: async b => {
+        await b.write('s1', 500, 330, 'temp      pressure      speed', { size: 36, color: 'blue', bold: true });
+        await b.write('s2', 500, 390, 'low      medium      very slow', { size: 28, color: 'green' });
+        await b.write('s3', 500, 460, 'سه متغیر زبانی؛ بقیه مقدار زبانی و قید هستند', { size: 26, color: 'soft', fa: true });
+      },
+    },
+  ],
+});
 </script>
 </body>
 </html>

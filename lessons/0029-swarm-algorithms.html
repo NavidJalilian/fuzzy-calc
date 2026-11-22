@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Swarm Algorithms</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Vazirmatn:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="../assets/teacher.css">
+</head>
+<body>
+<main id="app"></main>
+<script src="../assets/teacher.js"></script>
+<script src="../assets/graph.js"></script>
+<script>
+// Lesson 29 — slides 316–318 (Part 8: optimization algorithms): PSO, firefly, ant colony.
+// The slides describe these three in words only; the pictures and small numbers here are the teacher's own.
+
+const all = list => Promise.all(list);
+const QUIZZES = 5;
+const round = n => Math.round(n);
+
+function quizBoard(n, lines) {
+  return async b => {
+    await b.clear();
+    await b.write('q-n', 500, 60, `سؤال ${n} از ${QUIZZES}`, { size: 24, color: 'soft', fa: true });
+    for (const [k, l] of lines.entries()) await b.write(`q-l${k}`, 500, 130 + k * 55, l.text, { size: l.size || 34, fa: l.fa, color: l.color || 'ink' });
+  };
+}
+
+// ---- PSO picture: birds (particles) and one piece of food.
+const FOOD = [850, 270];
+const BIRDS = [[150, 140], [250, 430], [430, 190], [330, 310], [560, 450], [610, 130], [690, 360], [170, 300]];
+const dist = ([x, y]) => Math.hypot(x - FOOD[0], y - FOOD[1]);
+const BEST = BIRDS.reduce((bi, p, k) => (dist(p) < dist(BIRDS[bi]) ? k : bi), 0);
+// One "round": every bird moves 45% of the way toward the best bird and 25% toward the food it senses.
+const step1 = BIRDS.map((p, k) => (k === BEST
+  ? [(FOOD[0] - p[0]) * 0.5, (FOOD[1] - p[1]) * 0.5]
+  : [(BIRDS[BEST][0] - p[0]) * 0.45 + (FOOD[0] - p[0]) * 0.25, (BIRDS[BEST][1] - p[1]) * 0.45 + (FOOD[1] - p[1]) * 0.25]));
+const AFTER1 = BIRDS.map((p, k) => [p[0] + step1[k][0], p[1] + step1[k][1]]);
+
+// ---- Firefly picture: brightness = how good the solution is.
+const FLIES = [[200, 330, 0.3], [380, 200, 0.9], [560, 380, 0.5], [760, 250, 0.2]];
+const BRIGHTEST = FLIES.reduce((bi, f, k) => (f[2] > FLIES[bi][2] ? k : bi), 0);
+
+Teacher.start({
+  id: 'L29',
+  number: 29,
+  title: 'PSO، کرم شب‌تاب و کلونی مورچه',
+  chapter: 'بخش 8 · الگوریتم‌های بهینه‌سازی',
+  slides: '316–318',
+  intro: 'سه الگوریتم فرااکتشافی که از رفتار جمعی پرندگان، کرم‌های شب‌تاب و مورچه‌ها الهام گرفته‌اند.',
+  next: { href: '0030-genetic-algorithm.html', title: 'الگوریتم ژنتیک' },
+  steps: [
+    // ---------------------------------------------------------- 1. intro
+    {
+      say: 'در درس قبل گفتیم الگوریتم‌های فرااکتشافی جوابی *نزدیک به بهترین* در زمان قابل قبول پیدا می‌کنند. امروز سه‌تا از آن‌ها را می‌بینیم که هر سه از *رفتار جمعی* موجودات زنده الهام گرفته‌اند: پرندگان، کرم‌های شب‌تاب و مورچه‌ها.',
+      draw: async b => {
+        await b.write('h', 500, 110, 'سه الگوریتم از طبیعت', { size: 50, color: 'orange', bold: true, fa: true });
+        const L = [['PSO', 'پرندگان', 'blue'], ['Firefly', 'کرم شب‌تاب', 'orange'], ['Ant colony', 'مورچه‌ها', 'green']];
+        for (const [k, [en, fa, c]] of L.entries()) {
+          await b.box(`bx${k}`, 680 - k * 290, 200, 240, 150, { color: c, fill: c });
+          await b.write(`en${k}`, 800 - k * 290, 265, en, { size: 34, color: c, bold: true });
+          await b.write(`fa${k}`, 800 - k * 290, 315, fa, { size: 28, fa: true });
+        }
+        await b.write('sub', 500, 440, 'یک گروه، با هم، دنبال بهترین جواب می‌گردد', { size: 30, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 2. PSO name
+    {
+      say: 'اولی *PSO* است: particle swarm optimization یعنی بهینه‌سازی ازدحام ذرات (اسلاید 316). از حرکت دسته‌جمعی *پرندگانی* الهام گرفته که دنبال غذا هستند. هر پرنده در این الگوریتم یک *ذره* است، و هر ذره یعنی یک جواب پیشنهادی برای مسئله.',
+      term: ['Particle swarm optimization (PSO)', 'بهینه‌سازی ازدحام ذرات'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'PSO = particle swarm optimization', { size: 36, color: 'blue', bold: true });
+        await b.write('h2', 500, 115, 'ذره = پرنده = یک جواب پیشنهادی', { size: 26, color: 'soft', fa: true });
+        await all(BIRDS.map((p, k) => b.dot(`p${k}`, p[0], p[1], { r: 9, color: 'blue' })));
+      },
+    },
+    // ---------------------------------------------------------- 3. nobody knows
+    {
+      say: 'داستان اسلاید: گروهی از پرندگان در یک فضا به‌صورت *تصادفی* دنبال غذا می‌گردند. فقط *یک تکه* غذا در این فضا هست، و *هیچ* پرنده‌ای نمی‌داند غذا کجاست.',
+      draw: async b => {
+        await b.write('food', FOOD[0], FOOD[1] + 12, '?', { size: 60, color: 'orange', bold: true });
+        await b.write('foodl', FOOD[0], FOOD[1] + 60, 'غذا کجاست؟', { size: 24, color: 'orange', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 4. fitness
+    {
+      say: 'ولی هر پرنده می‌تواند حس کند چقدر به غذا *نزدیک* است. در الگوریتم به این می‌گوییم *fitness* یا مقدار شایستگی، که یک تابع شایستگی حسابش می‌کند. قانون اسلاید: هرچه ذره به هدف نزدیک‌تر باشد، شایستگی بیشتری دارد. تابع شایستگی همان تابع هدف درس قبل است.',
+      term: ['Fitness function', 'تابع شایستگی'],
+      draw: async b => {
+        await b.erase(['food', 'foodl']);
+        await b.dot('fd', FOOD[0], FOOD[1], { r: 14, color: 'orange' });
+        await b.write('fdl', FOOD[0], FOOD[1] + 45, 'غذا (هدف)', { size: 22, color: 'orange', fa: true });
+        for (const k of [0, 4, BEST]) {
+          const [x, y] = BIRDS[k];
+          await b.line(`dl${k}`, x, y, FOOD[0], FOOD[1], { color: 'soft', width: 2, dur: 350 });
+          await b.write(`dv${k}`, (x + FOOD[0]) / 2, (y + FOOD[1]) / 2 - 10, String(round(dist(BIRDS[k]))), { size: 22, color: 'purple' });
+        }
+        await b.write('rule', 420, 530, 'فاصله‌ی کمتر ← شایستگی بیشتر', { size: 28, color: 'green', bold: true, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 5. follow the best
+    {
+      say: 'یکی از بهترین استراتژی‌ها طبق اسلاید: *دنبال کردن پرنده‌ای که کمترین فاصله را تا غذا دارد*. این پرنده الان بهترین ذره‌ی گروه است. بقیه به سمت او کشیده می‌شوند.',
+      draw: async b => {
+        await b.erase(['dl*', 'dv*']);
+        await b.ring('bestr', BIRDS[BEST][0], BIRDS[BEST][1], 26, 26, { color: 'green' });
+        await b.write('bestl', BIRDS[BEST][0], BIRDS[BEST][1] - 36, 'بهترین ذره', { size: 22, color: 'green', bold: true, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 6. velocity
+    {
+      say: 'هر ذره یک *سرعت* هم دارد که حرکتش را هدایت می‌کند: به کدام سمت و چقدر جابه‌جا شود. فلش‌ها سرعت هر ذره در این دور هستند؛ همه رو به بهترین ذره و رو به جایی که غذا حس می‌شود.',
+      term: ['Velocity', 'سرعت ذره'],
+      draw: async b => {
+        await b.erase(['bestl', 'rule']);
+        await all(BIRDS.map((p, k) => b.arrow(`v${k}`, p[0], p[1], p[0] + step1[k][0] * 0.8, p[1] + step1[k][1] * 0.8, { color: 'purple', head: 10 })));
+      },
+    },
+    // ---------------------------------------------------------- 7. move
+    {
+      say: 'حالا همه با سرعتشان حرکت می‌کنند. ببینید: گروه به هم نزدیک‌تر و به غذا نزدیک‌تر شد. اسلاید می‌گوید هر ذره با دنبال کردن ذره‌های بهینه‌ی حالت فعلی، به حرکتش در فضای مسئله ادامه می‌دهد.',
+      draw: async b => {
+        await b.erase(['v*', 'bestr']);
+        await all(BIRDS.map((p, k) => b.move(`p${k}`, step1[k][0], step1[k][1], 900)));
+      },
+    },
+    // ---------------------------------------------------------- 8. repeat
+    {
+      say: 'این کار *دور به دور* تکرار می‌شود: دوباره شایستگی همه حساب می‌شود، بهترین ذره عوض می‌شود، و همه دوباره حرکت می‌کنند. بعد از چند دور، کل دسته دور غذا جمع می‌شود؛ یعنی الگوریتم به جواب بهینه یا نزدیک به آن رسیده است.',
+      draw: async b => {
+        await all(BIRDS.map((p, k) => {
+          const [x, y] = AFTER1[k];
+          const tx = FOOD[0] - 40 + (k % 4) * 22, ty = FOOD[1] - 30 + Math.floor(k / 4) * 50;
+          return b.move(`p${k}`, tx - x, ty - y, 1100);
+        }));
+        await b.write('done', 450, 500, 'چند دور بعد: همه نزدیک غذا', { size: 28, color: 'green', bold: true, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 9. PSO extra
+    {
+      say: 'نکته‌ی تکمیلی، خارج از اسلاید: در نسخه‌ی کامل PSO، سرعت جدید هر ذره از سه تکه ساخته می‌شود: کمی از سرعت قبلی‌اش، کشش به سمت *بهترین جایی که خودش* تا حالا دیده، و کشش به سمت *بهترین جای کل گروه*. برای امتحان همان سه نکته‌ی اسلاید کافی است: شایستگی، سرعت، دنبال کردن بهترین.',
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 90, 'سرعت جدید ذره', { size: 42, color: 'purple', bold: true, fa: true });
+        const P = [['سرعت قبلی', 'soft'], ['بهترین جای خودش', 'blue'], ['بهترین جای گروه', 'green']];
+        for (const [k, [t, c]] of P.entries()) {
+          await b.box(`pb${k}`, 690 - k * 300, 180, 240, 90, { color: c, fill: c });
+          await b.write(`pt${k}`, 810 - k * 300, 235, t, { size: 26, fa: true });
+          if (k < 2) await b.write(`pp${k}`, 675 - k * 300, 240, '+', { size: 40, color: 'soft' });
+        }
+        await b.write('ex', 500, 380, 'در اسلاید نیامده؛ فقط برای فهم بهتر', { size: 26, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 10. firefly
+    {
+      say: 'دومی *Firefly algorithm* یا الگوریتم کرم شب‌تاب است (اسلاید 317)، الهام‌گرفته از *نور* کرم‌های شب‌تاب. آن‌ها دسته‌جمعی زندگی می‌کنند و قانون ساده است: کرم *کم‌نورتر* همیشه به سمت کرم *پرنورتر* حرکت می‌کند.',
+      term: ['Firefly algorithm', 'الگوریتم کرم شب‌تاب'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'Firefly algorithm', { size: 42, color: 'orange', bold: true });
+        for (const [k, [x, y, br]] of FLIES.entries()) {
+          await b.ring(`ff${k}`, x, y, 14 + 40 * br, 14 + 40 * br, { color: 'orange', fill: 'orange', tilt: 0 });
+          await b.write(`fl${k}`, x, y + 10, String(br), { size: 26, bold: true });
+        }
+        await b.write('leg', 500, 520, 'عدد هر کرم = میزان نور آن', { size: 26, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 11. light = quality
+    {
+      say: 'ارتباطش با بهینه‌سازی: هر کرم یک *جواب* است و نورش متناسب با *کیفیت* آن جواب است. کرم‌های کم‌نور، یعنی جواب‌های بدتر، به سمت جواب‌های بهتر می‌روند. اینجا پرنورترین کرم با نور 0.9 است و بقیه به سمتش حرکت می‌کنند.',
+      draw: async b => {
+        const [bx, by] = FLIES[BRIGHTEST];
+        for (const [k, [x, y]] of FLIES.entries()) {
+          if (k === BRIGHTEST) continue;
+          await b.arrow(`fa${k}`, x, y, x + (bx - x) * 0.55, y + (by - y) * 0.55, { color: 'purple', head: 12 });
+        }
+        await b.write('q', 500, 470, 'نور = کیفیت جواب', { size: 30, color: 'green', bold: true, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 12. firefly details
+    {
+      say: 'دو جزئیات اسلاید که در سؤال‌های تستی می‌آید: یک، هر کرم همتایانش را *صرف‌نظر از جنسیتشان* جذب می‌کند. دو، الگوی نور هر کرم با بقیه فرق دارد، و کرم‌ها از نور به *دو* منظور استفاده می‌کنند: جذب جفت و جذب شکار.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 90, 'کرم شب‌تاب — نکته‌های اسلاید', { size: 40, color: 'orange', bold: true, fa: true });
+        const L = [
+          'کرم کم‌نورتر ← به سمت کرم پرنورتر',
+          'هر کرم همه را جذب می‌کند، صرف‌نظر از جنسیت',
+          'الگوی نور هر کرم با بقیه فرق دارد',
+          'دو کاربرد نور: جذب جفت · جذب شکار',
+        ];
+        for (const [k, l] of L.entries()) await b.write(`m${k}`, 860, 180 + k * 80, '•  ' + l, { size: 28, anchor: 'start', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 13. ant colony
+    {
+      say: 'سومی *Ant colony* یا کلونی مورچگان است (اسلاید 318). مسئله‌ای که حل می‌کند: *پیدا کردن کوتاه‌ترین مسیر*. مسئله‌ای که حلش گاهی بسیار دشوار و گاهی بسیار زمان‌بر است. مثال معروفش مسئله‌ی *فروشنده‌ی دوره‌گرد* است که در درس بعد با ژنتیک حلش می‌کنیم.',
+      term: ['Ant colony optimization', 'کلونی مورچگان'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'Ant colony', { size: 42, color: 'green', bold: true });
+        await b.ring('nest', 850, 300, 45, 45, { color: 'ink', fill: 'soft', tilt: 0 });
+        await b.write('nestl', 850, 310, 'لانه', { size: 26, bold: true, fa: true });
+        await b.ring('food', 150, 300, 45, 45, { color: 'orange', fill: 'orange', tilt: 0 });
+        await b.write('foodl', 150, 310, 'غذا', { size: 26, bold: true, fa: true });
+        await b.path('short', 'M805 290 Q500 200 195 290', { color: 'soft' });
+        await b.path('long', 'M810 330 Q500 560 190 330', { color: 'soft' });
+        await b.write('sl', 500, 215, 'مسیر کوتاه', { size: 24, color: 'soft', fa: true });
+        await b.write('ll', 500, 470, 'مسیر بلند', { size: 24, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 14. pheromone
+    {
+      say: 'مورچه‌های واقعی در مسیرشان *نشانه* باقی می‌گذارند، یعنی ماده‌ای بودار به اسم فرومون. در الگوریتم، مورچه‌های *مصنوعی* روی نمودار مسئله حرکت می‌کنند و نشانه می‌گذارند، تا مورچه‌های مصنوعی *بعدی* بتوانند راه‌حل‌های بهتری پیدا کنند.',
+      term: ['Pheromone trail', 'نشانه (فرومون)'],
+      draw: async b => {
+        await all([
+          b.dot('a1', 640, 240, { r: 7 }), b.dot('a2', 360, 240, { r: 7 }),
+          b.dot('a3', 650, 420, { r: 7 }), b.dot('a4', 350, 420, { r: 7 }),
+        ]);
+        await b.write('note', 500, 530, 'هر مورچه روی مسیرش نشانه می‌گذارد', { size: 26, color: 'purple', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 15. why short wins
+    {
+      say: 'چرا مسیر کوتاه برنده می‌شود؟ مورچه‌ای که مسیر کوتاه را می‌رود *زودتر* برمی‌گردد و در همان زمان دفعه‌های بیشتری آن را طی می‌کند، پس نشانه روی مسیر کوتاه *پررنگ‌تر* می‌شود. مورچه‌های بعدی بیشتر مسیر پرنشانه را انتخاب می‌کنند و این چرخه کوتاه‌ترین مسیر را تقویت می‌کند. این توضیح تکمیلی من است؛ اسلاید فقط می‌گوید نشانه‌ها به مورچه‌های بعدی کمک می‌کنند.',
+      tip: true,
+      draw: async b => {
+        await b.erase('note');
+        await b.path('short2', 'M805 290 Q500 200 195 290', { color: 'green', width: 9 });
+        await b.dim('long', 0.35);
+        await b.write('note2', 500, 530, 'مسیر کوتاه ← نشانه‌ی بیشتر ← مورچه‌ی بیشتر', { size: 28, color: 'green', bold: true, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 16. compare
+    {
+      say: 'هر سه را کنار هم بگذاریم. سؤال رایج امتحان این است که هر الگوریتم از چه چیزی الهام گرفته و چه چیزی حرکت را هدایت می‌کند.',
+      draw: async b => {
+        await b.clear();
+        const C = [820, 520, 210];
+        const H = ['الگوریتم', 'الهام از', 'چه چیزی هدایت می‌کند'];
+        const R = [
+          ['PSO', 'پرندگانِ دنبال غذا', 'بهترین ذره (شایستگی)'],
+          ['Firefly', 'نور کرم شب‌تاب', 'کرم پرنورتر'],
+          ['Ant colony', 'مورچه‌ها', 'نشانه‌های مسیر'],
+        ];
+        await all(H.map((h, k) => b.write(`th${k}`, C[k], 110, h, { size: 28, color: 'blue', bold: true, fa: true })));
+        await b.line('hl', 60, 135, 940, 135, { color: 'soft', width: 2 });
+        for (const [r, row] of R.entries()) {
+          await all(row.map((v, k) => b.write(`td${r}-${k}`, C[k], 200 + r * 90, v, { size: k === 0 ? 30 : 26, fa: k > 0, bold: k === 0, color: k === 0 ? 'orange' : 'ink' })));
+        }
+      },
+    },
+    // ---------------------------------------------------------- 17. summary
+    {
+      say: 'یادت باشد: پنج نکته. بعد سراغ سؤال‌ها.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 75, 'یادت باشد', { size: 48, color: 'orange', bold: true, fa: true });
+        const L = [
+          'PSO: هر ذره یک جواب؛ نزدیک‌تر به هدف = شایستگی بیشتر',
+          'هر ذره سرعت دارد و ذره‌های بهینه را دنبال می‌کند',
+          'کرم شب‌تاب: کم‌نورتر به سمت پرنورتر؛ نور = کیفیت جواب',
+          'نور برای دو کار: جذب جفت و جذب شکار',
+          'کلونی مورچگان: کوتاه‌ترین مسیر با نشانه گذاشتن',
+        ];
+        for (const [k, l] of L.entries()) await b.write(`m${k}`, 920, 160 + k * 75, '•  ' + l, { size: 26, anchor: 'start', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- quizzes
+    {
+      say: 'در یک دور PSO، فاصله‌ی سه ذره تا هدف این است: ذره‌ی 1 فاصله‌ی 7، ذره‌ی 2 فاصله‌ی 3، ذره‌ی 3 فاصله‌ی 9. بقیه‌ی ذره‌ها کدام ذره را دنبال می‌کنند؟ شماره‌اش را بنویسید.',
+      draw: quizBoard(1, [
+        { text: 'distance: P1 = 7    P2 = 3    P3 = 9', size: 36, color: 'blue' },
+        { text: 'بقیه کدام ذره را دنبال می‌کنند؟', size: 32, fa: true },
+      ]),
+      quiz: { answer: ['2', 'P2'], hint: 'هرچه به هدف نزدیک‌تر، شایستگی بیشتر.', explain: 'ذره‌ی 2 کمترین فاصله، یعنی بیشترین شایستگی را دارد، پس بقیه آن را دنبال می‌کنند.' },
+      solve: async b => {
+        await b.write('s1', 500, 320, 'کمترین فاصله: P2 = 3', { size: 36, color: 'green', bold: true, fa: true });
+        await b.write('s2', 500, 390, 'فاصله‌ی کمتر ← شایستگی بیشتر', { size: 28, color: 'soft', fa: true });
+      },
+    },
+    {
+      say: 'الگوریتم ازدحام ذرات از رفتار چه موجودی الهام گرفته است؟',
+      draw: quizBoard(2, [{ text: 'PSO از چه الهام گرفته؟', size: 40, fa: true }]),
+      quiz: {
+        choices: ['حرکت دسته‌جمعی پرندگان به دنبال غذا', 'نور کرم‌های شب‌تاب', 'نشانه‌گذاری مورچه‌ها روی مسیر', 'انتخاب طبیعی و جهش ژن‌ها'],
+        correct: 0,
+        explain: 'PSO از دسته‌ی پرندگانی الهام گرفته که به‌صورت تصادفی دنبال تنها تکه‌ی غذا می‌گردند.',
+      },
+      solve: async b => {
+        await b.write('s1', 500, 320, 'PSO ← پرندگان', { size: 40, color: 'green', bold: true, fa: true });
+        await b.write('s2', 500, 390, 'کرم شب‌تاب ← نور · کلونی مورچگان ← نشانه · ژنتیک ← وراثت', { size: 26, color: 'soft', fa: true });
+      },
+    },
+    {
+      say: 'چهار کرم شب‌تاب با نورهای 0.4، 0.7، 0.2 و 0.6 داریم. همه به سمت کرمی با چه میزان نوری حرکت می‌کنند؟',
+      draw: quizBoard(3, [
+        { text: 'brightness: 0.4    0.7    0.2    0.6', size: 38, color: 'orange' },
+        { text: 'همه به سمت کدام نور می‌روند؟', size: 32, fa: true },
+      ]),
+      quiz: { answer: ['0.7'], hint: 'کرم کم‌نورتر به سمت کرم پرنورتر حرکت می‌کند.', explain: 'پرنورترین کرم با نور 0.7 بهترین جواب فعلی است و بقیه به سمتش می‌روند.' },
+      solve: async b => {
+        await b.write('s1', 500, 330, 'max(0.4, 0.7, 0.2, 0.6) = 0.7', { size: 40, color: 'green', bold: true });
+        await b.write('s2', 500, 400, 'کم‌نورتر ← به سمت پرنورتر', { size: 28, color: 'soft', fa: true });
+      },
+    },
+    {
+      say: 'طبق اسلاید 317، کرم‌های شب‌تاب از نورشان برای چه استفاده می‌کنند؟',
+      draw: quizBoard(4, [{ text: 'دو کاربرد نور کرم شب‌تاب؟', size: 40, fa: true }]),
+      quiz: {
+        choices: ['پیدا کردن کوتاه‌ترین مسیر و ساختن لانه', 'جذب جفت و جذب شکار', 'ترساندن دشمن و گرم شدن', 'فقط جذب کرم‌های هم‌جنس'],
+        correct: 1,
+        explain: 'اسلاید می‌گوید کرم‌ها از نور به دو منظور استفاده می‌کنند: جذب جفت و جذب شکار؛ و هر کرم بقیه را صرف‌نظر از جنسیت جذب می‌کند.',
+      },
+      solve: async b => {
+        await b.write('s1', 500, 330, 'جذب جفت · جذب شکار', { size: 40, color: 'green', bold: true, fa: true });
+      },
+    },
+    {
+      say: 'سؤال آخر: در الگوریتم کلونی مورچگان، چه چیزی باعث می‌شود مورچه‌های مصنوعی بعدی راه‌حل‌های بهتری پیدا کنند؟',
+      draw: quizBoard(5, [{ text: 'کلونی مورچگان: چه چیزی به مورچه‌های بعدی کمک می‌کند؟', size: 32, fa: true }]),
+      quiz: {
+        choices: ['سرعت هر مورچه', 'نشانه‌هایی که مورچه‌های قبلی روی مسیر گذاشته‌اند', 'نور مورچه‌ها', 'جهش تصادفی مسیرها'],
+        correct: 1,
+        explain: 'مورچه‌های مصنوعی روی نمودار مسئله حرکت می‌کنند و نشانه باقی می‌گذارند؛ همین نشانه‌ها مورچه‌های بعدی را به راه‌حل بهتر، یعنی مسیر کوتاه‌تر، می‌رسانند.',
+      },
+      solve: async b => {
+        await b.write('s1', 500, 330, 'نشانه‌های روی مسیر (فرومون)', { size: 38, color: 'green', bold: true, fa: true });
+        await b.write('s2', 500, 400, 'مسیر کوتاه‌تر ← نشانه‌ی بیشتر', { size: 28, color: 'soft', fa: true });
+      },
+    },
+  ],
+});
+</script>
+</body>
+</html>

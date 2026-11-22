@@ -1,0 +1,543 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mamdani Inference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Vazirmatn:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="../assets/teacher.css">
+</head>
+<body>
+<main id="app"></main>
+<script src="../assets/teacher.js"></script>
+<script src="../assets/graph.js"></script>
+<script>
+// Lesson 14 — slides 108–115 (part 4: the Mamdani fuzzy inference system, steps 1–3).
+// Aggregation and defuzzification (steps 4–5) are lesson 15.
+// Explanations are Persian; numbers, math and technical terms stay in English.
+
+const LTR = s => `⁦${s}⁩`; // keeps a left-to-right run intact inside Persian board text
+const all = list => Promise.all(list);
+const fmt = n => String(+n.toFixed(4));
+
+// Membership-function shapes.
+const tri = (a, m, c) => v => Math.max(0, Math.min((v - a) / (m - a), (c - v) / (c - m)));
+const ramp = (a, c) => v => Math.max(0, Math.min(1, (v - a) / (c - a)));   // 0 before a, rises to 1 at c
+const fall = (a, c) => v => Math.max(0, Math.min(1, (c - v) / (c - a)));   // 1 before a, falls to 0 at c
+const gaussmf = (s, c) => v => Math.exp(-((v - c) ** 2) / (2 * s * s));     // MATLAB gaussmf(x, [σ c])
+const probor = (a, b) => a + b - a * b;
+
+// The wind / pressure / rain example (slides 109–117). The slides give only pictures and the
+// readings 0.6, 0.2 (x = 8) and 0.3, 0.7 (y = 5); these straight lines pass through the same readings.
+const A1 = ramp(5, 10);        // «شدید»  (strong)
+const A2 = tri(3, 6, 8.5);     // «متوسط» (medium)
+const B1 = fall(2.9, 5.9);     // «پایین» (low)
+const B2 = ramp(2.9, 5.9);     // «بالا»  (high)
+const C1 = tri(5, 7, 9);       // «زیاد»  (heavy rain) — our numbers
+const C2 = tri(2, 4, 6);       // «کم»    (light rain) — our numbers
+const X0 = 8, Y0 = 5;
+const MU = { A1: A1(X0), A2: A2(X0), B1: B1(Y0), B2: B2(Y0) };   // 0.6, 0.2, 0.3, 0.7
+const AL1 = Math.min(MU.A1, MU.B1), AL2 = Math.min(MU.A2, MU.B2); // 0.3, 0.2
+const CUT1 = [5 + 2 * AL1, 9 - 2 * AL1];                          // 5.6 … 8.4
+const CUT2 = [2 + 2 * AL2, 6 - 2 * AL2];                          // 2.4 … 5.6
+
+// A filled region under μ = f(v) between lo and hi.
+function shade(b, g, id, f, lo, hi, color = 'green', dur = 700) {
+  const pts = [[lo, 0]];
+  for (let k = 0; k <= 100; k++) { const v = lo + ((hi - lo) * k) / 100; pts.push([v, f(v)]); }
+  pts.push([hi, 0]);
+  const d = 'M' + pts.map(([v, m]) => `${g.X(v).toFixed(1)} ${g.Y(m).toFixed(1)}`).join('L') + 'Z';
+  return b.path(id, d, { color, fill: color, width: 2.5, dur });
+}
+
+// The three graphs of the example (x, y, z).
+const GX = Graph({ x: 80, y: 270, w: 210, h: 150, from: 0, to: 12 });
+const GY = Graph({ x: 380, y: 270, w: 210, h: 150, from: 0, to: 10 });
+const GZ = Graph({ x: 690, y: 270, w: 210, h: 150, from: 0, to: 10 });
+// The big output graph used for implication.
+const GC = Graph({ x: 120, y: 150, w: 560, h: 300, from: 0, to: 10 });
+
+// Quiz helpers.
+function quizBoard(n, lines) {
+  return async b => {
+    await b.clear();
+    await b.write('q-n', 500, 52, `سؤال ${n} از 6`, { size: 22, color: 'soft', fa: true });
+    for (const [k, l] of lines.entries()) {
+      await b.write(`q-${k}`, 500, 108 + k * 50, l.t, { size: l.size || 30, color: l.color || 'ink', fa: !!l.fa });
+    }
+  };
+}
+
+Teacher.start({
+  id: 'L14',
+  number: 14,
+  title: 'سیستم استنتاج فازی ممدانی',
+  chapter: 'بخش 4 · برهان و سیستم استنتاج فازی',
+  slides: '108–115',
+  intro: 'پنج بخش سیستم استنتاج فازی؛ ممدانی در برابر سوگنو؛ فازی‌سازی، عملگر AND / OR (min، prod، max، probor) و استلزام min و prod.',
+  next: { href: '0015-aggregation-defuzzification.html', title: 'تجمیع و غیرفازی‌سازی' },
+  steps: [
+    // ---------------------------------------------------------- 1. intro
+    {
+      say: 'سلام! تا اینجا یک قاعده را ارزیابی کردیم. حالا کل ماشین را می‌سازیم: *Fuzzy inference system* یا سیستم استنتاج فازی. تعریف اسلاید: استنتاج فازی یعنی ساختن یک نگاشت از ورودی به خروجی با منطق فازی. عدد ورودی می‌دهیم، مثلاً سرعت باد و فشار، و یک عدد خروجی می‌گیریم، مثلاً میزان بارش.',
+      term: ['Fuzzy inference system (FIS)', 'سیستم استنتاج فازی'],
+      draw: async b => {
+        await b.write('h', 500, 80, 'سیستم استنتاج فازی', { size: 48, color: 'orange', bold: true, fa: true });
+        await b.write('he', 500, 135, 'Fuzzy Inference System', { size: 32, color: 'soft' });
+        await b.box('fis', 380, 230, 240, 120, { color: 'blue', fill: 'blue' });
+        await b.write('fisT', 500, 300, 'FIS', { size: 46, color: 'blue', bold: true });
+        await b.arrow('in1', 140, 260, 375, 260, { color: 'ink' });
+        await b.arrow('in2', 140, 320, 375, 320, { color: 'ink' });
+        await b.arrow('out', 625, 290, 860, 290, { color: 'green' });
+        await all([
+          b.write('in1t', 220, 250, 'x = 8', { size: 26 }),
+          b.write('in2t', 220, 310, 'y = 5', { size: 26 }),
+          b.write('outt', 760, 280, 'z = ?', { size: 28, color: 'green', bold: true }),
+        ]);
+        await all([
+          b.write('in1f', 220, 360, 'سرعت باد و فشار', { size: 20, color: 'soft', fa: true }),
+          b.write('outf', 760, 330, 'میزان بارش', { size: 20, color: 'soft', fa: true }),
+        ]);
+        await b.write('def', 500, 450, 'نگاشت از یک ورودی به یک خروجی با منطق فازی', { size: 26, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 2. five parts
+    {
+      say: 'این فرایند پنج بخش دارد. 1) فازی‌سازی ورودی‌ها، fuzzification. 2) اعمال عملگرهای فازی and و or. 3) استلزام از مقدم به مؤخر، implication. 4) تجمیع مؤخرهای چند قاعده، aggregation. 5) غیرفازی‌سازی، defuzzification. سه بخش اول همان سه مرحله‌ی برهان فازی درس 12 است و موضوع این درس؛ بخش 4 و 5 درس بعد.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 62, 'پنج بخش فرایند استنتاج فازی', { size: 36, color: 'orange', bold: true, fa: true });
+        const P = [
+          ['فازی‌سازی', 'fuzzification'],
+          ['عملگر فازی', 'and , or'],
+          ['استلزام', 'implication'],
+          ['تجمیع', 'aggregation'],
+          ['غیرفازی‌سازی', 'defuzzification'],
+        ];
+        for (const [k, [fa, en]] of P.entries()) {
+          const x = 790 - k * 178, now = k < 3;
+          await b.box(`p${k}`, x, 150, 160, 120, { color: now ? 'blue' : 'soft', fill: now ? 'blue' : 'soft' });
+          await b.write(`pn${k}`, x + 80, 185, String(k + 1), { size: 26, color: 'purple', bold: true });
+          await b.write(`pf${k}`, x + 80, 222, fa, { size: 22, bold: true, fa: true });
+          await b.write(`pe${k}`, x + 80, 252, en, { size: 18, color: 'soft' });
+          if (k < 4) await b.arrow(`pa${k}`, x - 2, 210, x - 16, 210, { color: 'orange', head: 8 });
+        }
+        await b.wire('br1', [[970 - 3 * 178 + 2, 300], [970 - 3 * 178 + 2, 312], [950, 312], [950, 300]], { color: 'blue', width: 2.5 });
+        await b.write('br1t', 692, 345, 'این درس (همان سه مرحله‌ی برهان فازی)', { size: 21, color: 'blue', bold: true, fa: true });
+        await b.wire('br2', [[80, 300], [80, 312], [414, 312], [414, 300]], { color: 'soft', width: 2.5 });
+        await b.write('br2t', 247, 345, 'درس 15', { size: 21, color: 'soft', bold: true, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 3. Mamdani vs Sugeno
+    {
+      say: 'جعبه‌ابزار MATLAB دو نوع سیستم استنتاج دارد که فقط در *شکل خروجی* فرق دارند. در *Mamdani* یا ممدانی، تابع عضویت خروجی یک مجموعه‌ی فازی است، مثل همین مثلث «بارش زیاد». در *Sugeno* یا سوگنو، خروجی هر قاعده یک تابع خطی از ورودی‌ها یا یک عدد ثابت است. این درس و درس بعد درباره‌ی ممدانی است.',
+      term: ['Mamdani / Sugeno', 'ممدانی / سوگنو'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 62, 'دو نوع سیستم استنتاج در MATLAB', { size: 34, color: 'orange', bold: true, fa: true });
+        await b.write('m', 740, 130, 'Mamdani', { size: 40, color: 'blue', bold: true });
+        await b.write('mf', 740, 172, 'ممدانی', { size: 24, color: 'blue', fa: true });
+        await b.write('s', 260, 130, 'Sugeno', { size: 40, color: 'purple', bold: true });
+        await b.write('sf', 260, 172, 'سوگنو', { size: 24, color: 'purple', fa: true });
+        await b.line('mid', 500, 110, 500, 500, { color: 'soft', width: 2 });
+        const g = Graph({ x: 600, y: 240, w: 280, h: 150, from: 0, to: 10 });
+        await g.axes(b, 'mg', { yTicks: [1], label: 'z' });
+        await g.curve(b, 'mc', C1, { color: 'green' });
+        await b.write('mt', 740, 470, 'خروجی = مجموعه‌ی فازی', { size: 24, color: 'green', bold: true, fa: true });
+        await b.write('s1', 260, 290, 'z = p·x + q·y + r', { size: 32 });
+        await b.write('s1f', 260, 330, 'خطی', { size: 20, color: 'soft', fa: true });
+        await b.write('s2', 260, 390, 'z = k', { size: 32 });
+        await b.write('s2f', 260, 430, 'عدد ثابت', { size: 20, color: 'soft', fa: true });
+        await b.write('st', 260, 470, 'خروجی = تابع خطی یا ثابت', { size: 24, color: 'purple', bold: true, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 4. the example rules
+    {
+      say: 'مثال اسلاید، همان باد و بارش، ولی حالا با *دو* قاعده. قاعده‌ی 1: اگر سرعت باد شدید و فشار پایین باشد، بارش زیاد است. قاعده‌ی 2: اگر سرعت باد متوسط و فشار بالا باشد، بارش کم است. به زبان نمادها A1 یعنی شدید، A2 متوسط، B1 پایین، B2 بالا، C1 زیاد و C2 کم.',
+      draw: async b => {
+        await b.clear();
+        await b.write('fa1', 500, 70, 'قاعده‌ی 1: اگر سرعت باد شدید و فشار پایین باشد، آنگاه میزان بارش زیاد است.', { size: 22, fa: true });
+        await b.write('fa2', 500, 110, 'قاعده‌ی 2: اگر سرعت باد متوسط و فشار بالا باشد، آنگاه میزان بارش کم است.', { size: 22, fa: true });
+        await b.write('R1', 500, 165, 'R1:  if x is A1 and y is B1 then z is C1', { size: 28, color: 'blue' });
+        await b.write('R2', 500, 210, 'R2:  if x is A2 and y is B2 then z is C2', { size: 28, color: 'purple' });
+        const M = [['A1', 'شدید'], ['A2', 'متوسط'], ['B1', 'پایین'], ['B2', 'بالا'], ['C1', 'زیاد'], ['C2', 'کم']];
+        for (const [k, [s, f]] of M.entries()) {
+          await b.write(`map${k}`, 860 - k * 145, 290, `${f} (${s})`, { size: 24, color: k > 3 ? 'green' : 'ink', fa: true, dur: 200 });
+        }
+        await b.write('ax', 500, 370, 'سرعت باد (x)     فشار (y)     میزان بارش (z)', { size: 22, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 5. the membership functions
+    {
+      say: 'این توابع عضویت اسلاید است. روی محور x دو مجموعه داریم: «متوسط» و «شدید». روی y: «پایین» و «بالا». روی z: «کم» و «زیاد». A و B مقدم‌اند و C مؤخر. اسلاید برای C عدد نداده؛ ما C2 را مثلث (2,4,6) و C1 را مثلث (5,7,9) می‌گیریم تا بتوانیم حساب کنیم.',
+      draw: async b => {
+        await b.erase(['fa1', 'fa2', 'map*', 'ax']);
+        await b.move(['R1', 'R2'], 0, -105);
+        await all([
+          b.wire('brA', [[80, 222], [80, 212], [600, 212], [600, 222]], { color: 'purple', width: 2.5 }),
+          b.wire('brC', [[690, 222], [690, 212], [920, 212], [920, 222]], { color: 'purple', width: 2.5 }),
+        ]);
+        await all([
+          b.write('brAt', 340, 200, 'مقدم', { size: 20, color: 'purple', bold: true, fa: true }),
+          b.write('brCt', 805, 200, 'مؤخر', { size: 20, color: 'purple', bold: true, fa: true }),
+        ]);
+        await all([
+          GX.axes(b, 'gx', { ticks: [0, 4, 8, 12], yTicks: [1] }),
+          GY.axes(b, 'gy', { ticks: [0, 5, 10], yTicks: [1], label: 'y' }),
+          GZ.axes(b, 'gz', { ticks: [0, 5, 10], yTicks: [1], label: 'z' }),
+        ]);
+        await all([GX.curve(b, 'cA2', A2, { color: 'purple' }), GX.curve(b, 'cA1', A1, { color: 'blue' })]);
+        await all([GY.curve(b, 'cB1', B1, { color: 'blue' }), GY.curve(b, 'cB2', B2, { color: 'purple' })]);
+        await all([GZ.curve(b, 'cC2', C2, { color: 'purple' }), GZ.curve(b, 'cC1', C1, { color: 'blue' })]);
+        await all([
+          b.write('lA2', GX.X(5), GX.Y(1) - 8, 'A2', { size: 18, color: 'purple' }),
+          b.write('lA1', GX.X(11), GX.Y(1) - 8, 'A1', { size: 18, color: 'blue' }),
+          b.write('lB1', GY.X(1.2), GY.Y(1) - 8, 'B1', { size: 18, color: 'blue' }),
+          b.write('lB2', GY.X(8.5), GY.Y(1) - 8, 'B2', { size: 18, color: 'purple' }),
+          b.write('lC2', GZ.X(3), GZ.Y(1) - 8, 'C2', { size: 18, color: 'purple' }),
+          b.write('lC1', GZ.X(8), GZ.Y(1) - 8, 'C1', { size: 18, color: 'blue' }),
+        ]);
+      },
+    },
+    // ---------------------------------------------------------- 6. fuzzify x on A1 (slide 110)
+    {
+      say: 'بخش 1، *fuzzification* یا فازی‌سازی: درجه‌ی تعلق هر ورودی به هر مجموعه‌ی فازی را از روی تابع عضویتش پیدا می‌کنیم. مثال اسلاید: سرعت باد x = 8. خط عمودی از 8 به «شدید» می‌خورد در 0.6. یعنی «سرعت باد شدید است» با درجه‌ی 0.6 درست است: μ_A1(8) = 0.6.',
+      term: ['Fuzzification', 'فازی‌سازی'],
+      draw: async b => {
+        await GX.guide(b, 'g1', X0, MU.A1, { color: 'blue' });
+        await b.write('e1', 185, 488, `μ_{A1}(8) = ${fmt(MU.A1)}`, { size: 22, color: 'blue', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 7. the other three readings
+    {
+      say: 'همین کار را برای *هر* بخش مقدم در *هر* قاعده می‌کنیم. همان x = 8 روی «متوسط» درجه‌ی 0.2 می‌دهد. فشار y = 5 روی «پایین» 0.3 می‌دهد و روی «بالا» 0.7. حالا هر بخش مقدم یک عدد بین 0 و 1 شده است. دقت کنید یک ورودی می‌تواند هم‌زمان عضو دو مجموعه باشد.',
+      draw: async b => {
+        await GX.guide(b, 'g2', X0, MU.A2, { color: 'purple' });
+        await b.write('e2', 185, 522, `μ_{A2}(8) = ${fmt(MU.A2)}`, { size: 22, color: 'purple', bold: true });
+        await GY.guide(b, 'g3', Y0, MU.B1, { color: 'blue' });
+        await b.write('e3', 485, 488, `μ_{B1}(5) = ${fmt(MU.B1)}`, { size: 22, color: 'blue', bold: true });
+        await GY.guide(b, 'g4', Y0, MU.B2, { color: 'purple' });
+        await b.write('e4', 485, 522, `μ_{B2}(5) = ${fmt(MU.B2)}`, { size: 22, color: 'purple', bold: true });
+        await b.write('e5', 800, 505, 'هر بخش مقدم ← یک عدد', { size: 20, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 8. fuzzy operators
+    {
+      say: 'بخش 2، *اعمال عملگر فازی*. اگر مقدم یک قاعده بیش از یک بخش دارد، عملگر AND یا OR آن را به *یک* عدد بین 0 و 1 تبدیل می‌کند؛ همان درجه‌ی تطبیق α. در جعبه‌ابزار MATLAB برای هر کدام دو روش هست: AND با *min* یا *prod*، یعنی ضرب؛ OR با *max* یا *probor*، یعنی OR احتمالاتی.',
+      term: ['Fuzzy operator: AND (min, prod) · OR (max, probor)', 'عملگر فازی'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 62, 'بخش 2: عملگر فازی ← یک عدد α', { size: 34, color: 'orange', bold: true, fa: true });
+        await b.line('tv', 500, 110, 500, 300, { color: 'soft', width: 2 });
+        await b.line('th', 200, 160, 800, 160, { color: 'soft', width: 2 });
+        await b.write('hAnd', 650, 145, 'AND', { size: 34, color: 'blue', bold: true });
+        await b.write('hOr', 350, 145, 'OR', { size: 34, color: 'purple', bold: true });
+        await b.write('and1', 650, 215, 'min', { size: 34 });
+        await b.write('and1f', 650, 245, 'مینیمم', { size: 18, color: 'soft', fa: true });
+        await b.write('and2', 650, 285, 'prod', { size: 34 });
+        await b.write('and2f', 650, 315, 'ضرب', { size: 18, color: 'soft', fa: true });
+        await b.write('or1', 350, 215, 'max', { size: 34 });
+        await b.write('or1f', 350, 245, 'ماکزیمم', { size: 18, color: 'soft', fa: true });
+        await b.write('or2', 350, 285, 'probor', { size: 34 });
+        await b.write('or2f', 350, 315, 'OR احتمالاتی', { size: 18, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 9. probor
+    {
+      say: 'probor، یا جمع جبری، این‌طور تعریف می‌شود: probor(a,b) = a + b − ab. مثلاً برای 0.6 و 0.3: 0.6 + 0.3 − 0.18 = 0.72، در حالی که max فقط 0.6 می‌دهد. همین‌طور prod(0.6,0.3) = 0.18 که از min، یعنی 0.3، کمتر است. ترتیب همیشگی: prod ≤ min ≤ max ≤ probor.',
+      term: ['probor(a, b) = a + b − ab', 'OR احتمالاتی (جمع جبری)'],
+      draw: async b => {
+        await b.write('pf', 500, 385, 'probor(a, b) = a + b − ab', { size: 36, color: 'purple', bold: true });
+        await b.write('ex1', 300, 445, `probor(0.6, 0.3) = ${fmt(probor(0.6, 0.3))}`, { size: 26, color: 'purple' });
+        await b.write('ex2', 700, 445, `prod(0.6, 0.3) = ${fmt(0.6 * 0.3)}`, { size: 26, color: 'blue' });
+        await b.write('ord', 500, 515, 'prod ≤ min ≤ max ≤ probor', { size: 32, color: 'green', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 10. probor on two gaussians (slide 112)
+    {
+      say: 'اسلاید با کد MATLAB نشان می‌دهد probor روی دو تابع گوسی چه می‌کند: y1 = gaussmf(x,[0.5 4]) و y2 = gaussmf(x,[2 7]). یادتان باشد در gaussmf اول σ می‌آید و بعد مرکز c. منحنی سبز probor است: همیشه بالای هر دو. مثلاً در x = 5 داریم y1 ≈ 0.135 و y2 ≈ 0.607، و probor ≈ 0.66؛ همان فرورفتگی وسط شکل اسلاید.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 52, 'Probabilistic OR', { size: 34, color: 'orange', bold: true });
+        const g = Graph({ x: 110, y: 120, w: 560, h: 300, from: 0, to: 10 });
+        const y1 = gaussmf(0.5, 4), y2 = gaussmf(2, 7), yy = v => probor(y1(v), y2(v));
+        await g.axes(b, 'g', { ticks: [0, 2, 4, 5, 6, 8, 10], yTicks: [0.5, 1] });
+        await g.curve(b, 'c1', y1, { color: 'blue' });
+        await g.curve(b, 'c2', y2, { color: 'red' });
+        await g.curve(b, 'cy', yy, { color: 'green', width: 5, dur: 1100 });
+        await all([
+          b.write('l1', 840, 160, 'y1 = gaussmf(x, [0.5 4])', { size: 19, color: 'blue' }),
+          b.write('l2', 840, 200, 'y2 = gaussmf(x, [2 7])', { size: 19, color: 'red' }),
+          b.write('l3', 840, 240, 'probor(y1, y2)', { size: 21, color: 'green', bold: true }),
+        ]);
+        await g.guide(b, 'p5', 5, yy(5), { color: 'purple' });
+        await all([b.dot('d1', g.X(5), g.Y(y1(5)), { color: 'blue' }), b.dot('d2', g.X(5), g.Y(y2(5)), { color: 'red' })]);
+        await b.write('v1', 840, 320, `x = 5:   y1 ≈ ${y1(5).toFixed(3)}`, { size: 19, color: 'blue' });
+        await b.write('v2', 840, 352, `y2 ≈ ${y2(5).toFixed(3)}`, { size: 19, color: 'red' });
+        await b.write('v3', 840, 390, `probor ≈ ${yy(5).toFixed(2)}`, { size: 22, color: 'purple', bold: true });
+        await b.write('code', 390, 515, 'yy = probor([y1; y2]);', { size: 24, color: 'soft' });
+      },
+    },
+    // ---------------------------------------------------------- 11. rule 1: α1 (slide 113)
+    {
+      say: 'برگردیم سراغ مثال، با x = 8 و y = 5. در قاعده‌ی 1 درجه‌های مقدم μ_A1(8) = 0.6 و μ_B1(5) = 0.3 هستند. AND را *min* انتخاب می‌کنیم: کوچک‌ترِ این دو، یعنی 0.3. پس درجه‌ی تطبیق قاعده‌ی 1، α_1 = 0.3.',
+      draw: async b => {
+        await b.clear();
+        for (const [r, [fa, fb, ma, mb, la, lb, c]] of [[A1, B1, MU.A1, MU.B1, 'شدید (A1)', 'پایین (B1)', 'blue']].entries()) {
+          const gx = Graph({ x: 80, y: 120 + r * 210, w: 220, h: 120, from: 0, to: 12 });
+          const gy = Graph({ x: 370, y: 120 + r * 210, w: 220, h: 120, from: 0, to: 10 });
+          await all([gx.axes(b, `ax${r}`, { ticks: [8], yTicks: [1] }), gy.axes(b, `ay${r}`, { ticks: [5], yTicks: [1], label: 'y' })]);
+          await all([gx.curve(b, `ca${r}`, fa, { color: c }), gy.curve(b, `cb${r}`, fb, { color: c })]);
+          await all([
+            b.write(`la${r}`, gx.X(9.5), gx.Y(1) - 10, la, { size: 18, color: c, fa: true }),
+            b.write(`lb${r}`, gy.X(4), gy.Y(1) - 10, lb, { size: 18, color: c, fa: true }),
+          ]);
+          await all([gx.guide(b, `ga${r}`, X0, ma, { color: 'orange' }), gy.guide(b, `gb${r}`, Y0, mb, { color: 'orange' })]);
+          await all([
+            b.line(`ha${r}`, gx.X(X0), gx.Y(ma), 640, gx.Y(ma), { color: 'soft', width: 2 }),
+            b.line(`hb${r}`, gy.X(Y0), gy.Y(mb), 640, gy.Y(mb), { color: 'soft', width: 2 }),
+          ]);
+          await b.wire(`br${r}`, [[632, gx.Y(ma)], [642, gx.Y(ma)], [642, gy.Y(mb)], [632, gy.Y(mb)]], { width: 3 });
+          await b.write(`mn${r}`, 642, gx.Y(ma) - 10, 'min', { size: 18, bold: true });
+          await b.arrow(`ar${r}`, 650, gx.Y(Math.min(ma, mb)), 690, gx.Y(Math.min(ma, mb)), { color: 'green', head: 10 });
+          await b.write(`al${r}`, 700, gx.Y(Math.min(ma, mb)) + 8, `α_1 = min(${fmt(ma)}, ${fmt(mb)}) = ${fmt(Math.min(ma, mb))}`, { size: 20, color: 'green', bold: true, anchor: 'start' });
+        }
+        await b.write('rl0', 50, 100, 'R1', { size: 24, color: 'blue', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 12. rule 2: α2
+    {
+      say: 'قاعده‌ی 2 هم همین‌طور: μ_A2(8) = 0.2 و μ_B2(5) = 0.7. پس α_2 = min(0.2,0.7) = 0.2. حالا هر قاعده یک عدد دارد: قاعده‌ی 1 با درجه‌ی 0.3 و قاعده‌ی 2 با درجه‌ی 0.2 برقرار است.',
+      draw: async b => {
+        const r = 1, c = 'purple';
+        const gx = Graph({ x: 80, y: 330, w: 220, h: 120, from: 0, to: 12 });
+        const gy = Graph({ x: 370, y: 330, w: 220, h: 120, from: 0, to: 10 });
+        const ma = MU.A2, mb = MU.B2;
+        await all([gx.axes(b, `ax${r}`, { ticks: [8], yTicks: [1] }), gy.axes(b, `ay${r}`, { ticks: [5], yTicks: [1], label: 'y' })]);
+        await all([gx.curve(b, `ca${r}`, A2, { color: c }), gy.curve(b, `cb${r}`, B2, { color: c })]);
+        await all([
+          b.write(`la${r}`, gx.X(6), gx.Y(1) - 10, 'متوسط (A2)', { size: 18, color: c, fa: true }),
+          b.write(`lb${r}`, gy.X(8), gy.Y(1) - 10, 'بالا (B2)', { size: 18, color: c, fa: true }),
+        ]);
+        await all([gx.guide(b, `ga${r}`, X0, ma, { color: 'orange' }), gy.guide(b, `gb${r}`, Y0, mb, { color: 'orange' })]);
+        await all([
+          b.line(`ha${r}`, gx.X(X0), gx.Y(ma), 640, gx.Y(ma), { color: 'soft', width: 2 }),
+          b.line(`hb${r}`, gy.X(Y0), gy.Y(mb), 640, gy.Y(mb), { color: 'soft', width: 2 }),
+        ]);
+        await b.wire(`br${r}`, [[632, gy.Y(mb)], [642, gy.Y(mb)], [642, gx.Y(ma)], [632, gx.Y(ma)]], { width: 3 });
+        await b.write(`mn${r}`, 642, gy.Y(mb) - 10, 'min', { size: 18, bold: true });
+        await b.arrow(`ar${r}`, 650, gx.Y(AL2), 690, gx.Y(AL2), { color: 'green', head: 10 });
+        await b.write(`al${r}`, 700, gx.Y(AL2) + 8, `α_2 = min(${fmt(ma)}, ${fmt(mb)}) = ${fmt(AL2)}`, { size: 20, color: 'green', bold: true, anchor: 'start' });
+        await b.write('rl1', 50, 310, 'R2', { size: 24, color: 'purple', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 13. implication: two methods
+    {
+      say: 'بخش 3، *Implication* یا استلزام از مقدم به مؤخر. استلزام روی *هر* قاعده جداگانه اجرا می‌شود و با α آن قاعده، مجموعه‌ی فازی مؤخر را شکل می‌دهد. دو روش داریم: تابع *min* مجموعه‌ی خروجی را *برش* می‌دهد؛ تابع *prod* آن را *تغییر مقیاس* می‌دهد، یعنی در α ضرب می‌کند.',
+      term: ['Implication: min (clipping) · prod (scaling)', 'استلزام: برش / تغییر مقیاس'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 62, 'بخش 3: استلزام — روی هر قاعده', { size: 34, color: 'orange', bold: true, fa: true });
+        await b.box('bm', 530, 120, 380, 150, { color: 'green', fill: 'green' });
+        await b.write('mT', 720, 165, 'برش با min', { size: 30, color: 'green', bold: true, fa: true });
+        await b.write('mF', 720, 225, "μ_{C'}(z) = min( α , μ_C(z) )", { size: 26 });
+        await b.box('bp', 90, 120, 380, 150, { color: 'blue', fill: 'blue' });
+        await b.write('pT', 280, 165, 'تغییر مقیاس با prod', { size: 30, color: 'blue', bold: true, fa: true });
+        await b.write('pF', 280, 225, "μ_{C'}(z) = α · μ_C(z)", { size: 26 });
+        await b.write('n1', 500, 340, 'ورودی استلزام: α همان قاعده و مجموعه‌ی مؤخرش', { size: 24, fa: true });
+        await b.write('n2', 500, 390, 'خروجی استلزام: یک مجموعه‌ی فازی برای هر قاعده', { size: 24, color: 'green', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 14. min on rule 1 (slide 114)
+    {
+      say: 'مثال اسلاید: استلزام min روی قاعده‌ی 1 با α_1 = 0.3. مثلث «بارش زیاد» در ارتفاع 0.3 بریده می‌شود و C1′ یک ذوزنقه است. جای برش را هم حساب کنیم: دامنه‌ی بالارونده (z − 5)/2 = 0.3 در z = 5.6، و دامنه‌ی پایین‌رونده (9 − z)/2 = 0.3 در z = 8.4. پس سقف صاف از 5.6 تا 8.4 است.',
+      draw: async b => {
+        await b.clear();
+        await GC.axes(b, 'gc', { ticks: [0, 2, 4, 5, 6, 7, 8, 9, 10], yTicks: [0.5, 1], label: 'z' });
+        await GC.curve(b, 'cC1', C1, { color: 'soft' });
+        await b.write('lC1', GC.X(8.6), GC.Y(0.8), 'زیاد (C1)', { size: 22, color: 'soft', fa: true });
+        await GC.poly(b, 'al', [[0, AL1], [10, AL1]], { color: 'orange', width: 2.5 });
+        await b.write('alt', GC.X(1), GC.Y(AL1) - 10, 'α_1 = 0.3', { size: 22, color: 'orange' });
+        await shade(b, GC, 'mn', z => Math.min(AL1, C1(z)), 5, 9, 'green');
+        await all([b.dot('d1', GC.X(CUT1[0]), GC.Y(AL1), { color: 'red' }), b.dot('d2', GC.X(CUT1[1]), GC.Y(AL1), { color: 'red' })]);
+        await b.write('tm', 840, 200, 'min', { size: 30, color: 'green', bold: true });
+        await b.write('t1', 840, 245, '(z − 5)/2 = 0.3', { size: 20 });
+        await b.write('t2', 840, 275, `z = ${fmt(CUT1[0])}`, { size: 22, color: 'red' });
+        await b.write('t3', 840, 315, '(9 − z)/2 = 0.3', { size: 20 });
+        await b.write('t4', 840, 345, `z = ${fmt(CUT1[1])}`, { size: 22, color: 'red' });
+      },
+    },
+    // ---------------------------------------------------------- 15. prod on rule 1 (slide 115)
+    {
+      say: 'حالا استلزام *prod* روی همان قاعده: μ_C1′(z) = 0.3 · μ_C1(z). هر نقطه‌ی مثلث در 0.3 ضرب می‌شود؛ پس همان مثلث است، با همان پایه از 5 تا 9، فقط قله‌اش در 0.3. مقایسه در z = 6: با min داریم min(0.3,0.5) = 0.3، با prod داریم 0.3 × 0.5 = 0.15.',
+      draw: async b => {
+        await shade(b, GC, 'pr', z => AL1 * C1(z), 5, 9, 'blue');
+        await b.write('tp', 840, 410, 'prod', { size: 30, color: 'blue', bold: true });
+        await b.write('tp2', 840, 445, 'قله در 0.3', { size: 20, color: 'blue', fa: true });
+        await b.line('z6', GC.X(6), GC.Y(0), GC.X(6), GC.Y(0.5), { color: 'purple', width: 2 });
+        await all([
+          b.dot('z6m', GC.X(6), GC.Y(Math.min(AL1, C1(6))), { color: 'green', r: 6 }),
+          b.dot('z6p', GC.X(6), GC.Y(AL1 * C1(6)), { color: 'blue', r: 6 }),
+        ]);
+        await b.write('cmp', 400, 520, `z = 6:   min → ${fmt(Math.min(AL1, C1(6)))}      prod → ${fmt(AL1 * C1(6))}`, { size: 26, color: 'purple', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 16. min vs prod
+    {
+      say: 'فرقشان را به خاطر بسپارید. min همه‌ی نقطه‌های بالای α را صاف می‌کند؛ قله پهن می‌شود و اطلاعات شکلِ بالای خط از بین می‌رود. prod شکل اصلی را *حفظ* می‌کند و فقط کوتاهش می‌کند. در هر دو روش هیچ نقطه‌ای از α بالاتر نمی‌رود، و prod هیچ‌وقت از min بیشتر نیست.',
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 62, 'min در برابر prod', { size: 36, color: 'orange', bold: true, fa: true });
+        const gm = Graph({ x: 560, y: 150, w: 330, h: 200, from: 3, to: 11 });
+        const gp = Graph({ x: 110, y: 150, w: 330, h: 200, from: 3, to: 11 });
+        await all([gm.axes(b, 'am', { yTicks: [0.3, 1], label: 'z' }), gp.axes(b, 'ap', { yTicks: [0.3, 1], label: 'z' })]);
+        await all([gm.curve(b, 'cm', C1, { color: 'soft' }), gp.curve(b, 'cp', C1, { color: 'soft' })]);
+        await shade(b, gm, 'sm', z => Math.min(AL1, C1(z)), 5, 9, 'green');
+        await shade(b, gp, 'sp', z => AL1 * C1(z), 5, 9, 'blue');
+        await b.write('tm', 725, 410, 'min: سقف صاف، شکل از دست می‌رود', { size: 22, color: 'green', bold: true, fa: true });
+        await b.write('tp', 275, 410, 'prod: همان شکل، کوتاه‌تر', { size: 22, color: 'blue', bold: true, fa: true });
+        await b.write('r', 500, 490, 'α · μ_C ≤ min(α, μ_C) ≤ α', { size: 28, color: 'purple' });
+      },
+    },
+    // ---------------------------------------------------------- 17. rule 2 → two output sets
+    {
+      say: 'قاعده‌ی 2 هم استلزام می‌خورد: C2، مثلث «بارش کم»، با min در α_2 = 0.2 بریده می‌شود؛ سقفش از 2.4 تا 5.6 است. حالا *دو* مجموعه‌ی خروجی داریم، C1′ و C2′، یکی برای هر قاعده. ترکیب این دو در یک مجموعه، یعنی تجمیع، و تبدیلش به یک عدد، یعنی غیرفازی‌سازی، موضوع درس بعد است.',
+      draw: async b => {
+        await b.clear();
+        await GC.axes(b, 'gc', { ticks: [0, 2, 2.4, 4, 5.6, 7, 9, 10], yTicks: [0.5, 1], label: 'z' });
+        await all([GC.curve(b, 'cC2', C2, { color: 'soft' }), GC.curve(b, 'cC1', C1, { color: 'soft' })]);
+        await all([
+          b.write('lC2', GC.X(4), GC.Y(1) - 10, 'کم (C2)', { size: 22, color: 'soft', fa: true }),
+          b.write('lC1', GC.X(7), GC.Y(1) - 10, 'زیاد (C1)', { size: 22, color: 'soft', fa: true }),
+        ]);
+        await shade(b, GC, 'o2', z => Math.min(AL2, C2(z)), 2, 6, 'purple');
+        await shade(b, GC, 'o1', z => Math.min(AL1, C1(z)), 5, 9, 'green');
+        await all([
+          b.write('t2', GC.X(4), GC.Y(AL2) - 12, "C2' (α = 0.2)", { size: 20, color: 'purple', bold: true }),
+          b.write('t1', GC.X(7), GC.Y(AL1) - 12, "C1' (α = 0.3)", { size: 20, color: 'green', bold: true }),
+        ]);
+        await b.write('nx', 840, 260, 'دو مجموعه‌ی خروجی', { size: 22, bold: true, fa: true });
+        await b.write('nx2', 840, 300, 'ترکیبشان = تجمیع', { size: 20, color: 'soft', fa: true });
+        await b.write('nx3', 840, 335, 'یک عدد = غیرفازی‌سازی', { size: 20, color: 'soft', fa: true });
+        await b.write('nx4', 840, 380, 'ادامه در درس 15', { size: 22, color: 'orange', bold: true, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 18. summary
+    {
+      say: 'جمع‌بندی برای امتحان. این نکته‌ها را یک بار دیگر بخوانید، بعد سراغ سؤال‌ها برویم.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 60, 'یادت باشد', { size: 44, color: 'orange', bold: true, fa: true });
+        const L = [
+          'پنج بخش: فازی‌سازی، عملگر، استلزام، تجمیع، غیرفازی‌سازی',
+          'ممدانی: خروجی مجموعه‌ی فازی، سوگنو: خروجی خطی یا ثابت',
+          'فازی‌سازی: هر بخش مقدم در هر قاعده ← عددی بین 0 و 1',
+          'عملگر AND: min یا prod، عملگر OR: max یا probor',
+          'استلزام روی هر قاعده: min برش می‌دهد، prod مقیاس',
+        ];
+        for (const [k, l] of L.entries()) await b.write(`m${k}`, 900, 130 + k * 58, '•  ' + l, { size: 25, anchor: 'start', fa: true });
+        await b.write('f1', 500, 450, 'probor(a, b) = a + b − ab', { size: 28, color: 'purple' });
+        await b.write('f2', 500, 505, "min: μ_{C'} = min(α, μ_C)        prod: μ_{C'} = α · μ_C", { size: 28, color: 'blue' });
+      },
+    },
+    // ---------------------------------------------------------- quizzes
+    {
+      say: 'نوبت شماست! یک قاعده با OR داریم و برای OR روش probor انتخاب شده. درجه‌های دو بخش مقدم 0.5 و 0.4 هستند. α چند است؟',
+      draw: quizBoard(1, [
+        { t: 'μ_1 = 0.5        μ_2 = 0.4', size: 32 },
+        { t: 'OR = probor', size: 30, color: 'purple' },
+        { t: 'α = ?', color: 'orange', size: 36 },
+      ]),
+      quiz: { answer: ['0.7'], hint: 'probor(a,b) = a + b − ab', explain: '0.5 + 0.4 − 0.5 × 0.4 = 0.9 − 0.2 = 0.7. با max جواب 0.5 بود.' },
+      solve: async b => {
+        await b.write('s1', 500, 300, 'probor(a, b) = a + b − ab', { size: 30, color: 'purple' });
+        await b.write('s2', 500, 365, '= 0.5 + 0.4 − 0.5 × 0.4 = 0.9 − 0.2', { size: 30 });
+        await b.write('s3', 500, 440, `α = ${fmt(probor(0.5, 0.4))}`, { size: 40, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'قاعده‌ی 2 مثال را دوباره حساب کنید، ولی این بار AND را *prod* بگیرید: μ_A2(8) = 0.2 و μ_B2(5) = 0.7. α_2 چند است؟',
+      draw: quizBoard(2, [
+        { t: 'μ_{A2}(8) = 0.2        μ_{B2}(5) = 0.7', size: 32 },
+        { t: 'AND = prod', size: 30, color: 'blue' },
+        { t: 'α_2 = ?', color: 'orange', size: 36 },
+      ]),
+      quiz: { answer: ['0.14'], hint: 'prod یعنی ضرب دو درجه.', explain: 'α_2 = 0.2 × 0.7 = 0.14. با min جواب 0.2 بود؛ prod همیشه کوچک‌تر یا مساوی min است.' },
+      solve: async b => {
+        await b.write('s1', 500, 320, `α_2 = prod(0.2, 0.7) = 0.2 × 0.7 = ${fmt(0.2 * 0.7)}`, { size: 34, color: 'green', bold: true });
+        await b.write('s2', 500, 400, `با min: ${LTR('min(0.2, 0.7) = 0.2')}`, { size: 24, color: 'soft', fa: true });
+      },
+    },
+    {
+      say: 'استلزام min روی قاعده‌ی 2: C2 مثلث (2,4,6) است و α_2 = 0.2. سقف صاف C2′ از کدام z *شروع* می‌شود؟',
+      draw: quizBoard(3, [
+        { t: 'C2 = (2, 4, 6)        α_2 = 0.2', size: 32 },
+        { t: 'استلزام min — سقف صاف از کدام z شروع می‌شود؟', fa: true, size: 26 },
+        { t: 'z = ?', color: 'orange', size: 36 },
+      ]),
+      quiz: { answer: ['2.4'], hint: 'دامنه‌ی بالارونده (z − 2)/2 را برابر 0.2 بگذار.', explain: '(z − 2)/2 = 0.2 پس z = 2 + 0.4 = 2.4. سقف تا 6 − 0.4 = 5.6 ادامه دارد.' },
+      solve: async b => {
+        const g = Graph({ x: 150, y: 270, w: 480, h: 200, from: 1, to: 7 });
+        await g.axes(b, 's', { ticks: [2, 2.4, 4, 5.6, 6], yTicks: [0.2, 1], label: 'z' });
+        await g.curve(b, 'sc', C2, { color: 'soft' });
+        await g.poly(b, 'sa', [[1, AL2], [7, AL2]], { color: 'orange', width: 2 });
+        await shade(b, g, 'ss', z => Math.min(AL2, C2(z)), 2, 6, 'green');
+        await all([b.dot('sd1', g.X(CUT2[0]), g.Y(AL2), { color: 'red', r: 6 }), b.dot('sd2', g.X(CUT2[1]), g.Y(AL2), { color: 'red' })]);
+        await b.write('e1', 830, 330, '(z − 2)/2 = 0.2', { size: 24 });
+        await b.write('e2', 830, 380, `z = ${fmt(CUT2[0])}`, { size: 32, color: 'green', bold: true });
+        await b.write('e3', 830, 420, `تا ${LTR(fmt(CUT2[1]))}`, { size: 18, color: 'soft', fa: true });
+      },
+    },
+    {
+      say: 'این بار استلزام prod روی قاعده‌ی 1: α_1 = 0.3 و C1 مثلث (5,7,9). مقدار μ_C1′ در z = 7.5 چند است؟',
+      draw: quizBoard(4, [
+        { t: 'C1 = (5, 7, 9)        α_1 = 0.3', size: 32 },
+        { t: 'استلزام prod', fa: true, size: 26 },
+        { t: "μ_{C1'}(7.5) = ?", color: 'orange', size: 36 },
+      ]),
+      quiz: { answer: ['0.225'], hint: 'اول μ_C1(7.5) را از دامنه‌ی پایین‌رونده (9 − z)/2 حساب کن، بعد در 0.3 ضرب کن.', explain: 'μ_C1(7.5) = (9 − 7.5)/2 = 0.75. با prod: 0.3 × 0.75 = 0.225. (با min جواب 0.3 بود.)' },
+      solve: async b => {
+        await b.write('s1', 500, 300, `μ_{C1}(7.5) = (9 − 7.5)/2 = ${fmt(C1(7.5))}`, { size: 30 });
+        await b.write('s2', 500, 370, `μ_{C1'}(7.5) = 0.3 × ${fmt(C1(7.5))} = ${fmt(AL1 * C1(7.5))}`, { size: 34, color: 'green', bold: true });
+        await b.write('s3', 500, 440, `با min: ${LTR(`min(0.3, 0.75) = ${fmt(Math.min(AL1, C1(7.5)))}`)}`, { size: 24, color: 'soft', fa: true });
+      },
+    },
+    {
+      say: 'در کدام نوع سیستم استنتاج، توابع عضویت *خروجی* مجموعه‌ی فازی هستند؟',
+      draw: quizBoard(5, [
+        { t: 'توابع عضویت خروجی مجموعه‌ی فازی‌اند در:', fa: true, size: 32 },
+      ]),
+      quiz: {
+        choices: ['ممدانی (Mamdani)', 'سوگنو (Sugeno)', 'هر دو'], correct: 0,
+        explain: 'در ممدانی خروجی مجموعه‌ی فازی است؛ در سوگنو خروجی هر قاعده تابع خطی یا عدد ثابت است.',
+      },
+      solve: async b => {
+        await b.write('s1', 720, 300, 'Mamdani', { size: 36, color: 'green', bold: true });
+        await b.write('s1f', 720, 345, 'مجموعه‌ی فازی ✓', { size: 24, color: 'green', fa: true });
+        await b.write('s2', 280, 300, 'Sugeno', { size: 36, color: 'soft' });
+        await b.write('s2f', 280, 345, 'خطی یا ثابت', { size: 24, color: 'soft', fa: true });
+      },
+    },
+    {
+      say: 'آخرین سؤال: برای هر دو عدد a و b بین 0 و 1، کدام رابطه *همیشه* درست است؟',
+      draw: quizBoard(6, [
+        { t: 'برای هر a و b بین 0 و 1 همیشه درست است:', fa: true, size: 32 },
+      ]),
+      quiz: {
+        choices: ['probor(a, b) ≥ max(a, b)', 'probor(a, b) ≤ max(a, b)', 'probor(a, b) = a + b'], correct: 0,
+        explain: 'probor(a,b) − a = b(1 − a) ≥ 0 و همین‌طور برای b؛ پس probor از هر دو، و از max، کمتر نیست. a + b فقط وقتی درست است که ab = 0 باشد.',
+      },
+      solve: async b => {
+        await b.write('s1', 500, 290, 'probor(a, b) − a = b − ab = b(1 − a) ≥ 0', { size: 30 });
+        await b.write('s2', 500, 350, 'probor(a, b) − b = a(1 − b) ≥ 0', { size: 30 });
+        await b.write('s3', 500, 430, 'probor(a, b) ≥ max(a, b)', { size: 38, color: 'green', bold: true });
+      },
+    },
+  ],
+});
+</script>
+</body>
+</html>

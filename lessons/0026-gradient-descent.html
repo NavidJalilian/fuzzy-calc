@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gradient Descent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Vazirmatn:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="../assets/teacher.css">
+</head>
+<body>
+<main id="app"></main>
+<script src="../assets/teacher.js"></script>
+<script src="../assets/graph.js"></script>
+<script>
+// Lesson 26 — slides 273–292 (Part 7: optimization, gradient descent, the worked example, back-propagation).
+// Explanations are Persian; numbers, math and technical terms stay in English.
+// Slide 284 has an arithmetic slip: ∂J/∂w at w = 1.58 is −24.36, not −24.27 (the next w is 1.82 either way).
+
+const all = list => Promise.all(list);
+const LTR = s => `⁦${s}⁩`; // keeps a left-to-right run intact inside Persian board text
+const r2 = v => String(+v.toFixed(2));
+const r3 = v => String(+v.toFixed(3));
+
+// ---- the worked example of slides 279–285: y_p = xw + b, b = 0, y_t = 2x, η = 0.01
+const XS = [2, 3, 4, 5, 6, 7, 8];
+const YT = XS.map(x => 2 * x);
+const ETA = 0.01;
+const J = w => XS.reduce((s, x, i) => s + (x * w - YT[i]) ** 2, 0) / XS.length;
+const dJ = w => (2 / XS.length) * XS.reduce((s, x, i) => s + x * (x * w - YT[i]), 0);
+const ITER = []; // [{ w, L, g }] for iterations 1..5, w kept unrounded
+for (let w = 1, k = 0; k < 5; k++) { ITER.push({ w, L: J(w), g: dJ(w) }); w -= ETA * dJ(w); }
+
+// Iteration table (right side of the board): iter | w | L | ∂J/∂w
+const IT = { x: 600, y: 80, cw: [60, 90, 90, 120], rh: 44 };
+const itX = c => IT.x + IT.cw.slice(0, c).reduce((a, v) => a + v, 0) + IT.cw[c] / 2;
+const itY = r => IT.y + 14 + IT.rh * (r + 0.72);
+async function iterTable(b) {
+  const head = ['iter', 'w', 'L', '∂J/∂w'];
+  await all(head.map((h, c) => b.write(`it-h${c}`, itX(c), IT.y, h, { size: 24, color: 'blue', bold: true, dur: 150 })));
+  const W = IT.cw.reduce((a, v) => a + v, 0);
+  await b.line('it-hl', IT.x, IT.y + 14, IT.x + W, IT.y + 14, { color: 'soft', width: 2, dur: 250 });
+  for (let c = 1; c < 4; c++) {
+    const x = IT.x + IT.cw.slice(0, c).reduce((a, v) => a + v, 0);
+    await b.line(`it-v${c}`, x, IT.y - 24, x, IT.y + 14 + 5 * IT.rh, { color: 'soft', width: 2, dur: 150 });
+  }
+  await all([0, 1, 2, 3, 4].map(r => b.write(`it-${r}-0`, itX(0), itY(r), String(r + 1), { size: 24, color: 'purple', dur: 100 })));
+}
+const f2 = v => (Number.isInteger(v) ? String(v) : v.toFixed(2)); // table cells: 29, 0.90, -4.30
+const cell = (b, r, c, v, color = 'ink') => b.write(`it-${r}-${c}`, itX(c), itY(r), c ? f2(+v) : v, { size: 24, color, dur: 200 });
+
+// Data table of the example (right side): x | y_t | y_p
+const DT = { x: 660, y: 70, cw: 95, rh: 40 };
+async function dataTable(b) {
+  await all(['x', 'y_t', 'y_p'].map((h, c) => b.write(`dt-h${c}`, DT.x + DT.cw * (c + 0.5), DT.y, h, { size: 26, color: 'blue', bold: true, dur: 150 })));
+  await b.line('dt-hl', DT.x, DT.y + 14, DT.x + DT.cw * 3, DT.y + 14, { color: 'soft', width: 2, dur: 250 });
+  for (let c = 1; c < 3; c++) await b.line(`dt-v${c}`, DT.x + DT.cw * c, DT.y - 26, DT.x + DT.cw * c, DT.y + 14 + 7 * DT.rh, { color: 'soft', width: 2, dur: 150 });
+  for (const [r, x] of XS.entries()) {
+    await all([
+      b.write(`dt-${r}-0`, DT.x + DT.cw * 0.5, DT.y + 14 + DT.rh * (r + 0.75), String(x), { size: 24, dur: 100 }),
+      b.write(`dt-${r}-1`, DT.x + DT.cw * 1.5, DT.y + 14 + DT.rh * (r + 0.75), String(YT[r]), { size: 24, color: 'green', dur: 100 }),
+    ]);
+  }
+}
+
+function quizBoard(n, question, o = { size: 34 }) {
+  return async b => {
+    await b.clear();
+    await b.write('q-n', 500, 60, `سؤال ${n} از 5`, { size: 24, color: 'soft', fa: true });
+    await b.write('q-q', 500, 140, question, o);
+  };
+}
+
+// ---- slides 289–292: the computation graph y = 1 / (1 + e^{-(ab + cd + e)})
+const IN = { a: 2, b: -1, c: -3, d: -2, e: -3 };
+const F = (() => {
+  const f = IN.a * IN.b, g = IN.c * IN.d, h = f + g, i = h + IN.e, j = -i, k = Math.exp(j), l = k + 1, y = 1 / l;
+  const dl = -1 / l ** 2, dk = dl, dj = dk * k, di = -dj;
+  return { f, g, h, i, j, k, l, y, dl, dk, dj, di, da: di * IN.b, db: di * IN.a, dc: di * IN.d, dd: di * IN.c, de: di };
+})();
+const CY = 320; // chain row
+const CHAIN = [['plus2', 390, '+'], ['neg', 500, '×−1'], ['exp', 610, 'exp'], ['inc', 720, '+1'], ['inv', 830, '1/x']];
+
+Teacher.start({
+  id: 'L26',
+  number: 26,
+  title: 'گرادیان کاهشی',
+  chapter: 'بخش 7 · شبکه‌ی عصبی',
+  slides: '273–292',
+  intro: 'شیب خطا را حساب کن و یک قدم سرازیری برو — مثال اسلاید، ردیف به ردیف.',
+  next: { href: '0027-multi-input-training.html', title: 'آموزش نورون چندورودی' },
+  steps: [
+    // ---------------------------------------------------------- 1. intro
+    {
+      say: 'سلام! درس قبل یاد گرفتیم با loss بفهمیم شبکه چقدر اشتباه می‌کند. حالا نوبت بلوک بنفش حلقه است، یعنی optimizer: چطور w را عوض کنیم که خطا کم شود؟ جواب این درس *gradient descent* یا گرادیان کاهشی است.',
+      term: ['Gradient descent', 'گرادیان کاهشی'],
+      draw: async b => {
+        await b.write('t1', 500, 170, 'بخش 7 · شبکه‌ی عصبی', { size: 40, color: 'soft', fa: true });
+        await b.write('t2', 500, 270, 'گرادیان کاهشی', { size: 72, color: 'blue', bold: true, fa: true });
+        await b.write('t3', 500, 360, 'Gradient descent', { size: 50, color: 'orange' });
+      },
+    },
+    // ---------------------------------------------------------- 2. slide 273
+    {
+      say: 'اول تعریف اسلاید: *optimization* یا بهینه‌سازی یعنی *تغییر مقدار پارامترها برای کاهش خطا*. پارامترها همان w و b هستند. و اسلاید می‌گوید: برای بهینه‌سازی از گرادیان کاهشی استفاده می‌کنیم.',
+      term: ['Optimization', 'بهینه‌سازی'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 80, 'بهینه‌سازی چیست؟', { size: 42, color: 'purple', bold: true, fa: true });
+        await b.box('bx', 220, 130, 560, 90, { color: 'orange', fill: 'orange' });
+        await b.write('d', 500, 188, 'تغییر مقدار پارامترها برای کاهش خطا', { size: 34, bold: true, fa: true });
+        await b.write('p', 500, 275, `پارامترها = ${LTR('w , b')}`, { size: 30, color: 'blue', fa: true });
+        await b.box('bx2', 200, 330, 600, 90, { color: 'blue', fill: 'blue' });
+        await b.write('d2', 500, 388, 'برای بهینه‌سازی از گرادیان کاهشی استفاده می‌کنیم', { size: 28, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 3. slide 274
+    {
+      say: 'تعریف اسلاید 274: گرادیان کاهشی یک الگوریتم بهینه‌سازی *تکراری* و *مرتبه‌ی اول* است که *مینیموم محلی* یک تابع مشتق‌پذیر را پیدا می‌کند. «مرتبه‌ی اول» یعنی فقط از مشتق اول استفاده می‌کند. تصویرش این است: loss را بر حسب w رسم کن؛ یک کاسه می‌شود. از یک وزن اولیه شروع می‌کنیم و می‌خواهیم به ته کاسه برسیم.',
+      term: ['Local minimum', 'مینیموم محلی'],
+      draw: async b => {
+        await b.clear();
+        const g = Graph({ x: 150, y: 100, w: 640, h: 340, from: -1, to: 5, min: 0, max: 10 });
+        await g.axes(b, 'ax', { ticks: [], yTicks: [], label: 'w', yLabel: 'J(w)' });
+        await g.curve(b, 'bowl', w => (w - 2) ** 2 + 1, { color: 'orange', lo: -1, hi: 5 });
+        await b.dot('w0', g.X(4.3), g.Y((4.3 - 2) ** 2 + 1), { color: 'ink', r: 7 });
+        await b.write('w0l', g.X(4.3) + 16, g.Y(6.29) + 34, 'وزن اولیه', { size: 24, fa: true, anchor: 'end' });
+        await b.dot('min', g.X(2), g.Y(1), { color: 'green', r: 7 });
+        await b.write('minl', g.X(2), g.Y(1) - 22, 'مینیموم تابع اتلاف', { size: 24, color: 'green', fa: true });
+        await b.write('def', 500, 520, 'الگوریتم تکراری، مرتبه‌ی اول ← مینیموم محلی یک تابع مشتق‌پذیر', { size: 24, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 4. slope sign
+    {
+      say: 'از کجا بفهمیم به کدام طرف برویم؟ از *مشتق*، یعنی شیب خط مماس. در وزن اولیه، سمت راست کاسه، شیب مثبت است؛ پس باید w را کم کنیم. اگر سمت چپ کاسه بودیم، شیب منفی بود و باید w را زیاد می‌کردیم. قانون ساده: همیشه *خلاف جهت شیب* حرکت کن تا سرازیری بروی.',
+      term: ['Derivative / slope', 'مشتق / شیب'],
+      draw: async b => {
+        const g = Graph({ x: 150, y: 100, w: 640, h: 340, from: -1, to: 5, min: 0, max: 10 });
+        const t = w => 6.29 + 4.6 * (w - 4.3);
+        await b.line('tan', g.X(3.75), g.Y(t(3.75)), g.X(4.95), g.Y(t(4.95)), { color: 'green', width: 3 });
+        await b.write('tanl', g.X(4.95) + 10, g.Y(t(4.95)) + 30, 'شیب +', { size: 26, color: 'green', fa: true, anchor: 'end' });
+        await b.arrow('go1', g.X(4.25), g.Y(6.06) + 14, g.X(3.55), g.Y(3.4) + 14, { color: 'red' });
+        await b.write('go1l', g.X(4.45), g.Y(2.3), `${LTR('w')} کم شود ←`, { size: 24, color: 'red', fa: true });
+        await b.dot('wl', g.X(0), g.Y(5), { color: 'ink', r: 7 });
+        const t2 = w => 5 - 4 * w;
+        await b.line('tan2', g.X(-0.55), g.Y(t2(-0.55)), g.X(0.55), g.Y(t2(0.55)), { color: 'green', width: 3 });
+        await b.write('tan2l', g.X(-0.55) + 8, g.Y(t2(-0.55)) - 12, 'شیب −', { size: 26, color: 'green', fa: true, anchor: 'end' });
+        await b.arrow('go2', g.X(0.1), g.Y(4.6) + 14, g.X(0.8), g.Y(2.44) + 14, { color: 'red' });
+      },
+    },
+    // ---------------------------------------------------------- 5. slide 276 — update rule
+    {
+      say: 'همین قانون در یک فرمول، اسلاید 276: W = W − η ∂J/∂W. ∂J/∂W شیب loss نسبت به وزن است و علامت منفی ما را خلاف شیب می‌برد. η، که «اِتا» خوانده می‌شود، *learning rate* یا نرخ یادگیری است: اندازه‌ی قدم. حواستان باشد: در مثال اسلاید‌ها همین نرخ را با μ نوشته‌اند؛ آن‌جا μ ربطی به درجه‌ی عضویت فازی ندارد.',
+      term: ['Learning rate (η)', 'نرخ یادگیری'],
+      draw: async b => {
+        await b.clear();
+        await b.box('fb', 230, 70, 540, 100, { color: 'blue', fill: 'blue' });
+        await b.write('f', 500, 135, 'W = W − η · ∂J/∂W', { size: 50, bold: true });
+        await b.write('l1', 300, 240, '∂J/∂W', { size: 36, color: 'red' });
+        await b.write('l1f', 300, 285, 'شیب loss نسبت به وزن', { size: 24, fa: true });
+        await b.write('l2', 700, 240, 'η', { size: 40, color: 'orange', bold: true });
+        await b.write('l2f', 700, 285, 'نرخ یادگیری = اندازه‌ی قدم', { size: 24, fa: true });
+        await b.write('l3', 500, 360, `علامت ${LTR('−')} یعنی خلاف جهت شیب`, { size: 30, color: 'purple', fa: true });
+        await b.box('wb', 200, 410, 600, 90, { color: 'red', fill: 'red' });
+        await b.write('w1', 500, 448, `در مثال اسلاید: ${LTR('w = w − μ ∂J/∂w')}`, { size: 26, fa: true });
+        await b.write('w2', 500, 485, 'این μ همان η است، نه درجه‌ی عضویت!', { size: 24, color: 'red', bold: true, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 6. slide 275 — the loop
+    {
+      say: 'اسلاید 275 الگوریتم را به شکل flowchart نشان می‌دهد: مقدار اولیه‌ی x را انتخاب کن، گرادیان df/dx را حساب کن، x را آپدیت کن: x = x − df/dx، و بپرس رسیدیم؟ اگر نه، برگرد. در نمودار کنارش f = x^2/10 است و از x = 4 شروع کرده: 4، 3.2، 2.56، 2.05 … ببین قدم‌ها خودبه‌خود کوچک می‌شوند، چون نزدیک مینیموم df/dx به صفر می‌رسد.',
+      draw: async b => {
+        await b.clear();
+        const BX = [[70, 'انتخاب مقدار اولیه (x)', null], [150, 'گرادیان تابع f در x', 'df/dx'], [250, 'آپدیت x', 'x = x − df/dx']];
+        for (const [k, [y, t, m]] of BX.entries()) {
+          const h = m ? 70 : 50;
+          await b.box(`fc${k}`, 70, y, 320, h, { color: 'ink', fill: 'soft', dur: 350 });
+          await b.write(`fct${k}`, 230, y + (m ? 30 : 33), t, { size: 22, fa: true });
+          if (m) await b.write(`fcm${k}`, 230, y + 60, m, { size: 22, color: 'red' });
+        }
+        await b.arrow('fa0', 230, 120, 230, 148);
+        await b.arrow('fa1', 230, 220, 230, 248);
+        await b.arrow('fa2', 230, 320, 230, 345);
+        await b.path('dia', 'M120 390 L230 347 L340 390 L230 433 Z', { color: 'purple' });
+        await b.write('diat', 230, 398, 'رسیدیم؟', { size: 24, fa: true });
+        await b.wire('no', [[120, 390], [50, 390], [50, 185]], { color: 'ink' });
+        await b.arrow('noh', 50, 185, 68, 185);
+        await b.write('nol', 90, 378, 'خیر', { size: 20, color: 'red', fa: true });
+        await b.arrow('yes', 230, 433, 230, 480);
+        await b.write('yesl', 260, 465, 'بله', { size: 20, color: 'green', fa: true });
+        await b.write('end', 230, 510, 'پایان', { size: 24, color: 'green', bold: true, fa: true });
+        const g = Graph({ x: 520, y: 110, w: 400, h: 300, from: -1, to: 4.5, min: 0, max: 2 });
+        await g.axes(b, 'gx', { ticks: [0, 2, 4], yTicks: [1, 2], label: 'x', yLabel: 'f' });
+        await g.curve(b, 'gc', x => x * x / 10, { color: 'red' });
+        let x = 4;
+        for (let k = 0; k < 7; k++) {
+          await b.dot(`gd${k}`, g.X(x), g.Y(x * x / 10), { color: 'orange', r: 6 });
+          x -= x / 5;
+        }
+        await b.write('gl', 720, 470, 'x = 4 → 3.2 → 2.56 → 2.05 → …', { size: 22, color: 'orange' });
+        await b.write('gl2', 720, 510, `قدم‌ها کوچک می‌شوند: ${LTR('df/dx → 0')}`, { size: 22, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 7. learning rate tip
+    {
+      say: 'نکته‌ی امتحان درباره‌ی η: اگر خیلی کوچک باشد، قدم‌ها ریزند و آموزش خیلی کند می‌شود. اگر خیلی بزرگ باشد، از روی ته کاسه می‌پریم، آن طرف می‌افتیم و ممکن است هر بار دورتر شویم. η باید متعادل باشد.',
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        const gs = Graph({ x: 90, y: 130, w: 330, h: 270, from: -0.5, to: 4.5, min: 0, max: 7 });
+        const gb = Graph({ x: 560, y: 130, w: 330, h: 270, from: -0.5, to: 4.5, min: 0, max: 7 });
+        const f = w => (w - 2) ** 2 + 0.5;
+        await b.write('hs', 255, 80, `${LTR('η')} خیلی کوچک ← کند`, { size: 28, color: 'blue', fa: true });
+        await b.write('hb', 725, 80, `${LTR('η')} خیلی بزرگ ← پرش و واگرایی`, { size: 28, color: 'red', fa: true });
+        await all([gs.curve(b, 'cs', f, { color: 'orange' }), gb.curve(b, 'cb', f, { color: 'orange' })]);
+        let w = 4.2;
+        for (let k = 0; k < 6; k++) { await b.dot(`ds${k}`, gs.X(w), gs.Y(f(w)), { color: 'blue', r: 5 }); w -= 0.08 * 2 * (w - 2); }
+        let v = 2.6;
+        const pts = [];
+        for (let k = 0; k < 5; k++) { pts.push([gb.X(v), gb.Y(f(v))]); v -= 1.15 * 2 * (v - 2); }
+        await b.wire('zig', pts, { color: 'red', dur: 900 });
+        await all(pts.map(([x, y], k) => b.dot(`db${k}`, x, y, { color: 'red', r: 5 })));
+        await b.write('note', 500, 480, 'η را متعادل انتخاب کن', { size: 30, color: 'green', bold: true, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 8. slides 277–278 — overview
+    {
+      say: 'نگاه کلی، اسلاید 277 و 278: نمونه‌ی آموزش وارد شبکه می‌شود، خروجی به بلوک اتلاف می‌رود، و بهینه‌سازی وزن‌های شبکه را اصلاح می‌کند. مسیر رفت را *Forward* می‌گوییم و مسیر برگشت گرادیان به وزن‌ها را *Backward*. وقتی آموزش تمام شد، همان شبکه‌ی آموزش‌دیده نمونه‌ی آزمایش را می‌گیرد و خروجی می‌دهد؛ دیگر loss و optimizer لازم نیست.',
+      term: ['Forward / Backward', 'رفت / برگشت'],
+      draw: async b => {
+        await b.clear();
+        const BX = [[170, 'شبکه'], [420, 'اتلاف'], [670, 'بهینه‌سازی']];
+        for (const [k, [x, t]] of BX.entries()) {
+          await b.box(`ob${k}`, x, 180, 160, 70, { color: 'blue', fill: 'blue', dur: 350 });
+          await b.write(`obt${k}`, x + 80, 225, t, { size: 30, bold: true, fa: true });
+        }
+        await b.write('trl', 95, 170, 'نمونه‌ی آموزش', { size: 20, fa: true });
+        await b.arrow('tra', 45, 215, 168, 215, { color: 'red' });
+        await b.arrow('a1', 330, 215, 418, 215, { color: 'red' });
+        await b.arrow('a2', 580, 215, 668, 215, { color: 'red' });
+        await b.wire('lp', [[830, 215], [870, 215], [870, 140], [250, 140]], { color: 'red' });
+        await b.arrow('lph', 250, 140, 250, 178, { color: 'red' });
+        await b.arrow('fw', 170, 285, 830, 285, { color: 'orange' });
+        await b.write('fwl', 880, 293, 'Forward', { size: 24, color: 'orange', bold: true });
+        await b.arrow('bw', 830, 100, 170, 100, { color: 'orange' });
+        await b.write('bwl', 880, 108, 'Backward', { size: 24, color: 'orange', bold: true });
+        await b.wire('ds', [[250, 250], [250, 330], [500, 330]], { color: 'soft' });
+        await b.arrow('dsh', 500, 330, 500, 378, { color: 'soft' });
+        await b.box('tn', 410, 380, 180, 70, { color: 'ink', fill: 'ink' });
+        await b.write('tnt', 500, 425, 'شبکه‌ی آموزش‌دیده', { size: 22, bold: true, fa: true });
+        await b.write('tsl', 290, 400, 'نمونه‌ی آزمایش', { size: 20, fa: true });
+        await b.arrow('tsa', 220, 415, 408, 415, { color: 'red' });
+        await b.arrow('out', 590, 415, 700, 415, { color: 'red' });
+        await b.write('outl', 750, 422, 'خروجی', { size: 24, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 9. slide 279 — example setup
+    {
+      say: 'حالا مثال اصلی اسلاید، که در امتحان مهم است. یک نورون خیلی ساده: x در w ضرب می‌شود و با b جمع می‌شود: y_p = xw + b. اینجا b = 0 ثابت است و فقط w را آموزش می‌دهیم. داده‌ها: x از 2 تا 8، و جواب درست همیشه دو برابر x است. وزن اولیه w = 1.',
+      draw: async b => {
+        await b.clear();
+        await b.write('x', 70, 140, 'x', { size: 32 });
+        await b.arrow('xa', 90, 130, 170, 130, { color: 'blue' });
+        await b.ring('mul', 200, 130, 28, 28, { color: 'red', fill: 'red', tilt: 0 });
+        await b.write('mult', 200, 141, '×', { size: 30 });
+        await b.arrow('ma', 228, 130, 300, 130, { color: 'blue' });
+        await b.ring('add', 330, 130, 28, 28, { color: 'red', fill: 'red', tilt: 0 });
+        await b.write('addt', 330, 141, '+', { size: 30 });
+        await b.arrow('pa', 358, 130, 480, 130, { color: 'blue' });
+        await b.write('yp', 420, 112, 'y_p', { size: 28 });
+        await b.write('w', 200, 232, 'w', { size: 30, color: 'purple' });
+        await b.arrow('wa', 200, 205, 200, 160, { color: 'blue' });
+        await b.write('b', 330, 232, 'b = 0', { size: 30, color: 'purple' });
+        await b.arrow('ba', 330, 205, 330, 160, { color: 'blue' });
+        await b.box('fb', 90, 280, 440, 80, { color: 'orange', fill: 'orange' });
+        await b.write('f', 310, 332, 'w = 1  →  y_p = xw + b', { size: 34, bold: true });
+        await b.write('note', 310, 420, `هدف: ${LTR('yₜ = 2x')}`, { size: 30, color: 'green', fa: true });
+        await dataTable(b);
+      },
+    },
+    // ---------------------------------------------------------- 10. slide 280 — J = 29
+    {
+      say: 'Forward با w = 1: خروجی هر سطر همان x است: 2، 3 تا 8؛ همه نصف جواب درست‌اند، پس w خیلی کوچک است. حالا loss را با MSE حساب می‌کنیم: J = (1/n) Σ (y_p − y_t)^2. اختلاف‌ها −2، −3، −4 تا −8 هستند و مربع‌هایشان 4، 9، 16، 25، 36، 49، 64. جمعشان 203 است، تقسیم بر 7 می‌شود J = 29. درست مثل اسلاید.',
+      draw: async b => {
+        for (const [r, x] of XS.entries()) await b.write(`dt-${r}-2`, DT.x + DT.cw * 2.5, DT.y + 14 + DT.rh * (r + 0.75), String(x * 1), { size: 24, color: 'red', dur: 150 });
+        await b.write('half', 805, 400, 'همه نصف جواب!', { size: 26, color: 'red', fa: true });
+        await b.erase('note');
+        await b.write('jf', 310, 420, 'J = (1/7) Σ (y_p − y_t)^2', { size: 28, color: 'red' });
+        const sq = XS.map((x, i) => (x - YT[i]) ** 2);
+        await b.write('js', 310, 465, `= (${sq.join(' + ')}) / 7`, { size: 24 });
+        await b.write('jv', 310, 520, `= ${sq.reduce((a, c) => a + c, 0)} / 7 = ${r2(J(1))}`, { size: 34, color: 'green', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 11. slide 281 — the derivative
+    {
+      say: 'حالا شیب: مشتق J نسبت به w. با قاعده‌ی زنجیره‌ای، مشتق مربع می‌شود 2 ضرب در اختلاف، ضرب در مشتق y_p نسبت به w: ∂J/∂w = (1/n) Σ 2 (∂y_p/∂w)(y_p − y_t). چون y_p = xw + b، مشتقش نسبت به w همان x است. پس فرمول نهایی اسلاید: ∂J/∂w = (1/n) Σ 2x (y_p − y_t).',
+      term: ['Chain rule', 'قاعده‌ی زنجیره‌ای'],
+      draw: async b => {
+        await b.clear();
+        await b.write('d1', 300, 80, 'J = (1/n) Σ (y_p^i − y_t^i)^2', { size: 28 });
+        await b.write('d2', 300, 150, '∂J/∂w = (1/n) Σ 2 (∂y_p/∂w) (y_p − y_t)', { size: 26 });
+        await b.write('d3', 300, 220, 'y_p = xw + b  →  ∂y_p/∂w = x', { size: 28, color: 'blue' });
+        await b.box('db', 50, 250, 500, 76, { color: 'red', fill: 'red' });
+        await b.write('d4', 300, 300, '∂J/∂w = (1/n) Σ 2x (y_p − y_t)', { size: 32, bold: true });
+        await iterTable(b);
+      },
+    },
+    // ---------------------------------------------------------- 12. slide 282 — gradient at w = 1
+    {
+      say: 'اسلاید 282: مشتق را در w = 1 حساب کنیم. برای هر سطر x ضرب در اختلاف: 2 × (2 − 4) = −4، 3 × (3 − 6) = −9، و همین‌طور −16، −25، −36، −49، −64. جمع: −203. ضرب در 2/7: ∂J/∂w = −58. ردیف اول جدول کامل شد: w = 1، L = 29، و شیب −58.',
+      draw: async b => {
+        const t = XS.map((x, i) => x * (x * 1 - YT[i]));
+        await b.write('c-1', 300, 380, `x(y_p − y_t) = ${t.join(' , ')}`, { size: 22 });
+        await b.write('c-2', 300, 425, `Σ = ${t.reduce((a, c) => a + c, 0)}`, { size: 28 });
+        await b.write('c-3', 300, 480, `∂J/∂w = (2/7)(${t.reduce((a, c) => a + c, 0)}) = ${r2(ITER[0].g)}`, { size: 32, color: 'green', bold: true });
+        await cell(b, 0, 1, r2(ITER[0].w));
+        await cell(b, 0, 2, r2(ITER[0].L), 'red');
+        await cell(b, 0, 3, r2(ITER[0].g), 'red');
+      },
+    },
+    // ---------------------------------------------------------- 13. slide 283 — first update
+    {
+      say: 'اسلاید 283: قدم آپدیت با نرخ یادگیری 0.01: w = 1 − 0.01 × (−58) = 1 + 0.58 = 1.58. شیب منفی بود، پس منهای منفی شد مثبت و w *زیاد* شد؛ درست به سمت جواب واقعی 2.',
+      draw: async b => {
+        await b.erase('c-*');
+        await b.write('u-1', 300, 390, 'μ = η = 0.01', { size: 28, color: 'orange' });
+        await b.write('u-2', 300, 450, `w = 1 − 0.01 × (${r2(ITER[0].g)}) = ${r2(ITER[1].w)}`, { size: 32, color: 'green', bold: true });
+        await b.write('u-3', 300, 505, 'شیب منفی ← w زیاد شد', { size: 24, color: 'soft', fa: true });
+        await cell(b, 1, 1, r2(ITER[1].w), 'green');
+      },
+    },
+    // ---------------------------------------------------------- 14. slide 284 — L at w = 1.58
+    {
+      say: 'تکرار دوم، اسلاید 284. Forward با w = 1.58: خروجی‌ها 3.16، 4.74، 6.32، 7.9، 9.48، 11.06، 12.64. هنوز کمتر از جواب‌اند، ولی نزدیک‌تر. loss: J = 5.12. اسلاید آن را گرد کرده و 5.1 نوشته که مشکلی ندارد. خطا از 29 به حدود 5 افتاد!',
+      draw: async b => {
+        await b.erase('u-*');
+        const w = ITER[1].w;
+        await b.write('f-1', 300, 375, `y_p = ${r2(w)}x = ${XS.map(x => r2(x * w)).join(' , ')}`, { size: 20, color: 'orange' });
+        await b.write('f-2', 300, 420, 'L = (1/7)[(3.16 − 4)^2 + … + (12.64 − 16)^2]', { size: 22 });
+        await b.write('f-3', 300, 475, `L = ${r2(ITER[1].L)}`, { size: 34, color: 'green', bold: true });
+        await cell(b, 1, 2, r2(ITER[1].L), 'red');
+      },
+    },
+    // ---------------------------------------------------------- 15. slide 284 — gradient at 1.58 (slide error)
+    {
+      say: 'شیب در w = 1.58: x ضرب در اختلاف هر سطر: −1.68، −3.78، −6.72، −10.5، −15.12، −20.58، −26.88. جمع −85.26، ضرب در 2/7 می‌شود −24.36. اسلاید −24.27 نوشته که *اشتباه حسابی* است؛ عدد درست −24.36 است. خوشبختانه w بعدی در هر دو حالت بعد از گرد کردن 1.82 می‌شود.',
+      draw: async b => {
+        await b.erase('f-*');
+        const w = ITER[1].w;
+        const t = XS.map((x, i) => x * (x * w - YT[i]));
+        const s = t.reduce((a, c) => a + c, 0);
+        await b.write('g-1', 300, 370, `x(y_p − y_t) = ${t.map(r2).join(' , ')}`, { size: 18 });
+        await b.write('g-2', 300, 415, `Σ = ${r2(s)}`, { size: 26 });
+        await b.write('g-3', 300, 465, `∂J/∂w = (2/7)(${r2(s)}) = ${r2(ITER[1].g)}`, { size: 30, color: 'green', bold: true });
+        await b.write('g-4', 300, 515, `اسلاید: ${LTR('−24.27')} ✗   درست: ${LTR(r2(ITER[1].g))} ✓`, { size: 24, color: 'red', fa: true });
+        await cell(b, 1, 3, r2(ITER[1].g), 'red');
+      },
+    },
+    // ---------------------------------------------------------- 16. second update
+    {
+      say: 'آپدیت دوم: w = 1.58 − 0.01 × (−24.36) = 1.58 + 0.2436 = 1.8236، که گرد شده‌اش همان 1.82ی اسلاید است. ما در ادامه رقم‌های بیشتر را نگه می‌داریم تا خطای گرد کردن جمع نشود.',
+      draw: async b => {
+        await b.erase('g-*');
+        await b.write('v-1', 300, 410, `w = ${r2(ITER[1].w)} − 0.01 × (${r2(ITER[1].g)})`, { size: 30 });
+        await b.write('v-2', 300, 470, `= ${(+ITER[2].w.toFixed(4))} ≈ ${r2(ITER[2].w)}`, { size: 34, color: 'green', bold: true });
+        await cell(b, 2, 1, r2(ITER[2].w), 'green');
+      },
+    },
+    // ---------------------------------------------------------- 17. shortcut (teacher tip)
+    {
+      say: 'یک میان‌بر برای چک کردن در امتحان: چون y_t = 2x و b = 0، اختلاف هر سطر (w − 2)x است. پس J = 29 (w − 2)^2 و ∂J/∂w = 58 (w − 2)؛ عدد 29 میانگین x^2 است، یعنی 203/7. چک کنیم: w = 1 می‌دهد 29 و −58، درست. w = 1.58 می‌دهد 5.12 و −24.36؛ همین تأیید می‌کند که −24.27ی اسلاید اشتباه است.',
+      tip: true,
+      draw: async b => {
+        await b.erase('v-*');
+        await b.write('s-1', 300, 370, 'y_p − y_t = (w − 2)x', { size: 26, color: 'blue' });
+        await b.write('s-2', 300, 420, 'J = 29 (w − 2)^2', { size: 30, bold: true });
+        await b.write('s-3', 300, 470, '∂J/∂w = 58 (w − 2)', { size: 30, color: 'red', bold: true });
+        await b.write('s-4', 300, 520, `w = 1.58 → 58 × (−0.42) = ${r2(58 * (1.58 - 2))}`, { size: 24, color: 'green' });
+      },
+    },
+    // ---------------------------------------------------------- 18. rows 3–5
+    {
+      say: 'بقیه‌ی جدول را همین‌طور پر می‌کنیم. تکرار 3: w = 1.82، L = 0.90، شیب −10.23. تکرار 4: w = 1.93، L = 0.16. تکرار 5: w = 1.97، L = 0.03. هر بار فاصله‌ی w تا 2 در 0.42 ضرب می‌شود؛ w به 2 نزدیک می‌شود، یعنی شبکه یاد گرفت y = 2x.',
+      draw: async b => {
+        await b.erase('s-*');
+        for (let r = 2; r < 5; r++) {
+          if (r > 2) await cell(b, r, 1, r2(ITER[r].w), 'green');
+          await cell(b, r, 2, r2(ITER[r].L), 'red');
+          await cell(b, r, 3, r2(ITER[r].g), 'red');
+        }
+        await b.write('k-1', 300, 410, 'w :  1 → 1.58 → 1.82 → 1.93 → 1.97 → … → 2', { size: 24, color: 'green' });
+        await b.write('k-2', 300, 470, `فاصله تا 2 هر بار × ${LTR(r2(1 - ETA * 58))}`, { size: 26, fa: true });
+        await b.ring('kr', itX(1), itY(4) - 8, 44, 22, { color: 'green' });
+      },
+    },
+    // ---------------------------------------------------------- 19. slide 285 — loss curve
+    {
+      say: 'اسلاید 285 نمودار loss را بر حسب تکرار کشیده: از 29 با سرعت پایین می‌آید و بعد صاف می‌شود. علتش همان کوچک شدن شیب نزدیک مینیموم است: هرچه به جواب نزدیک‌تر، قدم‌ها کوچک‌تر.',
+      draw: async b => {
+        await b.clear();
+        const g = Graph({ x: 160, y: 90, w: 640, h: 360, from: 1, to: 5, min: 0, max: 30 });
+        await g.axes(b, 'ax', { ticks: [1, 2, 3, 4, 5], yTicks: [10, 20, 30], label: 'iter', yLabel: 'L' });
+        await g.poly(b, 'lc', ITER.map((it, k) => [k + 1, it.L]), { color: 'blue' });
+        for (const [k, it] of ITER.entries()) {
+          await b.dot(`ld${k}`, g.X(k + 1), g.Y(it.L), { color: 'red', r: 6 });
+          await b.write(`lt${k}`, g.X(k + 1) + 14, g.Y(it.L) - 14, r2(it.L), { size: 22, color: 'red', anchor: 'start', dur: 150 });
+        }
+      },
+    },
+    // ---------------------------------------------------------- 20. slides 286–288 — back-propagation
+    {
+      say: 'بخش تکمیلی اسلاید‌ها: *انتشار و پس‌انتشار*. در یک شبکه‌ی دولایه، Forward این است: X وارد لایه‌ی اول می‌شود، z^{(1)} و بعد y^{(1)} ساخته می‌شود، بعد لایه‌ی دوم z^{(2)} و خروجی f(X)، و آخر loss یعنی l(f(X), y). در Backward گرادیان از loss شروع می‌کند و *برعکس* همین مسیر برمی‌گردد تا به همه‌ی W و b برسد. به این می‌گویند *backpropagation*.',
+      term: ['Backpropagation', 'پس‌انتشار'],
+      draw: async b => {
+        await b.clear();
+        const N = [[50, 80, 'X'], [190, 120, 'z^{(1)}(X)'], [370, 120, 'y^{(1)}(X)'], [550, 120, 'z^{(2)}(X)'], [730, 100, 'f(X)'], [850, 110, 'l(f(X), y)']];
+        for (const [k, [x, w, t]] of N.entries()) {
+          await b.box(`bn${k}`, x, 170, w, 60, { color: k === 5 ? 'blue' : 'red', fill: k === 5 ? 'blue' : 'red', dur: 300 });
+          await b.write(`bt${k}`, x + w / 2, 208, t, { size: k === 5 ? 18 : 22 });
+          if (k) await b.arrow(`fa${k}`, N[k - 1][0] + N[k - 1][1], 200, x - 2, 200, { color: 'green', dur: 250 });
+        }
+        for (const [k, x] of [[1, 250], [2, 610]]) {
+          await b.write(`W${k}`, x - 30, 300, `W^{(${k})}`, { size: 22, color: 'purple' });
+          await b.write(`B${k}`, x + 30, 300, `b^{(${k})}`, { size: 22, color: 'purple' });
+          await b.arrow(`Wa${k}`, x - 30, 278, x - 10, 234, { color: 'green', dur: 200 });
+          await b.arrow(`Ba${k}`, x + 30, 278, x + 10, 234, { color: 'green', dur: 200 });
+        }
+        await b.write('fwl', 500, 140, 'Forward →', { size: 24, color: 'green', bold: true });
+        await b.arrow('bw', 900, 360, 200, 360, { color: 'orange' });
+        await b.write('bwl', 550, 395, '← Backward (گرادیان)', { size: 24, color: 'orange', bold: true, fa: true });
+        await all([1, 2].map(k => b.ring(`gr${k}`, (k === 1 ? 250 : 610), 292, 62, 26, { color: 'orange', tilt: 0 })));
+        await b.write('n1', 500, 460, 'Forward: خروجی و loss را حساب کن', { size: 24, fa: true });
+        await b.write('n2', 500, 505, 'Backward: گرادیان loss نسبت به هر W و b را حساب کن', { size: 24, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 21. slides 289–292 — forward numbers
+    {
+      say: 'اسلاید 289 یک گراف محاسباتی ساده می‌دهد: f = a × b، g = c × d، h = f + g، i = h + e، و بعد ضرب در −1، exp، به‌علاوه‌ی 1 و یک‌به‌روی x. این همان sigmoid است. اسلاید 292 عدد گذاشته: a = 2، b = −1، c = −3، d = −2، e = −3. Forward: f = −2، g = 6، h = 4، i = 1، j = −1، k = e^{-1} ≈ 0.368، l ≈ 1.368 و y ≈ 0.731.',
+      draw: async b => {
+        await b.clear();
+        const P = { a: 90, b: 170, c: 250, d: 330, e: 420 };
+        await all(Object.entries(P).map(([n, y]) => b.write(`in-${n}`, 55, y + 8, `${n}=${IN[n]}`, { size: 22, color: 'blue', anchor: 'start', dur: 150 })));
+        const node = async (id, x, y, t, s = 24) => { await b.ring(id, x, y, 28, 28, { color: 'red', fill: 'red', tilt: 0, dur: 250 }); await b.write(`${id}-t`, x, y + 8, t, { size: s, dur: 120 }); };
+        await node('m1', 210, 130, '×'); await node('m2', 210, 290, '×'); await node('p1', 300, 210, '+');
+        await b.arrow('w-a', 115, 90, 186, 118); await b.arrow('w-b', 115, 170, 186, 142);
+        await b.arrow('w-c', 115, 250, 186, 278); await b.arrow('w-d', 115, 330, 186, 302);
+        await b.arrow('w-f', 236, 140, 276, 196); await b.arrow('w-g', 236, 280, 276, 224);
+        await b.arrow('w-h', 322, 228, 368, 306);
+        await b.arrow('w-e', 115, 420, 370, 336);
+        for (const [k, [id, x, t]] of CHAIN.entries()) {
+          await node(id, x, CY, t, t.length > 2 ? 18 : 24);
+          if (k < CHAIN.length - 1) await b.arrow(`w-${id}`, x + 28, CY, CHAIN[k + 1][1] - 30, CY, { dur: 200 });
+        }
+        await b.arrow('w-out', 858, CY, 905, CY);
+        const V = [['f', 210, 92, F.f], ['g', 210, 342, F.g], ['h', 352, 245, F.h], ['i', 445, 300, F.i], ['j', 555, 300, F.j], ['k', 665, 300, F.k], ['l', 775, 300, F.l]];
+        await all(V.map(([n, x, y, v]) => b.write(`v-${n}`, x, y, `${n}=${r3(v)}`, { size: 18, color: 'green', dur: 150 })));
+        await b.write('v-y', 922, CY - 22, `y=${r3(F.y)}`, { size: 20, color: 'green', bold: true });
+        await b.write('sig', 660, 150, 'y = 1 / (1 + e^{-(ab + cd + e)})', { size: 26, color: 'purple' });
+      },
+    },
+    // ---------------------------------------------------------- 22. backward numbers
+    {
+      say: 'Backward: از y شروع می‌کنیم و هر گره مشتق محلی‌اش را ضرب می‌کند. 1/x مشتقش −1/x^2 است: −0.534. +1 چیزی عوض نمی‌کند. exp مشتقش خودش است، یعنی × 0.368: −0.197. ×−1 علامت را برمی‌گرداند: ∂y/∂i = 0.197. گره‌های + گرادیان را بدون تغییر رد می‌کنند، پس ∂y/∂e = 0.197. و جواب علامت سؤال اسلاید: گره × گرادیان را در *ورودی دیگرش* ضرب می‌کند: ∂y/∂a = 0.197 × b = −0.197، ∂y/∂b = 0.197 × a = 0.393.',
+      draw: async b => {
+        const G = [['inv', 830, F.dl], ['inc', 720, F.dk], ['exp', 610, F.dj], ['neg', 500, F.di]];
+        await b.write('bk0', 890, CY + 55, '∂y/∂…', { size: 18, color: 'orange' });
+        for (const [k, [id, x, v]] of G.entries()) await b.write(`bk-${id}`, x - 55, CY + 55, r3(v), { size: 20, color: 'orange', bold: k === 3, dur: 200 });
+        await b.write('bk-loc', 660, CY + 90, '−1/x^2      ×1       ×e^j       ×(−1)', { size: 18, color: 'soft' });
+        const R = [
+          `∂y/∂e = ∂y/∂h = ∂y/∂f = ∂y/∂g = ${r3(F.de)}`,
+          `∂y/∂a = ${r3(F.di)} × b = ${r3(F.da)}     ∂y/∂b = ${r3(F.di)} × a = ${r3(F.db)}`,
+          `∂y/∂c = ${r3(F.di)} × d = ${r3(F.dc)}     ∂y/∂d = ${r3(F.di)} × c = ${r3(F.dd)}`,
+        ];
+        for (const [k, t] of R.entries()) await b.write(`res${k}`, 640, 455 + k * 38, t, { size: 20, color: k ? 'red' : 'orange' });
+        await all([b.ring('q1', 210, 130, 36, 36, { color: 'orange', tilt: 0 }), b.ring('q2', 210, 290, 36, 36, { color: 'orange', tilt: 0 })]);
+      },
+    },
+    // ---------------------------------------------------------- 23. summary
+    {
+      say: 'جمع‌بندی کنیم: پنج نکته برای امتحان. یک بار دیگر بخوانیدشان، بعد برویم سراغ سؤال‌ها.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 75, 'یادت باشد', { size: 48, color: 'orange', bold: true, fa: true });
+        const L = [
+          `آپدیت: ${LTR('w = w − η ∂J/∂w')} — خلاف جهت شیب`,
+          `برای ${LTR('yₚ = xw')}:  ${LTR('∂J/∂w = (1/n) Σ 2x (yₚ − yₜ)')}`,
+          `مثال اسلاید: ${LTR('w = 1, J = 29, ∂J/∂w = −58')} ← ${LTR('w = 1.58')}`,
+          `در ${LTR('w = 1.58')} شیب ${LTR('−24.36')} است (اسلاید اشتباه نوشته) ← ${LTR('w = 1.82')}`,
+          `${LTR('η')} کوچک = کند،  ${LTR('η')} بزرگ = پرش؛ گره × در Backward در ورودی دیگر ضرب می‌کند`,
+        ];
+        for (const [k, l] of L.entries()) await b.write(`m${k}`, 930, 155 + k * 74, '•  ' + l, { size: 24, anchor: 'start', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- quizzes
+    {
+      say: 'نوبت شماست! همان مثال اسلاید (x = 2 … 8، y_t = 2x، b = 0). اگر الان w = 1.5 باشد، ∂J/∂w چقدر است؟',
+      draw: quizBoard(1, 'x = 2 … 8 ,  y_t = 2x ,  w = 1.5  →  ∂J/∂w = ?'),
+      quiz: { answer: ['-29', '−29'], hint: 'میان‌بر: ∂J/∂w = 58 (w − 2). یا فرمول (2/7) Σ x (y_p − y_t).', explain: 'y_p − y_t = −0.5x، پس Σ x(y_p − y_t) = −0.5 × 203 = −101.5 و (2/7)(−101.5) = −29.' },
+      solve: async b => {
+        await b.write('s1', 500, 240, 'y_p − y_t = (1.5 − 2)x = −0.5x', { size: 34 });
+        await b.write('s2', 500, 310, 'Σ x(y_p − y_t) = −0.5 × 203 = −101.5', { size: 34 });
+        await b.write('s3', 500, 390, `∂J/∂w = (2/7)(−101.5) = ${r2(dJ(1.5))}`, { size: 40, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'ادامه‌ی همان سؤال: با نرخ یادگیری 0.01، وزن بعدی w چقدر می‌شود؟',
+      draw: quizBoard(2, 'w = 1.5 ,  ∂J/∂w = −29 ,  η = 0.01  →  w_new = ?'),
+      quiz: { answer: ['1.79'], hint: 'w − η × شیب؛ منهای منفی می‌شود مثبت.', explain: 'w = 1.5 − 0.01 × (−29) = 1.5 + 0.29 = 1.79' },
+      solve: async b => {
+        await b.write('s1', 500, 260, 'w = 1.5 − 0.01 × (−29)', { size: 40 });
+        await b.write('s2', 500, 350, `= 1.5 + 0.29 = ${r2(1.5 - ETA * dJ(1.5))}`, { size: 44, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'یک سؤال مفهومی: در وزن فعلی، ∂J/∂w مثبت است. گرادیان کاهشی با w چه می‌کند؟',
+      draw: quizBoard(3, `اگر ${LTR('∂J/∂w > 0')} باشد، ${LTR('w')} چه می‌شود؟`, { size: 36, fa: true }),
+      quiz: {
+        choices: ['w زیاد می‌شود', 'w کم می‌شود', 'w تغییر نمی‌کند'], correct: 1,
+        explain: 'w = w − η × (عدد مثبت)، پس w کم می‌شود. شیب مثبت یعنی سمت راست ته کاسه‌ایم و باید به چپ برویم.',
+      },
+      solve: async b => {
+        await b.write('s1', 500, 260, 'w = w − η × (+)', { size: 44 });
+        await b.write('s2', 500, 350, 'w کم می‌شود ←', { size: 40, color: 'green', bold: true, fa: true });
+      },
+    },
+    {
+      say: 'اگر نرخ یادگیری η را خیلی بزرگ بگیریم، چه اتفاقی ممکن است بیفتد؟',
+      draw: quizBoard(4, `${LTR('η')} خیلی بزرگ ← ؟`, { size: 40, fa: true }),
+      quiz: {
+        choices: ['آموزش خیلی کند می‌شود', 'از روی مینیموم می‌پریم و ممکن است loss زیاد شود', 'loss همیشه دقیقاً صفر می‌شود'], correct: 1,
+        explain: 'قدم بزرگ از ته کاسه رد می‌شود و آن طرف می‌افتد؛ ممکن است هر بار دورتر شود. η کوچک است که آموزش را کند می‌کند.',
+      },
+      solve: async b => {
+        await b.write('s1', 500, 260, `${LTR('η')} کوچک ← کند`, { size: 36, color: 'blue', fa: true });
+        await b.write('s2', 500, 340, `${LTR('η')} بزرگ ← پرش از روی مینیموم`, { size: 36, color: 'red', bold: true, fa: true });
+      },
+    },
+    {
+      say: 'سؤال آخر، درباره‌ی Backward: گره × با ورودی‌های a = 2 و b = 5. گرادیانی که از بالا به این گره رسیده 3 است. گرادیان نسبت به a چقدر است؟',
+      draw: quizBoard(5, 'f = a × b ,  a = 2 ,  b = 5 ,  ∂y/∂f = 3  →  ∂y/∂a = ?'),
+      quiz: { answer: ['15'], hint: 'گره × گرادیان را در ورودی دیگرش ضرب می‌کند.', explain: '∂f/∂a = b = 5، پس ∂y/∂a = 3 × 5 = 15.' },
+      solve: async b => {
+        await b.write('s1', 500, 260, '∂f/∂a = b = 5', { size: 40, color: 'blue' });
+        await b.write('s2', 500, 350, `∂y/∂a = 3 × 5 = ${3 * 5}`, { size: 46, color: 'green', bold: true });
+      },
+    },
+  ],
+});
+</script>
+</body>
+</html>

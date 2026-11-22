@@ -2,6 +2,10 @@
 /*
 !/.gitignore
 !/index.html
+!/assets/
+!/tools/
+!/README.md
+!/LESSON-GUIDE.md
 !/lessons/
 !/reference/
 .DS_Store

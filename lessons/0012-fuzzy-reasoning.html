@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fuzzy Reasoning</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Vazirmatn:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="../assets/teacher.css">
+</head>
+<body>
+<main id="app"></main>
+<script src="../assets/teacher.js"></script>
+<script src="../assets/graph.js"></script>
+<script>
+// Lesson 12 — slides 96–101 (part 4: fuzzy reasoning).
+// Explanations are Persian; numbers, math and technical terms stay in English.
+
+const LTR = s => `⁦${s}⁩`; // keeps a left-to-right run intact inside Persian board text
+const all = list => Promise.all(list);
+const fmt = n => String(+n.toFixed(4));
+
+// Membership-function shapes.
+const tri = (a, m, c) => v => Math.max(0, Math.min((v - a) / (m - a), (c - v) / (c - m)));
+const trap = (a, p, q, d) => v => Math.max(0, Math.min(1, (v - a) / (p - a), (d - v) / (d - q)));
+const ramp = (a, c) => v => Math.max(0, Math.min(1, (v - a) / (c - a)));   // 0 before a, rises to 1 at c
+const fall = (a, c) => v => Math.max(0, Math.min(1, (c - v) / (c - a)));   // 1 before a, falls to 0 at c
+const bell = (c, s) => v => Math.exp(-((v - c) ** 2) / (2 * s * s));
+
+// The wind / pressure / rain example of slides 99–101. The slides give only pictures and the
+// readings 0.6 and 0.3; these straight lines pass through the same readings.
+const STRONG = ramp(5, 10);   // A = «شدید»: x = 8 → 0.6
+const LOW = fall(2.9, 5.9);   // B = «پایین»: y = 5 → 0.3
+const HEAVY = tri(5, 7, 9);   // C = «زیاد» (our numbers: feet 5 and 9, peak 7)
+const X0 = 8, Y0 = 5;
+const MA = STRONG(X0), MB = LOW(Y0), ALPHA = Math.min(MA, MB);   // 0.6, 0.3, 0.3
+const CLIP = [5 + 2 * ALPHA, 9 - 2 * ALPHA];                       // flat top of C′: 5.6 … 8.4
+
+// A filled region under μ = f(v) between lo and hi.
+function shade(b, g, id, f, lo, hi, color = 'green') {
+  const pts = [[lo, 0]];
+  for (let k = 0; k <= 80; k++) { const v = lo + ((hi - lo) * k) / 80; pts.push([v, f(v)]); }
+  pts.push([hi, 0]);
+  const d = 'M' + pts.map(([v, m]) => `${g.X(v).toFixed(1)} ${g.Y(m).toFixed(1)}`).join('L') + 'Z';
+  return b.path(id, d, { color, fill: color, width: 2.5, dur: 700 });
+}
+
+// Persian label on the right, formal English line starting at x = 200.
+async function row(b, id, y, fa, en, color = 'ink', size = 30) {
+  await b.write(`${id}-fa`, 840, y, fa, { size: size - 2, color: 'purple', bold: true, fa: true });
+  await b.write(`${id}-en`, 200, y, en, { size, color, anchor: 'start' });
+}
+
+// The three small graphs of the slide-99 example (x, y, z).
+const GX = Graph({ x: 80, y: 280, w: 210, h: 150, from: 0, to: 12 });
+const GY = Graph({ x: 380, y: 280, w: 210, h: 150, from: 0, to: 10 });
+const GZ = Graph({ x: 690, y: 280, w: 210, h: 150, from: 0, to: 10 });
+
+// The big graph of C used for implication.
+const GC = Graph({ x: 120, y: 150, w: 600, h: 300, from: 0, to: 10 });
+
+// Quiz helpers.
+function quizBoard(n, lines) {
+  return async b => {
+    await b.clear();
+    await b.write('q-n', 500, 52, `سؤال ${n} از 6`, { size: 22, color: 'soft', fa: true });
+    for (const [k, l] of lines.entries()) {
+      await b.write(`q-${k}`, 500, 108 + k * 50, l.t, { size: l.size || 30, color: l.color || 'ink', fa: !!l.fa });
+    }
+  };
+}
+// Small graph of C clipped at α, used by the implication quizzes.
+async function clipSolve(b, alpha, at) {
+  const g = Graph({ x: 170, y: 300, w: 450, h: 170, from: 4.5, to: 9.5 });
+  await g.axes(b, 's-ax', { ticks: [5, 7, 9], yTicks: [1], label: 'z' });
+  await g.curve(b, 's-c', HEAVY, { color: 'soft', dur: 600 });
+  await g.poly(b, 's-al', [[4.5, alpha], [9.5, alpha]], { color: 'orange', width: 2, dur: 400 });
+  await b.write('s-alt', g.X(9.5) + 8, g.Y(alpha) + 7, `α = ${fmt(alpha)}`, { size: 20, color: 'orange', anchor: 'start' });
+  const lo = 5 + 2 * alpha, hi = 9 - 2 * alpha;
+  await shade(b, g, 's-clip', z => Math.min(alpha, HEAVY(z)), 5, 9, 'green');
+  if (at != null) {
+    await g.guide(b, 's-g', at, Math.min(alpha, HEAVY(at)), { color: 'blue' });
+    await b.write('s-at', g.X(at), g.Y(0) + 26, fmt(at), { size: 18, color: 'blue' });
+    await b.write('s-e1', 820, 330, `μ_C(${fmt(at)}) = ${fmt(HEAVY(at))}`, { size: 22, color: 'blue' });
+    await b.write('s-e2', 820, 375, `min(${fmt(alpha)}, ${fmt(HEAVY(at))}) = ${fmt(Math.min(alpha, HEAVY(at)))}`, { size: 24, color: 'green', bold: true });
+  } else {
+    await all([b.dot('s-d1', g.X(lo), g.Y(alpha), { color: 'red' }), b.dot('s-d2', g.X(hi), g.Y(alpha), { color: 'red' })]);
+  }
+}
+
+Teacher.start({
+  id: 'L12',
+  number: 12,
+  title: 'برهان فازی: قاعده، حقیقت، نتیجه',
+  chapter: 'بخش 4 · برهان و سیستم استنتاج فازی',
+  slides: '96–101',
+  intro: 'برهان فازی چیست، سه نوع آن، و سه مرحله‌اش روی مثال باد، فشار و بارش.',
+  next: { href: '0013-reasoning-fuzzy-inputs.html', title: 'برهان با ورودی فازی و چند قاعده' },
+  steps: [
+    // ---------------------------------------------------------- 1. intro
+    {
+      say: 'سلام! به بخش 4 خوش آمدید. موضوع این درس *Fuzzy reasoning* یا برهان فازی است: یعنی مراحلی که با آن یک قاعده‌ی فازی را ارزیابی می‌کنیم و از آن نتیجه می‌گیریم. بالای این اسلایدها نوشته «استنتاج فازی»؛ هر دو اسم به همین کار اشاره دارند.',
+      term: ['Fuzzy reasoning', 'برهان فازی'],
+      draw: async b => {
+        await b.write('t1', 500, 150, 'بخش 4', { size: 64, color: 'blue', bold: true, fa: true });
+        await b.write('t2', 500, 245, 'برهان فازی', { size: 52, fa: true });
+        await b.write('t3', 500, 320, 'Fuzzy reasoning', { size: 44, color: 'orange' });
+        await b.write('t4', 500, 410, 'سرتیتر اسلایدها: استنتاج فازی', { size: 24, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 2. three parts
+    {
+      say: 'هر برهان فازی سه بخش دارد: *قاعده* یا Rule، یعنی دانشی که از قبل داریم؛ *حقیقت* یا Fact، یعنی چیزی که الان درباره‌ی ورودی می‌دانیم؛ و *نتیجه* یا Conclusion، یعنی چیزی که درباره‌ی خروجی به دست می‌آوریم. سؤال اصلی همین است: با یک قاعده و یک حقیقت، نتیجه را چطور حساب کنیم؟',
+      term: ['Rule · Fact · Conclusion', 'قاعده · حقیقت · نتیجه'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'هر برهان فازی سه بخش دارد', { size: 36, color: 'orange', bold: true, fa: true });
+        const P = [
+          [700, 'قاعده', 'Rule', 'اگر هوا ابری باشد، باران می‌آید', 'blue'],
+          [400, 'حقیقت', 'Fact', 'هوا کمی ابری است', 'blue'],
+          [100, 'نتیجه', 'Conclusion', 'پس کمی باران می‌آید', 'green'],
+        ];
+        for (const [k, [x, fa, en, ex, c]] of P.entries()) {
+          await b.box(`bx${k}`, x, 140, 200, 120, { color: c, fill: c });
+          await all([
+            b.write(`bf${k}`, x + 100, 192, fa, { size: 36, bold: true, fa: true }),
+            b.write(`be${k}`, x + 100, 236, en, { size: 24, color: 'soft' }),
+          ]);
+          await b.write(`bx${k}e`, x + 100, 310, ex, { size: 19, color: 'soft', fa: true });
+          if (k === 0) await b.write('plus', 650, 212, '+', { size: 44, color: 'soft' });
+          if (k === 1) await b.arrow('arr', 390, 200, 310, 200, { color: 'green' });
+        }
+        await b.write('q1', 500, 420, 'سؤال برهان فازی: با یک قاعده و یک حقیقت، نتیجه را چطور بسازیم؟', { size: 26, fa: true });
+        await b.write('q2', 500, 470, 'حقیقت = دانشی درباره‌ی x،   نتیجه = دانشی درباره‌ی y', { size: 22, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 3. type 1
+    {
+      say: 'برهان فازی سه نوع دارد. نوع 1، ساده‌ترین: یک قاعده با یک مقدم. قاعده می‌گوید if x is A then y is B. حقیقت می‌گوید x is A′؛ یعنی چیزی که دیده‌ایم *شبیه* A است ولی دقیقاً خود A نیست. نتیجه y is B′ است و B′ را باید پیدا کنیم.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 62, 'نوع 1: یک قاعده با یک مقدم', { size: 32, color: 'orange', bold: true, fa: true });
+        await b.write('r1-fa', 840, 120, 'قاعده', { size: 28, color: 'purple', bold: true, fa: true });
+        await b.write('r1-if', 200, 120, 'if x is A', { size: 30, anchor: 'start' });
+        await b.write('r1-then', 370, 120, 'then y is B', { size: 30, anchor: 'start' });
+        await row(b, 'r2', 200, 'حقیقت', "x is A'", 'red');
+        await row(b, 'r3', 248, 'نتیجه', "y is B' = ?", 'green');
+        const gA = Graph({ x: 120, y: 330, w: 300, h: 140, from: 0, to: 10 });
+        const gB = Graph({ x: 560, y: 330, w: 300, h: 140, from: 0, to: 10 });
+        await all([gA.axes(b, 'ax', { yTicks: [1] }), gB.axes(b, 'ay', { yTicks: [1], label: 'y' })]);
+        await gA.curve(b, 'cA', bell(4, 1.1), { color: 'blue' });
+        await b.write('lA', gA.X(3.2), gA.Y(1) + 4, 'A', { size: 24, color: 'blue' });
+        await gA.curve(b, 'cA2', bell(6.4, 0.9), { color: 'red' });
+        await b.write('lA2', gA.X(7.3), gA.Y(1) + 4, "A'", { size: 24, color: 'red' });
+        await gB.poly(b, 'cB', [[0, 0], [2, 0], [3.5, 1], [6.5, 1], [8, 0], [10, 0]], { color: 'green' });
+        await b.write('lB', gB.X(5), gB.Y(1) - 10, 'B', { size: 24, color: 'green' });
+        await b.write('lB2', gB.X(5), gB.Y(0.4), "B' = ?", { size: 26, color: 'orange' });
+      },
+    },
+    // ---------------------------------------------------------- 4. why it is hard
+    {
+      say: 'در منطق کلاسیک فقط وقتی دقیقاً A برقرار باشد، B را نتیجه می‌گیریم. ولی در دنیای فازی حقیقتِ ما A′ است که فقط *تا حدی* با A جور است. پس انتظار داریم B′ هم تا حدی شبیه B باشد. برهان فازی دقیقاً همین «تا حدی» را حساب می‌کند.',
+      draw: async b => {
+        await b.ring('rA2', 312, 395, 48, 70, { color: 'red' });
+        await b.arrow('aAB', 440, 400, 545, 400, { color: 'orange' });
+        await b.write('nt', 500, 528, `${LTR("A'")} فقط تا حدی شبیه ${LTR('A')} است  ←  پس ${LTR("B'")} هم تا حدی شبیه ${LTR('B')} است`, { size: 22, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 5. antecedent / consequent
+    {
+      say: 'دو اسم مهم امتحانی: بخش «اگر» در قاعده، یعنی if x is A، را *مقدم* یا antecedent می‌گوییم. بخش «آنگاه»، یعنی then y is B، را *مؤخر* یا consequent می‌گوییم. مقدم شرط است و مؤخر چیزی است که از آن نتیجه می‌شود.',
+      term: ['Antecedent / Consequent', 'مقدم / مؤخر'],
+      draw: async b => {
+        await all([
+          b.line('u-if', 200, 130, 316, 130, { color: 'blue', width: 2.5 }),
+          b.line('u-then', 370, 130, 520, 130, { color: 'green', width: 2.5 }),
+        ]);
+        await all([
+          b.write('l-if', 258, 160, 'مقدم', { size: 22, color: 'blue', bold: true, fa: true }),
+          b.write('l-then', 445, 160, 'مؤخر', { size: 22, color: 'green', bold: true, fa: true }),
+        ]);
+      },
+    },
+    // ---------------------------------------------------------- 6. type 2
+    {
+      say: 'نوع 2: یک قاعده با *چند* مقدم. حالا قاعده دو شرط دارد که با and به هم وصل شده‌اند: if x is A and y is B then z is C. حقیقت هم درباره‌ی هر دو ورودی است: x is A′ and y is B′. و باید C′ را پیدا کنیم.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 62, 'نوع 2: یک قاعده با چند مقدم', { size: 32, color: 'orange', bold: true, fa: true });
+        await row(b, 'r1', 125, 'قاعده', 'if x is A and y is B then z is C', 'ink', 28);
+        await row(b, 'r2', 175, 'حقیقت', "x is A'  and  y is B'", 'red', 28);
+        await row(b, 'r3', 225, 'نتیجه', "z is C' = ?", 'green', 28);
+        const g = [80, 380, 680].map(x => Graph({ x, y: 320, w: 210, h: 130, from: 0, to: 10 }));
+        await all(g.map((gg, k) => gg.axes(b, `ax${k}`, { yTicks: [1], label: 'xyz'[k] })));
+        await g[0].curve(b, 'cA', bell(3.5, 1), { color: 'blue' });
+        await g[0].curve(b, 'cA2', bell(6.2, 0.8), { color: 'red' });
+        await all([b.write('lA', g[0].X(2.4), g[0].Y(1), 'A', { size: 22, color: 'blue' }), b.write('lA2', g[0].X(7.3), g[0].Y(1), "A'", { size: 22, color: 'red' })]);
+        await g[1].poly(b, 'cB2', [[0.5, 0], [2, 0.75], [5, 0.75], [6.5, 0]], { color: 'red' });
+        await g[1].poly(b, 'cB', [[3, 0], [6, 1], [9, 0]], { color: 'blue' });
+        await all([b.write('lB2', g[1].X(1.3), g[1].Y(0.85), "B'", { size: 22, color: 'red' }), b.write('lB', g[1].X(7.3), g[1].Y(0.95), 'B', { size: 22, color: 'blue' })]);
+        await g[2].poly(b, 'cC', [[0.5, 0], [3.5, 0.75], [7, 0.75], [9, 0]], { color: 'green' });
+        await all([b.write('lC', g[2].X(5), g[2].Y(0.75) - 10, 'C', { size: 22, color: 'green' }), b.write('lC2', g[2].X(5), g[2].Y(0.3), "C' = ?", { size: 22, color: 'orange' })]);
+      },
+    },
+    // ---------------------------------------------------------- 7. type 3
+    {
+      say: 'نوع 3: *چند* قاعده با چند مقدم. اینجا دو قاعده داریم که هر کدام شرط‌ها و نتیجه‌ی خودش را دارد، ولی حقیقت برای هر دو *یکی* است. هر قاعده جداگانه تکه‌ای از جواب را می‌دهد و در آخر این تکه‌ها با هم ترکیب می‌شوند تا C′ ساخته شود. جزئیاتش را در درس بعد می‌بینیم.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 52, 'نوع 3: چند قاعده با چند مقدم', { size: 30, color: 'orange', bold: true, fa: true });
+        await row(b, 'r1', 96, 'قاعده‌ی 1', 'if x is A1 and y is B1 then z is C1', 'ink', 24);
+        await row(b, 'r2', 132, 'قاعده‌ی 2', 'if x is A2 and y is B2 then z is C2', 'ink', 24);
+        await row(b, 'r3', 168, 'حقیقت', "x is A'  and  y is B'", 'red', 24);
+        await row(b, 'r4', 204, 'نتیجه', "z is C' = ?", 'green', 24);
+        const rowsY = [270, 405];
+        for (const [r, y] of rowsY.entries()) {
+          const g = [80, 380, 680].map(x => Graph({ x, y, w: 210, h: 80, from: 0, to: 10 }));
+          await all(g.map((gg, k) => gg.axes(b, `ax${r}${k}`, { yTicks: [], label: 'xyz'[k], size: 16 })));
+          await all([
+            g[0].curve(b, `cA${r}`, bell(r ? 4.4 : 6, 1), { color: 'blue', dur: 500 }),
+            g[0].curve(b, `cA2${r}`, bell(3, 0.8), { color: 'red', dur: 500 }),
+            g[1].poly(b, `cB${r}`, r ? [[2.5, 0], [4, 1], [8, 0]] : [[1, 0], [2, 1], [6, 0]], { color: 'blue', dur: 500 }),
+            g[1].poly(b, `cB2${r}`, [[4, 0], [7.5, 1], [8.5, 0]], { color: 'red', dur: 500 }),
+            r ? g[2].poly(b, `cC${r}`, [[1, 0], [2.5, 1], [5.5, 1], [7, 0]], { color: 'green', dur: 500 })
+              : g[2].curve(b, `cC${r}`, bell(6, 1.2), { color: 'green', dur: 500 }),
+          ]);
+          await b.write(`lC${r}`, g[2].X(8.6), g[2].Y(0.95), `C${r + 1}`, { size: 20, color: 'green' });
+        }
+        await b.write('q', 820, 532, "C' = ?", { size: 24, color: 'orange' });
+      },
+    },
+    // ---------------------------------------------------------- 8. three stages
+    {
+      say: 'حالا خود برهان: هر برهان فازی سه مرحله دارد. مرحله‌ی 1، *فازی‌سازی ورودی‌ها*: هر بخش مقدم به یک عدد بین 0 و 1 تبدیل می‌شود. مرحله‌ی 2، *اعمال عملگر فازی*: اگر مقدم چند بخش دارد، با AND یا OR همه را یک عدد می‌کنیم. مرحله‌ی 3، *اعمال روش استلزام*: با همان عدد، مجموعه‌ی خروجی را شکل می‌دهیم.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'برهان فازی در 3 مرحله', { size: 38, color: 'orange', bold: true, fa: true });
+        const S = [
+          [660, '1. فازی‌سازی ورودی‌ها', 'fuzzification', 'هر بخش مقدم ← یک درجه‌ی عضویت'],
+          [370, '2. اعمال عملگر فازی', 'AND / OR', 'همه‌ی بخش‌ها ← یک عدد α'],
+          [80, '3. اعمال روش استلزام', 'implication', `مجموعه‌ی خروجی ${LTR("C'")} با α`],
+        ];
+        for (const [k, [x, fa, en, out]] of S.entries()) {
+          await b.box(`sb${k}`, x, 150, 260, 120, { color: 'blue', fill: 'blue' });
+          await b.write(`sf${k}`, x + 130, 200, fa, { size: 25, bold: true, fa: true });
+          await b.write(`se${k}`, x + 130, 240, en, { size: 22, color: 'soft' });
+          await b.arrow(`sd${k}`, x + 130, 280, x + 130, 330, { color: 'green' });
+          await b.write(`so${k}`, x + 130, 368, out, { size: 21, color: 'green', fa: true });
+          if (k < 2) await b.arrow(`sa${k}`, x - 10, 210, x - 30, 210, { color: 'orange' });
+        }
+        await b.write('nt', 500, 470, 'این سه مرحله را روی مثال اسلاید قدم‌به‌قدم می‌بینیم', { size: 24, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 9. slide-99 example
+    {
+      say: 'مثال اسلاید: «اگر سرعت باد شدید باشد و فشار پایین باشد، آنگاه میزان بارش زیاد است». همان شکل نوع 2 است: x سرعت باد و A یعنی «شدید»، y فشار و B یعنی «پایین»، z میزان بارش و C یعنی «زیاد». A و B مقدم‌اند و C مؤخر.',
+      draw: async b => {
+        await b.clear();
+        await b.write('s', 500, 62, 'اگر سرعت باد شدید باشد و فشار پایین باشد، آنگاه میزان بارش زیاد است.', { size: 25, fa: true });
+        await b.write('f', 500, 115, 'if x is A and y is B then z is C', { size: 30 });
+        await all([
+          b.write('mA', GX.X(6), 165, 'شدید (A)', { size: 22, color: 'blue', fa: true }),
+          b.write('mB', GY.X(5), 165, 'پایین (B)', { size: 22, color: 'blue', fa: true }),
+          b.write('mC', GZ.X(5), 165, 'زیاد (C)', { size: 22, color: 'green', fa: true }),
+        ]);
+        await all([
+          b.wire('brA', [[80, 232], [80, 222], [600, 222], [600, 232]], { color: 'purple', width: 2.5 }),
+          b.wire('brC', [[690, 232], [690, 222], [920, 222], [920, 232]], { color: 'purple', width: 2.5 }),
+        ]);
+        await all([
+          b.write('brAt', 340, 210, 'مقدم', { size: 20, color: 'purple', bold: true, fa: true }),
+          b.write('brCt', 805, 210, 'مؤخر', { size: 20, color: 'purple', bold: true, fa: true }),
+        ]);
+        await all([
+          GX.axes(b, 'gx', { ticks: [0, 4, 8, 12], yTicks: [1] }),
+          GY.axes(b, 'gy', { ticks: [0, 5, 10], yTicks: [1], label: 'y' }),
+          GZ.axes(b, 'gz', { ticks: [0, 5, 10], yTicks: [1], label: 'z' }),
+        ]);
+        await GX.curve(b, 'cA', STRONG, { color: 'blue' });
+        await GY.curve(b, 'cB', LOW, { color: 'blue' });
+        await GZ.curve(b, 'cC', HEAVY, { color: 'green' });
+      },
+    },
+    // ---------------------------------------------------------- 10. fuzzify x
+    {
+      say: 'مرحله‌ی 1، *fuzzification* یا فازی‌سازی. ورودی‌ها عدد معمولی، یعنی غیرفازی، هستند: سرعت باد x_0 = 8. از 8 خط عمودی بالا می‌رویم تا به نمودار «شدید» برسیم و بعد به محور μ می‌رویم: 0.6. یعنی جمله‌ی «باد شدید است» با درجه‌ی 0.6 درست است.',
+      term: ['Fuzzification', 'فازی‌سازی'],
+      draw: async b => {
+        await GX.guide(b, 'gA', X0, MA, { color: 'orange' });
+        await b.write('vA', GX.X(0) + 22, GX.Y(MA) - 8, fmt(MA), { size: 20, color: 'orange', bold: true });
+        await b.write('eA', 185, 510, `μ_A(8) = ${fmt(MA)}`, { size: 26, color: 'orange' });
+      },
+    },
+    // ---------------------------------------------------------- 11. fuzzify y (slide typo)
+    {
+      say: 'همین کار برای فشار: y_0 = 5 روی نمودار «پایین» درجه‌ی 0.3 می‌دهد، پس μ_B(5) = 0.3. دقت کنید: اسلاید این را μ_A(x = B′) = 0.3 نوشته که *اشتباه تایپی* است؛ فشار ورودی y است و مجموعه‌اش B، پس درستش μ_B(y = 5) = 0.3 است.',
+      draw: async b => {
+        await GY.guide(b, 'gB', Y0, MB, { color: 'orange' });
+        await b.write('vB', GY.X(0) + 22, GY.Y(MB) - 8, fmt(MB), { size: 20, color: 'orange', bold: true });
+        await b.write('eB', 485, 510, `μ_B(5) = ${fmt(MB)}`, { size: 26, color: 'orange' });
+        await b.write('typo', 800, 510, "μ_A(x=B') = 0.3", { size: 22, color: 'red' });
+        await b.line('typoX', 720, 502, 880, 502, { color: 'red' });
+        await b.write('typoT', 800, 540, 'نوشته‌ی اسلاید — اشتباه', { size: 16, color: 'red', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 12. operator → α
+    {
+      say: 'مرحله‌ی 2، اعمال عملگر فازی. مقدم دو بخش دارد که با AND وصل شده‌اند، و AND در فازی یعنی اشتراک، یعنی *min*. پس α = min(0.6,0.3) = 0.3. به این عدد *درجه‌ی تطبیق* قاعده می‌گوییم و با α نشانش می‌دهیم: یعنی این قاعده برای این ورودی‌ها چقدر برقرار است.',
+      term: ['Degree of match (firing strength) α', 'درجه‌ی تطبیق α'],
+      draw: async b => {
+        await b.erase(['typo', 'typoX', 'typoT']);
+        await all([
+          b.line('hA', GX.X(X0), GX.Y(MA), 650, GX.Y(MA), { color: 'soft', width: 2 }),
+          b.line('hB', GY.X(Y0), GY.Y(MB), 650, GY.Y(MB), { color: 'soft', width: 2 }),
+        ]);
+        await b.wire('brk', [[642, GX.Y(MA)], [652, GX.Y(MA)], [652, GY.Y(MB)], [642, GY.Y(MB)]], { color: 'ink', width: 3 });
+        await b.write('mn', 652, GX.Y(MA) - 12, 'min', { size: 20, bold: true });
+        await GZ.poly(b, 'al', [[0, ALPHA], [10, ALPHA]], { color: 'orange', width: 2 });
+        await b.write('eAl', 800, 510, `α = min(0.6, 0.3) = ${fmt(ALPHA)}`, { size: 24, color: 'green', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 13. implication formula
+    {
+      say: 'مرحله‌ی 3، *Implication* یا استلزام. مؤخر قاعده، یعنی «بارش زیاد»، یک مجموعه‌ی فازی کامل است. چون قاعده فقط با درجه‌ی 0.3 برقرار است، نتیجه هم نباید از 0.3 مطمئن‌تر باشد. با استلزام min هر نقطه‌ی C را با α مقایسه می‌کنیم و کوچک‌تر را برمی‌داریم: μ_C′(z) = min(α,μ_C(z)).',
+      term: ['Implication', 'استلزام'],
+      draw: async b => {
+        await b.clear();
+        await b.write('fm', 500, 68, "μ_{C'}(z) = min( α , μ_C(z) )", { size: 40, color: 'blue', bold: true });
+        await b.write('fmfa', 500, 112, 'هر نقطه‌ی C با α مقایسه می‌شود و کوچک‌تر می‌ماند', { size: 22, color: 'soft', fa: true });
+        await GC.axes(b, 'gc', { ticks: [0, 2, 4, 5, 6, 7, 8, 9, 10], yTicks: [0.5, 1], label: 'z' });
+        await GC.curve(b, 'cC', HEAVY, { color: 'green' });
+        await b.write('lC', GC.X(8.6), GC.Y(0.8), 'زیاد (C)', { size: 22, color: 'green', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 14. clipping
+    {
+      say: 'خط افقی α = 0.3 را می‌کشیم. هر جا C بالاتر از این خط است، min همان 0.3 را برمی‌دارد؛ پس نوک مثلث *بریده* می‌شود. هر جا C پایین‌تر از خط است، خود C می‌ماند. نتیجه C′ است: یک ذوزنقه با سقف صاف در ارتفاع 0.3. در مثال ما سقف از z = 5.6 تا z = 8.4 است.',
+      draw: async b => {
+        await GC.poly(b, 'al', [[0, ALPHA], [10, ALPHA]], { color: 'orange', width: 2.5 });
+        await b.write('alt', GC.X(10) - 4, GC.Y(ALPHA) - 10, 'α = 0.3', { size: 24, color: 'orange', anchor: 'end' });
+        await b.dim('cC', 0.35);
+        await shade(b, GC, 'cl', z => Math.min(ALPHA, HEAVY(z)), 5, 9, 'green');
+        await b.write('lC2', GC.X(7), GC.Y(ALPHA) + 50, "C'", { size: 30, color: 'green', bold: true });
+        await all([b.dot('d1', GC.X(CLIP[0]), GC.Y(ALPHA), { color: 'red' }), b.dot('d2', GC.X(CLIP[1]), GC.Y(ALPHA), { color: 'red' })]);
+        await all([
+          b.write('t1', 860, 300, `سقف از ${LTR(fmt(CLIP[0]))}`, { size: 20, color: 'red', fa: true }),
+          b.write('t2', 860, 335, `تا ${LTR(fmt(CLIP[1]))}`, { size: 20, color: 'red', fa: true }),
+        ]);
+      },
+    },
+    // ---------------------------------------------------------- 15. two points
+    {
+      say: 'دو نقطه را با فرمول چک کنیم. در z = 7 نوک مثلث است: μ_C = 1 و min(0.3,1) = 0.3، پس بریده شده. در z = 5.4 روی دامنه‌ی مثلث: μ_C = (5.4 − 5)/2 = 0.2 و min(0.3,0.2) = 0.2؛ پس این نقطه *دست نخورده* می‌ماند. استلزام min فقط بالای خط α را می‌بُرد.',
+      draw: async b => {
+        await b.erase(['t1', 't2']);
+        await GC.guide(b, 'p7', 7, ALPHA, { color: 'blue' });
+        await b.write('e7', 860, 230, 'z = 7', { size: 22, color: 'blue' });
+        await b.write('e7b', 860, 262, `min(0.3, 1) = ${fmt(Math.min(ALPHA, HEAVY(7)))}`, { size: 20, color: 'blue' });
+        await GC.guide(b, 'p54', 5.4, Math.min(ALPHA, HEAVY(5.4)), { color: 'purple' });
+        await b.write('e5', 860, 330, 'z = 5.4', { size: 22, color: 'purple' });
+        await b.write('e5b', 860, 362, `min(0.3, ${fmt(HEAVY(5.4))}) = ${fmt(Math.min(ALPHA, HEAVY(5.4)))}`, { size: 20, color: 'purple' });
+        await b.write('e5c', 860, 394, 'دست نخورده', { size: 18, color: 'purple', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 16. meaning
+    {
+      say: 'معنی‌اش ساده است: قاعده فقط 30 درصد برقرار است، پس نتیجه‌اش، یعنی «بارش زیاد»، هم حداکثر با اطمینان 0.3 گفته می‌شود. شکل C حفظ می‌شود ولی هیچ نقطه‌اش از α بالاتر نمی‌رود. این C′ خروجی همین یک قاعده است.',
+      draw: async b => {
+        await b.pulse('cl');
+        await b.write('mean', 420, 530, 'قاعده با درجه‌ی 0.3 برقرار است  ←  نتیجه هم حداکثر 0.3', { size: 24, color: 'green', bold: true, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 17. edge cases
+    {
+      say: 'دو حالت مرزی که در امتحان می‌آید. اگر α = 1 باشد، یعنی قاعده کاملاً برقرار است، چیزی بریده نمی‌شود و C′ = C. اگر α = 0 باشد، قاعده اصلاً فعال نیست و C′ همه‌جا صفر است؛ این قاعده در خروجی هیچ سهمی ندارد.',
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 62, 'دو حالت مرزی', { size: 36, color: 'orange', bold: true, fa: true });
+        const g1 = Graph({ x: 560, y: 180, w: 330, h: 200, from: 3, to: 11 });
+        const g0 = Graph({ x: 110, y: 180, w: 330, h: 200, from: 3, to: 11 });
+        await all([g1.axes(b, 'a1', { yTicks: [1], label: 'z' }), g0.axes(b, 'a0', { yTicks: [1], label: 'z' })]);
+        await g1.poly(b, 'l1', [[3, 1], [11, 1]], { color: 'orange', width: 2 });
+        await shade(b, g1, 's1', HEAVY, 5, 9, 'green');
+        await b.write('t1', 725, 440, "α = 1   →   C' = C", { size: 28, color: 'green' });
+        await b.write('t1f', 725, 480, 'چیزی بریده نمی‌شود', { size: 20, color: 'soft', fa: true });
+        await g0.curve(b, 'c0', HEAVY, { color: 'soft' });
+        await g0.poly(b, 's0', [[3, 0], [11, 0]], { color: 'red', width: 5 });
+        await b.write('t0', 275, 440, "α = 0   →   C' = 0", { size: 28, color: 'red' });
+        await b.write('t0f', 275, 480, 'قاعده خاموش است و سهمی ندارد', { size: 20, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 18. summary
+    {
+      say: 'جمع‌بندی برای امتحان. یک بار دیگر این نکته‌ها را بخوانید، بعد برویم سراغ سؤال‌ها.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 62, 'یادت باشد', { size: 44, color: 'orange', bold: true, fa: true });
+        const L = [
+          'برهان فازی: از قاعده و حقیقت، نتیجه را می‌سازیم',
+          'مقدم = بخش «اگر»، مؤخر = بخش «آنگاه»',
+          'سه نوع: یک قاعده یک مقدم، یک قاعده چند مقدم، چند قاعده',
+          `مرحله‌ی 1، فازی‌سازی: هر بخش مقدم ← عددی بین ${LTR('0')} و ${LTR('1')}`,
+          `مرحله‌ی 2، عملگر: ${LTR('AND = min')} و ${LTR('OR = max')}؛ حاصل: درجه‌ی تطبیق α`,
+          'مرحله‌ی 3، استلزام min: مؤخر در ارتفاع α بریده می‌شود',
+        ];
+        for (const [k, l] of L.entries()) await b.write(`m${k}`, 900, 130 + k * 56, '•  ' + l, { size: 25, anchor: 'start', fa: true });
+        await b.write('f', 500, 500, "α = min(μ_A(x_0), μ_B(y_0))        μ_{C'}(z) = min(α, μ_C(z))", { size: 28, color: 'blue' });
+      },
+    },
+    // ---------------------------------------------------------- quizzes
+    {
+      say: 'نوبت شماست! همان قاعده‌ی باد و فشار، ولی ورودی‌های دیگر: فازی‌سازی درجه‌های 0.8 و 0.45 را داده. درجه‌ی تطبیق α چند است؟',
+      draw: quizBoard(1, [
+        { t: 'اگر باد شدید باشد و فشار پایین باشد، آنگاه بارش زیاد است', fa: true, size: 26 },
+        { t: 'μ_A(x_0) = 0.8        μ_B(y_0) = 0.45' },
+        { t: 'α = ?', color: 'orange', size: 36 },
+      ]),
+      quiz: { answer: ['0.45'], hint: 'دو بخش با «و» وصل شده‌اند؛ AND یعنی min.', explain: 'AND یعنی min، پس α = min(0.8,0.45) = 0.45.' },
+      solve: async b => {
+        await b.write('s1', 500, 300, 'AND  →  min', { size: 32, color: 'blue' });
+        await b.write('s2', 500, 380, `α = min(0.8, 0.45) = ${fmt(Math.min(0.8, 0.45))}`, { size: 38, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'حالا همان دو درجه‌ی مثال اسلاید، 0.6 و 0.3، ولی قاعده با «یا» نوشته شده. α چند است؟',
+      draw: quizBoard(2, [
+        { t: 'اگر باد شدید باشد «یا» فشار پایین باشد، آنگاه بارش زیاد است', fa: true, size: 26 },
+        { t: 'μ_A(x_0) = 0.6        μ_B(y_0) = 0.3' },
+        { t: 'α = ?', color: 'orange', size: 36 },
+      ]),
+      quiz: { answer: ['0.6'], hint: 'OR در فازی یعنی اجتماع، یعنی max.', explain: 'OR یعنی max، پس α = max(0.6,0.3) = 0.6. با AND جواب 0.3 بود.' },
+      solve: async b => {
+        await b.write('s1', 500, 300, 'OR  →  max', { size: 32, color: 'blue' });
+        await b.write('s2', 500, 380, `α = max(0.6, 0.3) = ${fmt(Math.max(0.6, 0.3))}`, { size: 38, color: 'green', bold: true });
+        await b.write('s3', 500, 450, `با ${LTR('AND')} جواب ${LTR('0.3')} بود — عملگر را از متن قاعده بخوان`, { size: 22, color: 'soft', fa: true });
+      },
+    },
+    {
+      say: 'سؤال تله‌ای! α = 0.3 و C مثلثی با پایه‌ی 5 تا 9 و رأس 7 است. با استلزام min، مقدار μ_C′ در z = 5.4 چند است؟',
+      draw: quizBoard(3, [
+        { t: 'α = 0.3        C = (5, 7, 9)', size: 30 },
+        { t: 'استلزام min', fa: true, size: 26 },
+        { t: "μ_{C'}(5.4) = ?", color: 'orange', size: 36 },
+      ]),
+      quiz: { answer: ['0.2'], hint: 'اول μ_C(5.4) را از دامنه‌ی بالارونده حساب کن: (z − 5)/2. بعد با 0.3 مقایسه کن.', explain: 'μ_C(5.4) = (5.4 − 5)/2 = 0.2 که از α کمتر است، پس min(0.3,0.2) = 0.2؛ این نقطه بریده نمی‌شود.' },
+      solve: b => clipSolve(b, ALPHA, 5.4),
+    },
+    {
+      say: 'باز همان C و α = 0.3. سقف صاف C′ از کدام z *شروع* می‌شود؟ یعنی دامنه‌ی بالارونده‌ی C کجا به ارتفاع 0.3 می‌رسد؟',
+      draw: quizBoard(4, [
+        { t: 'α = 0.3        C = (5, 7, 9)', size: 30 },
+        { t: 'سقف صاف مجموعه‌ی بریده‌شده از کدام z شروع می‌شود؟', fa: true, size: 26 },
+        { t: 'z = ?', color: 'orange', size: 36 },
+      ]),
+      quiz: { answer: ['5.6'], hint: '(z − 5)/2 = 0.3 را حل کن.', explain: '(z − 5)/2 = 0.3 پس z = 5 + 0.3 × 2 = 5.6. سقف تا 9 − 0.6 = 8.4 ادامه دارد.' },
+      solve: async b => {
+        await clipSolve(b, ALPHA, null);
+        await b.write('s-e1', 820, 330, '(z − 5) / 2 = 0.3', { size: 22, color: 'red' });
+        await b.write('s-e2', 820, 370, `z = ${fmt(CLIP[0])}`, { size: 26, color: 'green', bold: true });
+        await b.write('s-e3', 820, 410, `تا ${LTR(fmt(CLIP[1]))}`, { size: 18, color: 'soft', fa: true });
+      },
+    },
+    {
+      say: 'در برهان فازی، کدام‌یک *حقیقت* یا Fact است؟',
+      draw: quizBoard(5, [
+        { t: 'در برهان فازی کدام «حقیقت» است؟', fa: true, size: 34 },
+      ]),
+      quiz: {
+        choices: ['if x is A then y is B', "x is A'", "y is B'"], correct: 1,
+        explain: "حقیقت دانشی است که الان درباره‌ی ورودی داریم: x is A′. اولی قاعده است و سومی نتیجه.",
+      },
+      solve: async b => {
+        const R = [['if x is A then y is B', 'قاعده', 'soft'], ["x is A'", 'حقیقت', 'green'], ["y is B'", 'نتیجه', 'soft']];
+        for (const [k, [en, fa, c]] of R.entries()) {
+          await b.write(`c${k}`, 420, 240 + k * 70, en, { size: k === 1 ? 34 : 28, color: c, bold: k === 1 });
+          await b.write(`cf${k}`, 760, 240 + k * 70, fa, { size: k === 1 ? 32 : 26, color: c, bold: k === 1, fa: true });
+        }
+      },
+    },
+    {
+      say: 'آخرین سؤال: ترتیب درست سه مرحله‌ی برهان فازی کدام است؟',
+      draw: quizBoard(6, [
+        { t: 'ترتیب درست سه مرحله‌ی برهان فازی؟', fa: true, size: 34 },
+      ]),
+      quiz: {
+        choices: [
+          '1) فازی‌سازی  2) عملگر فازی  3) استلزام',
+          '1) عملگر فازی  2) فازی‌سازی  3) استلزام',
+          '1) استلزام  2) فازی‌سازی  3) عملگر فازی',
+        ],
+        correct: 0,
+        explain: 'اول ورودی‌ها فازی‌سازی می‌شوند، بعد عملگر فازی آن‌ها را یک عدد α می‌کند، و آخر استلزام با α مؤخر را شکل می‌دهد.',
+      },
+      solve: async b => {
+        const S = ['1. فازی‌سازی', '2. عملگر فازی', '3. استلزام'];
+        const O = ['μ_A = 0.6 ,  μ_B = 0.3', 'α = 0.3', "C' = min(0.3, C)"];
+        for (const [k, s] of S.entries()) {
+          const x = 800 - k * 300;
+          await b.write(`o${k}`, x, 250, s, { size: 28, color: 'blue', bold: true, fa: true });
+          await b.write(`r${k}`, x, 300, O[k], { size: 22, color: 'green' });
+          if (k < 2) await b.arrow(`a${k}`, x - 120, 242, x - 180, 242, { color: 'orange' });
+        }
+      },
+    },
+  ],
+});
+</script>
+</body>
+</html>

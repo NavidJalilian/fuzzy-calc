@@ -1,0 +1,507 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Multilayer Networks</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Vazirmatn:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="../assets/teacher.css">
+</head>
+<body>
+<main id="app"></main>
+<script src="../assets/teacher.js"></script>
+<script src="../assets/graph.js"></script>
+<script>
+// Lesson 23 — slides 217–236 (Part 7: neural networks).
+// Explanations are Persian; numbers, math and technical terms stay as written in English.
+
+const all = list => Promise.all(list);
+const LTR = s => `⁦${s}⁩`; // keeps a left-to-right run (numbers, math) intact inside Persian board text
+const num = v => String(+v.toFixed(6));
+const QUIZZES = 6;
+
+// A neuron: a filled circle with a label inside.
+async function node(b, id, x, y, r, label, o = {}) {
+  const size = o.size || 26;
+  await b.ring(id, x, y, r, r, { color: o.color || 'blue', fill: o.fill || o.color || 'blue', tilt: 0, dur: o.dur ?? 300 });
+  await b.write(id + '-t', x, y + size * 0.35, label, { size, bold: true, dur: o.dur ? 100 : 150 });
+}
+// An arrow from the edge of circle a to the edge of circle b; a, b = [x, y, r].
+function edge(b, id, [x1, y1, r1], [x2, y2, r2], o = {}) {
+  const a = Math.atan2(y2 - y1, x2 - x1);
+  return b.arrow(id, x1 + r1 * Math.cos(a), y1 + r1 * Math.sin(a), x2 - r2 * Math.cos(a), y2 - r2 * Math.sin(a), { head: 11, dur: 300, ...o });
+}
+function wlabel(b, id, [x1, y1], [x2, y2], text, t = 0.45, o = {}) {
+  return b.write(id, x1 + (x2 - x1) * t, y1 + (y2 - y1) * t - 12, text, { size: o.size || 22, color: o.color || 'purple', dur: 150 });
+}
+// A fully connected layered network. L = [{ x, ys, labels, color }]; edges are thin lines e<l>-<i>-<j>.
+async function net(b, L, r = 22) {
+  for (const [l, layer] of L.entries()) {
+    await all(layer.ys.map((y, i) => node(b, `n${l}-${i}`, layer.x, y, r, layer.labels[i], { color: layer.color, size: 20, dur: 150 })));
+  }
+  for (let l = 0; l + 1 < L.length; l++) {
+    const A = L[l], B = L[l + 1];
+    await all(A.ys.flatMap((ya, i) => B.ys.map((yb, j) => b.line(`e${l}-${i}-${j}`, A.x + r, ya, B.x - r, yb, { width: 1.6, dur: 300 }))));
+  }
+}
+const edgeIds = (l, A, B, keep) => {
+  const ids = [];
+  for (let i = 0; i < A; i++) for (let j = 0; j < B; j++) if (keep(i, j)) ids.push(`e${l}-${i}-${j}`);
+  return ids;
+};
+
+// Number of parameters of a fully connected network with layer sizes L (slide 236, extended).
+const params = L => L.slice(1).reduce((s, n, i) => s + L[i] * n + n, 0);
+const paramText = L => L.slice(1).map((n, i) => `[${L[i]}×${n} + ${n}]`).join(' + ');
+const paramParts = L => L.slice(1).map((n, i) => L[i] * n + n).join(' + ');
+
+// The 5-6-4 network of slides 228–232.
+const NET = [
+  { x: 170, ys: [100, 160, 220, 280, 340], labels: ['x_1', 'x_2', 'x_3', 'x_4', 'x_5'], color: 'blue' },
+  { x: 500, ys: [80, 140, 200, 260, 320, 380], labels: ['z_1', 'z_2', 'z_3', 'z_4', 'z_5', 'z_6'], color: 'orange' },
+  { x: 830, ys: [140, 200, 260, 320], labels: ['y_1', 'y_2', 'y_3', 'y_4'], color: 'red' },
+];
+
+// Example 2 (slides 219–220): z = -1.5 + 0.5 x1 + 0.5 x2.
+const W2 = [-1.5, 0.5, 0.5];
+const z2 = (x1, x2) => +(W2[0] + W2[1] * x1 + W2[2] * x2).toFixed(6);
+const CIRC = [[0.5, 1.5], [1, 1], [1.5, 0.5], [0.8, 0.4], [1.6, 0.9], [0.4, 0.6], [1.2, 1.5]];
+const SQ = [[3, 4], [4, 3], [3.5, 3.5], [4.5, 4.2], [3.8, 4.8], [5, 3.2], [4.6, 2.6], [2.8, 4.6]];
+const G2 = () => Graph({ x: 560, y: 110, w: 340, h: 340, from: 0, to: 6, min: 0, max: 6 });
+
+// Slide 221 figures (my coordinates, copied from the picture's layout).
+const F1_RED = [[1.5, 2.5], [2.5, 3.5], [2, 1.8], [3, 2.6], [1.2, 3.6], [2.8, 1.4], [3.4, 3.4]];
+const F1_GREEN = [[6.5, 7], [7.5, 6.2], [8, 8], [7, 8.6], [8.6, 7], [6.2, 8.2], [8.2, 5.6]];
+const F2_RED = [[2, 4], [3, 5], [4, 4.5], [3, 3], [4.5, 3.2], [2.5, 2.2], [3.8, 5.8], [1.5, 5.2]];
+const F2_GREEN = [[1.5, 8.5], [3.5, 8.8], [5.5, 8], [7.5, 8.5], [6.5, 6.6], [8.5, 6], [7.8, 4.2], [8.8, 2.6], [6.8, 2], [5.5, 0.8], [2.5, 0.6], [7.2, 0.6], [4.3, 7.2]];
+async function scatter(b, g, id, pts, color) {
+  await all(pts.map(([u, v], k) => b.dot(`${id}${k}`, g.X(u), g.Y(v), { color, r: 7 })));
+}
+async function squares(b, g, id, pts) {
+  await all(pts.map(([u, v], k) => b.box(`${id}${k}`, g.X(u) - 7, g.Y(v) - 7, 14, 14, { color: 'red', fill: 'red', r: 2, dur: 150 })));
+}
+
+function quizBoard(n, lines) {
+  return async b => {
+    await b.clear();
+    await b.write('q-n', 500, 60, `سؤال ${n} از ${QUIZZES}`, { size: 24, color: 'soft', fa: true });
+    for (const [k, l] of lines.entries()) await b.write(`q-l${k}`, 500, 130 + k * 52, l.text, { size: l.size || 34, fa: l.fa, color: l.color || 'ink' });
+  };
+}
+async function solveLines(b, lines, y0 = 320) {
+  for (const [k, l] of lines.entries()) await b.write(`s-l${k}`, 500, y0 + k * 52, l.text, { size: l.size || 30, fa: l.fa, color: l.color || 'ink', bold: l.bold });
+}
+// Quiz solution for parameter counting: one bracket per pair of layers.
+function solveParams(L) {
+  return async b => {
+    const X = L.map((_, k) => 500 + (k - (L.length - 1) / 2) * 150);
+    const col = k => (k === 0 ? 'blue' : k === L.length - 1 ? 'red' : 'orange');
+    await all(L.map((n, k) => b.box(`s-b${k}`, X[k] - 22, 250, 44, 90, { color: col(k), fill: col(k), r: 4, dur: 300 })));
+    await all(L.map((n, k) => b.write(`s-n${k}`, X[k], 375, String(n), { size: 30, bold: true })));
+    for (let k = 0; k + 1 < L.length; k++) await b.arrow(`s-a${k}`, X[k] + 30, 295, X[k + 1] - 30, 295, { head: 10, dur: 250 });
+    await b.write('s-f', 500, 440, paramText(L), { size: 30 });
+    await b.write('s-r', 500, 500, `= ${paramParts(L)} = ${params(L)}`, { size: 34, color: 'green', bold: true });
+  };
+}
+
+Teacher.start({
+  id: 'L23',
+  number: 23,
+  title: 'لایه‌ها و شبکه‌های چندلایه',
+  chapter: 'بخش 7 · شبکه‌ی عصبی',
+  slides: '217–236',
+  intro: 'نورون به شکل ماتریسی، خط جداکننده، جداپذیری خطی، چرا غیرخطی لازم است، لایه‌ی پنهان و شمردن پارامترهای شبکه.',
+  next: { href: '0024-perceptron-training.html', title: 'آموزش پرسپترون' },
+  steps: [
+    // ---------------------------------------------------------- 1. intro
+    {
+      say: 'در درس قبل یک نورون تنها ساختیم. حالا نورون‌ها را کنار هم و پشت سر هم می‌گذاریم تا یک *شبکه* بسازیم. اول یک نگاه دوباره به نورون، به شکل فشرده‌ی ماتریسی.',
+      draw: async b => {
+        await b.write('t1', 500, 190, 'درس 23', { size: 60, color: 'blue', bold: true, fa: true });
+        await b.write('t2', 500, 280, 'لایه‌ها و شبکه‌های چندلایه', { size: 46, fa: true });
+        await b.write('t3', 500, 360, 'Multilayer networks', { size: 40, color: 'orange' });
+      },
+    },
+    // ---------------------------------------------------------- 2. y = f(XW^T + W0)
+    {
+      say: 'اسلاید 217 نورون را این‌طور می‌نویسد: y = f(z) = f(XW^T + W_0). X سطر ورودی‌هاست: x_1 تا x_m. W سطر وزن‌هاست و W^T همان سطر است که ستون شده؛ پس XW^T یعنی x_{1}w_1 + … + x_{m}w_m، همان جمع وزن‌دار. W_0 هم بایاس است، یعنی همان w_0 روی ورودی 1. جمع این‌ها z است و y = f(z).',
+      term: ['y = f(XWᵀ + W₀)', 'شکل ماتریسی نورون'],
+      draw: async b => {
+        await b.clear();
+        const IN = [['1', 120, 120], ['x_1', 120, 210], ['x_2', 120, 300], ['x_m', 120, 420]];
+        const Z = [360, 270, 40];
+        for (const [k, [l, x, y]] of IN.entries()) await node(b, `in${k}`, x, y, 30, l, { size: 24 });
+        await b.write('dots', 120, 370, '⋮', { size: 30, color: 'soft' });
+        await node(b, 'z', Z[0], Z[1], Z[2], 'z', { color: 'red', size: 32 });
+        for (const [k, [, x, y]] of IN.entries()) {
+          await edge(b, `e${k}`, [x, y, 30], Z);
+          await wlabel(b, `w${k}`, [x, y], Z, ['w_0', 'w_1', 'w_2', 'w_m'][k]);
+        }
+        await b.arrow('eo', 400, 270, 490, 270, { head: 11, dur: 250 });
+        await b.write('y', 515, 282, 'y', { size: 36, bold: true });
+        await b.write('f0', 760, 150, 'y = f(z) = f(XW^T + W_0)', { size: 30, color: 'red', bold: true });
+        await b.write('f1', 760, 225, 'X = [x_1 x_2 … x_m]', { size: 26, color: 'blue' });
+        await b.write('f2', 760, 280, 'W = [w_1 w_2 … w_m]', { size: 26, color: 'purple' });
+        await b.write('f3', 760, 340, 'XW^T = x_{1}w_1 + … + x_{m}w_m', { size: 24 });
+        await b.write('f4', 760, 400, 'W_0 = w_0  (bias)', { size: 26, color: 'orange' });
+      },
+    },
+    // ---------------------------------------------------------- 3. example 1
+    {
+      say: 'مثال اسلاید 218: دو ورودی، تابع فعال‌سازی ReLU، و وزن‌ها W = [1, 0.5, 0.5] که اولی w_0 یعنی بایاس است. ورودی‌ها x_1 = 2 و x_2 = 3، پس سطر ورودی با آن 1 اول می‌شود [1 2 3]. ضرب: 1×1 + 2×0.5 + 3×0.5 = 1 + 1 + 1.5 = 3.5. و ReLU عدد مثبت را دست نمی‌زند: y = 3.5.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 60, 'مثال اسلاید 218', { size: 30, color: 'orange', bold: true, fa: true });
+        const IN = [['1', 120, 140], ['x_1', 120, 250], ['x_2', 120, 360]];
+        const Z = [360, 250, 40];
+        for (const [k, [l, x, y]] of IN.entries()) await node(b, `in${k}`, x, y, 30, l, { size: 24 });
+        await node(b, 'z', Z[0], Z[1], Z[2], 'z', { color: 'red', size: 32 });
+        for (const [k, [, x, y]] of IN.entries()) {
+          await edge(b, `e${k}`, [x, y, 30], Z);
+          await wlabel(b, `w${k}`, [x, y], Z, ['w_0', 'w_1', 'w_2'][k]);
+        }
+        await b.write('relu', 360, 318, 'ReLU', { size: 22, color: 'soft' });
+        await b.arrow('eo', 400, 250, 490, 250, { head: 11, dur: 250 });
+        await b.write('y', 515, 262, 'y', { size: 36, bold: true });
+        await b.write('r1', 770, 160, 'ReLU:  f(z) = max(0, z)', { size: 26 });
+        await b.write('r2', 770, 230, 'W = [1, 0.5, 0.5]', { size: 30, color: 'purple' });
+        await b.write('r3', 770, 290, 'x_1 = 2,   x_2 = 3', { size: 30, color: 'blue' });
+        await b.write('s1', 500, 440, 'y = f([1 2 3] · [1 0.5 0.5]^T)', { size: 30 });
+        await b.write('s2', 500, 505, '= f(1×1 + 2×0.5 + 3×0.5) = f(3.5) = 3.5', { size: 30, color: 'green', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 4. example 2 data
+    {
+      say: 'مثال 2 اسلاید: همان نورون، این بار با W = [-1.5, 0.5, 0.5]. پس z = -1.5 + 0.5x_1 + 0.5x_2. سمت راست داده‌ها را می‌بینی: دو دسته نقطه روی صفحه‌ی x_1 و x_2، مربع‌های قرمز بالا-راست و دایره‌های سبز پایین-چپ. سؤال: این نورون چطور این دو دسته را از هم جدا می‌کند؟',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 270, 100, 'مثال 2 · اسلاید 219', { size: 30, color: 'orange', bold: true, fa: true });
+        await b.write('l1', 270, 170, 'W = [-1.5, 0.5, 0.5]', { size: 30, color: 'purple' });
+        await b.write('l2', 270, 240, 'z = -1.5 + 0.5x_1 + 0.5x_2', { size: 28 });
+        await b.write('l3', 270, 300, 'y = f(z)', { size: 28 });
+        const g = G2();
+        await g.axes(b, 'ax', { ticks: [0, 1, 2, 3, 4, 5, 6], yTicks: [1, 2, 3, 4, 5, 6], label: 'x_1', yLabel: 'x_2', size: 16 });
+        await scatter(b, g, 'c', CIRC, 'green');
+        await squares(b, g, 's', SQ);
+      },
+    },
+    // ---------------------------------------------------------- 5. the line z = 0
+    {
+      say: `مرز جایی است که z = 0 شود: -1.5 + 0.5x_1 + 0.5x_2 = 0. دو طرف را در 2 ضرب کن و مرتب کن: x_2 = -x_1 + 3. این یک *خط* است که از 3 روی هر دو محور می‌گذرد. بالای خط z مثبت است، y > 0، یعنی مربع‌ها. پایین خط z منفی است، y < 0، یعنی دایره‌ها. امتحان کنیم: نقطه‌ی (4, 3) می‌دهد z = ${z2(4, 3)} که مثبت است؛ نقطه‌ی (1, 1) می‌دهد z = ${z2(1, 1)} که منفی است. پس یک نورون یعنی یک خط جداکننده.`,
+      term: ['Decision line: z = 0', 'خط جداکننده'],
+      draw: async b => {
+        const g = G2();
+        await b.write('l4', 270, 370, 'z = 0  ⇒  x_2 = -x_1 + 3', { size: 28, color: 'red', bold: true });
+        await g.poly(b, 'line', [[0, 3], [3, 0]], { color: 'orange', width: 4 });
+        await b.write('ypos', g.X(5.3), g.Y(5.5), 'y > 0', { size: 22, color: 'red', bold: true });
+        await b.write('yneg', g.X(2.2), g.Y(0.25), 'y < 0', { size: 20, color: 'green', bold: true });
+        await b.pulse(['s1', 'c1']);
+      },
+    },
+    // ---------------------------------------------------------- 6. role of weights and bias
+    {
+      say: 'ببین هر عدد چه نقشی دارد. دو وزن 0.5 و 0.5 *شیب* خط را تعیین می‌کنند: شیب -1. بایاس -1.5 خط را *جابه‌جا* می‌کند تا از 3 بگذرد. اگر بایاس نبود، خط می‌شد x_2 = -x_1 و مجبور بود از مبدأ رد شود؛ آن‌وقت این دو دسته جدا نمی‌شدند. این همان دلیل اصلی وجود بایاس است.',
+      tip: true,
+      draw: async b => {
+        const g = G2();
+        await b.write('n1', 270, 435, `وزن‌ها ← شیب خط`, { size: 26, color: 'purple', fa: true });
+        await b.write('n2', 270, 485, `بایاس ← جابه‌جایی خط`, { size: 26, color: 'orange', fa: true });
+        await b.write('n3', 270, 535, `بدون بایاس: خط از مبدأ (${LTR('0, 0')}) می‌گذرد`, { size: 22, color: 'red', fa: true });
+        await b.ring('orig', g.X(0), g.Y(0), 16, 16, { color: 'red' });
+      },
+    },
+    // ---------------------------------------------------------- 7. linear separability
+    {
+      say: 'اسم این حالت: *linear separability* یا جداپذیری خطی. شکل 1 اسلاید 221: وقتی دو کلاس را بتوان با یک خط راست از هم جدا کرد، یک نورون مصنوعی کافی است. نورون فقط باید وزن‌ها و بایاسی پیدا کند که خطش بین دو دسته بیفتد.',
+      term: ['Linear separability', 'جداپذیری خطی'],
+      draw: async b => {
+        await b.clear();
+        const g = Graph({ x: 100, y: 120, w: 330, h: 330, from: 0, to: 10, min: 0, max: 10 });
+        await g.axes(b, 'a1', { ticks: [], yTicks: [], label: 'x_1', yLabel: 'x_2' });
+        await scatter(b, g, 'r', F1_RED, 'red');
+        await scatter(b, g, 'g', F1_GREEN, 'green');
+        await g.poly(b, 'l1', [[3, 9], [9, 1]], { color: 'blue', width: 3 });
+        await b.write('cap1', 265, 520, 'شکل 1: جداسازی با یک نورون', { size: 24, color: 'green', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 8. not linearly separable
+    {
+      say: 'ولی شکل 2: نقطه‌های قرمز وسط هستند و سبزها دورشان را گرفته‌اند. هر خط راستی بکشی، یک طرفش هم سبز دارد هم قرمز. پس با یک خط راست نمی‌شود جدا کرد. اسلاید می‌گوید: «نیاز به خاصیت غیرخطی برای جداسازی دو کلاس». مرز درست یک خط *خمیده* است، مثل شکل پایین اسلاید.',
+      draw: async b => {
+        const g = Graph({ x: 560, y: 120, w: 330, h: 330, from: 0, to: 10, min: 0, max: 10 });
+        await g.axes(b, 'a2', { ticks: [], yTicks: [], label: 'x_1', yLabel: 'x_2' });
+        await scatter(b, g, 'r2', F2_RED, 'red');
+        await scatter(b, g, 'g2', F2_GREEN, 'green');
+        await g.poly(b, 'try', [[1, 9.5], [8, 0.5]], { color: 'soft', width: 3 });
+        await b.write('x', g.X(7.8), g.Y(1.4), '✗', { size: 40, color: 'red', bold: true });
+        await b.dim('try', 0.35);
+        await g.poly(b, 'bent', [[0, 7], [4.5, 7], [5.6, 4.5], [5.5, 2], [3.5, 1.4], [0, 1.4]], { color: 'blue', width: 4, dur: 900 });
+        await b.write('cap2', 725, 520, 'شکل 2: خط راست کافی نیست', { size: 24, color: 'red', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 9. why non-linear f
+    {
+      say: 'چرا تابع فعال‌سازی باید غیرخطی باشد؟ فرض کن f خطی باشد و دو نورون پشت سر هم بگذاریم. لایه‌ی اول z = 2x + 1 و لایه‌ی دوم y = 3z - 1. جایگذاری کن: y = 3(2x + 1) - 1 = 6x + 2. باز هم یک خط! هر چند لایه‌ی خطی روی هم، آخرش یک خط است. فقط وقتی بین لایه‌ها یک f غیرخطی مثل ReLU یا sigmoid باشد، مرز می‌تواند بشکند و خم شود.',
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'چرا غیرخطی؟', { size: 42, color: 'orange', bold: true, fa: true });
+        await b.write('a', 500, 150, 'z = 2x + 1', { size: 34, color: 'blue' });
+        await b.write('b', 500, 210, 'y = 3z - 1', { size: 34, color: 'purple' });
+        await b.write('c', 500, 280, 'y = 3(2x + 1) - 1 = 6x + 2', { size: 34 });
+        await b.write('d', 500, 340, 'باز هم یک خط!', { size: 32, color: 'red', bold: true, fa: true });
+        await b.write('e', 500, 420, `لایه‌های خطی روی هم = یک لایه‌ی خطی`, { size: 28, fa: true });
+        await b.write('f', 500, 480, `با ${LTR('ReLU')} یا ${LTR('sigmoid')} بین لایه‌ها، مرز می‌تواند خم شود`, { size: 28, color: 'green', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 10. two output neurons
+    {
+      say: 'در مغز، نورون‌ها به هم وصل‌اند: خروجی یکی ورودی بعدی است. در شبکه‌ی مصنوعی هم همین کار را می‌کنیم. اسلایدهای 223 و 224: اول یک نورون z_1 با خروجی y_1 = f(z_1). حالا همان ورودی‌ها را به یک نورون دوم z_2 هم می‌دهیم. هر نورون *وزن‌های خودش* را دارد: یال‌های بنفش برای z_1 و نارنجی برای z_2.',
+      draw: async b => {
+        await b.clear();
+        const IN = [['1', 200, 170], ['x_1', 200, 280], ['x_m', 200, 390]];
+        const Z = [[520, 240, 34], [520, 350, 34]];
+        for (const [k, [l, x, y]] of IN.entries()) await node(b, `in${k}`, x, y, 32, l, { size: 26 });
+        await node(b, 'z1', ...Z[0], 'z_1', { color: 'red', size: 26 });
+        for (const [k, [, x, y]] of IN.entries()) await edge(b, `p${k}`, [x, y, 32], Z[0], { color: 'purple' });
+        await b.arrow('o1', 554, 240, 760, 240, { head: 11, dur: 250 });
+        await b.write('y1', 660, 225, 'y_1 = f(z_1)', { size: 24 });
+        await node(b, 'z2', ...Z[1], 'z_2', { color: 'red', size: 26 });
+        for (const [k, [, x, y]] of IN.entries()) await edge(b, `q${k}`, [x, y, 32], Z[1], { color: 'orange' });
+        await b.arrow('o2', 554, 350, 760, 350, { head: 11, dur: 250 });
+        await b.write('y2', 660, 335, 'y_2 = f(z_2)', { size: 24 });
+      },
+    },
+    // ---------------------------------------------------------- 11. weight indices
+    {
+      say: 'حالا وزن‌ها دو اندیس لازم دارند: w_{i,j}. اندیس اول i می‌گوید از *کدام ورودی* می‌آید، اندیس دوم j می‌گوید به *کدام نورون* می‌رود. مثلاً w_{1,2} وزن یال از x_1 به z_2 است و w_{0,1} بایاس نورون z_1. ستون چپ را *لایه‌ی ورودی* و نورون‌های z را *لایه‌ی خروجی* می‌نامیم. فرمول هر خروجی: y_j = f(Σ x_{i}w_{i,j}) از i = 0 تا m، برای j = 1, 2.',
+      term: ['Input layer · output layer', 'لایه‌ی ورودی · لایه‌ی خروجی'],
+      draw: async b => {
+        const IN = [[200, 170], [200, 280], [200, 390]];
+        const Z = [[520, 240], [520, 350]];
+        const P = ['w_{0,1}', 'w_{1,1}', 'w_{m,1}'], Q = ['w_{0,2}', 'w_{1,2}', 'w_{m,2}'];
+        for (let k = 0; k < 3; k++) await wlabel(b, `pl${k}`, IN[k], Z[0], P[k], 0.3, { size: 20, color: 'purple' });
+        for (let k = 0; k < 3; k++) await wlabel(b, `ql${k}`, IN[k], Z[1], Q[k], 0.66, { size: 20, color: 'orange' });
+        await all([b.write('L0', 200, 105, 'لایه‌ی ورودی', { size: 26, fa: true, bold: true }), b.write('L1', 520, 105, 'لایه‌ی خروجی', { size: 26, fa: true, bold: true })]);
+        await b.write('f', 500, 490, 'y_j = f(Σ_{i=0}^{m} x_i w_{i,j}),     j = 1, 2', { size: 30, color: 'red' });
+      },
+    },
+    // ---------------------------------------------------------- 12. m inputs, n outputs
+    {
+      say: 'اسلاید 227 همین را بزرگ می‌کند: m ورودی و n نورون خروجی، و *هر* ورودی به *هر* نورون وصل است. فرمول: y_j = f(w_{0,j} + Σ x_{i}w_{i,j}) از i = 1 تا m، برای j = 1 تا n. اینجا بایاس w_{0,j} جدا نوشته شده. نتیجه برای شمردن: هر نورون خروجی m وزن و 1 بایاس دارد.',
+      draw: async b => {
+        await b.clear();
+        const XS = [120, 200, 280, 360, 440], ZS = [160, 250, 340, 430];
+        const xl = ['x_1', 'x_2', 'x_3', 'x_4', 'x_m'], zl = ['z_1', 'z_2', 'z_3', 'z_n'];
+        await all(XS.map((y, i) => node(b, `x${i}`, 200, y, 28, xl[i], { size: 22, dur: 200 })));
+        await all(ZS.map((y, j) => node(b, `z${j}`, 560, y, 28, zl[j], { color: 'red', size: 22, dur: 200 })));
+        const C = ['purple', 'orange', 'green', 'blue'];
+        await all(XS.flatMap((ya, i) => ZS.map((yb, j) => edge(b, `e${i}-${j}`, [200, ya, 28], [560, yb, 28], { color: C[j], head: 8, dur: 350 }))));
+        await all(ZS.map((y, j) => b.arrow(`o${j}`, 588, y, 800, y, { head: 9, dur: 250 })));
+        await all(ZS.map((y, j) => b.write(`y${j}`, 700, y - 12, `y_${['1', '2', '3', 'n'][j]} = f(z_${['1', '2', '3', 'n'][j]})`, { size: 22 })));
+        await all([b.write('L0', 200, 75, 'لایه‌ی ورودی', { size: 24, fa: true, bold: true }), b.write('L1', 560, 75, 'لایه‌ی خروجی', { size: 24, fa: true, bold: true })]);
+        await b.write('f', 500, 525, 'y_j = f(w_{0,j} + Σ_{i=1}^{m} x_i w_{i,j}),    j = 1, 2, …, n', { size: 26, color: 'red' });
+      },
+    },
+    // ---------------------------------------------------------- 13. hidden layer
+    {
+      say: 'حالا اسلاید 228: بین ورودی و خروجی یک لایه‌ی دیگر می‌گذاریم: *hidden layer* یا لایه‌ی پنهان. اینجا 5 ورودی، 6 نورون پنهان z و 4 خروجی y. اسلاید سه فایده می‌گوید: لایه‌ی پنهان قدرت شبکه را بیشتر می‌کند، خاصیت غیرخطی بیشتری به شبکه می‌دهد، و می‌شود با آن مدل‌های پیچیده‌تر برای داده‌های پیچیده‌تر ساخت. برحسب نیاز می‌توان لایه‌های بیشتری هم اضافه کرد.',
+      term: ['Hidden layer', 'لایه‌ی پنهان'],
+      draw: async b => {
+        await b.clear();
+        await net(b, NET);
+        await all(['لایه‌ی ورودی', 'لایه‌ی پنهان', 'لایه‌ی خروجی'].map((t, k) => b.write(`L${k}`, NET[k].x, 425, t, { size: 24, fa: true, bold: true, color: NET[k].color })));
+        await b.write('ben', 500, 490, 'لایه‌ی پنهان: قدرت بیشتر · خاصیت غیرخطی بیشتر · مدل پیچیده‌تر', { size: 24, color: 'green', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 14. formulas with superscripts
+    {
+      say: 'اسلاید 229 فرمول‌ها را می‌نویسد. حالا دو دسته وزن داریم، پس یک بالانویس هم اضافه می‌شود: w^{(1)} برای یال‌های ورودی به پنهان و w^{(2)} برای پنهان به خروجی. هر نورون پنهان: z_j = f(w_{0,j} + Σ x_{i}w_{i,j}) با i از 1 تا 5 و j از 1 تا 6. هر خروجی: y_k = f(w_{0,k} + Σ z_{i}w_{i,k}) با i از 1 تا 6 و k از 1 تا 4. یعنی خروجی‌های لایه‌ی پنهان، ورودی‌های لایه‌ی بعد هستند.',
+      draw: async b => {
+        await b.erase('ben');
+        await all([b.write('w1', 335, 405, 'w^{(1)}_{i,j}', { size: 24, color: 'green', bold: true }), b.write('w2', 665, 405, 'w^{(2)}_{i,k}', { size: 24, color: 'green', bold: true })]);
+        await b.write('f1', 500, 475, 'z_j = f(w^{(1)}_{0,j} + Σ_{i=1}^{5} x_i w^{(1)}_{i,j}),    j = 1, …, 6', { size: 24, color: 'orange' });
+        await b.write('f2', 500, 530, 'y_k = f(w^{(2)}_{0,k} + Σ_{i=1}^{6} z_i w^{(2)}_{i,k}),    k = 1, …, 4', { size: 24, color: 'red' });
+      },
+    },
+    // ---------------------------------------------------------- 15. z6
+    {
+      say: 'اسلاید 230 فقط z_6 را نگاه می‌کند. یال‌هایی که به z_6 می‌رسند پررنگ شده‌اند: از هر 5 ورودی یکی. پس z_6 = f(w_{0,6} + x_{1}w_{1,6} + x_{2}w_{2,6} + x_{3}w_{3,6} + x_{4}w_{4,6} + x_{5}w_{5,6})، همه با بالانویس (1). یعنی z_6 به 5 وزن و 1 بایاس احتیاج دارد: 6 عدد.',
+      draw: async b => {
+        const into6 = edgeIds(0, 5, 6, (i, j) => j === 5);
+        await b.dim([...edgeIds(0, 5, 6, (i, j) => j !== 5), ...edgeIds(1, 6, 4, () => true)], 0.15);
+        await b.recolor(into6, 'orange');
+        await b.pulse('n1-5*');
+        await b.erase('f1');
+        await b.write('f1', 500, 475, 'z_6 = f(w^{(1)}_{0,6} + x_{1}w^{(1)}_{1,6} + x_{2}w^{(1)}_{2,6} + … + x_{5}w^{(1)}_{5,6})', { size: 22, color: 'orange' });
+      },
+    },
+    // ---------------------------------------------------------- 16. y4 = ?
+    {
+      say: 'اسلاید 231 می‌پرسد: y_4 چیست؟ یال‌هایی که به y_4 می‌رسند از هر 6 نورون پنهان می‌آیند. پس y_4 = f(w_{0,4} + Σ z_{i}w_{i,4}) با i از 1 تا 6 و بالانویس (2). و چون هر z خودش از همه‌ی x‌ها ساخته شده، y_4 در واقع به همه‌ی ورودی‌ها و همه‌ی یال‌های لایه‌ی اول بستگی دارد. برای همین در اسلاید همه‌ی یال‌های سمت چپ سیاه‌اند.',
+      draw: async b => {
+        await b.recolor(edgeIds(0, 5, 6, () => true), 'ink');
+        await b.dim(edgeIds(0, 5, 6, () => true), 1);
+        const into4 = edgeIds(1, 6, 4, (i, j) => j === 3);
+        await b.dim(into4, 1);
+        await b.recolor(into4, 'red');
+        await b.pulse('n2-3*');
+        await b.erase('f2');
+        await b.write('f2', 500, 530, 'y_4 = f(w^{(2)}_{0,4} + Σ_{i=1}^{6} z_i w^{(2)}_{i,4})', { size: 26, color: 'red', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 17. deep network
+    {
+      say: 'اسلایدهای 232 تا 235 همین را با بلوک‌ها خلاصه می‌کنند: هر ستون یک لایه است. ورودی، بعد یک لایه‌ی پنهان، بعد خروجی. می‌شود دو لایه‌ی پنهان گذاشت، یا هر چند تا. وقتی چند لایه‌ی پنهان پشت سر هم باشد به آن *deep network* یا شبکه‌ی عمیق می‌گویند.',
+      term: ['Deep network', 'شبکه‌ی عمیق'],
+      draw: async b => {
+        await b.clear();
+        await b.write('tag', 500, 70, 'شبکه‌ی عمیق', { size: 34, color: 'red', bold: true, fa: true });
+        await b.box('B0', 90, 150, 50, 260, { color: 'blue', fill: 'blue', r: 4 });
+        await b.box('B1', 300, 110, 50, 340, { color: 'orange', fill: 'orange', r: 4 });
+        await all([0, 1, 2].map(k => b.dot(`dd${k}`, 425 + k * 40, 280, { r: 9 })));
+        await b.box('B2', 600, 110, 50, 340, { color: 'orange', fill: 'orange', r: 4 });
+        await b.box('B3', 820, 180, 50, 200, { color: 'red', fill: 'red', r: 4 });
+        await all([[160, 280], [680, 800]].map(([a, c], k) => b.arrow(`A${k}`, a, 280, c, 280, { head: 16 })));
+        await all([[115, 'لایه‌ی ورودی'], [325, 'لایه‌ی پنهان'], [625, 'لایه‌ی پنهان'], [845, 'لایه‌ی خروجی']].map(([x, t], k) => b.write(`BL${k}`, x, 500, t, { size: 24, fa: true, bold: true })));
+      },
+    },
+    // ---------------------------------------------------------- 18. params formula
+    {
+      say: 'اسلاید 236: شمردن پارامترها. *parameter* یعنی هر عددی که شبکه باید یاد بگیرد: همه‌ی وزن‌ها و همه‌ی بایاس‌ها. لایه‌ی ورودی m نورون، پنهان n، خروجی k. بین ورودی و پنهان هر کدام از m ورودی به هر کدام از n نورون وصل است: m×n وزن، و هر نورون پنهان یک بایاس دارد: n. بین پنهان و خروجی: n×k وزن و k بایاس. فرمول: params = [m×n + n] + [n×k + k].',
+      term: ['Parameters', 'پارامترها (وزن‌ها + بایاس‌ها)'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 60, 'تعداد پارامترهای یک شبکه', { size: 32, color: 'orange', bold: true, fa: true });
+        await b.box('P0', 230, 130, 60, 180, { color: 'blue', fill: 'blue', r: 4 });
+        await b.box('P1', 470, 100, 60, 240, { color: 'orange', fill: 'orange', r: 4 });
+        await b.box('P2', 710, 160, 60, 120, { color: 'red', fill: 'red', r: 4 });
+        await all([[300, 460], [540, 700]].map(([a, c], k) => b.arrow(`PA${k}`, a, 220, c, 220, { head: 14 })));
+        await all([[260, 'لایه‌ی ورودی', 'm'], [500, 'لایه‌ی پنهان', 'n'], [740, 'لایه‌ی خروجی', 'k']].map(([x, t, s], k) => b.write(`PL${k}`, x, 380, `${t} ${LTR(`(${s})`)}`, { size: 24, fa: true, bold: true })));
+        await b.write('pf', 500, 445, 'params = [m×n + n] + [n×k + k]', { size: 34, color: 'red', bold: true });
+        await b.write('pn1', 330, 500, `${LTR('m×n')} وزن + ${LTR('n')} بایاس`, { size: 22, color: 'soft', fa: true });
+        await b.write('pn2', 680, 500, `${LTR('n×k')} وزن + ${LTR('k')} بایاس`, { size: 22, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 19. apply to 5-6-4
+    {
+      say: `همین را روی شبکه‌ی اسلاید 228 حساب کنیم: m = 5، n = 6، k = 4. براکت اول: 5×6 + 6 = 36. براکت دوم: 6×4 + 4 = 28. جمع: ${params([5, 6, 4])} پارامتر. یعنی این شبکه‌ی کوچک ${params([5, 6, 4])} عدد دارد که باید با آموزش پیدا شوند.`,
+      draw: async b => {
+        await all([b.write('PL0', 260, 380, `لایه‌ی ورودی ${LTR('(m = 5)')}`, { size: 24, fa: true, bold: true }), b.write('PL1', 500, 380, `لایه‌ی پنهان ${LTR('(n = 6)')}`, { size: 24, fa: true, bold: true }), b.write('PL2', 740, 380, `لایه‌ی خروجی ${LTR('(k = 4)')}`, { size: 24, fa: true, bold: true })]);
+        await b.erase(['pn1', 'pn2']);
+        await b.write('pc', 500, 505, `${paramText([5, 6, 4])} = ${paramParts([5, 6, 4])} = ${params([5, 6, 4])}`, { size: 32, color: 'green', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 20. more layers
+    {
+      say: `نکته‌ی امتحانی: اگر چند لایه‌ی پنهان باشد، فرمول اسلاید را همین‌طور ادامه بده: برای هر دو لایه‌ی پشت سر هم یک براکت [قبلی × بعدی + بعدی]. مثال از خودم: شبکه‌ی 3-4-4-2 می‌شود [3×4 + 4] + [4×4 + 4] + [4×2 + 2] = 16 + 20 + 10 = ${params([3, 4, 4, 2])}. تله: لایه‌ی ورودی *بایاس ندارد*؛ بایاس فقط برای نورون‌هایی است که جمع می‌زنند، یعنی پنهان و خروجی.`,
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 80, 'چند لایه‌ی پنهان؟', { size: 38, color: 'orange', bold: true, fa: true });
+        await b.write('r', 500, 160, 'هر دو لایه‌ی پشت سر هم ← یک براکت', { size: 30, fa: true });
+        await b.write('rr', 500, 220, '[before × after + after]', { size: 32, color: 'purple' });
+        await b.write('ex', 500, 300, '3 - 4 - 4 - 2', { size: 34, color: 'blue', bold: true });
+        await b.write('ex1', 500, 360, paramText([3, 4, 4, 2]), { size: 30 });
+        await b.write('ex2', 500, 420, `= ${paramParts([3, 4, 4, 2])} = ${params([3, 4, 4, 2])}`, { size: 32, color: 'green', bold: true });
+        await b.write('trap', 500, 500, 'تله: لایه‌ی ورودی بایاس ندارد!', { size: 28, color: 'red', bold: true, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 21. summary
+    {
+      say: 'جمع‌بندی کنیم. این شش نکته را یک بار دیگر بخوانید، بعد سؤال‌ها.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'یادت باشد', { size: 46, color: 'orange', bold: true, fa: true });
+        const L = [
+          `نورون: ${LTR('y = f(XWᵀ + W₀)')}؛ ${LTR('W₀')} همان بایاس است`,
+          'مرز یک نورون جایی است که z = 0؛ یعنی یک خط راست',
+          'جداپذیری خطی: دو کلاس با یک خط راست جدا شوند → یک نورون کافی است',
+          'غیرخطی لازم است؛ لایه‌های خطی روی هم باز یک خط‌اند',
+          'اندیس‌های وزن: اولی شماره‌ی ورودی، دومی شماره‌ی نورون؛ چند لایه‌ی پنهان = شبکه‌ی عمیق',
+          'تعداد پارامترها: params = [m×n + n] + [n×k + k]؛ ورودی بایاس ندارد',
+        ];
+        for (const [k, l] of L.entries()) await b.write(`m${k}`, 920, 150 + k * 68, '•  ' + l, { size: 25, anchor: 'start', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- quizzes
+    {
+      say: 'نوبت شماست! شبکه‌ای با 3 ورودی، 4 نورون پنهان و 2 خروجی. چند پارامتر دارد؟',
+      draw: quizBoard(1, [
+        { text: '3 - 4 - 2', size: 44, color: 'blue' },
+        { text: 'params = ?', color: 'orange' },
+      ]),
+      quiz: { answer: [String(params([3, 4, 2]))], hint: 'params = [m×n + n] + [n×k + k] با m = 3، n = 4، k = 2.', explain: `[3×4 + 4] + [4×2 + 2] = 16 + 10 = ${params([3, 4, 2])}.` },
+      solve: solveParams([3, 4, 2]),
+    },
+    {
+      say: 'شبکه‌ی بزرگ‌تر: 10 ورودی، 8 نورون پنهان، 3 خروجی. چند پارامتر؟',
+      draw: quizBoard(2, [
+        { text: '10 - 8 - 3', size: 44, color: 'blue' },
+        { text: 'params = ?', color: 'orange' },
+      ]),
+      quiz: { answer: [String(params([10, 8, 3]))], hint: 'براکت اول 10×8 + 8، براکت دوم 8×3 + 3.', explain: `[10×8 + 8] + [8×3 + 3] = 88 + 27 = ${params([10, 8, 3])}.` },
+      solve: solveParams([10, 8, 3]),
+    },
+    {
+      say: 'دو لایه‌ی پنهان: 2 ورودی، دو لایه‌ی پنهان هر کدام 4 نورون، و 1 خروجی. چند پارامتر؟',
+      draw: quizBoard(3, [
+        { text: '2 - 4 - 4 - 1', size: 44, color: 'blue' },
+        { text: 'params = ?', color: 'orange' },
+      ]),
+      quiz: { answer: [String(params([2, 4, 4, 1]))], hint: 'سه براکت لازم است: یکی برای هر دو لایه‌ی پشت سر هم.', explain: `[2×4 + 4] + [4×4 + 4] + [4×1 + 1] = 12 + 20 + 5 = ${params([2, 4, 4, 1])}.` },
+      solve: solveParams([2, 4, 4, 1]),
+    },
+    {
+      say: 'نورون مثال 2 با تابع sigmoid: W_0 = -1.5 و وزن‌ها 0.5 و 0.5. ورودی x_1 = 1 و x_2 = 2. خروجی y چند است؟',
+      draw: quizBoard(4, [
+        { text: 'W_0 = -1.5,   W = [0.5, 0.5]', color: 'purple' },
+        { text: 'X = [1, 2]', color: 'blue' },
+        { text: 'y = sigmoid(XW^T + W_0) = ?', color: 'orange' },
+      ]),
+      quiz: { answer: ['0.5'], hint: 'اول z را حساب کن. sigmoid(0) چند بود؟', explain: `z = -1.5 + 1×0.5 + 2×0.5 = ${z2(1, 2)}. این نقطه درست روی خط جداکننده است و sigmoid(0) = 1 / (1 + 1) = 0.5.` },
+      solve: b => solveLines(b, [
+        { text: `z = -1.5 + 1×0.5 + 2×0.5 = ${z2(1, 2)}` },
+        { text: 'y = 1 / (1 + e^0) = 1 / 2 = 0.5', color: 'green', bold: true, size: 34 },
+        { text: 'نقطه روی خود خط جداکننده است', fa: true, color: 'soft', size: 26 },
+      ], 330),
+    },
+    {
+      say: 'باز هم مثال 2: z = -1.5 + 0.5x_1 + 0.5x_2. کدام نقطه در طرف y > 0 خط است؟',
+      draw: quizBoard(5, [
+        { text: 'z = -1.5 + 0.5x_1 + 0.5x_2', color: 'purple' },
+        { text: 'z > 0 ?', color: 'orange' },
+      ]),
+      quiz: {
+        choices: ['(1, 1)', '(2, 0.5)', '(2, 2)'], correct: 2,
+        explain: `هر نقطه را در z بگذار: (1, 1) می‌دهد ${z2(1, 1)}، (2, 0.5) می‌دهد ${z2(2, 0.5)} و (2, 2) می‌دهد ${z2(2, 2)}. فقط آخری مثبت است. راه سریع: x_1 + x_2 باید از 3 بیشتر باشد.`,
+      },
+      solve: b => solveLines(b, [
+        { text: `(1, 1):  z = ${z2(1, 1)}`, color: 'red' },
+        { text: `(2, 0.5):  z = ${z2(2, 0.5)}`, color: 'red' },
+        { text: `(2, 2):  z = ${z2(2, 2)} > 0  ✓`, color: 'green', bold: true },
+      ], 290),
+    },
+    {
+      say: 'سؤال مفهومی: داده‌ها مثل شکل 2 اسلاید 221 هستند و با هیچ خط راستی جدا نمی‌شوند. چه لازم است؟',
+      draw: quizBoard(6, [
+        { text: 'دو کلاس با خط راست جدا نمی‌شوند', fa: true, size: 36 },
+        { text: 'چه لازم است؟', fa: true, size: 36, color: 'orange' },
+      ]),
+      quiz: {
+        choices: ['یک نورون با بایاس بزرگ‌تر', 'لایه‌ی پنهان با تابع فعال‌سازی غیرخطی', 'چند لایه با تابع فعال‌سازی خطی'], correct: 1,
+        explain: 'بایاس فقط خط را جابه‌جا می‌کند و آن را خم نمی‌کند. لایه‌های خطی روی هم باز یک خط‌اند. فقط لایه‌ی پنهان با f غیرخطی، مثل ReLU یا sigmoid، می‌تواند مرز خمیده بسازد.',
+      },
+      solve: b => solveLines(b, [
+        { text: 'بایاس ← فقط جابه‌جایی خط', fa: true, color: 'red', size: 28 },
+        { text: 'خطی روی خطی ← باز یک خط', fa: true, color: 'red', size: 28 },
+        { text: 'لایه‌ی پنهان + غیرخطی ← مرز خمیده  ✓', fa: true, color: 'green', bold: true, size: 30 },
+      ], 300),
+    },
+  ],
+});
+</script>
+</body>
+</html>

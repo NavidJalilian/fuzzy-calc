@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Multi-input Training</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Vazirmatn:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="../assets/teacher.css">
+</head>
+<body>
+<main id="app"></main>
+<script src="../assets/teacher.js"></script>
+<script src="../assets/graph.js"></script>
+<script>
+// Lesson 27 — slides 293–304 ("Neural network 3": multi-input neuron, p = [w, b], gradient vector, training loop).
+// Explanations are Persian; numbers, math and technical terms stay in English.
+// Slide 303 drops "+ b" inside ∂e/∂w and the parentheses in ∂e/∂b; slide 304 drops "+ b" in y_p and the counter step.
+
+const all = list => Promise.all(list);
+const LTR = s => `⁦${s}⁩`; // keeps a left-to-right run intact inside Persian board text
+const r2 = v => String(+v.toFixed(3));
+const sgn = v => (v < 0 ? `(${r2(v)})` : r2(v));
+
+// One full training step of a linear neuron y_p = w·x + b with MSE loss.
+function step(X, Y, w, b, eta) {
+  const n = X.length;
+  const yp = X.map(x => x.reduce((s, v, j) => s + v * w[j], 0) + b);
+  const err = yp.map((p, i) => p - Y[i]);
+  const e = err.reduce((s, d) => s + d * d, 0) / n;
+  const gw = w.map((_, j) => (2 / n) * X.reduce((s, x, i) => s + x[j] * err[i], 0));
+  const gb = (2 / n) * err.reduce((s, d) => s + d, 0);
+  return { yp, err, e, gw, gb, w2: w.map((v, j) => v - eta * gw[j]), b2: b - eta * gb };
+}
+
+// Worked example (teacher's own): two samples, two inputs.
+const EX = { X: [[1, 2], [2, 1]], Y: [5, 4], w: [1, 1], b: 0, eta: 0.1 };
+const S1 = step(EX.X, EX.Y, EX.w, EX.b, EX.eta);
+const S2 = step(EX.X, EX.Y, S1.w2, S1.b2, EX.eta);
+// Quiz example: one sample x = [1, 3], y_t = 10, w = [1, 2], b = 1, η = 0.1
+const QZ = step([[1, 3]], [10], [1, 2], 1, 0.1);
+
+// Example table: i | x_1 | x_2 | y_t | y_p | y_p − y_t
+const ET = { x: 60, y: 90, cw: 100, rh: 50 };
+const etX = c => ET.x + ET.cw * (c + 0.5);
+const etY = r => ET.y + 14 + ET.rh * (r + 0.72);
+
+function quizBoard(n, question, o = { size: 34 }) {
+  return async b => {
+    await b.clear();
+    await b.write('q-n', 500, 60, `سؤال ${n} از 6`, { size: 24, color: 'soft', fa: true });
+    await b.write('q-q', 500, 140, question, o);
+  };
+}
+
+// Multi-input neuron (slides 296–302). o.loss: text in the loss box; o.loop: draw ∂e/∂p and the update box.
+async function neuron(b, o = {}) {
+  const Y = [150, 215, 310];
+  for (const [k, t] of ['x_1', 'x_2', 'x_m'].entries()) {
+    await b.write(`nx${k}`, 70, Y[k] + 8, t, { size: 26 });
+    await b.arrow(`nxa${k}`, 95, Y[k], 213, 230 + (Y[k] - 230) * 0.3, { dur: 250 });
+    await b.write(`nw${k}`, 150, Y[k] + (k === 2 ? 34 : -10), `w_${k === 2 ? 'm' : k + 1}`, { size: 22, color: 'purple', dur: 120 });
+  }
+  await b.write('ndots', 70, 268, '⋮', { size: 26, color: 'soft' });
+  await b.write('nb', 250, 112, 'b', { size: 28, color: 'purple' });
+  await b.arrow('nba', 250, 125, 250, 190);
+  await b.ring('nn', 250, 230, 38, 38, { color: 'red', fill: 'red', tilt: 0 });
+  await b.line('nact', 233, 247, 267, 213);
+  await b.arrow('nya', 288, 230, 398, 230);
+  await b.write('nyp', 340, 215, 'y_p', { size: 24 });
+  if (o.noLoss) return;
+  await b.box('nl', 400, 195, 110, 70, { color: 'green', fill: 'green' });
+  await b.write('nlt', 455, 240, 'L', { size: 30, color: 'green', bold: true });
+  await b.write('nyt', 455, 120, 'y_t', { size: 28, color: 'blue' });
+  await b.arrow('nyta', 455, 132, 455, 193);
+  await b.arrow('nea', 510, 230, 578, 230);
+  await b.write('ne', 545, 215, 'e', { size: 24, color: 'red' });
+  if (!o.grad) return;
+  await b.box('ng', 580, 195, 100, 70, { color: 'blue', fill: 'blue' });
+  await b.write('ngt', 630, 240, '∂e/∂p', { size: 24, color: 'blue', bold: true });
+  await b.wire('ngo', [[680, 230], [720, 230], [720, 400]], { color: 'ink' });
+  await b.write('ngl', 745, 330, 'g', { size: 28, color: 'orange', bold: true });
+  if (!o.update) return;
+  await b.arrow('ngo2', 720, 400, 622, 400);
+  await b.box('nu', 400, 370, 220, 60, { color: 'purple', fill: 'soft' });
+  await b.write('nut', 510, 410, 'p = p − η g', { size: 28, color: 'purple', bold: true });
+  await b.wire('nback', [[400, 400], [250, 400], [250, 290]], { color: 'ink' });
+  await b.arrow('nbackh', 250, 300, 250, 270);
+}
+
+Teacher.start({
+  id: 'L27',
+  number: 27,
+  title: 'آموزش نورون چندورودی',
+  chapter: 'بخش 7 · شبکه‌ی عصبی',
+  slides: '293–304',
+  intro: 'همه‌ی وزن‌ها و bias را در یک بردار p بگذار و همه را با هم آپدیت کن.',
+  next: { href: '0028-optimization.html', title: 'بهینه‌سازی و فرآیند آن' },
+  steps: [
+    // ---------------------------------------------------------- 1. intro
+    {
+      say: 'سلام! به جزوه‌ی سوم شبکه‌ی عصبی خوش آمدید: *Neural network 3*. درس قبل یک نورون با فقط یک وزن w را آموزش دادیم. ولی نورون‌های واقعی چند ورودی دارند، پس چند وزن و یک bias. امروز یاد می‌گیریم همه را با هم آموزش بدهیم.',
+      draw: async b => {
+        await b.write('t1', 500, 160, 'Neural network 3', { size: 50, color: 'blue', bold: true });
+        await b.write('t2', 500, 260, 'آموزش نورون چندورودی', { size: 60, bold: true, fa: true });
+        await b.write('t3', 500, 350, `${LTR('w₁, w₂, …, wₘ')} و ${LTR('b')} — همه با هم`, { size: 34, color: 'orange', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 2. slides 294–295
+    {
+      say: 'یادآوری از اسلاید 294 و 295: نورون تک‌ورودی. x با وزن w وارد می‌شود، خروجی y_p است، بلوک خطا (wx − y_t)^2 را حساب می‌کند و e می‌دهد، و optimizer وزن را آپدیت می‌کند: w = w − η de/dw. فقط یک پارامتر داشتیم، پس فقط یک مشتق.',
+      draw: async b => {
+        await b.clear();
+        await b.write('x', 70, 238, 'x', { size: 30 });
+        await b.arrow('xa', 90, 230, 208, 230);
+        await b.write('w', 150, 215, 'w', { size: 26, color: 'purple' });
+        await b.ring('n', 250, 230, 38, 38, { color: 'red', fill: 'red', tilt: 0 });
+        await b.line('act', 233, 247, 267, 213);
+        await b.arrow('ya', 288, 230, 398, 230);
+        await b.write('yp', 340, 215, 'y_p', { size: 24 });
+        await b.box('l', 400, 195, 220, 70, { color: 'green', fill: 'green' });
+        await b.write('lt', 510, 240, '(wx − y_t)^2', { size: 28, color: 'green', bold: true });
+        await b.write('yt', 510, 120, 'y_t', { size: 28, color: 'blue' });
+        await b.arrow('yta', 510, 132, 510, 193);
+        await b.arrow('ea', 620, 230, 700, 230);
+        await b.write('e', 660, 215, 'e', { size: 24, color: 'red' });
+        await b.wire('lp', [[700, 230], [740, 230], [740, 400], [662, 400]]);
+        await b.arrow('lph', 680, 400, 660, 400);
+        await b.box('o', 400, 365, 260, 70, { color: 'purple', fill: 'soft' });
+        await b.write('ot', 530, 410, 'w = w − η de/dw', { size: 28, color: 'purple', bold: true });
+        await b.wire('bk', [[400, 400], [250, 400], [250, 290]]);
+        await b.arrow('bkh', 250, 300, 250, 270);
+        await b.write('one', 500, 500, 'یک پارامتر ← یک مشتق', { size: 28, color: 'orange', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 3. slide 296
+    {
+      say: 'اسلاید 296 می‌گوید: *بهینه‌ساز نیاز به توجه بیشتر دارد!* حالا m ورودی داریم، پس m وزن w_1 تا w_m و یک bias. هر کدام آپدیت خودش را لازم دارد: w_1 = w_1 − η ∂e/∂w_1، و همین‌طور تا w_m، و آخر b = b − η ∂e/∂b. علامت ∂ یعنی مشتق جزئی: مشتق نسبت به یک پارامتر، وقتی بقیه ثابت‌اند.',
+      term: ['Partial derivative (∂)', 'مشتق جزئی'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 55, 'بهینه‌ساز نیاز به توجه بیشتر دارد!', { size: 32, color: 'red', bold: true, fa: true });
+        await neuron(b);
+        const U = ['w_1 = w_1 − η ∂e/∂w_1', 'w_2 = w_2 − η ∂e/∂w_2', '⋮', 'w_m = w_m − η ∂e/∂w_m', 'b = b − η ∂e/∂b'];
+        for (const [k, t] of U.entries()) {
+          if (t === '⋮') { await b.write('u-dots', 800, 410, t, { size: 24, color: 'soft' }); continue; }
+          const y = [300, 360, 0, 460, 520][k];
+          await b.box(`ub${k}`, 640, y - 36, 320, 50, { color: 'purple', fill: 'soft', dur: 300 });
+          await b.write(`u${k}`, 800, y - 3, t, { size: 22, color: 'purple', dur: 250 });
+        }
+      },
+    },
+    // ---------------------------------------------------------- 4. slide 297
+    {
+      say: 'برای این‌که این همه آپدیت را یکی‌یکی ننویسیم، اسلاید 297 یک اسم می‌گذارد: *parameter* یا پارامتر، یعنی مجموعه‌ی bias و وزن‌ها. همه را در یک لیست می‌چینیم: p = [w_1, w_2, …, w_m, b].',
+      term: ['Parameter', 'پارامتر = مجموعه‌ی bias و وزن'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 60, 'پارامتر = {مجموعه‌ی بایاس و وزن}', { size: 34, bold: true, fa: true });
+        await neuron(b, { noLoss: true });
+        await b.box('pb', 470, 180, 460, 100, { color: 'orange', fill: 'orange' });
+        await b.write('p', 700, 245, 'p = [w_1, w_2, …, w_m, b]', { size: 32, bold: true });
+        await all([b.ring('rw', 150, 230, 34, 110, { color: 'orange', tilt: 0 }), b.ring('rb', 250, 105, 24, 24, { color: 'orange', tilt: 0 })]);
+      },
+    },
+    // ---------------------------------------------------------- 5. slide 298
+    {
+      say: 'اسلاید 298 کوتاه‌ترش می‌کند: همه‌ی w‌ها را در یک بردار w می‌گذاریم، پس p = [w, b]. نکته‌ی شمارش برای امتحان: نورونی با m ورودی، m + 1 پارامتر دارد؛ m وزن و یک bias. مثلاً با 3 ورودی، 4 پارامتر.',
+      draw: async b => {
+        await b.erase(['pb', 'p']);
+        await b.box('pb2', 470, 160, 460, 90, { color: 'orange', fill: 'orange' });
+        await b.write('p2', 700, 220, 'p = [ w , b ]', { size: 40, bold: true });
+        await b.write('wv', 700, 300, 'w = [w_1, w_2, …, w_m]', { size: 28, color: 'purple' });
+        await b.box('cb', 470, 340, 460, 120, { color: 'green', fill: 'green' });
+        await b.write('c1', 700, 390, `${LTR('m')} ورودی ← ${LTR('m + 1')} پارامتر`, { size: 30, bold: true, fa: true });
+        await b.write('c2', 700, 435, `مثال: ${LTR('3')} ورودی ← ${LTR('4')} پارامتر`, { size: 26, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 6. slide 299
+    {
+      say: 'اسلاید 299: *تابع اتلاف مثل قبل*. هیچ چیزی در loss عوض نشده: خروجی y_p با y_t مقایسه می‌شود و بلوک L، همان MSE، خطای e را می‌دهد. فرقی ندارد نورون یک ورودی داشته باشد یا صد ورودی.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 55, 'تابع اتلاف مثل قبل', { size: 34, bold: true, fa: true });
+        await neuron(b);
+        await b.write('pl', 130, 420, 'p = [w, b]', { size: 26, color: 'orange' });
+        await b.write('mse', 700, 400, 'e = (1/n) Σ (y_p − y_t)^2', { size: 30, color: 'green' });
+      },
+    },
+    // ---------------------------------------------------------- 7. slide 300
+    {
+      say: 'اسلاید 300: *مشتق‌گیری نسبت به همه‌ی پارامترها*. یک بلوک تازه ∂e/∂p اضافه می‌شود که مشتق e را نسبت به تک‌تک پارامترها حساب می‌کند و همه را در یک بردار می‌گذارد: ∂e/∂p = [∂e/∂b, ∂e/∂w_1, …, ∂e/∂w_m]. اسم این بردار g است، یعنی *gradient*. هر خانه‌اش می‌گوید loss نسبت به آن پارامتر چقدر شیب دارد.',
+      term: ['Gradient vector (g)', 'بردار گرادیان'],
+      draw: async b => {
+        await b.erase(['mse', 'h']);
+        await b.write('h7', 500, 55, 'مشتق‌گیری نسبت به همه‌ی پارامترها', { size: 34, bold: true, fa: true });
+        await neuron(b, { grad: true });
+        await b.write('gv', 640, 490, 'g = ∂e/∂p = [∂e/∂b, ∂e/∂w_1, …, ∂e/∂w_m]', { size: 26, color: 'blue', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 8. slide 301
+    {
+      say: 'اسلاید 301: *آپدیت همه‌ی پارامترها*. حالا همه‌ی آن آپدیت‌های جدا در یک خط جا می‌شوند: p = p − η g. یعنی هر پارامتر منهای η ضرب در خانه‌ی خودش از بردار گرادیان. همان قانون درس قبل است، فقط برداری.',
+      draw: async b => {
+        await b.erase(['gv', 'h7']);
+        await b.write('h8', 500, 55, 'آپدیت همه‌ی پارامترها', { size: 34, bold: true, fa: true });
+        await neuron(b, { grad: true, update: true });
+        await b.write('eq', 640, 500, 'p = p − η g   ⟺   همه‌ی w و b با هم', { size: 26, color: 'purple', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 9. slides 302–303
+    {
+      say: 'اسلاید 302 می‌پرسد: گرادیان را چطور حساب کنیم؟ و اسلاید 303 جواب می‌دهد: ∂e/∂w = (2/n) Σ x_i (w x_i^T − y_{ti}) و ∂e/∂b = (2/n) Σ (w x_i + b − y_{ti}). این x_i^T یعنی ترانهاده؛ w x_i^T همان ضرب داخلی است: w_1 x_1 + w_2 x_2 + … برای نمونه‌ی i.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 60, 'مشتق نسبت به w و b', { size: 34, bold: true, fa: true });
+        await b.box('b1', 150, 100, 700, 100, { color: 'blue', fill: 'blue' });
+        await b.write('f1', 500, 165, '∂e/∂w = (2/n) Σ x_i (w x_i^T − y_{ti})', { size: 34 });
+        await b.box('b2', 150, 230, 700, 100, { color: 'blue', fill: 'blue' });
+        await b.write('f2', 500, 295, '∂e/∂b = (2/n) Σ w x_i + b − y_{ti}', { size: 34 });
+        await b.write('t1', 500, 400, 'w x_i^T = w_1 x_{i1} + w_2 x_{i2} + … + w_m x_{im}', { size: 28, color: 'purple' });
+        await b.write('t2', 500, 450, 'ضرب داخلی وزن‌ها در ورودی‌های نمونه‌ی i', { size: 24, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 10. derivation + slide slips
+    {
+      say: 'از کجا آمدند؟ همان قاعده‌ی زنجیره‌ای درس قبل. y_p = w x_i^T + b. مشتق y_p نسبت به w همان x_i است و نسبت به b برابر 1. پس هر دو فرمول یک تکه‌ی مشترک دارند، یعنی خطای نمونه (y_p − y_t)؛ فقط ∂e/∂w یک ضریب x_i اضافه دارد. دو دقت روی اسلاید 303: در فرمول w جمله‌ی + b جا افتاده، و در فرمول b پرانتز نیست؛ Σ روی کل (w x_i + b − y_t) است. شکل درست را روی تخته می‌بینید.',
+      draw: async b => {
+        await b.erase(['t1', 't2']);
+        await b.dim(['f1', 'f2', 'b1', 'b2'], 0.3);
+        await b.write('d1', 500, 380, 'y_p = w x_i^T + b   →   ∂y_p/∂w = x_i ,  ∂y_p/∂b = 1', { size: 26, color: 'blue' });
+        await b.write('c1', 500, 435, '∂e/∂w = (2/n) Σ x_i (w x_i^T + b − y_{ti})', { size: 28, color: 'green', bold: true });
+        await b.write('c2', 500, 485, '∂e/∂b = (2/n) Σ (w x_i^T + b − y_{ti})', { size: 28, color: 'green', bold: true });
+        await b.write('warn', 500, 530, `اسلاید: در ${LTR('∂e/∂w')} جمله‌ی ${LTR('+ b')} و در ${LTR('∂e/∂b')} پرانتز جا افتاده`, { size: 20, color: 'red', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 11. slide 304 — the training loop
+    {
+      say: 'اسلاید 304 کل آموزش را در یک flowchart می‌گذارد. شروع؛ تا وقتی شمارنده‌ی تکرار کمتر از N است: y_p را حساب کن، خطای e را با MSE حساب کن، دو مشتق ∂e/∂w و ∂e/∂b را حساب کن، و [w, b] = [w, b] − η ∂e/∂[w, b]. بعد برگرد سراغ شرط. N تعداد تکرارهای آموزش است. اسلاید شمارنده را i نوشته که با i نمونه‌ها قاطی می‌شود، پس ما t می‌نویسیم. و دو چیز جا افتاده: + b در y_p، و یکی زیاد کردن t در هر دور.',
+      term: ['Training loop / iterations (N)', 'حلقه‌ی آموزش / تعداد تکرار'],
+      draw: async b => {
+        await b.clear();
+        await b.ring('st', 500, 55, 52, 22, { color: 'purple', tilt: 0 });
+        await b.write('stt', 500, 63, 'شروع', { size: 22, fa: true });
+        await b.arrow('a0', 500, 77, 500, 95);
+        await b.path('dia', 'M430 130 L500 96 L570 130 L500 164 Z', { color: 'red' });
+        await b.write('diat', 500, 138, 't < N', { size: 22, bold: true });
+        await b.arrow('aend', 430, 130, 352, 130);
+        await b.write('no', 392, 118, 'خیر', { size: 18, color: 'red', fa: true });
+        await b.ring('en', 300, 130, 50, 22, { color: 'purple', tilt: 0 });
+        await b.write('ent', 300, 138, 'پایان', { size: 22, fa: true });
+        await b.arrow('a1', 500, 164, 500, 183);
+        await b.write('yes', 525, 180, 'بله', { size: 18, color: 'green', fa: true });
+        await b.box('b1', 380, 185, 240, 42, { color: 'purple' });
+        await b.write('b1t', 500, 214, 'y_p = w x^T + b', { size: 22 });
+        await b.arrow('a2', 500, 227, 500, 248);
+        await b.box('b2', 340, 250, 320, 46, { color: 'purple' });
+        await b.write('b2t', 500, 281, 'e = (1/n) Σ (y_{pi} − y_{ti})^2', { size: 20 });
+        await b.wire('sp', [[500, 296], [500, 316]]);
+        await b.wire('sp2', [[310, 316], [690, 316]]);
+        await b.arrow('sl', 310, 316, 310, 338);
+        await b.arrow('sr', 690, 316, 690, 338);
+        await b.box('b3', 150, 340, 320, 52, { color: 'purple' });
+        await b.write('b3t', 310, 373, '∂e/∂w = (1/n) Σ 2x_i (y_{pi} − y_{ti})', { size: 18 });
+        await b.box('b4', 530, 340, 320, 52, { color: 'purple' });
+        await b.write('b4t', 690, 373, '∂e/∂b = (1/n) Σ 2 (y_{pi} − y_{ti})', { size: 18 });
+        await b.wire('mg', [[310, 392], [310, 412], [690, 412], [690, 392]]);
+        await b.arrow('a3', 500, 412, 500, 438);
+        await b.box('b5', 310, 440, 380, 52, { color: 'purple' });
+        await b.write('b5t', 500, 473, '[w, b] = [w, b] − η ∂e/∂[w, b]', { size: 20, bold: true });
+        await b.wire('bk', [[500, 492], [500, 520], [900, 520], [900, 130]]);
+        await b.arrow('bkh', 900, 130, 572, 130);
+        await b.write('inc', 830, 300, 't = t + 1', { size: 22, color: 'orange', bold: true });
+        await all([b.ring('r1', 572, 206, 30, 18, { color: 'orange', tilt: 0 })]);
+        await b.write('r1l', 640, 212, '+ b', { size: 20, color: 'orange' });
+      },
+    },
+    // ---------------------------------------------------------- 12. own example — setup
+    {
+      say: 'اسلاید‌ها برای نورون چندورودی عدد نداده‌اند، پس یک مثال کوچک خودم می‌سازم تا یک دور کامل حلقه را با عدد ببینیم. دو نمونه، هر کدام با دو ورودی: نمونه‌ی 1: x = [1, 2] و جواب 5؛ نمونه‌ی 2: x = [2, 1] و جواب 4. شروع: w = [1, 1]، b = 0، و η = 0.1.',
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        const head = ['i', 'x_1', 'x_2', 'y_t', 'y_p', 'y_p − y_t'];
+        await all(head.map((h, c) => b.write(`et-h${c}`, etX(c), ET.y, h, { size: 24, color: 'blue', bold: true, dur: 150 })));
+        await b.line('et-hl', ET.x, ET.y + 14, ET.x + ET.cw * 6, ET.y + 14, { color: 'soft', width: 2 });
+        for (let c = 1; c < 6; c++) await b.line(`et-v${c}`, ET.x + ET.cw * c, ET.y - 24, ET.x + ET.cw * c, ET.y + 14 + 2 * ET.rh, { color: 'soft', width: 2, dur: 150 });
+        for (const [r, x] of EX.X.entries()) {
+          await all([
+            b.write(`et-${r}-0`, etX(0), etY(r), String(r + 1), { size: 24, color: 'purple', dur: 100 }),
+            b.write(`et-${r}-1`, etX(1), etY(r), String(x[0]), { size: 24, dur: 100 }),
+            b.write(`et-${r}-2`, etX(2), etY(r), String(x[1]), { size: 24, dur: 100 }),
+            b.write(`et-${r}-3`, etX(3), etY(r), String(EX.Y[r]), { size: 24, color: 'green', dur: 100 }),
+          ]);
+        }
+        await b.write('pw', 830, 90, `w = [${EX.w.join(', ')}]`, { size: 28, color: 'purple' });
+        await b.write('pb', 830, 140, `b = ${EX.b}`, { size: 28, color: 'purple' });
+        await b.write('pe', 830, 190, `η = ${EX.eta}`, { size: 28, color: 'orange' });
+      },
+    },
+    // ---------------------------------------------------------- 13. forward + e
+    {
+      say: 'Forward: نمونه‌ی 1: 1 × 1 + 2 × 1 + 0 = 3. نمونه‌ی 2: 2 × 1 + 1 × 1 + 0 = 3. اختلاف با جواب: −2 و −1. خطا: e = ((−2)^2 + (−1)^2) / 2 = 5 / 2 = 2.5.',
+      draw: async b => {
+        for (const [r] of EX.X.entries()) {
+          await b.write(`et-${r}-4`, etX(4), etY(r), r2(S1.yp[r]), { size: 24, color: 'orange', dur: 200 });
+          await b.write(`et-${r}-5`, etX(5), etY(r), r2(S1.err[r]), { size: 24, color: 'red', dur: 200 });
+        }
+        await b.write('e1', 500, 270, `e = (${S1.err.map(d => `(${r2(d)})^2`).join(' + ')}) / 2 = ${r2(S1.e)}`, { size: 30, color: 'green', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 14. gradients
+    {
+      say: 'گرادیان. اینجا n = 2 است، پس 2/n برابر 1 می‌شود. ∂e/∂w_1: ورودی اول هر نمونه ضرب در خطایش: 1 × (−2) + 2 × (−1) = −4. ∂e/∂w_2: ورودی دوم: 2 × (−2) + 1 × (−1) = −5. ∂e/∂b: فقط خطاها: −2 + (−1) = −3. بردار g = [−4, −5, −3].',
+      draw: async b => {
+        const [e1, e2] = S1.err;
+        await b.write('g1', 290, 340, `∂e/∂w_1 = 1·${sgn(e1)} + 2·${sgn(e2)} = ${r2(S1.gw[0])}`, { size: 24 });
+        await b.write('g2', 290, 395, `∂e/∂w_2 = 2·${sgn(e1)} + 1·${sgn(e2)} = ${r2(S1.gw[1])}`, { size: 24 });
+        await b.write('g3', 290, 450, `∂e/∂b = ${sgn(e1)} + ${sgn(e2)} = ${r2(S1.gb)}`, { size: 24 });
+        await b.write('g4', 290, 510, `g = [${S1.gw.map(r2).join(', ')}, ${r2(S1.gb)}]`, { size: 28, color: 'blue', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 15. update
+    {
+      say: 'آپدیت همه با هم: w_1 = 1 − 0.1 × (−4) = 1.4، w_2 = 1 − 0.1 × (−5) = 1.5، و b = 0 − 0.1 × (−3) = 0.3. همه‌ی شیب‌ها منفی بودند، پس هر سه پارامتر زیاد شدند؛ منطقی است، چون خروجی‌ها از جواب کمتر بودند.',
+      draw: async b => {
+        await b.write('u1', 760, 340, `w_1 = 1 − 0.1·(${r2(S1.gw[0])}) = ${r2(S1.w2[0])}`, { size: 24, color: 'green' });
+        await b.write('u2', 760, 395, `w_2 = 1 − 0.1·(${r2(S1.gw[1])}) = ${r2(S1.w2[1])}`, { size: 24, color: 'green' });
+        await b.write('u3', 760, 450, `b = 0 − 0.1·(${r2(S1.gb)}) = ${r2(S1.b2)}`, { size: 24, color: 'green' });
+        await b.arrow('ua', 520, 395, 590, 395, { color: 'orange' });
+      },
+    },
+    // ---------------------------------------------------------- 16. check
+    {
+      say: 'چک کنیم که واقعاً یاد گرفت: با پارامترهای تازه، نمونه‌ی 1: 1.4 + 2 × 1.5 + 0.3 = 4.7 و نمونه‌ی 2: 2 × 1.4 + 1.5 + 0.3 = 4.6. خطا: (0.3^2 + 0.6^2) / 2 = 0.225. فقط با یک دور حلقه، loss از 2.5 به 0.225 رسید!',
+      draw: async b => {
+        await b.erase(['g4', 'ua']);
+        await b.write('ck1', 500, 510, `y_p = ${S2.yp.map(r2).join(' , ')}   →   e = ${r2(S2.e)}`, { size: 26, color: 'orange' });
+        await b.write('ck2', 830, 250, `${r2(S1.e)} → ${r2(S2.e)}`, { size: 30, color: 'green', bold: true });
+        await b.ring('ckr', 830, 240, 105, 30, { color: 'green' });
+      },
+    },
+    // ---------------------------------------------------------- 17. summary
+    {
+      say: 'جمع‌بندی کنیم: پنج نکته برای امتحان. یک بار دیگر بخوانیدشان، بعد برویم سراغ سؤال‌ها.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 75, 'یادت باشد', { size: 48, color: 'orange', bold: true, fa: true });
+        const L = [
+          `پارامتر = وزن‌ها و bias:  ${LTR('p = [w, b]')}  ←  ${LTR('m')} ورودی، ${LTR('m + 1')} پارامتر`,
+          `گرادیان = بردار مشتق‌ها:  ${LTR('g = ∂e/∂p')}`,
+          `آپدیت همه با هم:  ${LTR('p = p − η g')}`,
+          `${LTR('∂e/∂w = (2/n) Σ xᵢ (yₚ − yₜ)')}   و   ${LTR('∂e/∂b = (2/n) Σ (yₚ − yₜ)')}`,
+          `حلقه: تا ${LTR('t < N')} ← ${LTR('yₚ')} ← ${LTR('e')} ← مشتق‌ها ← آپدیت`,
+        ];
+        for (const [k, l] of L.entries()) await b.write(`m${k}`, 930, 155 + k * 74, '•  ' + l, { size: 24, anchor: 'start', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- quizzes
+    {
+      say: 'نوبت شماست! یک نمونه: x = [1, 3] و جواب y_t = 10. پارامترها w = [1, 2] و b = 1. خطای e (MSE با n = 1) چقدر است؟',
+      draw: quizBoard(1, 'x = [1, 3] ,  y_t = 10 ,  w = [1, 2] ,  b = 1  →  e = ?'),
+      quiz: { answer: [r2(QZ.e)], hint: 'اول y_p = 1·1 + 3·2 + 1 را حساب کن، بعد (y_p − y_t)^2.', explain: 'y_p = 1 + 6 + 1 = 8، اختلاف 8 − 10 = −2، پس e = (−2)^2 = 4.' },
+      solve: async b => {
+        await b.write('s1', 500, 250, `y_p = 1·1 + 3·2 + 1 = ${r2(QZ.yp[0])}`, { size: 38 });
+        await b.write('s2', 500, 330, `y_p − y_t = ${r2(QZ.err[0])}`, { size: 38 });
+        await b.write('s3', 500, 420, `e = (${r2(QZ.err[0])})^2 = ${r2(QZ.e)}`, { size: 46, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'همان نمونه: ∂e/∂w_2 چقدر است؟ (فرمول: (2/n) Σ x_2 × خطا، با n = 1)',
+      draw: quizBoard(2, 'x = [1, 3] ,  y_p − y_t = −2  →  ∂e/∂w_2 = ?'),
+      quiz: { answer: [r2(QZ.gw[1])], hint: 'ورودی دوم 3 است. 2 × 3 × (−2).', explain: '∂e/∂w_2 = 2 × x_2 × (y_p − y_t) = 2 × 3 × (−2) = −12.' },
+      solve: async b => {
+        await b.write('s1', 500, 260, '∂e/∂w_2 = (2/1) · x_2 · (y_p − y_t)', { size: 36 });
+        await b.write('s2', 500, 350, `= 2 · 3 · (−2) = ${r2(QZ.gw[1])}`, { size: 44, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'باز همان نمونه، با η = 0.1. مقدار تازه‌ی b بعد از یک آپدیت چقدر است؟',
+      draw: quizBoard(3, 'b = 1 ,  y_p − y_t = −2 ,  η = 0.1  →  b_new = ?'),
+      quiz: { answer: [r2(QZ.b2)], hint: 'اول ∂e/∂b = 2 × (y_p − y_t)، بعد b − η × آن.', explain: '∂e/∂b = 2 × (−2) = −4، پس b = 1 − 0.1 × (−4) = 1.4.' },
+      solve: async b => {
+        await b.write('s1', 500, 250, `∂e/∂b = 2 · (−2) = ${r2(QZ.gb)}`, { size: 38 });
+        await b.write('s2', 500, 340, `b = 1 − 0.1 · (${r2(QZ.gb)}) = ${r2(QZ.b2)}`, { size: 44, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'شمارش پارامترها: نورونی با 3 ورودی چند پارامتر دارد؟ (تعداد خانه‌های p)',
+      draw: quizBoard(4, 'نورون با 3 ورودی ← تعداد پارامترها = ؟', { size: 36, fa: true }),
+      quiz: { answer: ['4'], hint: 'هر ورودی یک وزن، به‌علاوه‌ی یک bias.', explain: 'p = [w_1, w_2, w_3, b]: سه وزن و یک bias، یعنی 4 پارامتر.' },
+      solve: async b => {
+        await b.write('s1', 500, 270, 'p = [w_1, w_2, w_3, b]', { size: 44, color: 'purple' });
+        await b.write('s2', 500, 360, '3 + 1 = 4', { size: 50, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'در flowchart اسلاید 304، عدد N در شرط t < N چه معنایی دارد؟',
+      draw: quizBoard(5, `${LTR('N')} در شرط ${LTR('t < N')} یعنی چه؟`, { size: 36, fa: true }),
+      quiz: {
+        choices: ['تعداد ورودی‌های نورون', 'تعداد تکرارهای حلقه‌ی آموزش', 'تعداد نمونه‌های داده'], correct: 1,
+        explain: 'هر دور حلقه یک بار همه‌ی پارامترها را آپدیت می‌کند؛ N می‌گوید چند دور این کار تکرار شود. تعداد نمونه‌ها n است که در میانگین Σ می‌آید.',
+      },
+      solve: async b => {
+        await b.write('s1', 500, 260, `${LTR('N')} = تعداد تکرار حلقه`, { size: 40, color: 'green', bold: true, fa: true });
+        await b.write('s2', 500, 340, `${LTR('n')} = تعداد نمونه‌ها (در Σ)`, { size: 34, color: 'soft', fa: true });
+      },
+    },
+    {
+      say: 'سؤال آخر: فرق فرمول ∂e/∂w با ∂e/∂b چیست؟',
+      draw: quizBoard(6, `فرق ${LTR('∂e/∂w')} با ${LTR('∂e/∂b')} چیست؟`, { size: 36, fa: true }),
+      quiz: {
+        choices: ['∂e/∂w یک ضریب x_i اضافه دارد', '∂e/∂b به جای مربع، توان 3 دارد', 'هیچ فرقی ندارند'], correct: 0,
+        explain: 'هر دو از خطای (y_p − y_t) ساخته می‌شوند. چون ∂y_p/∂w = x_i ولی ∂y_p/∂b = 1، فرمول w یک ضریب x_i اضافه دارد.',
+      },
+      solve: async b => {
+        await b.write('s1', 500, 250, '∂y_p/∂w = x_i     ∂y_p/∂b = 1', { size: 38, color: 'blue' });
+        await b.write('s2', 500, 330, '∂e/∂w = (2/n) Σ x_i (y_p − y_t)', { size: 34, color: 'green' });
+        await b.write('s3', 500, 400, '∂e/∂b = (2/n) Σ (y_p − y_t)', { size: 34, color: 'green' });
+      },
+    },
+  ],
+});
+</script>
+</body>
+</html>

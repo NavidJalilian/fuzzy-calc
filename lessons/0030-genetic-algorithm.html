@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Genetic Algorithm</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Vazirmatn:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="../assets/teacher.css">
+</head>
+<body>
+<main id="app"></main>
+<script src="../assets/teacher.js"></script>
+<script src="../assets/graph.js"></script>
+<script>
+// Lesson 30 — slides 319–324 (Part 8: optimization algorithms): the genetic algorithm and the
+// travelling-salesman example. Slides 320–324 are scanned pages; every number here was recomputed.
+
+const all = list => Promise.all(list);
+const QUIZZES = 6;
+
+function quizBoard(n, lines) {
+  return async b => {
+    await b.clear();
+    await b.write('q-n', 500, 60, `سؤال ${n} از ${QUIZZES}`, { size: 24, color: 'soft', fa: true });
+    for (const [k, l] of lines.entries()) await b.write(`q-l${k}`, 500, 130 + k * 55, l.text, { size: l.size || 34, fa: l.fa, color: l.color || 'ink' });
+  };
+}
+
+// A chromosome: a row of gene boxes, left to right, like the slides draw them.
+// genes: labels such as 'X_1'; red: indexes drawn in red (genes that changed).
+async function chromo(b, id, x, y, genes, { cell = 64, red = [], color = 'ink', label } = {}) {
+  if (label) await b.write(`${id}-n`, x - 34, y + 8, label, { size: 24, color: 'purple', bold: true, dur: 150 });
+  for (const [k, g] of genes.entries()) {
+    await b.box(`${id}-b${k}`, x + k * cell, y - 25, cell, 50, { color, r: 4, dur: 120 });
+    await b.write(`${id}-g${k}`, x + k * cell + cell / 2, y + 9, g, { size: 24, color: red.includes(k) ? 'red' : 'ink', bold: red.includes(k), dur: 100 });
+  }
+}
+const X = (...n) => n.map(k => `X_${k}`);
+const C = (...n) => n.map(k => `C_${k}`);
+
+// ---- Travelling salesman, slide 323: 6 cities and the road lengths between them.
+// The picture labels the C6–C4 road "8", but the slide's own sum on slide 324 uses 80.
+const ROADS = { '6-1': 100, '1-2': 120, '2-3': 50, '3-4': 300, '4-5': 150, '5-6': 170, '6-4': 80, '6-3': 70, '4-1': 75, '5-2': 200 };
+const road = (a, c) => ROADS[`${a}-${c}`] ?? ROADS[`${c}-${a}`];
+// Fitness of slide 324: the total length of the trip, city to city in the chromosome's order.
+const fit = tour => tour.slice(1).reduce((s, c, i) => s + road(tour[i], c), 0);
+const legs = tour => tour.slice(1).map((c, i) => road(tour[i], c));
+const K1 = [1, 2, 3, 4, 5, 6], K2 = [5, 4, 6, 1, 2, 3], K3 = [5, 6, 4, 1, 2, 3], BEST = [2, 3, 6, 1, 4, 5];
+const POS = { 6: [300, 150], 1: [700, 150], 5: [140, 290], 2: [860, 290], 4: [300, 430], 3: [700, 430] };
+const LABEL = { '6-1': [500, 132], '1-2': [808, 205], '2-3': [808, 385], '3-4': [500, 465], '4-5': [192, 385], '5-6': [192, 205],
+  '6-4': [280, 365], '6-3': [445, 222], '4-1': [445, 372], '5-2': [770, 278] };
+const fact = n => (n <= 1 ? 1 : n * fact(n - 1));
+
+async function drawMap(b) {
+  for (const k of Object.keys(ROADS)) {
+    const [a, c] = k.split('-');
+    await b.line(`e${k}`, ...POS[a], ...POS[c], { color: 'soft', width: 2, dur: 150 });
+  }
+  for (const [c, [x, y]] of Object.entries(POS)) {
+    await b.dot(`c${c}`, x, y, { r: 9 });
+    const [lx, ly] = y === 290 ? [x + (x < 500 ? -50 : 50), y + 10] : [x, y + (y < 290 ? -20 : 42)];
+    await b.write(`cl${c}`, lx, ly, `C_${c}`, { size: 28, bold: true, dur: 100 });
+  }
+  await all(Object.entries(LABEL).map(([k, [x, y]]) => b.write(`el${k}`, x, y, String(ROADS[k]), { size: 22, color: 'purple', dur: 100 })));
+}
+// Highlights a trip on the map.
+async function drawTrip(b, id, tour, color) {
+  await b.wire(id, tour.map(c => POS[c]), { color, width: 6, dur: 900 });
+}
+
+Teacher.start({
+  id: 'L30',
+  number: 30,
+  title: 'الگوریتم ژنتیک',
+  chapter: 'بخش 8 · الگوریتم‌های بهینه‌سازی',
+  slides: '319–324',
+  intro: 'ژن، کروموزوم، جمعیت و تابع تطبیق؛ برش و جهش؛ و حل مسئله‌ی فروشنده‌ی دوره‌گرد با ژنتیک.',
+  steps: [
+    // ---------------------------------------------------------- 1. what it is
+    {
+      say: 'آخرین درس: *genetic algorithm* یا الگوریتم ژنتیک (اسلاید 319). یک تکنیک *جستجو* برای پیدا کردن راه‌حل *تقریبی* در مسئله‌های بهینه‌سازی و جستجو. نوع خاصی از الگوریتم‌های *تکاملی* است که از تکنیک‌های زیست‌شناسی مثل *وراثت* و *جهش* استفاده می‌کند.',
+      term: ['Genetic algorithm (GA)', 'الگوریتم ژنتیک'],
+      draw: async b => {
+        await b.write('t1', 500, 150, 'الگوریتم ژنتیک', { size: 62, color: 'blue', bold: true, fa: true });
+        await b.write('t2', 500, 230, 'Genetic algorithm', { size: 44, color: 'orange' });
+        await b.write('t3', 500, 320, 'جستجو برای راه‌حل تقریبی', { size: 32, fa: true });
+        await b.write('t4', 500, 380, 'از زیست‌شناسی: وراثت و جهش', { size: 32, color: 'green', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 2. Holland, Darwin
+    {
+      say: 'این الگوریتم را اولین بار *John Henry Holland* (جان هنری هالند) معرفی کرد. ایده‌اش از اصل *انتخاب طبیعی داروین* می‌آید: موجودی که با محیط بهتر جور است بیشتر زنده می‌ماند و ژنش را به نسل بعد می‌دهد. الگوریتم ژنتیک *تکرارشونده* است و بیشتر بخش‌هایش *تصادفی* انتخاب می‌شوند.',
+      draw: async b => {
+        await b.write('hol', 500, 460, 'John Henry Holland · انتخاب طبیعی داروین', { size: 28, color: 'purple', fa: true });
+        await b.write('it', 500, 515, 'تکرارشونده + تصادفی', { size: 26, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 3. gene, chromosome
+    {
+      say: 'واژه‌ها، اسلاید 320. *gene* یا ژن: کوچک‌ترین جزء یک مسئله. *chromosome* یا کروموزوم: مجموعه‌ای از ژن‌ها که با یک *ترتیب* مشخص کنار هم قرار گرفته‌اند. هر کروموزوم یعنی *یک جواب کامل* برای مسئله.',
+      term: ['Gene / chromosome', 'ژن / کروموزوم'],
+      draw: async b => {
+        await b.clear();
+        await b.write('gh', 860, 100, 'ژن: کوچک‌ترین جزء مسئله', { size: 30, anchor: 'start', fa: true });
+        await b.box('g1', 120, 70, 64, 50, { color: 'orange', r: 4 });
+        await b.write('g1t', 152, 104, 'X_1', { size: 24 });
+        await b.write('ch', 860, 220, 'کروموزوم: ژن‌ها با ترتیب مشخص', { size: 30, anchor: 'start', fa: true });
+        await chromo(b, 'k', 120, 270, ['X_1', 'X_2', '…', 'X_n']);
+        await b.write('cn', 590, 280, '= یک جواب کامل', { size: 28, color: 'green', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 4. population, generation, fitness
+    {
+      say: '*population* یا جمعیت: مجموعه‌ای از کروموزوم‌ها، یعنی چند جواب هم‌زمان. *generation* یا نسل: یک جمعیت در یک محدوده‌ی زمانی. و *fitness function* یا تابع تطبیق: تابعی که نشان می‌دهد هر کروموزوم چقدر با محیط *جور* است، یعنی چقدر جواب خوبی است.',
+      term: ['Population / generation / fitness function', 'جمعیت / نسل / تابع تطبیق'],
+      draw: async b => {
+        await b.clear();
+        const rows = [X(1, 2, 3, 4, 5), X(5, 4, 3, 2, 1), X(4, 3, 1, 5, 2), X(3, 4, 2, 1, 5)];
+        for (const [k, g] of rows.entries()) await chromo(b, `p${k}`, 150, 110 + k * 75, g, { label: `K_${k + 1}`, cell: 56 });
+        await b.path('brace', 'M450 85 Q470 85 470 110 L470 190 Q470 222 490 222 Q470 222 470 254 L470 335 Q470 360 450 360', { color: 'purple' });
+        await b.write('pop', 640, 230, 'جمعیت (population)', { size: 30, color: 'purple', bold: true, fa: true });
+        await b.write('gen', 500, 450, 'نسل = جمعیت در یک محدوده‌ی زمانی', { size: 28, fa: true });
+        await b.write('fit', 500, 510, 'تابع تطبیق = هر کروموزوم چقدر با محیط جور است', { size: 28, color: 'green', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 5. four stages
+    {
+      say: 'مراحل الگوریتم ژنتیک، به ترتیب: 1 تولید جمعیت اولیه، 2 انتخاب والد، 3 تولید مثل، 4 تولید نسل جدید. بعد دوباره از مرحله‌ی 2، تا وقتی که شرط توقف برقرار شود.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'مراحل الگوریتم ژنتیک', { size: 42, color: 'orange', bold: true, fa: true });
+        const S = ['تولید جمعیت اولیه', 'انتخاب والد', 'تولید مثل', 'تولید نسل جدید'];
+        const SX = [830, 610, 390, 170];
+        for (const [k, s] of S.entries()) {
+          await b.box(`s${k}`, SX[k] - 95, 170, 190, 90, { color: 'blue', fill: 'blue' });
+          await b.write(`sn${k}`, SX[k], 205, String(k + 1), { size: 26, color: 'purple', bold: true });
+          await b.write(`st${k}`, SX[k], 243, s, { size: 24, fa: true });
+          if (k < 3) await b.arrow(`sa${k}`, SX[k] - 100, 215, SX[k + 1] + 100, 215, { color: 'soft' });
+        }
+        await b.wire('loop', [[170, 265], [170, 320], [610, 320], [610, 275]], { color: 'orange' });
+        await b.arrow('loopa', 610, 295, 610, 268, { color: 'orange', head: 10 });
+        await b.write('ll', 390, 360, 'تکرار تا شرط توقف', { size: 26, color: 'orange', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 6. pseudocode
+    {
+      say: 'شبه‌کد اسلاید 321 همین مراحل است: جمعیتی به اندازه‌ی M بساز و ارزیابی کن. تا وقتی شرط توقف برقرار نشده: والدها را از جمعیت انتخاب کن، با هم ترکیبشان کن، جهش بده، و از بین همه یک جمعیت جدید به اندازه‌ی M انتخاب کن.',
+      draw: async b => {
+        await b.clear();
+        const L = [
+          'Initialize and evaluate population of size M',
+          'while (not stop condition) {',
+          '    select parents from population',
+          '    recombine parents  (crossover)',
+          '    mutate',
+          '    select new population of size M',
+          '}',
+        ];
+        for (const [k, l] of L.entries()) await b.write(`pc${k}`, 110, 100 + k * 60, l, { size: 28, anchor: 'start', color: k === 3 || k === 4 ? 'orange' : 'ink', dur: 300 });
+      },
+    },
+    // ---------------------------------------------------------- 7. crossover one point
+    {
+      say: 'تولید مثل دو روش دارد: *crossover* یا برش، و *mutation* یا جهش. اول برش، مثال اسلاید: دو والد داریم. یک خط برش بعد از ژن دوم می‌کشیم. فرزند اول: دو ژن اول والد دوم، بعد بقیه‌ی والد اول. فرزند دوم برعکس. ژن‌های قرمز همان‌هایی هستند که جابه‌جا شدند.',
+      term: ['Crossover / mutation', 'برش / جهش'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 60, 'crossover — یک نقطه', { size: 36, color: 'orange', bold: true, fa: true });
+        await chromo(b, 'a', 110, 170, X(1, 2, 3, 4, 5), { label: 'P_1' });
+        await chromo(b, 'c', 110, 250, X(1, 4, 5, 2, 3), { label: 'P_2' });
+        await b.line('cut', 238, 120, 238, 300, { color: 'red', width: 3 });
+        await b.arrow('ar', 450, 210, 540, 210, { color: 'soft' });
+        await chromo(b, 'd', 600, 170, X(1, 4, 3, 4, 5), { red: [0, 1] });
+        await chromo(b, 'e', 600, 250, X(1, 2, 5, 2, 3), { red: [0, 1] });
+        await b.write('n', 500, 380, 'سر دو والد بعد از خط برش جابه‌جا می‌شود', { size: 28, fa: true });
+        await b.write('n2', 500, 430, 'خانه‌ی دوم والد اول در اسلاید خالی چاپ شده؛ همان X₂ است', { size: 22, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 8. crossover two points
+    {
+      say: 'برش *دونقطه‌ای* هم در اسلاید هست: دو خط برش، بعد از ژن دوم و بعد از ژن چهارم. فقط تکه‌ی *وسط* بین دو والد عوض می‌شود. فرزند اول: X_1 X_2 X_5 X_2 X_5 و فرزند دوم: X_1 X_4 X_3 X_4 X_3.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 60, 'crossover — دو نقطه', { size: 36, color: 'orange', bold: true, fa: true });
+        await chromo(b, 'a', 110, 170, X(1, 2, 3, 4, 5), { label: 'P_1' });
+        await chromo(b, 'c', 110, 250, X(1, 4, 5, 2, 3), { label: 'P_2' });
+        await b.line('cut1', 238, 120, 238, 300, { color: 'red', width: 3 });
+        await b.line('cut2', 366, 120, 366, 300, { color: 'red', width: 3 });
+        await b.arrow('ar', 450, 210, 540, 210, { color: 'soft' });
+        await chromo(b, 'd', 600, 170, X(1, 2, 5, 2, 5), { red: [2, 3] });
+        await chromo(b, 'e', 600, 250, X(1, 4, 3, 4, 3), { red: [2, 3] });
+        await b.write('n', 500, 380, 'فقط تکه‌ی بین دو خط برش جابه‌جا می‌شود', { size: 28, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 9. mutation
+    {
+      say: 'حالا *جهش*: فقط *یک* کروموزوم لازم دارد. در مثال اسلاید جای دو ژن با هم عوض می‌شود: ژن اول X_1 و ژن چهارم X_4. نتیجه: X_4 X_2 X_3 X_1 X_5. جهش کمی تنوع تصادفی اضافه می‌کند تا الگوریتم در یک جواب گیر نکند.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 60, 'mutation — جهش', { size: 36, color: 'orange', bold: true, fa: true });
+        await chromo(b, 'a', 110, 200, X(1, 2, 3, 4, 5));
+        await b.path('sw', 'M142 230 Q238 300 334 230', { color: 'red' });
+        await b.arrow('ar', 450, 200, 540, 200, { color: 'soft' });
+        await chromo(b, 'd', 600, 200, X(4, 2, 3, 1, 5), { red: [0, 3] });
+        await b.write('n', 500, 380, 'یک کروموزوم · جای دو ژن عوض می‌شود', { size: 28, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 10. next generation
+    {
+      say: 'از یک نسل به نسل بعد، اسلاید 322: نسل 1 جمعیتی با M = 10 کروموزوم است و هر کدام تابع تطبیق F خودش را دارد. با تولید مثل M′ = 10 فرزند می‌سازیم. حالا 20 کروموزوم داریم. همه را بر اساس تابع تطبیق *مرتب* می‌کنیم و فقط M تای اول، یعنی 10 تا از بهترین‌ها، به نسل بعد می‌روند.',
+      draw: async b => {
+        await b.clear();
+        await b.box('g1', 60, 120, 220, 220, { color: 'blue', fill: 'blue' });
+        await b.write('g1t', 170, 210, 'نسل 1', { size: 30, bold: true, fa: true });
+        await b.write('g1m', 170, 260, 'M = 10', { size: 30, color: 'blue' });
+        await b.arrow('a1', 290, 230, 370, 230, { color: 'soft' });
+        await b.box('g2', 380, 90, 260, 280, { color: 'purple', fill: 'purple' });
+        await b.write('g2t', 510, 190, 'M + M′ = 20', { size: 30, color: 'purple' });
+        await b.write('g2s', 510, 245, 'مرتب‌سازی با تابع تطبیق', { size: 22, fa: true });
+        await b.arrow('a2', 650, 230, 730, 230, { color: 'soft' });
+        await b.box('g3', 740, 120, 220, 220, { color: 'green', fill: 'green' });
+        await b.write('g3t', 850, 210, 'نسل 2', { size: 30, bold: true, fa: true });
+        await b.write('g3m', 850, 260, 'M = 10', { size: 30, color: 'green' });
+        await b.write('n', 500, 430, '10 تای بهتر می‌مانند، 10 تای بدتر حذف می‌شوند', { size: 28, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 11. stop condition
+    {
+      say: 'کی تمام می‌شود؟ در هر نسل *بهترین کروموزوم* ذخیره می‌شود. اگر یک کروموزوم چند نسل پشت‌سرهم بهترین بماند، یعنی بهتر از آن تولید نمی‌شود، و همان *جواب مسئله* است. نکته‌ی اسلاید: اگر چنین تکراری پیش نیامد، شرط پایان را *محدودیت تعداد نسل* می‌گذاریم.',
+      term: ['Stop condition', 'شرط توقف'],
+      draw: async b => {
+        await b.write('s1', 500, 490, 'بهترین کروموزوم چند نسل ثابت ماند ← جواب', { size: 28, color: 'green', bold: true, fa: true });
+        await b.write('s2', 500, 535, 'وگرنه: حداکثر تعداد نسل', { size: 24, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 12. TSP
+    {
+      say: 'حالا مثال اسلاید 323: *فروشنده‌ی دوره‌گرد*. شش شهر C_1 تا C_6 داریم و طول جاده‌ها روی نقشه نوشته شده. فروشنده باید از همه‌ی شهرها *یک بار* بگذرد و کل مسیرش کوتاه‌ترین شود.',
+      term: ['Travelling salesman problem', 'مسئله‌ی فروشنده‌ی دوره‌گرد'],
+      draw: async b => {
+        await b.clear();
+        await drawMap(b);
+      },
+    },
+    // ---------------------------------------------------------- 13. encoding
+    {
+      say: 'ترجمه به زبان ژنتیک: *ژن* = یک شهر. *کروموزوم* = یک ترتیب از شهرها، یعنی یک مسیر. چند کروموزوم ممکن داریم؟ شش شهر را به 6! ترتیب می‌شود چید: 6 × 5 × 4 × 3 × 2 × 1 = 720.',
+      draw: async b => {
+        await b.dim(['e*', 'el*'], 0.35);
+        await b.write('enc1', 500, 225, 'ژن = شهر', { size: 30, color: 'blue', bold: true, fa: true });
+        await b.write('enc2', 500, 270, 'کروموزوم = ترتیب شهرها', { size: 30, color: 'blue', bold: true, fa: true });
+        await b.write('enc3', 500, 360, `6! = ${fact(6)}`, { size: 40, color: 'green', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 14. fitness K1
+    {
+      say: `تابع تطبیق، اسلاید 324: *مجموع فاصله‌ی بین شهرها* به ترتیب کروموزوم. ورودی‌اش کروموزوم است و خروجی‌اش یک عدد صحیح. برای K_1 = C_1 C_2 C_3 C_4 C_5 C_6: ${legs(K1).join(' + ')} = ${fit(K1)}.`,
+      draw: async b => {
+        await b.erase(['enc*']);
+        await b.dim(['e*', 'el*'], 1, 200);
+        await drawTrip(b, 't1', K1, 'red');
+        await b.write('f1', 500, 535, `f(K_1) = ${legs(K1).join(' + ')} = ${fit(K1)}`, { size: 30, color: 'red', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 15. fitness K2 + slide error
+    {
+      say: `برای K_2 = C_5 C_4 C_6 C_1 C_2 C_3: ${legs(K2).join(' + ')} = ${fit(K2)}. دقت کنید: روی نقشه‌ی اسلاید، جاده‌ی C_6 تا C_4 عدد 8 نوشته شده، ولی خود اسلاید در جمع 80 گذاشته. صفرش در شکل افتاده؛ ما 80 را حساب می‌کنیم.`,
+      draw: async b => {
+        await b.erase(['t1', 'f1']);
+        await drawTrip(b, 't2', K2, 'green');
+        await b.recolor('el6-4', 'red');
+        await b.write('f2', 500, 535, `f(K_2) = ${legs(K2).join(' + ')} = ${fit(K2)}`, { size: 30, color: 'green', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 16. smaller is better
+    {
+      say: 'اینجا تابع تطبیق *طول مسیر* است، پس هرچه *کمتر* بهتر. اسلاید می‌گوید مرتب‌سازی *صعودی* است و بهترین کروموزوم، کروموزومی با *کمترین* تابع تطبیق است. پس K_2 با 500 از K_1 با 790 بهتر است.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 90, 'مرتب‌سازی صعودی', { size: 42, color: 'orange', bold: true, fa: true });
+        await b.write('r1', 500, 190, `K_2 : ${fit(K2)}`, { size: 40, color: 'green', bold: true });
+        await b.write('r2', 500, 260, `K_1 : ${fit(K1)}`, { size: 40, color: 'red' });
+        await b.write('n', 500, 370, 'کمترین تابع تطبیق = بهترین کروموزوم', { size: 32, fa: true });
+        await b.write('n2', 500, 420, 'چون تابع تطبیق اینجا طول مسیر است', { size: 24, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 17. crossover on TSP + trap
+    {
+      say: 'برش روی همین مسئله، اسلاید 323: K_1 و K_2 را بعد از ژن چهارم برش می‌زنیم و دم‌هایشان را عوض می‌کنیم. ولی ببینید چه شد: فرزند اول C_2 و C_3 را *دو بار* دارد و C_5 و C_6 را اصلاً ندارد! این مسیر معتبر نیست، چون هر شهر باید دقیقاً یک بار بیاید. اسلاید این را نگفته؛ در مسئله‌هایی که کروموزوم یک *ترتیب* است، برش باید طوری باشد که هر ژن یک بار بماند.',
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        await chromo(b, 'a', 100, 120, C(...K1), { label: 'K_1', cell: 58 });
+        await chromo(b, 'c', 100, 200, C(...K2), { label: 'K_2', cell: 58 });
+        await b.line('cut', 332, 75, 332, 245, { color: 'red', width: 3 });
+        await b.arrow('ar', 470, 160, 520, 160, { color: 'soft' });
+        await chromo(b, 'd', 560, 120, C(1, 2, 3, 4, 2, 3), { red: [4, 5], cell: 58 });
+        await chromo(b, 'e', 560, 200, C(5, 4, 6, 1, 5, 6), { red: [4, 5], cell: 58 });
+        await b.ring('dup1', 676, 120, 64, 34, { color: 'red' });
+        await b.ring('dup2', 850, 120, 64, 34, { color: 'red' });
+        await b.write('n', 500, 340, 'C₂ و C₃ تکراری، C₅ و C₆ جا افتاده ← مسیر نامعتبر', { size: 28, color: 'red', bold: true, fa: true });
+        await b.write('n2', 500, 400, 'در کروموزوم‌های ترتیبی، هر ژن باید دقیقاً یک بار بیاید', { size: 26, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 18. mutation on TSP
+    {
+      say: 'جهش روی این مسئله مشکلی ندارد: در مثال اسلاید جای شهر اول و آخر کروموزوم K_m عوض می‌شود. چون فقط جای دو شهر عوض شده، باز هم هر شهر دقیقاً یک بار هست و مسیر معتبر می‌ماند.',
+      draw: async b => {
+        await chromo(b, 'm', 100, 480, C(4, 6, 1, 2, 5, 3), { label: 'K_m', cell: 58 });
+        await b.arrow('am', 470, 480, 520, 480, { color: 'soft' });
+        await chromo(b, 'm2', 560, 480, C(3, 6, 1, 2, 5, 4), { red: [0, 5], cell: 58 });
+      },
+    },
+    // ---------------------------------------------------------- 19. where it ends
+    {
+      say: `اگر الگوریتم را نسل به نسل ادامه دهیم، کروموزوم‌ها کوتاه‌تر و کوتاه‌تر می‌شوند. من همه‌ی 720 ترتیب را با کامپیوتر امتحان کردم: کوتاه‌ترین مسیر روی این نقشه C_2 C_3 C_6 C_1 C_4 C_5 با طول ${fit(BEST)} است. الگوریتم ژنتیک بدون امتحان کردن همه‌ی 720 حالت، به چنین جوابی یا نزدیک به آن می‌رسد.`,
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        await drawMap(b);
+        await drawTrip(b, 'tb', BEST, 'green');
+        await b.write('fb', 500, 535, `${BEST.map(c => `C_${c}`).join(' ')} : ${legs(BEST).join(' + ')} = ${fit(BEST)}`, { size: 28, color: 'green', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 20. summary
+    {
+      say: 'یادت باشد؛ شش نکته، بعد سؤال‌ها.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'یادت باشد', { size: 48, color: 'orange', bold: true, fa: true });
+        const L = [
+          'ژن ← کروموزوم (ترتیب ژن‌ها) ← جمعیت ← نسل',
+          'تابع تطبیق: کروموزوم چقدر با محیط جور است',
+          'مراحل: جمعیت اولیه، انتخاب والد، تولید مثل، نسل جدید',
+          'برش: تکه‌ها بین دو والد جابه‌جا · جهش: تغییر در یک کروموزوم',
+          'از M + M′ کروموزوم، M تای بهتر به نسل بعد می‌روند',
+          'توقف: بهترین چند نسل ثابت ماند، یا حداکثر تعداد نسل',
+        ];
+        for (const [k, l] of L.entries()) await b.write(`m${k}`, 930, 145 + k * 68, '•  ' + l, { size: 25, anchor: 'start', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- quizzes
+    {
+      say: 'روی همان نقشه، تابع تطبیق کروموزوم C_5 C_6 C_4 C_1 C_2 C_3 را حساب کنید.',
+      draw: async b => {
+        await b.clear();
+        await b.write('q-n', 500, 40, `سؤال 1 از ${QUIZZES}`, { size: 22, color: 'soft', fa: true });
+        await drawMap(b);
+        await b.write('q-q', 500, 535, 'f(C_5 C_6 C_4 C_1 C_2 C_3) = ?', { size: 30, color: 'orange', bold: true });
+      },
+      quiz: { answer: [String(fit(K3))], hint: 'طول جاده‌ها را به ترتیب جمع کن: C₅→C₆، C₆→C₄، …', explain: `${legs(K3).join(' + ')} = ${fit(K3)}` },
+      solve: async b => {
+        await drawTrip(b, 'tq', K3, 'green');
+        await b.erase('q-q');
+        await b.write('sq', 500, 535, `${legs(K3).join(' + ')} = ${fit(K3)}`, { size: 32, color: 'green', bold: true });
+      },
+    },
+    {
+      say: `سه کروموزوم با تابع تطبیق ${fit(K1)}، ${fit(K2)} و ${fit(K3)} داریم و تابع تطبیق طول مسیر است. بهترین کدام است؟`,
+      draw: quizBoard(2, [
+        { text: `f(K_1) = ${fit(K1)}    f(K_2) = ${fit(K2)}    f(K_3) = ${fit(K3)}`, size: 36, color: 'blue' },
+        { text: 'تابع تطبیق = طول مسیر · بهترین کدام است؟', size: 30, fa: true },
+      ]),
+      quiz: {
+        choices: ['K_1', 'K_2', 'K_3'], correct: 2,
+        explain: `مرتب‌سازی صعودی است و بهترین کروموزوم کمترین تابع تطبیق را دارد: K_3 با ${fit(K3)}.`,
+      },
+      solve: async b => {
+        await b.write('s1', 500, 330, `${fit(K3)} < ${fit(K2)} < ${fit(K1)}`, { size: 40 });
+        await b.write('s2', 500, 400, 'بهترین: K₃', { size: 38, color: 'green', bold: true, fa: true });
+      },
+    },
+    {
+      say: 'اگر فروشنده 5 شهر داشته باشد، چند کروموزوم، یعنی چند ترتیب مختلف، ممکن است؟',
+      draw: quizBoard(3, [{ text: 'تعداد کروموزوم‌ها برای 5 شهر؟', size: 38, fa: true }]),
+      quiz: { answer: [String(fact(5))], hint: 'برای 6 شهر 6! = 720 بود.', explain: `5! = 5 × 4 × 3 × 2 × 1 = ${fact(5)}` },
+      solve: async b => {
+        await b.write('s1', 500, 330, `5! = 5×4×3×2×1 = ${fact(5)}`, { size: 44, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'برش یک‌نقطه‌ای بعد از ژن سوم: والد اول X_1 X_2 X_3 X_4 X_5 و والد دوم X_5 X_4 X_3 X_2 X_1. فرزندی که سرش از والد اول است کدام است؟',
+      draw: async b => {
+        await quizBoard(4, [])(b);
+        await chromo(b, 'qa', 340, 170, X(1, 2, 3, 4, 5), { label: 'P_1' });
+        await chromo(b, 'qc', 340, 250, X(5, 4, 3, 2, 1), { label: 'P_2' });
+        await b.line('qcut', 532, 120, 532, 300, { color: 'red', width: 3 });
+      },
+      quiz: {
+        choices: ['X_1 X_2 X_3 X_2 X_1', 'X_5 X_4 X_3 X_4 X_5', 'X_1 X_2 X_3 X_4 X_5', 'X_4 X_2 X_3 X_1 X_5'],
+        correct: 0,
+        explain: 'سه ژن اول از والد اول (X_1 X_2 X_3) و بعد از خط برش، دم والد دوم (X_2 X_1).',
+      },
+      solve: async b => {
+        await chromo(b, 'qd', 340, 400, X(1, 2, 3, 2, 1), { red: [3, 4] });
+      },
+    },
+    {
+      say: 'جمعیت با M = 10 کروموزوم داریم و با تولید مثل M′ = 10 فرزند ساخته شده. چند کروموزوم به نسل بعد می‌رود؟',
+      draw: quizBoard(5, [
+        { text: "M = 10    M′ = 10", size: 40, color: 'blue' },
+        { text: 'چند کروموزوم به نسل بعد می‌رود؟', size: 32, fa: true },
+      ]),
+      quiz: { answer: ['10'], hint: 'اندازه‌ی جمعیت در هر نسل ثابت M است.', explain: 'هر 20 کروموزوم با تابع تطبیق مرتب می‌شوند و فقط M = 10 تای بهتر به نسل بعد می‌روند.' },
+      solve: async b => {
+        await b.write('s1', 500, 330, 'M + M′ = 20 ← مرتب‌سازی ← 10 تای بهتر', { size: 32, color: 'green', bold: true, fa: true });
+      },
+    },
+    {
+      say: 'سؤال آخر درس، و آخر کل دوره: کروموزوم در الگوریتم ژنتیک چیست؟',
+      draw: quizBoard(6, [{ text: 'کروموزوم چیست؟', size: 40, fa: true }]),
+      quiz: {
+        choices: [
+          'کوچک‌ترین جزء یک مسئله',
+          'مجموعه‌ای از ژن‌ها که با ترتیب مشخص کنار هم قرار گرفته‌اند',
+          'مجموعه‌ای از چند جمعیت',
+          'تابعی که میزان تطبیق را نشان می‌دهد',
+        ],
+        correct: 1,
+        explain: 'ژن کوچک‌ترین جزء است، کروموزوم ژن‌ها با ترتیب مشخص، جمعیت مجموعه‌ای از کروموزوم‌ها، و تابع تطبیق کیفیت هر کروموزوم را می‌سنجد.',
+      },
+      solve: async b => {
+        await chromo(b, 'qk', 340, 300, X(1, 2, 3, 4, 5), { color: 'green' });
+        await b.write('s1', 500, 400, 'ژن‌ها با ترتیب مشخص = یک جواب', { size: 30, color: 'green', bold: true, fa: true });
+      },
+    },
+  ],
+});
+</script>
+</body>
+</html>

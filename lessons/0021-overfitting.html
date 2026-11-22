@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>بیش‌برازش و تعمیم</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Vazirmatn:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="../assets/teacher.css">
+</head>
+<body>
+<main id="app"></main>
+<script src="../assets/teacher.js"></script>
+<script src="../assets/graph.js"></script>
+<script>
+// Lesson 21 — slides 198–203 (part 6: machine learning). Overfitting, underfitting, generalization,
+// decision boundaries.
+
+const all = list => Promise.all(list);
+const LTR = s => `⁦${s}⁩`; // keeps a left-to-right run intact inside Persian board text
+const FA = /[؀-ۿ]/;
+
+async function node(b, id, x, y, w, h, label, o = {}) {
+  await b.box(id, x, y, w, h, { color: o.color || 'blue', fill: o.fill ?? (o.color || 'blue'), dur: o.dur ?? 350 });
+  const size = o.size || 24;
+  await b.write(id + '-t', x + w / 2, y + h / 2 + size / 3, label, { size, fa: FA.test(label), color: o.text || 'ink', bold: o.bold, dur: 250 });
+}
+
+function quizBoard(n, question, o = { size: 30, fa: true }) {
+  return async b => {
+    await b.clear();
+    await b.write('q-n', 500, 60, `سؤال ${n} از 6`, { size: 24, color: 'soft', fa: true });
+    await b.write('q-q', 500, 140, question, o);
+  };
+}
+
+// ---- the two-class picture of slides 199–203: circles (o) on the left, pluses (+) on the right.
+// Coordinates are 0..1 inside the frame (u to the right, v downwards). 19 + 1 circles, 19 + 1 pluses.
+const CIRCLES = [[0.144, 0.407], [0.209, 0.653], [0.112, 0.212], [0.192, 0.094], [0.142, 0.618], [0.271, 0.774], [0.175, 0.269], [0.322, 0.624], [0.115, 0.748], [0.144, 0.863], [0.223, 0.49], [0.251, 0.87], [0.186, 0.19], [0.116, 0.528], [0.319, 0.493], [0.056, 0.123], [0.288, 0.189], [0.192, 0.787], [0.052, 0.838]];
+const PLUSES = [[0.492, 0.507], [0.453, 0.213], [0.664, 0.917], [0.665, 0.733], [0.591, 0.207], [0.555, 0.932], [0.675, 0.577], [0.757, 0.513], [0.635, 0.325], [0.772, 0.626], [0.725, 0.196], [0.618, 0.404], [0.732, 0.697], [0.734, 0.326], [0.405, 0.085], [0.48, 0.126], [0.529, 0.253], [0.562, 0.541], [0.781, 0.413]];
+const ODD_CIRCLE = [0.5, 0.7];   // a circle that landed among the pluses
+const ODD_PLUS = [0.34, 0.33];   // a plus that landed among the circles
+const NEW_POINT = [0.30, 0.38];  // a new, unseen circle
+// Boundaries u = f(v). Circles are on the left (u < f(v)).
+const FIT = v => 0.42 - 0.6 * (v - 0.5) ** 2;                                   // smooth: 2 training errors
+const OVER = v => FIT(v) - 0.17 * Math.exp(-(((v - 0.355) / 0.06) ** 2)) + 0.19 * Math.exp(-(((v - 0.7) / 0.06) ** 2)) + 0.015 * Math.sin(v * 40); // bends round every point: 0 errors
+const UNDER = v => 0.12 + 0.5 * v;                                              // straight line: 4 errors
+
+function frame(x, y, w, h) {
+  return { x, y, w, h, X: u => x + 12 + u * (w - 24), Y: v => y + 12 + v * (h - 24) };
+}
+async function drawData(b, id, F, small = false) {
+  const r = small ? 5 : 8, ps = small ? 18 : 28;
+  await b.box(`${id}-fr`, F.x, F.y, F.w, F.h, { color: 'ink', r: 2, dur: 300 });
+  await all([
+    ...[...CIRCLES, ODD_CIRCLE].map(([u, v], k) => b.ring(`${id}-c${k}`, F.X(u), F.Y(v), r, r, { color: 'red', tilt: 0, dur: 80 })),
+    ...[...PLUSES, ODD_PLUS].map(([u, v], k) => b.write(`${id}-p${k}`, F.X(u), F.Y(v) + ps * 0.35, '+', { size: ps, color: 'green', bold: true, dur: 80 })),
+  ]);
+}
+function boundary(b, id, F, f, color = 'orange') {
+  const pts = [];
+  for (let k = 0; k <= 100; k++) { const v = k / 100; pts.push([+F.X(f(v)).toFixed(1), +F.Y(v).toFixed(1)]); }
+  return b.wire(id, pts, { color, width: 3, dur: 900 });
+}
+
+// ---- the same idea for regression: y grows and levels off; three fits.
+const TRUE = x => 1 + 1.6 * x - 0.1 * x * x;
+const REG = [0.6, -0.7, 0.8, -0.5, 0.7, -0.8, 0.5, -0.6, 0.4].map((d, k) => [k + 1, +(TRUE(k + 1) + d).toFixed(2)]);
+const MEAN = REG.reduce((s, [, y]) => s + y, 0) / REG.length;
+
+Teacher.start({
+  id: 'L21',
+  number: 21,
+  title: 'بیش‌برازش و تعمیم',
+  chapter: 'بخش 6 · یادگیری ماشین',
+  slides: '198–203',
+  intro: 'مدلی که حفظ می‌کند، مدلی که خیلی ساده است، و مدلی که تعمیم می‌دهد — با مرز تصمیم‌گیری.',
+  next: { href: '0022-artificial-neuron.html', title: 'نورون مصنوعی' },
+  steps: [
+    // ---------------------------------------------------------- 1. ML structure
+    {
+      say: 'سلام! اسلاید 198 کل ساختار یادگیری ماشین را در یک تصویر جمع می‌کند. داده وارد *آموزش ML* می‌شود. بعد *ارزیابی*: اگر خوب بود، *اجرا*، و از اجرا داده‌های جدید به دست می‌آید که دوباره به آموزش برمی‌گردد. اگر بد بود، *تحلیل خطاها* و برگشت به داده. امروز دو خطای اصلی را می‌بینیم که در همین ارزیابی پیدا می‌شوند.',
+      draw: async b => {
+        await b.write('h', 500, 60, 'ساختار یادگیری ماشین', { size: 36, color: 'orange', bold: true, fa: true });
+        await b.path('d', 'M790 230 L940 230 L910 320 L760 320 Z', { color: 'blue', fill: 'blue' });
+        await b.write('dt', 850, 285, 'داده', { size: 28, fa: true, bold: true });
+        await node(b, 'tr', 470, 235, 210, 80, 'آموزش ML', { color: 'blue', size: 28, bold: true });
+        await b.arrow('a1', 765, 275, 685, 275, { color: 'orange' });
+        await b.path('ev', 'M230 200 L320 275 L230 350 L140 275 Z', { color: 'blue', fill: 'blue' });
+        await b.write('evt', 230, 284, 'ارزیابی', { size: 24, fa: true, bold: true });
+        await b.arrow('a2', 465, 275, 325, 275, { color: 'orange' });
+        await node(b, 'run', 160, 90, 140, 60, 'اجرا', { color: 'green', size: 26, bold: true });
+        await b.arrow('a3', 230, 195, 230, 155, { color: 'green' });
+        await b.write('ok', 275, 185, '☺', { size: 26, color: 'green' });
+        await node(b, 'new', 470, 90, 210, 60, 'داده‌های جدید', { color: 'blue', size: 24 });
+        await b.arrow('a4', 305, 120, 465, 120, { color: 'orange' });
+        await b.arrow('a5', 575, 155, 575, 230, { color: 'orange' });
+        await node(b, 'err', 470, 420, 210, 66, 'تحلیل خطاها', { color: 'red', size: 26, bold: true });
+        await b.wire('a6', [[230, 355], [230, 453], [465, 453]], { color: 'red' });
+        await b.write('bad', 270, 410, '☹', { size: 26, color: 'red' });
+        await b.wire('a7', [[685, 453], [850, 453], [850, 325]], { color: 'red' });
+        await b.arrow('a7h', 850, 350, 850, 325, { color: 'red', head: 12, dur: 100 });
+      },
+    },
+    // ---------------------------------------------------------- 2. overfitting definition
+    {
+      say: '*Overfitting* یا بیش‌برازش، اسلاید 199: یکی از خطاهای مدل‌سازی در علم داده. وقتی اتفاق می‌افتد که مدل ویژگی‌های داده‌های آموزشی را به جای *یاد گرفتن*، *حفظ* کرده باشد؛ یعنی بیش از حد روی آن آموزش دیده. نتیجه: مدل فقط روی همان داده‌های آموزشی خوب کار می‌کند، نه روی داده‌هایی که هنوز ندیده.',
+      term: ['Overfitting', 'بیش‌برازش — بیش از حد آموزش دیدن'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 90, 'بیش‌برازش (Overfitting)', { size: 44, color: 'red', bold: true, fa: true });
+        await b.write('l1', 850, 190, '◂ مدل داده‌های آموزشی را حفظ می‌کند، یاد نمی‌گیرد', { size: 28, fa: true, anchor: 'start' });
+        await b.write('l2', 850, 260, '◂ بیش از حد روی آن‌ها آموزش دیده', { size: 28, fa: true, anchor: 'start' });
+        await b.write('ok', 700, 370, 'داده‌ی آموزشی:  عالی ✓', { size: 30, fa: true, color: 'green', bold: true });
+        await b.write('no', 300, 370, 'داده‌ی ندیده:  بد ✗', { size: 30, fa: true, color: 'red', bold: true });
+        await b.write('w', 500, 470, 'overfit یعنی بیش از حد آموزش دیدن', { size: 30, fa: true, color: 'orange' });
+      },
+    },
+    // ---------------------------------------------------------- 3. overfitted picture
+    {
+      say: 'تصویر اسلاید 199، Overfitted model: دو دسته داده، دایره‌های قرمز و بعلاوه‌های سبز. یک دایره بین بعلاوه‌ها افتاده و یک بعلاوه بین دایره‌ها — احتمالاً داده‌ی پرت یا نویز. مدلِ overfit مرزش را آن‌قدر *پیچ‌وتاب* می‌دهد که حتی این دو را هم درست جدا کند. روی داده‌ی آموزشی خطایش صفر است!',
+      draw: async b => {
+        await b.clear();
+        const F = frame(80, 100, 400, 400);
+        await b.write('ft', 280, 80, 'Overfitted model', { size: 26 });
+        await drawData(b, 'd', F);
+        await all([b.ring('odd1', F.X(ODD_CIRCLE[0]), F.Y(ODD_CIRCLE[1]), 18, 18, { color: 'purple' }), b.ring('odd2', F.X(ODD_PLUS[0]), F.Y(ODD_PLUS[1]), 18, 18, { color: 'purple' })]);
+        await boundary(b, 'bd', F, OVER);
+        await b.write('t1', 730, 170, 'مرز پیچ‌وتاب‌دار', { size: 30, fa: true, color: 'orange', bold: true });
+        await b.write('t2', 730, 230, 'دور هر نقطه می‌پیچد', { size: 26, fa: true });
+        await b.write('t3', 730, 310, `خطای آموزش: ${LTR('0')}`, { size: 30, fa: true, color: 'green', bold: true });
+        await b.write('t4', 730, 370, 'نقطه‌های بنفش: داده‌ی پرت', { size: 22, fa: true, color: 'purple' });
+      },
+    },
+    // ---------------------------------------------------------- 4. why it fails
+    {
+      say: 'حالا چرا این بد است؟ یک دایره‌ی *تازه* می‌آید، درست کنار همان بعلاوه‌ی پرت — نقطه‌ی نارنجی. هر آدمی می‌گوید این دایره است؛ دورش پر از دایره است. ولی مرزِ overfit برای آن بعلاوه‌ی پرت یک «جیب» باز کرده، و نقطه‌ی تازه داخل همان جیب افتاده. مدل اشتباه می‌گوید: بعلاوه. مدل *نویز* را حفظ کرده بود، نه الگو را.',
+      tip: true,
+      draw: async b => {
+        const F = frame(80, 100, 400, 400);
+        await b.dot('nw', F.X(NEW_POINT[0]), F.Y(NEW_POINT[1]), { color: 'orange', r: 9 });
+        await b.ring('nwr', F.X(NEW_POINT[0]), F.Y(NEW_POINT[1]), 22, 22, { color: 'orange' });
+        await b.write('t5', 730, 440, 'داده‌ی تازه (دایره)  ←  مدل: «بعلاوه» ✗', { size: 24, fa: true, color: 'red', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 5. flowers
+    {
+      say: 'مثال اسلاید 200: داده‌های ما می‌تواند صدها عکس گل باشد. هر بار عکس یک گل را به مدل نشان دهیم، حدس می‌زند این گل در کدام دسته قرار دارد. ولی اگر یک تصویر *کاملاً جدید* از گل ببیند که قبلاً ندیده است چطور؟ آیا آن را هم درست پیش‌بینی می‌کند؟',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'صدها عکس گل', { size: 36, color: 'orange', bold: true, fa: true });
+        const C = ['red', 'orange', 'purple', 'blue', 'green'];
+        for (let r = 0; r < 3; r++) {
+          await all([...Array(8)].map((_, c) => all([
+            b.box(`ph-${r}-${c}`, 180 + c * 82, 110 + r * 82, 72, 72, { color: 'soft', r: 4, dur: 100 }),
+            b.dot(`fl-${r}-${c}`, 216 + c * 82, 146 + r * 82, { color: C[(r * 3 + c) % 5], r: 16 }),
+          ])));
+        }
+        await b.write('q1', 500, 385, 'عکس دیده‌شده  ←  دسته‌ی درست ✓', { size: 26, fa: true, color: 'green' });
+        await b.box('nwb', 300, 405, 72, 72, { color: 'orange', r: 4 });
+        await b.dot('nwf', 336, 441, { color: 'purple', r: 16 });
+        await b.write('q2', 620, 452, 'عکسِ کاملاً جدید  ←  ؟', { size: 28, fa: true, color: 'orange', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 6. generalization
+    {
+      say: 'جواب اسلاید 201: بله؛ مدل یادگیری ماشینِ *خوب* می‌تواند داده‌های جدید را هم پیش‌بینی کند. به این *generalization* یا تعمیم می‌گویند. هدف کلی این است که مدل یک گروه از تصاویر را ببیند و آن را به‌خوبی تعمیم دهد تا بتواند تصاویر جدید را پیش‌بینی کند. یعنی هدفِ واقعی، نمره روی داده‌ی *ندیده* است، نه روی داده‌ی آموزش.',
+      term: ['Generalization', 'تعمیم'],
+      draw: async b => {
+        await b.erase(['q2']);
+        await b.write('q3', 640, 452, 'مدل خوب  ←  این را هم درست می‌گوید ✓', { size: 24, fa: true, color: 'green', bold: true });
+        await b.line('g', 200, 497, 800, 497, { color: 'soft', width: 2, dur: 200 });
+        await b.write('gt', 500, 535, 'Generalization یعنی تعمیم به داده‌ی ندیده', { size: 26, fa: true, color: 'blue', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 7. fitted model
+    {
+      say: 'تصویر Fitted model در اسلاید 201: مرزی *نرم* که شکل کلی داده‌ها را دنبال می‌کند. دو نقطه‌ی پرت را در سمت اشتباه رها می‌کند — یعنی روی داده‌ی آموزشی 2 خطا دارد — ولی الگوی واقعی را یاد گرفته. و آن دایره‌ی تازه را؟ درست، دایره تشخیص می‌دهد. کمی خطا روی آموزش، در عوض تعمیم خوب.',
+      draw: async b => {
+        await b.clear();
+        const F = frame(80, 100, 400, 400);
+        await b.write('ft', 280, 80, 'Fitted model', { size: 26 });
+        await drawData(b, 'd', F);
+        await boundary(b, 'bd', F, FIT, 'blue');
+        await all([b.ring('odd1', F.X(ODD_CIRCLE[0]), F.Y(ODD_CIRCLE[1]), 18, 18, { color: 'purple' }), b.ring('odd2', F.X(ODD_PLUS[0]), F.Y(ODD_PLUS[1]), 18, 18, { color: 'purple' })]);
+        await b.dot('nw', F.X(NEW_POINT[0]), F.Y(NEW_POINT[1]), { color: 'orange', r: 9 });
+        await b.write('t1', 730, 170, 'مرز نرم', { size: 32, fa: true, color: 'blue', bold: true });
+        await b.write('t2', 730, 240, `خطای آموزش: ${LTR('2')} از ${LTR('40')}`, { size: 28, fa: true });
+        await b.write('t3', 730, 310, 'داده‌ی تازه  ←  دایره ✓', { size: 28, fa: true, color: 'green', bold: true });
+        await b.write('t4', 730, 400, 'تعمیم خوب', { size: 34, fa: true, color: 'green', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 8. underfitting
+    {
+      say: 'خطای برعکس: *underfitting* یا کم‌برازش، اسلاید 202. اینجا مرز یک *خط صاف* است، در حالی که داده‌ها شکل خمیده دارند. زیرنویس اسلاید: «مرز تصمیم‌گیری خوب نیست». مدل *خیلی ساده* است و حتی الگوی داده‌ی آموزشی را هم یاد نگرفته: روی همان داده‌ی آموزش 4 خطا دارد، و روی داده‌ی جدید هم خوب نیست.',
+      term: ['Underfitting', 'کم‌برازش — مدل خیلی ساده'],
+      draw: async b => {
+        await b.clear();
+        const F = frame(80, 100, 400, 400);
+        await b.write('ft', 280, 80, 'Underfitted model', { size: 26 });
+        await drawData(b, 'd', F);
+        await boundary(b, 'bd', F, UNDER, 'orange');
+        await b.write('t1', 730, 170, 'مرز تصمیم‌گیری خوب نیست', { size: 28, fa: true, color: 'orange', bold: true });
+        await b.write('t2', 730, 240, 'خط صاف برای داده‌ی خمیده', { size: 26, fa: true });
+        await b.write('t3', 730, 310, `خطای آموزش: ${LTR('4')} از ${LTR('40')}`, { size: 28, fa: true, color: 'red', bold: true });
+        await b.write('t4', 730, 390, 'مدل خیلی ساده است', { size: 30, fa: true, color: 'red', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 9. three side by side
+    {
+      say: 'اسلاید 203 هر سه را کنار هم می‌گذارد. چپ: underfit، خط صاف، خیلی ساده. وسط: overfit، پیچ‌وتاب دور هر نقطه، خیلی پیچیده. راست: fitted، یک منحنی نرم، درست به اندازه. امتحان معمولاً یکی از این تصویرها را نشان می‌دهد و می‌پرسد کدام است.',
+      draw: async b => {
+        await b.clear();
+        const P = [[40, 'Underfitted', UNDER, 'orange'], [360, 'Overfitted', OVER, 'red'], [680, 'Fitted', FIT, 'blue']];
+        for (const [k, [x, name, f, c]] of P.entries()) {
+          const F = frame(x, 130, 280, 260);
+          await b.write(`n${k}`, x + 140, 110, name, { size: 24, color: c, bold: true });
+          await drawData(b, `s${k}`, F, true);
+          await boundary(b, `b${k}`, F, f, c);
+        }
+        await all([
+          b.write('e0', 180, 440, 'خیلی ساده', { size: 26, fa: true, color: 'orange', bold: true }),
+          b.write('e1', 500, 440, 'خیلی پیچیده', { size: 26, fa: true, color: 'red', bold: true }),
+          b.write('e2', 820, 440, 'درست به اندازه', { size: 26, fa: true, color: 'blue', bold: true }),
+          b.write('r0', 180, 490, `خطای آموزش ${LTR('4/40')}`, { size: 22, fa: true }),
+          b.write('r1', 500, 490, `خطای آموزش ${LTR('0/40')}`, { size: 22, fa: true }),
+          b.write('r2', 820, 490, `خطای آموزش ${LTR('2/40')}`, { size: 22, fa: true }),
+        ]);
+      },
+    },
+    // ---------------------------------------------------------- 10. error table
+    {
+      say: 'پس چطور تشخیص بدهیم؟ با *دو* خطا: خطا روی داده‌ی آموزش، و خطا روی داده‌ی ندیده — اعتبارسنجی یا تست، از درس قبل. Underfit: هر دو *زیاد*. Overfit: آموزش *خیلی کم*، ولی ندیده *زیاد* — فاصله‌ی بزرگ بین این دو، علامت overfit است. Good fit: هر دو کم و نزدیک به هم.',
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        const X = [800, 520, 230];
+        await all(['', 'خطای آموزش', 'خطای داده‌ی ندیده'].map((h, k) => (h ? b.write(`th${k}`, X[k], 90, h, { size: 26, fa: true, bold: true, color: 'blue' }) : null)));
+        await b.line('hl', 80, 115, 920, 115, { color: 'soft', width: 2 });
+        const R = [['Underfitting', 'زیاد', 'زیاد', 'orange'], ['Overfitting', 'خیلی کم', 'زیاد', 'red'], ['Good fit', 'کم', 'کم', 'blue']];
+        for (const [r, [n, a, c, col]] of R.entries()) {
+          const y = 190 + r * 90;
+          await all([
+            b.write(`t${r}-0`, X[0], y, n, { size: 30, bold: true, color: col }),
+            b.write(`t${r}-1`, X[1], y, a, { size: 28, fa: true, color: a === 'زیاد' ? 'red' : 'green' }),
+            b.write(`t${r}-2`, X[2], y, c, { size: 28, fa: true, color: c === 'زیاد' ? 'red' : 'green' }),
+          ]);
+        }
+        await b.ring('gap', 375, 275, 250, 40, { color: 'red' });
+        await b.write('n', 500, 490, 'فاصله‌ی بزرگ بین خطای آموزش و ندیده یعنی overfit', { size: 26, fa: true, color: 'red', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 11. student analogy
+    {
+      say: 'یک تشبیه ساده. سه دانشجو برای امتحان می‌خوانند. اولی فقط عنوان فصل‌ها را خوانده: سؤال‌های تمرین را هم بلد نیست و سر امتحان هم نه — underfit. دومی جواب تک‌تک سؤال‌های تمرین را *حفظ* کرده: تمرین‌ها را صد درصد می‌زند، ولی سؤال کمی عوض شود، می‌ماند — overfit. سومی روش حل را فهمیده: تمرین‌ها را تقریباً همه، و سؤال تازه را هم — تعمیم.',
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        const S = [
+          ['فقط عنوان‌ها را خوانده', 'تمرین: بد؛   امتحان: بد', 'Underfit', 'orange'],
+          ['جواب‌ها را حفظ کرده', 'تمرین: 100%؛   امتحان: بد', 'Overfit', 'red'],
+          ['روش را فهمیده', 'تمرین: خوب؛   امتحان: خوب', 'Generalization', 'blue'],
+        ];
+        for (const [k, [a, r, n, c]] of S.entries()) {
+          const y = 110 + k * 140;
+          await b.box(`bx${k}`, 60, y - 40, 880, 115, { color: c, fill: c, dur: 300 });
+          await b.write(`a${k}`, 900, y, a, { size: 28, fa: true, anchor: 'start', bold: true });
+          await b.write(`r${k}`, 900, y + 50, r, { size: 24, fa: true, anchor: 'start', color: 'soft' });
+          await b.write(`n${k}`, 200, y + 28, n, { size: 30, color: c, bold: true });
+        }
+      },
+    },
+    // ---------------------------------------------------------- 12. regression version
+    {
+      say: 'همین سه حالت در *رگرسیون* هم هست. یادتان هست اسلاید 175 گفت یک چندجمله‌ای روی داده‌ها fit می‌کنیم؟ اگر فقط یک خط افقی بکشیم، خیلی ساده است: underfit. اگر منحنی را از *تک‌تک* نقطه‌ها رد کنیم، خطای آموزش صفر می‌شود ولی منحنی زیگزاگ و بی‌معناست: overfit. منحنی نرمی که روند را دنبال می‌کند: fit خوب.',
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        const P = [[60, 'Underfit', 'orange'], [380, 'Overfit', 'red'], [700, 'Good fit', 'blue']];
+        for (const [k, [x, name, c]] of P.entries()) {
+          const g = Graph({ x, y: 150, w: 220, h: 230, from: 0, to: 10, min: 0, max: 10 });
+          await b.write(`n${k}`, x + 110, 95, name, { size: 26, color: c, bold: true });
+          await g.axes(b, `ax${k}`, { ticks: [], yTicks: [], label: 'x', yLabel: 'y', size: 16 });
+          await all(REG.map(([px, py], j) => b.dot(`pt${k}-${j}`, g.X(px), g.Y(py), { color: 'ink', r: 5 })));
+          if (k === 0) await g.poly(b, `f${k}`, [[0.5, MEAN], [9.5, MEAN]], { color: c });
+          if (k === 1) await g.poly(b, `f${k}`, REG, { color: c });
+          if (k === 2) await g.curve(b, `f${k}`, TRUE, { color: c, lo: 0.5, hi: 9.5 });
+        }
+        await all([
+          b.write('e0', 170, 460, 'خیلی ساده', { size: 24, fa: true, color: 'orange' }),
+          b.write('e1', 490, 460, 'از همه‌ی نقطه‌ها رد می‌شود', { size: 22, fa: true, color: 'red' }),
+          b.write('e2', 810, 460, 'روند را دنبال می‌کند', { size: 24, fa: true, color: 'blue' }),
+        ]);
+      },
+    },
+    // ---------------------------------------------------------- 13. connect to evaluation
+    {
+      say: 'و اتصال به درس قبل: overfit را با داده‌ی آموزش *هرگز* نمی‌شود دید، چون روی آن عالی است. باید روی داده‌ی *ندیده* سنجید. برای همین مجموعه‌ی اعتبارسنجی داریم: اگر خطای آموزش پایین است ولی خطای اعتبارسنجی بالا، مدل overfit شده و باید ساده‌ترش کنیم. اگر هر دو بالا هستند، underfit است و مدل باید قوی‌تر شود.',
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 80, 'تشخیص با مجموعه‌ی اعتبارسنجی', { size: 36, color: 'orange', bold: true, fa: true });
+        await node(b, 'c1', 520, 150, 400, 110, '', { color: 'red' });
+        await b.write('c1a', 720, 195, 'آموزش کم، اعتبارسنجی زیاد', { size: 26, fa: true });
+        await b.write('c1b', 720, 240, 'Overfit: مدل را ساده‌تر کن', { size: 26, fa: true, color: 'red', bold: true });
+        await node(b, 'c2', 80, 150, 400, 110, '', { color: 'orange' });
+        await b.write('c2a', 280, 195, 'آموزش زیاد، اعتبارسنجی زیاد', { size: 26, fa: true });
+        await b.write('c2b', 280, 240, 'Underfit: مدل قوی‌تر لازم است', { size: 26, fa: true, color: 'orange', bold: true });
+        await node(b, 'c3', 300, 320, 400, 100, '', { color: 'blue' });
+        await b.write('c3a', 500, 360, 'هر دو کم و نزدیک به هم', { size: 26, fa: true });
+        await b.write('c3b', 500, 400, 'Good fit ✓', { size: 28, color: 'blue', bold: true });
+        await b.write('n', 500, 490, 'overfit روی داده‌ی آموزش دیده نمی‌شود', { size: 26, fa: true, color: 'red' });
+      },
+    },
+    // ---------------------------------------------------------- 14. summary
+    {
+      say: 'جمع‌بندی برای امتحان، بعد سؤال‌ها.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'یادت باشد', { size: 46, color: 'orange', bold: true, fa: true });
+        const L = [
+          'Overfitting: حفظ کردن به جای یاد گرفتن؛ فقط روی داده‌ی آموزشی خوب',
+          'مرز overfit دور هر نقطه می‌پیچد؛ خطای آموزش تقریباً 0، ولی روی داده‌ی ندیده بد',
+          'Underfitting: مدل خیلی ساده؛ مرز تصمیم‌گیری خوب نیست؛ هر دو خطا زیاد',
+          'Generalization: پیش‌بینی درست داده‌ی جدید؛ هدف اصلی',
+          'Fitted: مرز نرم؛ کمی خطای آموزش، تعمیم خوب',
+          'overfit را با اعتبارسنجی یا تست پیدا کن، نه با داده‌ی آموزش',
+        ];
+        for (const [k, l] of L.entries()) {
+          await b.dot(`mb${k}`, 950, 142 + k * 66, { color: 'orange', r: 5 });
+          await b.write(`m${k}`, 932, 150 + k * 66, l, { size: 24, anchor: 'start', fa: true });
+        }
+      },
+    },
+    // ---------------------------------------------------------- quizzes
+    {
+      say: 'نوبت شماست! مدلی روی داده‌ی آموزش 99 درصد دقت دارد، ولی روی داده‌ی تست فقط 62 درصد. مشکلش چیست؟',
+      draw: quizBoard(1, 'آموزش: 99%؛   تست: 62%', { size: 40, fa: true }),
+      quiz: {
+        choices: ['Underfitting', 'Overfitting', 'Generalization خوب'],
+        correct: 1,
+        hint: 'روی داده‌ای که دیده عالی است و روی داده‌ی ندیده بد. این یعنی چه؟',
+        explain: 'دقت بالا روی آموزش و افت شدید روی تست یعنی مدل داده‌ی آموزشی را حفظ کرده: overfitting.',
+      },
+      solve: async b => {
+        await b.write('s1', 500, 250, 'آموزش خیلی خوب', { size: 30, fa: true, color: 'green' });
+        await b.write('s2', 500, 310, 'ندیده بد  ←  فاصله‌ی بزرگ', { size: 30, fa: true, color: 'red' });
+        await b.write('s3', 500, 400, 'Overfitting', { size: 48, color: 'red', bold: true });
+      },
+    },
+    {
+      say: 'مدل دیگری روی داده‌ی آموزش 58 درصد و روی داده‌ی تست 55 درصد دقت دارد، در حالی که مسئله ساده است. این کدام حالت است؟',
+      draw: quizBoard(2, 'آموزش: 58%؛   تست: 55%', { size: 40, fa: true }),
+      quiz: {
+        choices: ['Overfitting', 'Underfitting', 'مدل کاملاً درست است'],
+        correct: 1,
+        hint: 'مدل حتی داده‌ای را که دیده هم خوب یاد نگرفته.',
+        explain: 'هر دو دقت پایین و نزدیک به هم: مدل خیلی ساده است و الگو را حتی روی آموزش هم نگرفته. یعنی underfitting.',
+      },
+      solve: async b => {
+        await b.write('s1', 500, 250, 'آموزش هم بد', { size: 30, fa: true, color: 'red' });
+        await b.write('s2', 500, 310, 'ندیده هم بد  ←  مدل خیلی ساده', { size: 30, fa: true, color: 'red' });
+        await b.write('s3', 500, 400, 'Underfitting', { size: 48, color: 'orange', bold: true });
+      },
+    },
+    {
+      say: 'داده‌ها دو دسته‌اند و مرزشان یک منحنی خمیده است، ولی مدل فقط یک *خط صاف* بین آن‌ها کشیده و چند نقطه‌ی آموزش را اشتباه جدا کرده. طبق اسلاید 202 و 203، این مدل کدام است؟',
+      draw: async b => {
+        await quizBoard(3, 'مرز صاف برای داده‌ی خمیده', { size: 30, fa: true })(b);
+        const F = frame(380, 190, 240, 220);
+        await drawData(b, 'q', F, true);
+        await boundary(b, 'qb', F, UNDER, 'orange');
+      },
+      quiz: {
+        choices: ['Overfitted model', 'Fitted model', 'Underfitted model'],
+        correct: 2,
+        hint: 'مرز ساده‌تر از شکل داده‌هاست.',
+        explain: 'خط صاف برای داده‌ی خمیده یعنی مدل خیلی ساده؛ اسلاید 202: «مرز تصمیم‌گیری خوب نیست». این underfitting است.',
+      },
+      solve: async b => {
+        await b.write('s1', 500, 460, 'خیلی ساده  ←  Underfitted', { size: 32, fa: true, color: 'orange', bold: true });
+      },
+    },
+    {
+      say: 'به اسلاید 201 فکر کنید. کدام جمله تعریف درست *generalization* است؟',
+      draw: quizBoard(4, 'Generalization یعنی …'),
+      quiz: {
+        choices: ['مدل داده‌های آموزشی را بدون هیچ خطایی حفظ کند', 'مدل داده‌هایی را که ندیده هم درست پیش‌بینی کند', 'مدل تعداد ویژگی‌ها را کم کند'],
+        correct: 1,
+        hint: 'سؤال اسلاید 200: «اگر یک تصویر کاملاً جدید از گل ببیند…»',
+        explain: 'تعمیم یعنی مدل از گروهی از تصاویر یاد بگیرد و تصاویر جدید را هم پیش‌بینی کند. حفظ کردن بدون خطا همان overfitting است، و کم کردن ویژگی‌ها کاهش بعد.',
+      },
+      solve: async b => {
+        await b.write('s1', 500, 250, 'حفظ بی‌خطا  ←  Overfitting ✗', { size: 28, fa: true, color: 'red' });
+        await b.write('s2', 500, 320, 'پیش‌بینی درست داده‌ی ندیده  ←  Generalization ✓', { size: 28, fa: true, color: 'green', bold: true });
+        await b.write('s3', 500, 390, 'کم کردن ویژگی‌ها  ←  کاهش بعد ✗', { size: 28, fa: true, color: 'red' });
+      },
+    },
+    {
+      say: 'در تصویر Fitted model این درس 40 نقطه‌ی آموزشی داریم و مرز نرم 2 تایشان را در سمت اشتباه رها کرده. خطای آموزش این مدل چند *درصد* است؟ فقط عدد را بنویسید.',
+      draw: quizBoard(5, 'Fitted model: 40 نقطه، 2 خطا ← درصد خطا؟', { size: 36, fa: true }),
+      quiz: {
+        answer: ['5', '5%'],
+        hint: 'تعداد خطا تقسیم بر کل نقطه‌ها، ضرب در 100.',
+        explain: '2 / 40 = 0.05، یعنی 5 درصد خطا، یا 95 درصد دقت روی آموزش. مدل overfit با 0 درصد خطا روی آموزش، بدتر تعمیم می‌دهد.',
+      },
+      solve: async b => {
+        await b.write('s1', 500, 270, '2 / 40 = 0.05', { size: 44, color: 'blue' });
+        await b.write('s2', 500, 350, '0.05 × 100 = 5%', { size: 48, color: 'green', bold: true });
+        await b.write('s3', 500, 430, 'overfit: 0%   ·   fitted: 5%   ·   underfit: 10%', { size: 28, color: 'soft' });
+      },
+    },
+    {
+      say: 'سؤال آخر: برای اینکه بفهمیم مدلمان overfit شده یا نه، باید عملکردش را روی کدام داده ببینیم؟',
+      draw: quizBoard(6, 'overfit را روی کدام داده تشخیص می‌دهیم؟'),
+      quiz: {
+        choices: ['فقط روی داده‌ی آموزش', 'روی داده‌ی ندیده (اعتبارسنجی / تست) و مقایسه با آموزش', 'روی هیچ داده‌ای؛ از شکل مدل معلوم است'],
+        correct: 1,
+        hint: 'مدل overfit روی داده‌ی آموزش چطور عمل می‌کند؟',
+        explain: 'مدل overfit روی داده‌ی آموزش عالی است، پس آموزش به تنهایی چیزی نشان نمی‌دهد. باید خطای داده‌ی ندیده را با خطای آموزش مقایسه کنیم؛ فاصله‌ی بزرگ یعنی overfit.',
+      },
+      solve: async b => {
+        await b.write('s1', 500, 250, 'آموزش: overfit هم عالی است', { size: 28, fa: true, color: 'soft' });
+        await b.write('s2', 500, 320, 'اعتبارسنجی / تست  ←  خطای زیاد', { size: 30, fa: true, color: 'red', bold: true });
+        await b.write('s3', 500, 400, 'فاصله‌ی بزرگ یعنی overfit', { size: 34, fa: true, color: 'red', bold: true });
+      },
+    },
+  ],
+});
+</script>
+</body>
+</html>

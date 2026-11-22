@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>انواع یادگیری</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Vazirmatn:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="../assets/teacher.css">
+</head>
+<body>
+<main id="app"></main>
+<script src="../assets/teacher.js"></script>
+<script src="../assets/graph.js"></script>
+<script>
+// Lesson 19 — slides 168–185 (part 6: machine learning). Supervised, unsupervised, semi-supervised, reinforcement.
+
+const all = list => Promise.all(list);
+const LTR = s => `⁦${s}⁩`; // keeps a left-to-right run intact inside Persian board text
+const FA = /[؀-ۿ]/;
+
+async function node(b, id, x, y, w, h, label, o = {}) {
+  await b.box(id, x, y, w, h, { color: o.color || 'blue', fill: o.fill ?? (o.color || 'blue'), dur: o.dur ?? 350 });
+  const size = o.size || 24;
+  await b.write(id + '-t', x + w / 2, y + h / 2 + size / 3, label, { size, fa: FA.test(label), color: o.text || 'ink', bold: o.bold, dur: 250 });
+}
+
+function quizBoard(n, question, o = { size: 30, fa: true }) {
+  return async b => {
+    await b.clear();
+    await b.write('q-n', 500, 60, `سؤال ${n} از 6`, { size: 24, color: 'soft', fa: true });
+    await b.write('q-q', 500, 140, question, o);
+  };
+}
+
+// ---- the student scatter of slides 173–180 (read off the slide picture, scaled to 0..1)
+// x = how much they studied, y = how much they rested.
+const FAILED = [[0.099, 0.359], [0.171, 0.395], [0.271, 0.421], [0.39, 0.364], [0.171, 0.303], [0.264, 0.272], [0.39, 0.226], [0.473, 0.19], [0.154, 0.159], [0.271, 0.133], [0.39, 0.103], [0.545, 0.108]];
+const PASSED = [[0.455, 0.887], [0.613, 0.877], [0.736, 0.862], [0.521, 0.769], [0.599, 0.759], [0.692, 0.759], [0.51, 0.662], [0.61, 0.667], [0.716, 0.641], [0.791, 0.687], [0.647, 0.554], [0.726, 0.595]];
+const P = { x0: 110, y0: 460, w: 400, h: 330 };          // plot: origin bottom-left
+const SX = u => P.x0 + 25 + u * (P.w - 50);
+const SY = v => P.y0 - 20 - v * (P.h - 45);
+const BOUND = u => 0.95 - (u - 0.15) * 0.9375;            // the straight decision boundary (slide 174)
+
+async function plotAxes(b, id) {
+  await all([
+    b.arrow(`${id}-x`, P.x0, P.y0, P.x0 + P.w, P.y0, { color: 'soft', head: 10 }),
+    b.arrow(`${id}-y`, P.x0, P.y0, P.x0, P.y0 - P.h, { color: 'soft', head: 10 }),
+  ]);
+  await all([
+    b.write(`${id}-xl`, P.x0 + P.w - 70, P.y0 + 35, 'میزان مطالعه', { size: 22, color: 'soft', fa: true }),
+    b.write(`${id}-yl`, P.x0 + 80, P.y0 - P.h + 5, 'میزان استراحت', { size: 22, color: 'soft', fa: true }),
+  ]);
+}
+// labeled = true: failed = blue dots, passed = red squares. false: every student is a plain dot.
+function students(b, id, labeled) {
+  return all([
+    ...FAILED.map(([u, v], k) => b.dot(`${id}-f${k}`, SX(u), SY(v), { color: labeled ? 'blue' : 'ink', r: 9 })),
+    ...PASSED.map(([u, v], k) => (labeled
+      ? b.box(`${id}-p${k}`, SX(u) - 8, SY(v) - 8, 16, 16, { color: 'red', fill: 'red', r: 2, dur: 150 })
+      : b.dot(`${id}-p${k}`, SX(u), SY(v), { color: 'ink', r: 9 }))),
+  ]);
+}
+
+// ---- house prices (slides 175–176): price grows with area and levels off.
+const price = a => 10 * (1 - Math.exp(-0.33 * a));
+const HOUSES = [[0.8, -0.7], [1.3, 0.6], [1.8, 0.9], [2.6, -1.1], [3.0, 0.6], [3.6, 0.4], [4.4, -0.3], [5.2, 0.5], [6.3, -0.6], [7.2, 0.3], [8.1, -0.4]].map(([a, d]) => [a, price(a) + d]);
+const G = Graph({ x: 120, y: 120, w: 380, h: 310, from: 0, to: 10, min: 0, max: 10 });
+
+// ---- semi-supervised cloud (slide 183): two blobs, a few labeled points, the rest unlabeled.
+function rng(seed) { return () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; }; }
+const CLOUD = (() => {
+  const r = rng(7), pts = [];
+  for (let k = 0; k < 34; k++) pts.push([0.08 + 0.42 * r(), 0.08 + 0.42 * r(), 0]);
+  for (let k = 0; k < 30; k++) pts.push([0.5 + 0.42 * r(), 0.5 + 0.42 * r(), 1]);
+  return pts;
+})();
+const SEEDS = [[0.2, 0.3, 0], [0.38, 0.15, 0], [0.12, 0.45, 0], [0.7, 0.75, 1], [0.85, 0.6, 1], [0.6, 0.88, 1]]; // labeled ones
+const nearest = ([u, v]) => SEEDS.reduce((best, s) => ((s[0] - u) ** 2 + (s[1] - v) ** 2 < (best[0] - u) ** 2 + (best[1] - v) ** 2 ? s : best))[2];
+
+Teacher.start({
+  id: 'L19',
+  number: 19,
+  title: 'انواع یادگیری',
+  chapter: 'بخش 6 · یادگیری ماشین',
+  slides: '168–185',
+  intro: 'با ناظر (رگرسیون، دسته‌بندی)، بدون ناظر (خوشه‌بندی، کاهش بعد)، نیمه‌نظارتی و تقویتی.',
+  next: { href: '0020-evaluation.html', title: 'تکنیک‌های ارزیابی' },
+  steps: [
+    // ---------------------------------------------------------- 1. three methods
+    {
+      say: 'در درس قبل دیدیم که ماشین از داده یاد می‌گیرد. حالا: *چطور* یاد می‌گیرد؟ اسلاید 168 سه روش اصلی را نام می‌برد: *supervised learning* یا یادگیری با ناظر — یعنی با معلم؛ *unsupervised learning* یا بدون ناظر — بدون معلم؛ و *reinforcement learning* یا یادگیری تقویتی — یادگیری با بازی.',
+      term: ['Supervised / Unsupervised / Reinforcement', 'با ناظر / بدون ناظر / تقویتی'],
+      draw: async b => {
+        await b.write('h', 500, 80, 'سه روش یادگیری در ML', { size: 42, color: 'orange', bold: true, fa: true });
+        const R = [['یادگیری با ناظر', 'Supervised Learning', 'با معلم', 'red'], ['یادگیری بدون ناظر', 'Unsupervised Learning', 'بدون معلم', 'blue'], ['یادگیری تقویتی', 'Reinforcement Learning', 'با بازی', 'green']];
+        for (const [k, [fa, en, w, c]] of R.entries()) {
+          const x = 800 - k * 300;
+          await b.box(`b${k}`, x - 135, 160, 270, 230, { color: c, fill: c });
+          await b.write(`f${k}`, x, 230, fa, { size: 30, fa: true, bold: true, color: c });
+          await b.write(`e${k}`, x, 285, en, { size: 22 });
+          await b.write(`w${k}`, x, 350, w, { size: 26, fa: true, color: 'soft' });
+        }
+      },
+    },
+    // ---------------------------------------------------------- 2. tree
+    {
+      say: 'اسلاید 169 درخت کامل را می‌کشد. با ناظر دو شاخه دارد: *classification* یا دسته‌بندی، و *regression* یا رگرسیون. بدون ناظر هم دو شاخه دارد: *clustering* یا خوشه‌بندی، و *dimension reduction* یا کاهش بعد. تقویتی شاخه‌ای ندارد. این درخت را حفظ کنید؛ کل این درس روی همین است.',
+      draw: async b => {
+        await b.clear();
+        await node(b, 'root', 380, 50, 240, 60, 'انواع روش‌های یادگیری', { color: 'purple', fill: 'soft', size: 22, bold: true });
+        await b.line('trunk', 500, 115, 500, 150, { color: 'soft' });
+        await b.line('bar', 170, 150, 830, 150, { color: 'soft' });
+        await all([830, 500, 170].map((x, k) => b.arrow(`dn${k}`, x, 150, x, 195, { color: 'soft', head: 10 })));
+        await node(b, 'sup', 730, 200, 200, 60, 'با ناظر', { color: 'red', size: 26, bold: true });
+        await node(b, 'uns', 400, 200, 200, 60, 'بدون ناظر', { color: 'blue', size: 26, bold: true });
+        await node(b, 'rl', 70, 200, 200, 60, 'تقویتی', { color: 'green', size: 26, bold: true });
+        await b.line('sb', 730, 300, 930, 300, { color: 'soft' });
+        await b.line('st', 830, 265, 830, 300, { color: 'soft' });
+        await all([b.arrow('s1', 930, 300, 930, 345, { color: 'soft', head: 10 }), b.arrow('s2', 730, 300, 730, 345, { color: 'soft', head: 10 })]);
+        await node(b, 'cls', 860, 350, 120, 90, 'دسته‌بندی', { color: 'red', size: 20 });
+        await node(b, 'reg', 670, 350, 120, 90, 'رگرسیون', { color: 'red', size: 20 });
+        await b.line('ub', 400, 300, 600, 300, { color: 'soft' });
+        await b.line('ut', 500, 265, 500, 300, { color: 'soft' });
+        await all([b.arrow('u1', 600, 300, 600, 345, { color: 'soft', head: 10 }), b.arrow('u2', 400, 300, 400, 345, { color: 'soft', head: 10 })]);
+        await node(b, 'clu', 530, 350, 140, 90, 'خوشه‌بندی', { color: 'blue', size: 20 });
+        await node(b, 'dim', 330, 350, 140, 90, 'کاهش بعد', { color: 'blue', size: 20 });
+        await all([
+          b.write('cls-e', 920, 475, 'Classification', { size: 17, color: 'soft' }),
+          b.write('reg-e', 730, 475, 'Regression', { size: 17, color: 'soft' }),
+          b.write('clu-e', 600, 475, 'Clustering', { size: 17, color: 'soft' }),
+          b.write('dim-e', 400, 475, 'Dimension Reduction', { size: 17, color: 'soft' }),
+        ]);
+      },
+    },
+    // ---------------------------------------------------------- 3. supervised idea
+    {
+      say: 'یادگیری با ناظر، اسلاید 170: مدل را با داده‌های *برچسب‌دار* آموزش می‌دهیم. برچسب‌ها نقش *معلم* را دارند. مثل معلمی که عکس یک حیوان را به بچه نشان می‌دهد و می‌گوید «سگ». بچه — یعنی مدل — تصویر و جوابِ درست را با هم می‌بیند.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'یادگیری با ناظر (Supervised Learning)', { size: 34, color: 'red', bold: true, fa: true });
+        await b.box('img', 140, 170, 200, 160, { color: 'ink', r: 8 });
+        await b.write('imgt', 240, 265, 'تصویر', { size: 26, fa: true, color: 'soft' });
+        await b.write('plus', 400, 265, '+', { size: 50, color: 'soft' });
+        await b.ring('bub', 520, 250, 80, 55, { color: 'orange', tilt: 0 });
+        await b.write('bubt', 520, 262, 'سگ', { size: 34, fa: true, bold: true });
+        await b.write('bubl', 520, 345, 'برچسب = معلم', { size: 24, fa: true, color: 'orange' });
+        await b.arrow('a', 620, 250, 730, 250, { color: 'green' });
+        await node(b, 'mod', 740, 205, 160, 90, 'مدل', { color: 'green', size: 32, bold: true });
+        await b.write('n1', 500, 440, '◂ آموزش مدل با داده‌های برچسب‌دار', { size: 26, fa: true });
+        await b.write('n2', 500, 490, '◂ برچسب‌ها در نقش معلم', { size: 26, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 4. formal
+    {
+      say: 'تعریف دقیق‌تر، اسلاید 171: در یادگیری با ناظر *ورودی و خروجی مشخص است*. دیتاست را این‌طور می‌نویسیم: S برابر مجموعه‌ی زوج‌های x_i و y_i، از i = 1 تا N. هر x_i ویژگی‌های یک نمونه است و y_i برچسبش. پس N نمونه داریم و *هر کدام* یک برچسب دارد. سیستم سعی می‌کند تابعی مثل f_p یاد بگیرد که از x، خروجی y_p را بسازد.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'ورودی و خروجی مشخص است', { size: 34, color: 'red', bold: true, fa: true });
+        await b.write('S', 500, 170, 'S = { (x_i , y_i) }_{i=1}^{N} = { (x_1, y_1), (x_2, y_2), … , (x_N, y_N) }', { size: 32 });
+        await all([
+          b.write('lx', 250, 240, 'x_i', { size: 34, color: 'blue', bold: true }),
+          b.write('ly', 500, 240, 'y_i', { size: 34, color: 'red', bold: true }),
+          b.write('lN', 750, 240, 'N', { size: 34, color: 'purple', bold: true }),
+        ]);
+        await all([
+          b.write('lxf', 250, 280, 'ویژگی‌های نمونه', { size: 22, color: 'blue', fa: true }),
+          b.write('lyf', 500, 280, 'برچسب نمونه', { size: 22, color: 'red', fa: true }),
+          b.write('lNf', 750, 280, 'تعداد نمونه‌ها', { size: 22, color: 'purple', fa: true }),
+        ]);
+        await b.arrow('a1', 300, 380, 420, 380, { color: 'ink' });
+        await b.write('xin', 280, 390, 'x', { size: 36, bold: true, anchor: 'end' });
+        await b.box('f', 430, 335, 140, 90, { color: 'red', fill: 'red' });
+        await b.write('ft', 500, 392, 'f_p', { size: 40, bold: true, color: 'red' });
+        await b.arrow('a2', 580, 380, 700, 380, { color: 'ink' });
+        await b.write('yout', 715, 390, 'y_p = f_p(x)', { size: 34, anchor: 'start', color: 'green' });
+        await b.write('n', 500, 490, 'سیستم یک تابع از ورودی به خروجی یاد می‌گیرد', { size: 24, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 5. regression vs classification
+    {
+      say: 'دو شاخه‌ی با ناظر، اسلاید 172. فرقشان فقط در *نوع خروجی* است. اگر تابع هدف *پیوسته* باشد — هر عددی، مثل قیمت — مسئله *رگرسیون* است. اگر تابع هدف تعداد *محدودی مقدار گسسته* بگیرد — مثل قبول/رد، یا رقم 0 تا 9 — مسئله *دسته‌بندی* است.',
+      term: ['Regression / Classification', 'رگرسیون / دسته‌بندی'],
+      draw: async b => {
+        await b.clear();
+        await b.box('rb', 520, 70, 420, 400, { color: 'blue', fill: 'blue' });
+        await b.box('cb', 60, 70, 420, 400, { color: 'green', fill: 'green' });
+        await b.write('rt', 730, 130, 'رگرسیون', { size: 38, fa: true, bold: true, color: 'blue' });
+        await b.write('re', 730, 175, 'Regression', { size: 24, color: 'blue' });
+        await b.write('rd', 730, 250, 'خروجی پیوسته', { size: 32, fa: true, bold: true, color: 'red' });
+        await b.line('rl', 590, 330, 870, 330, { color: 'blue', width: 5 });
+        await b.write('rl1', 590, 365, '0', { size: 22, color: 'soft' });
+        await b.write('rl2', 870, 365, '∞', { size: 22, color: 'soft' });
+        await b.write('rx', 730, 430, 'مثال: قیمت خانه', { size: 24, fa: true });
+        await b.write('ct', 270, 130, 'دسته‌بندی', { size: 38, fa: true, bold: true, color: 'green' });
+        await b.write('ce', 270, 175, 'Classification', { size: 24, color: 'green' });
+        await b.write('cd', 270, 250, 'خروجی گسسته (محدود)', { size: 30, fa: true, bold: true, color: 'red' });
+        await all([150, 230, 310, 390].map((x, k) => b.dot(`cd${k}`, x, 330, { color: 'green', r: 11 })));
+        await b.write('cx', 270, 430, 'مثال: قبول / رد', { size: 24, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 6. classification example
+    {
+      say: 'مثال دسته‌بندی، اسلاید 173: داده‌های مطالعه‌ی تعدادی دانش‌آموز. محور افقی *میزان مطالعه*، محور عمودی *میزان استراحت*. برچسب هر نقطه نتیجه‌ی امتحان است: مربع‌های قرمز قبول شده‌اند و دایره‌های آبی قبول نشده‌اند. چون هر نقطه برچسب دارد، این یادگیری با ناظر است.',
+      draw: async b => {
+        await b.clear();
+        await plotAxes(b, 'ax');
+        await students(b, 'st', true);
+        await b.write('h', 760, 120, 'Classification', { size: 32, color: 'green', bold: true });
+        await b.box('lg1', 600, 190, 18, 18, { color: 'red', fill: 'red', r: 2 });
+        await b.write('lg1t', 640, 207, 'قبول شده', { size: 26, fa: true, color: 'red', anchor: 'end' });
+        await b.dot('lg2', 609, 250, { color: 'blue', r: 9 });
+        await b.write('lg2t', 640, 259, 'قبول نشده', { size: 26, fa: true, color: 'blue', anchor: 'end' });
+        await b.write('lg3', 760, 340, 'هر داده برچسب دارد', { size: 26, fa: true, color: 'orange', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 7. decision boundary
+    {
+      say: 'اسلاید 174: مدل از روی داده‌های برچسب‌دار یک *decision boundary* یا مرز تصمیم‌گیری بین دو دسته پیدا می‌کند — این خط‌چین. حالا اگر یک دانش‌آموز تازه بیاید — نقطه‌ی نارنجی — فقط نگاه می‌کنیم کدام طرف مرز است. این یکی طرف دایره‌هاست، پس مدل می‌گوید: قبول نمی‌شود.',
+      term: ['Decision boundary', 'مرز تصمیم‌گیری'],
+      draw: async b => {
+        await b.erase('lg3');
+        const a = [0.08, BOUND(0.08)], c = [1.0, BOUND(1.0)];
+        await b.line('bd', SX(a[0]), SY(a[1]), SX(c[0]), SY(c[1]), { color: 'orange', width: 3 });
+        await b.write('bdl', 760, 330, 'مرز تصمیم‌گیری', { size: 26, fa: true, color: 'orange', bold: true });
+        await b.dot('new', SX(0.1), SY(0.5), { color: 'orange', r: 11 });
+        await b.ring('newr', SX(0.1), SY(0.5), 22, 22, { color: 'orange' });
+        await b.write('nl', 760, 400, 'داده‌ی تازه ← سمت «قبول نشده»', { size: 24, fa: true, color: 'blue' });
+      },
+    },
+    // ---------------------------------------------------------- 8. regression
+    {
+      say: 'مثال رگرسیون، اسلاید 175: قیمت خانه بر اساس متراژ. هر چه متراژ بیشتر، قیمت بیشتر. اینجا برچسب هر داده *قیمت* آن است — یک عدد پیوسته. هدف مدل رگرسیون ساختن یک معادله بین x و y است: y = f(x). یک چندجمله‌ای روی داده‌ها *fit* می‌کنیم که کمترین خطای ممکن را داشته باشد، یعنی به همه‌ی نقاط تا جای ممکن نزدیک باشد. دقت کنید: عنوان اسلاید 175 و 176 «Classification» نوشته شده، ولی محتوا *رگرسیون* است.',
+      term: ['Fit', 'برازش — جا انداختن منحنی روی داده'],
+      draw: async b => {
+        await b.clear();
+        await G.axes(b, 'rg', { ticks: [], yTicks: [], label: '', yLabel: '' });
+        await b.write('rg-xl', 440, 470, 'متراژ خانه', { size: 22, color: 'soft', fa: true });
+        await b.write('rg-yl', 175, 100, 'قیمت', { size: 22, color: 'soft', fa: true });
+        await all(HOUSES.map(([a, p], k) => b.write(`hx${k}`, G.X(a), G.Y(p) + 9, '×', { size: 30, color: 'red', dur: 150 })));
+        await G.curve(b, 'fit', price, { color: 'blue', lo: 0.4, hi: 9.6 });
+        await b.write('h', 760, 120, 'Regression', { size: 32, color: 'blue', bold: true });
+        await b.write('eq', 760, 190, 'y = f(x)', { size: 40, color: 'blue' });
+        await b.write('l1', 760, 260, 'برچسب هر داده = قیمت', { size: 26, fa: true });
+        await b.write('l2', 760, 310, 'منحنی با کمترین خطا', { size: 26, fa: true });
+        await b.write('err', 760, 440, 'عنوان اسلاید: Classification ✗', { size: 22, fa: true, color: 'red' });
+      },
+    },
+    // ---------------------------------------------------------- 9. use the curve
+    {
+      say: 'اسلاید 176: حالا خانه‌ای با یک متراژ مشخص داریم؛ قیمتش چقدر است؟ متراژ را در معادله‌ی منحنی می‌گذاریم: از روی محور افقی بالا می‌رویم تا به منحنی برسیم، بعد به محور قیمت می‌رویم. این عدد، قیمتِ *تخمینی* است.',
+      draw: async b => {
+        await G.guide(b, 'gd', 6, price(6), { color: 'orange' });
+        await b.write('gdx', G.X(6), 465, 'متراژ', { size: 20, fa: true, color: 'orange' });
+        await b.write('gdy', G.X(0) + 60, G.Y(price(6)) - 22, 'قیمت تخمینی', { size: 20, fa: true, color: 'orange' });
+        await b.write('l3', 760, 370, 'متراژ را در منحنی بگذار', { size: 26, fa: true, color: 'orange', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 10. unsupervised
+    {
+      say: 'حالا *یادگیری بدون ناظر*، اسلاید 177 و 178: مدل را *بدون برچسب* آموزش می‌دهیم — از معلم خبری نیست! برخلاف یادگیری با ناظر، داده‌های مشخصی از قبل وجود ندارد و هدف، ارتباط ورودی و خروجی نیست؛ فقط می‌خواهیم داده‌ها را بر اساس یک ساختار خاص *دسته‌بندی* کنیم، یعنی داده‌ها را با هم مقایسه کنیم.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 80, 'یادگیری بدون ناظر (Unsupervised Learning)', { size: 32, color: 'blue', bold: true, fa: true });
+        const L = ['آموزش مدل بدون برچسب', 'از معلم خبری نیست!', 'مقایسه‌ی داده‌ها با هم', 'هدف: ارتباط ورودی و خروجی نیست'];
+        for (const [k, l] of L.entries()) await b.write(`l${k}`, 820, 180 + k * 70, '◂ ' + l, { size: 30, fa: true, anchor: 'start', dur: 300 });
+        await b.write('only', 500, 480, 'فقط گروه‌بندی بر اساس ساختار داده‌ها', { size: 28, fa: true, color: 'orange', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 11. clustering
+    {
+      say: '*Clustering* یا خوشه‌بندی، اسلاید 179: همان داده‌ی دانش‌آموزها، ولی این بار *نمی‌دانیم* کدام قبول شده‌اند و کدام نه — همه یک رنگ‌اند. خوشه‌بندی فرایندی خودکار است که نمونه‌ها را به گروه‌هایی تقسیم می‌کند که اعضایشان به هم شبیه‌اند. به هر گروه یک *cluster* یا خوشه می‌گوییم: اعضای یک خوشه به هم شبیه‌اند و با اعضای خوشه‌های دیگر فرق دارند.',
+      term: ['Clustering / Cluster', 'خوشه‌بندی / خوشه'],
+      draw: async b => {
+        await b.clear();
+        await plotAxes(b, 'ax');
+        await students(b, 'st', false);
+        await b.write('h', 760, 120, 'Clustering', { size: 32, color: 'blue', bold: true });
+        await b.write('l1', 760, 200, 'برچسب نداریم', { size: 28, fa: true, color: 'red', bold: true });
+        await b.write('l2', 760, 250, 'نمی‌دانیم چه کسی قبول شده', { size: 24, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 12. distance
+    {
+      say: 'اسلاید 180: شباهت را چطور بسنجیم؟ معیارهای مختلفی هست؛ مثلاً *فاصله*. اشیائی که به هم نزدیک‌ترند یک خوشه می‌شوند. به این، *خوشه‌بندی مبتنی بر فاصله* می‌گویند. اینجا دو خوشه پیدا می‌شود. دقت کنید که مدل اسم «قبول» و «رد» را نمی‌داند؛ فقط می‌داند این دو گروه از هم جدا هستند.',
+      draw: async b => {
+        await b.ring('c1', SX(0.3), SY(0.27), 115, 70, { color: 'orange', tilt: -8 });
+        await b.ring('c2', SX(0.63), SY(0.73), 105, 75, { color: 'orange', tilt: -8 });
+        await all([
+          ...FAILED.map(([u, v], k) => b.dot(`st-f${k}`, SX(u), SY(v), { color: 'blue', r: 9 })),
+          ...PASSED.map(([u, v], k) => b.dot(`st-p${k}`, SX(u), SY(v), { color: 'red', r: 9 })),
+        ]);
+        await b.write('w1', SX(0.3), SY(0.27) + 95, 'خوشه‌ی 1', { size: 22, fa: true, color: 'blue' });
+        await b.write('w2', SX(0.63), SY(0.73) - 88, 'خوشه‌ی 2', { size: 22, fa: true, color: 'red' });
+        await b.write('l3', 760, 330, 'معیار شباهت: فاصله', { size: 28, fa: true, color: 'orange', bold: true });
+        await b.write('l4', 760, 380, 'نزدیک‌ترها = یک خوشه', { size: 24, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 13. classification vs clustering
+    {
+      say: 'نکته‌ی امتحانی: تصویر دسته‌بندی و خوشه‌بندی شبیه هم است، فرق در *برچسب* است. اگر داده‌ها برچسب دارند و مرز را از روی برچسب‌ها یاد می‌گیریم، دسته‌بندی است — با ناظر. اگر برچسبی نیست و گروه‌ها را از روی شباهت پیدا می‌کنیم، خوشه‌بندی است — بدون ناظر.',
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        await b.box('l', 60, 90, 420, 330, { color: 'green', fill: 'green' });
+        await b.box('r', 520, 90, 420, 330, { color: 'blue', fill: 'blue' });
+        await b.write('lt', 270, 150, 'دسته‌بندی', { size: 36, fa: true, bold: true, color: 'green' });
+        await b.write('rt', 730, 150, 'خوشه‌بندی', { size: 36, fa: true, bold: true, color: 'blue' });
+        await b.write('l1', 270, 230, 'داده برچسب دارد', { size: 28, fa: true });
+        await b.write('r1', 730, 230, 'داده برچسب ندارد', { size: 28, fa: true });
+        await b.write('l2', 270, 300, 'مرز از روی برچسب‌ها', { size: 26, fa: true, color: 'soft' });
+        await b.write('r2', 730, 300, 'گروه از روی شباهت', { size: 26, fa: true, color: 'soft' });
+        await b.write('l3', 270, 375, 'با ناظر', { size: 32, fa: true, bold: true, color: 'red' });
+        await b.write('r3', 730, 375, 'بدون ناظر', { size: 32, fa: true, bold: true, color: 'red' });
+        await b.write('q', 500, 490, 'سؤال کلیدی: برچسب داریم یا نه؟', { size: 30, fa: true, color: 'orange', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 14. dimension reduction
+    {
+      say: 'شاخه‌ی دوم بدون ناظر: *dimension reduction* یا کاهش بعد، اسلاید 181. هر داده ممکن است چندین ویژگی داشته باشد؛ هر ویژگی یک *بعد* است. مثلاً اگر یک داده را از 4 بعد به 2 بعد برسانیم، خیلی خوب است. چرا؟ دو دلیل. یک: بیش از سه بعد را *نمی‌توانیم نمایش دهیم*؛ با کاهش بعد به دو یا سه بعد می‌توانیم ببینیمش. دو: *فشرده‌سازی* — همه‌ی ویژگی‌ها مفید نیستند و بعضی‌ها تأثیری در یادگیری ندارند؛ حذفشان فضای ذخیره را کم و سرعت الگوریتم را زیاد می‌کند.',
+      term: ['Dimension reduction', 'کاهش بعد'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'کاهش بعد (Dimension Reduction)', { size: 34, color: 'blue', bold: true, fa: true });
+        const F4 = ['f1', 'f2', 'f3', 'f4'];
+        await all(F4.map((f, k) => node(b, `d4-${k}`, 590 + k * 85, 130, 75, 55, f, { color: 'blue', size: 24 })));
+        await b.write('d4l', 740, 225, `${LTR('4')} ویژگی یعنی ${LTR('4')} بعد`, { size: 24, fa: true, color: 'blue' });
+        await b.arrow('a', 570, 158, 430, 158, { color: 'orange' });
+        await all(['g1', 'g2'].map((f, k) => node(b, `d2-${k}`, 250 + k * 85, 130, 75, 55, f, { color: 'green', size: 24 })));
+        await b.write('d2l', 330, 225, `${LTR('2')} بعد`, { size: 24, fa: true, color: 'green' });
+        await b.write('r1', 900, 310, '1.  نمایش: بیش از 3 بعد را نمی‌شود کشید', { size: 26, fa: true, anchor: 'start' });
+        await b.write('r2', 900, 370, '2.  فشرده‌سازی: حذف ویژگی‌های بی‌فایده', { size: 26, fa: true, anchor: 'start' });
+        await b.write('r3', 500, 450, 'فضای ذخیره‌سازی کمتر  ·  سرعت یادگیری بیشتر', { size: 26, fa: true, color: 'green', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 15. semi-supervised
+    {
+      say: 'روش سوم: *semi-supervised learning* یا یادگیری نیمه‌نظارتی، اسلاید 182. هم از داده‌های *برچسب‌خورده* و هم از داده‌های *برچسب‌نخورده* به صورت همزمان استفاده می‌کند تا دقت یادگیری بهتر شود. چرا لازم است؟ چون برچسب زدن گران است: معمولاً داده‌ی زیادی داریم ولی فقط تعداد کمی برچسب دارد.',
+      term: ['Semi-supervised learning', 'یادگیری نیمه‌نظارتی'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 80, 'یادگیری نیمه‌نظارتی (Semi-supervised)', { size: 34, color: 'purple', bold: true, fa: true });
+        await node(b, 'lab', 560, 170, 330, 80, 'کمی داده‌ی برچسب‌دار', { color: 'red', size: 26 });
+        await node(b, 'unl', 110, 170, 330, 80, 'خیلی داده‌ی بی‌برچسب', { color: 'soft', size: 26 });
+        await b.write('plus', 500, 225, '+', { size: 50, color: 'soft' });
+        await b.arrow('a1', 725, 260, 560, 340, { color: 'green' });
+        await b.arrow('a2', 275, 260, 440, 340, { color: 'green' });
+        await node(b, 'res', 380, 345, 240, 70, 'یادگیری دقیق‌تر', { color: 'green', size: 28, bold: true });
+        await b.write('n', 500, 480, 'هر دو نوع داده، همزمان', { size: 26, fa: true, color: 'orange' });
+      },
+    },
+    // ---------------------------------------------------------- 16. semi example
+    {
+      say: 'مثال اسلاید 183: داده‌ی زیادی داریم که کلاسشان مشخص نیست — نقطه‌های سیاه. فقط چند نقطه برچسب دارند: آبی یعنی رد شده، قرمز یعنی قبول شده. روش نیمه‌نظارتی بقیه را هم علامت‌گذاری می‌کند: از روی *فاصله‌ی* هر داده تا داده‌های برچسب‌دار. هر نقطه رنگ نزدیک‌ترین همسایه‌ی برچسب‌دارش را می‌گیرد. کاربرد واقعی: شناسایی چهره.',
+      draw: async b => {
+        await b.clear();
+        await plotAxes(b, 'ax');
+        await all(CLOUD.map(([u, v], k) => b.dot(`cl${k}`, SX(u), SY(v), { color: 'ink', r: 6 })));
+        await all(SEEDS.map(([u, v, c], k) => b.dot(`sd${k}`, SX(u), SY(v), { color: c ? 'red' : 'blue', r: 10 })));
+        await all(SEEDS.map(([u, v], k) => b.ring(`sr${k}`, SX(u), SY(v), 16, 16, { color: 'orange' })));
+        await b.write('l1', 760, 150, 'سیاه: بدون برچسب', { size: 26, fa: true });
+        await b.write('l2', 760, 200, 'آبی: رد شده', { size: 26, fa: true, color: 'blue' });
+        await b.write('l3', 760, 250, 'قرمز: قبول شده', { size: 26, fa: true, color: 'red' });
+        await all(CLOUD.map(([u, v], k) => b.dot(`cl${k}`, SX(u), SY(v), { color: nearest([u, v]) ? 'red' : 'blue', r: 6 })));
+        await b.write('l4', 760, 340, 'برچسب از روی فاصله تا', { size: 26, fa: true, color: 'orange', bold: true });
+        await b.write('l5', 760, 380, 'داده‌های برچسب‌دار', { size: 26, fa: true, color: 'orange', bold: true });
+        await b.write('l6', 760, 450, 'مثال: شناسایی چهره', { size: 24, fa: true, color: 'soft' });
+      },
+    },
+    // ---------------------------------------------------------- 17. reinforcement
+    {
+      say: 'روش آخر: *reinforcement learning* یا یادگیری تقویتی، اسلاید 184. یک *agent* یا عامل، در یک محیطِ تعاملی، با *آزمون و خطا* یاد می‌گیرد. وقتی عامل در یک حالت خاص عملی انجام می‌دهد، در مقابل *reward* یا پاداش می‌گیرد — یا جریمه. تمام تلاش عامل این است که پاداش دریافتی را *در دراز مدت* به حداکثر برساند. کاربرد معروفش: بازی‌ها.',
+      term: ['Agent / Reward', 'عامل / پاداش'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'یادگیری تقویتی (Reinforcement Learning)', { size: 34, color: 'green', bold: true, fa: true });
+        await node(b, 'ag', 380, 130, 240, 80, 'عامل (Agent)', { color: 'green', size: 28, bold: true });
+        await node(b, 'env', 380, 340, 240, 80, 'محیط', { color: 'blue', size: 28, bold: true });
+        await b.wire('act', [[620, 170], [760, 170], [760, 380], [625, 380]], { color: 'orange' });
+        await b.arrow('acth', 650, 380, 625, 380, { color: 'orange', head: 12, dur: 100 });
+        await b.write('actl', 790, 285, 'عمل', { size: 28, fa: true, color: 'orange', bold: true, anchor: 'end' });
+        await b.wire('rew', [[380, 380], [240, 380], [240, 170], [375, 170]], { color: 'red' });
+        await b.arrow('rewh', 350, 170, 375, 170, { color: 'red', head: 12, dur: 100 });
+        await b.write('rewl', 210, 270, 'پاداش / جریمه', { size: 26, fa: true, color: 'red', bold: true, anchor: 'start' });
+        await b.write('rewl2', 210, 305, '(Reward)', { size: 22, color: 'red', anchor: 'end' });
+        await b.write('goal', 500, 490, 'هدف: بیشترین پاداش در دراز مدت', { size: 30, fa: true, color: 'green', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 18. RL vs supervised, Pac-Man
+    {
+      say: 'فرقش با یادگیری با ناظر چیست؟ هر دو از نگاشت بین ورودی و خروجی استفاده می‌کنند، ولی در یادگیری تقویتی *پاداش و تنبیه* سیگنال بهبود عملکرد است، نه برچسب. اسلاید 185 با بازی Pac-Man نشانش می‌دهد: مدل بر اساس یک سناریوی پاداش و جزا آموزش می‌بیند. خوردن نقطه پاداش دارد، برخورد با روح جریمه. و جمله‌ی کلیدی اسلاید: *نه X داریم نه y* — هیچ دیتاستِ آماده‌ای از قبل نیست.',
+      draw: async b => {
+        await b.clear();
+        await b.box('maze', 60, 120, 380, 250, { color: 'blue', r: 4 });
+        await b.line('wall1', 110, 170, 300, 170, { color: 'blue' });
+        await b.line('wall2', 200, 320, 400, 320, { color: 'blue' });
+        await all([190, 235, 280, 325, 365].map((x, k) => b.dot(`pel${k}`, x, 245, { color: 'soft', r: 5 })));
+        await b.path('pac', 'M120 245 L148 228 A32 32 0 1 0 148 262 Z', { color: 'orange', fill: 'orange', dur: 300 });
+        await b.ring('ghost', 405, 245, 20, 22, { color: 'red', fill: 'red', tilt: 0 });
+        await b.write('pr', 275, 222, '+ پاداش', { size: 22, fa: true, color: 'green' });
+        await b.write('gr', 405, 298, 'جریمه −', { size: 22, fa: true, color: 'red' });
+        await b.write('t1', 940, 170, '◂ آموزش بر اساس سناریوی پاداش و جزا', { size: 22, fa: true, anchor: 'start' });
+        await b.write('t2', 940, 230, '◂ سیگنال: پاداش و تنبیه، نه برچسب', { size: 22, fa: true, anchor: 'start' });
+        await b.write('t3', 720, 330, `نه ${LTR('X')} داریم نه ${LTR('y')}`, { size: 36, fa: true, color: 'red', bold: true });
+        await b.write('t4', 500, 470, 'یادگیری تقویتی = یادگیری با بازی', { size: 30, fa: true, color: 'green', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 19. compare table
+    {
+      say: 'همه را کنار هم بگذاریم. سؤال اول امتحان معمولاً این است: «این مسئله کدام نوع یادگیری است؟» دو سؤال بپرسید. یک: داده *برچسب* دارد؟ همه دارند ← با ناظر؛ هیچ‌کدام ندارند ← بدون ناظر؛ بعضی دارند ← نیمه‌نظارتی؛ دیتاست نیست و فقط پاداش است ← تقویتی. دو: اگر با ناظر است، خروجی پیوسته است ← رگرسیون، گسسته ← دسته‌بندی.',
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        const H = ['نوع', 'داده', 'مثال'], X = [820, 520, 200];
+        await all(H.map((h, k) => b.write(`th${k}`, X[k], 70, h, { size: 28, fa: true, bold: true, color: 'blue' })));
+        await b.line('hl', 50, 90, 950, 90, { color: 'soft', width: 2 });
+        const R = [
+          ['با ناظر', 'همه برچسب دارند', 'قبول/رد، قیمت خانه', 'red'],
+          ['بدون ناظر', 'هیچ برچسبی نیست', 'گروه‌بندی مشتری‌ها', 'blue'],
+          ['نیمه‌نظارتی', 'کمی برچسب‌دار + بقیه بی‌برچسب', 'شناسایی چهره', 'purple'],
+          ['تقویتی', 'نه X نه y؛ فقط پاداش', 'بازی‌ها', 'green'],
+        ];
+        for (const [r, row] of R.entries()) {
+          const y = 150 + r * 75;
+          await all(row.slice(0, 3).map((v, k) => b.write(`t${r}-${k}`, X[k], y, v, { size: k ? 23 : 28, fa: true, bold: !k, color: k ? 'ink' : row[3], dur: 250 })));
+        }
+        await b.write('q', 500, 470, 'با ناظر: پیوسته ← رگرسیون   ·   گسسته ← دسته‌بندی', { size: 26, fa: true, color: 'orange', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 20. summary
+    {
+      say: 'جمع‌بندی برای امتحان. این‌ها را یک بار دیگر مرور کنید، بعد سؤال‌ها.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'یادت باشد', { size: 46, color: 'orange', bold: true, fa: true });
+        const L = [
+          'با ناظر: ورودی و خروجی مشخص؛ برچسب = معلم؛ یاد گرفتن y = f(x)',
+          'رگرسیون: خروجی پیوسته   ·   دسته‌بندی: خروجی گسسته و محدود',
+          'مرز تصمیم‌گیری: داده‌ی تازه را بر اساس سمتش دسته‌بندی می‌کند',
+          'بدون ناظر: بدون برچسب؛ خوشه‌بندی (معیار فاصله) و کاهش بعد',
+          'کاهش بعد: نمایش در 2 یا 3 بعد + حذف ویژگی‌های بی‌فایده',
+          'نیمه‌نظارتی: برچسب‌دار و بی‌برچسب با هم   ·   تقویتی: عامل + پاداش',
+        ];
+        for (const [k, l] of L.entries()) {
+          await b.dot(`mb${k}`, 950, 142 + k * 66, { color: 'orange', r: 5 });
+          await b.write(`m${k}`, 932, 150 + k * 66, l, { size: 24, anchor: 'start', fa: true });
+        }
+      },
+    },
+    // ---------------------------------------------------------- quizzes
+    {
+      say: 'نوبت شماست! می‌خواهیم قیمت یک خانه را از روی متراژش پیش‌بینی کنیم. این چه نوع مسئله‌ای است؟',
+      draw: quizBoard(1, 'پیش‌بینی قیمت خانه از روی متراژ'),
+      quiz: {
+        choices: ['دسته‌بندی (Classification)', 'رگرسیون (Regression)', 'خوشه‌بندی (Clustering)'],
+        correct: 1,
+        hint: 'قیمت یک مقدار پیوسته است یا یکی از چند دسته‌ی محدود؟',
+        explain: 'قیمت عدد پیوسته است و هر خانه برچسبِ قیمت دارد، پس یادگیری با ناظر از نوع رگرسیون. همان مثال اسلاید 175.',
+      },
+      solve: async b => {
+        await b.write('s1', 500, 240, 'برچسب دارد؟  بله  ←  با ناظر', { size: 30, fa: true, color: 'red' });
+        await b.write('s2', 500, 310, 'خروجی؟  قیمت = پیوسته', { size: 30, fa: true, color: 'blue' });
+        await b.write('s3', 500, 400, 'رگرسیون', { size: 46, fa: true, bold: true, color: 'green' });
+      },
+    },
+    {
+      say: 'در یادگیری با ناظر دیتاست را S = {(x_i, y_i)} از i = 1 تا N نوشتیم. اگر N = 200 باشد، این دیتاست چند *برچسب* y دارد؟',
+      draw: quizBoard(2, 'S = { (x_i , y_i) }_{i=1}^{N}   ,   N = 200', { size: 36 }),
+      quiz: {
+        answer: ['200'],
+        hint: 'در یادگیری با ناظر هر نمونه x_i یک برچسب y_i همراه خودش دارد.',
+        explain: 'هر زوج (x_i, y_i) یک نمونه با برچسبش است. 200 نمونه یعنی 200 برچسب: y_1 تا y_200.',
+      },
+      solve: async b => {
+        await b.write('s1', 500, 250, '(x_1, y_1), (x_2, y_2), … , (x_200, y_200)', { size: 34 });
+        await b.write('s2', 500, 340, 'هر نمونه یک برچسب', { size: 30, fa: true, color: 'blue' });
+        await b.write('s3', 500, 420, `${LTR('200')} برچسب`, { size: 44, fa: true, bold: true, color: 'green' });
+      },
+    },
+    {
+      say: 'یک فروشگاه اطلاعات خرید هزاران مشتری را دارد، ولی *هیچ برچسبی* ندارد. می‌خواهد مشتری‌های شبیه به هم را در گروه‌ها قرار دهد. از کدام روش استفاده کند؟',
+      draw: quizBoard(3, 'گروه‌بندی مشتری‌های بدون برچسب'),
+      quiz: {
+        choices: ['دسته‌بندی — با ناظر', 'خوشه‌بندی — بدون ناظر', 'رگرسیون — با ناظر'],
+        correct: 1,
+        hint: 'برچسب نداریم؛ پس کدام شاخه‌ی درخت؟',
+        explain: 'بدون برچسب و هدف گروه‌بندیِ داده‌های شبیه هم: خوشه‌بندی، که شاخه‌ای از یادگیری بدون ناظر است.',
+      },
+      solve: async b => {
+        await b.write('s1', 500, 240, 'برچسب دارد؟  نه  ←  بدون ناظر', { size: 30, fa: true, color: 'blue' });
+        await b.write('s2', 500, 310, 'هدف: گروه‌بندی شبیه‌ها', { size: 30, fa: true });
+        await b.write('s3', 500, 400, 'خوشه‌بندی', { size: 46, fa: true, bold: true, color: 'green' });
+      },
+    },
+    {
+      say: 'برای یک سیستم شناسایی چهره 10000 عکس داریم، ولی فقط 300 تایشان برچسب اسم دارند. مدل از *هر دو گروه* با هم استفاده می‌کند. این کدام نوع یادگیری است؟',
+      draw: quizBoard(4, '10000 عکس، فقط 300 تا برچسب‌دار', { size: 34, fa: true }),
+      quiz: {
+        choices: ['با ناظر', 'بدون ناظر', 'نیمه‌نظارتی', 'تقویتی'],
+        correct: 2,
+        hint: 'بعضی داده‌ها برچسب دارند و بعضی ندارند.',
+        explain: 'استفاده‌ی همزمان از داده‌ی برچسب‌دار و بی‌برچسب، تعریف یادگیری نیمه‌نظارتی است (اسلاید 182). اسلاید 183 هم شناسایی چهره را مثال می‌زند.',
+      },
+      solve: async b => {
+        await b.write('s1', 500, 240, 'بعضی برچسب دارند، بیشترشان نه', { size: 30, fa: true });
+        await b.write('s2', 500, 310, 'برچسب بقیه از روی فاصله تا برچسب‌دارها', { size: 26, fa: true, color: 'soft' });
+        await b.write('s3', 500, 400, 'نیمه‌نظارتی', { size: 46, fa: true, bold: true, color: 'green' });
+      },
+    },
+    {
+      say: 'یک برنامه بازی Pac-Man را یاد می‌گیرد: هیچ دیتاستی به آن نداده‌ایم؛ فقط وقتی نقطه می‌خورد امتیاز می‌گیرد و وقتی روح او را می‌گیرد امتیاز از دست می‌دهد. این کدام نوع یادگیری است؟',
+      draw: quizBoard(5, 'Pac-Man: امتیاز و جریمه، بدون دیتاست'),
+      quiz: {
+        choices: ['تقویتی', 'نیمه‌نظارتی', 'با ناظر — دسته‌بندی'],
+        correct: 0,
+        hint: 'نه X داریم نه y؛ فقط پاداش و جزا.',
+        explain: 'عاملی که با آزمون و خطا و پاداش و جریمه یاد می‌گیرد و پاداش دراز مدت را بیشینه می‌کند: یادگیری تقویتی (اسلاید 184 و 185).',
+      },
+      solve: async b => {
+        await b.write('s1', 500, 240, 'دیتاست؟  نه X نه y', { size: 30, fa: true, color: 'red' });
+        await b.write('s2', 500, 310, 'سیگنال: پاداش و جریمه', { size: 30, fa: true });
+        await b.write('s3', 500, 400, 'تقویتی', { size: 46, fa: true, bold: true, color: 'green' });
+      },
+    },
+    {
+      say: 'سؤال آخر: کدام‌یک از این‌ها *جزو* دلیل‌های کاهش بعد در اسلاید 181 *نیست*؟',
+      draw: quizBoard(6, 'کدام، دلیل کاهش بعد نیست؟'),
+      quiz: {
+        choices: ['نمایش داده‌ها در دو یا سه بعد', 'حذف ویژگی‌های بی‌فایده و فشرده کردن داده', 'اضافه کردن برچسب به داده‌ها'],
+        correct: 2,
+        hint: 'کاهش بعد تعداد ویژگی‌ها را کم می‌کند. کدام گزینه ربطی به تعداد ویژگی ندارد؟',
+        explain: 'دو دلیل اسلاید 181: نمایش (بیش از سه بعد را نمی‌شود کشید) و فشرده‌سازی (حذف ویژگی‌های بی‌اثر، فضای کمتر، سرعت بیشتر). کاهش بعد بدون ناظر است و برچسب اضافه نمی‌کند.',
+      },
+      solve: async b => {
+        await b.write('s1', 500, 240, '1. نمایش در 2 یا 3 بعد  ✓', { size: 30, fa: true, color: 'green' });
+        await b.write('s2', 500, 310, '2. فشرده‌سازی، حذف ویژگی بی‌فایده  ✓', { size: 30, fa: true, color: 'green' });
+        await b.write('s3', 500, 380, 'اضافه کردن برچسب  ✗', { size: 30, fa: true, color: 'red', bold: true });
+      },
+    },
+  ],
+});
+</script>
+</body>
+</html>

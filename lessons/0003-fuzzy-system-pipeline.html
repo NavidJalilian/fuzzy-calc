@@ -3,579 +3,502 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>درس ۳ — ساختار یک سیستم فازی</title>
-<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
-<style>
-/* ===== SHARED STYLE — copy verbatim into every lesson, do not edit per lesson ===== */
-:root{--bg:#fbfaf7;--surface:#ffffff;--surface-1:#f3f1ec;--text:#1f1e1c;--text-2:#5f5e5a;--text-3:#888780;--border:#e3e0d8;--border-strong:#c9c6bc;
---accent:#534AB7;--accent-bg:#EEEDFE;--ok:#3B6D11;--ok-bg:#EAF3DE;--bad:#A32D2D;--bad-bg:#FCEBEB;--warn:#854F0B;--warn-bg:#FAEEDA;
---c1:#7F77DD;--c2:#1D9E75;--c3:#EF9F27;--c4:#D4537E;--grid:#e3e0d8}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1a1a19;--surface:#232322;--surface-1:#2c2c2a;--text:#ecebe6;--text-2:#b4b2a9;--text-3:#888780;--border:#3a3a37;--border-strong:#55554f;
---accent:#AFA9EC;--accent-bg:#26215C;--ok:#97C459;--ok-bg:#173404;--bad:#F09595;--bad-bg:#501313;--warn:#FAC775;--warn-bg:#412402;--grid:#3a3a37}}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:Vazirmatn,Tahoma,sans-serif;font-size:16px;line-height:1.95}
-main{max-width:760px;margin:0 auto;padding:24px 16px 64px}
-a{color:var(--accent)}
-h1{font-size:26px;font-weight:700;line-height:1.5;margin:6px 0 6px}
-h2{font-size:19px;font-weight:500;margin:0 0 8px}
-h3{font-size:16px;font-weight:500;margin:12px 0 4px}
-p{margin:0 0 10px}
-.top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:13px;color:var(--text-2)}
-.goal{color:var(--text-2);margin-bottom:22px}
-.sec{margin:0 0 28px}
-.lab{font-size:13px;color:var(--text-3);margin:0 0 4px;letter-spacing:0}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
-.soft{background:var(--surface-1);border-radius:12px;padding:12px 14px}
-.m{direction:ltr;unicode-bidi:isolate;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14.5px;white-space:nowrap}
-@media (max-width:700px){.m{white-space:normal;display:inline-block;max-width:100%}}
-.mb{direction:ltr;text-align:left;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14.5px;background:var(--surface-1);border-radius:8px;padding:8px 12px;margin:6px 0;overflow-x:auto;line-height:1.8}
-.en{direction:ltr;unicode-bidi:isolate;font-size:13px;color:var(--text-2)}
-b,strong{font-weight:500}
-.key{background:var(--warn-bg);color:var(--warn);border-radius:6px;padding:0 6px}
-.tip{border-right:3px solid var(--accent);background:var(--accent-bg);padding:8px 12px;border-radius:0;margin:8px 0}
-.trap{border-right:3px solid var(--bad);background:var(--bad-bg);padding:8px 12px;border-radius:0;margin:8px 0}
-button{font-family:inherit;font-size:14px;background:var(--surface);color:var(--text);border:1px solid var(--border-strong);border-radius:8px;padding:5px 14px;cursor:pointer}
-button:hover{background:var(--surface-1)}
-button.on{background:var(--accent-bg);border-color:var(--accent);color:var(--accent)}
-input[type=text]{font-family:inherit;font-size:15px;direction:ltr;text-align:center;width:72px;height:34px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text)}
-input[type=range]{width:100%;accent-color:var(--accent);direction:ltr}
-table.t{border-collapse:collapse;direction:ltr;font-size:14.5px;margin:6px 0;display:block;max-width:100%;overflow-x:auto}
-table.t>tbody,table.t>thead{display:table;width:100%}
-table.t th,table.t td{border:1px solid var(--border);padding:5px 6px;text-align:center;font-weight:400}
-table.t th{background:var(--surface-1)}
-.ok{background:var(--ok-bg)!important}.no{background:var(--bad-bg)!important}
-.fb{font-size:14px;margin-top:8px;min-height:1em}.fb.good{color:var(--ok)}.fb.bad{color:var(--bad)}
-.q{margin:0 0 18px}
-.mcq .opts{display:grid;gap:6px;margin-top:6px}
-.mcq .opts button{text-align:right;padding:7px 12px}
-.stepper .st{display:none;padding:6px 0;border-bottom:1px dashed var(--border)}
-.stepper .st.show{display:block}
-.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-svg{max-width:100%;height:auto;direction:ltr}
-svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12px}
-.nav{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:14px;border-top:1px solid var(--border);padding-top:14px;margin-top:28px}
-.ask{font-size:14px;color:var(--text-2)}
-@media print{body{background:#fff}.card,.soft{break-inside:avoid}.stepper .st{display:block}button{display:none}}
-.given{font-size:14px;color:var(--text-2);background:var(--surface-1);border-right:3px solid var(--border-strong);border-radius:0 8px 8px 0;padding:6px 12px;margin:2px 0 10px}
-.given b{color:var(--text)}
-[id]{scroll-margin-top:16px}
-h3:target,.card:target{outline:2px solid var(--accent);outline-offset:6px;border-radius:8px}
-details.sol{margin-top:10px;border:1px dashed var(--border-strong);border-radius:10px;padding:6px 12px;background:var(--surface)}
-details.sol summary{cursor:pointer;color:var(--accent);font-weight:500}
-details.sol[open] summary{margin-bottom:6px}
-.q>details.sol:not([open]){display:inline-block;vertical-align:middle;margin:0;padding:0;border:0;background:none}
-.q>details.sol summary{list-style:none;display:inline-block;font-size:14px;border:1px solid var(--border-strong);border-radius:8px;padding:5px 14px;background:var(--surface)}
-.q>details.sol summary::-webkit-details-marker{display:none}
-.q>details.sol summary:hover{background:var(--surface-1)}
-@media print{details.sol{border-style:solid}}
-/* ===== END SHARED STYLE ===== */
-</style>
-<style>
-/* lesson 3 only */
-.stg{cursor:pointer}
-.stg rect{fill:var(--surface-1);stroke:var(--border-strong);stroke-width:1.5}
-.stg.on rect{fill:var(--accent-bg);stroke:var(--accent);stroke-width:2.5}
-.stg .tt{font-size:14px;font-weight:500;fill:var(--text)}
-.stg .vv{direction:ltr;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:11px}
-.panel{background:var(--surface-1);border-radius:10px;padding:10px 14px;margin-top:8px;min-height:120px}
-.bar{display:flex;align-items:center;gap:8px;margin:4px 0;font-size:14px}
-.bar .lbl{width:70px}
-.bar .trk{flex:1;height:14px;background:var(--surface);border:1px solid var(--border);border-radius:7px;overflow:hidden;direction:ltr}
-.bar .fill{height:100%;border-radius:7px}
-.bar .num{width:56px;direction:ltr;text-align:left;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:13px}
-.sw{display:inline-block;width:18px;height:3px;vertical-align:middle;margin-left:4px;border-radius:2px}
-.legend{font-size:13px;color:var(--text-2);display:flex;gap:14px;flex-wrap:wrap}
-.essay{margin:0 0 22px}
-.essay textarea{width:100%;min-height:110px;font-family:inherit;font-size:15px;line-height:1.9;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text);padding:8px 10px;direction:rtl;resize:vertical}
-.essay .model{display:none;margin-top:10px}
-.essay.open .model{display:block}
-.essay .model .ans{background:var(--surface-1);border-radius:8px;padding:8px 12px;margin-bottom:8px}
-.essay .pts label{display:block;font-size:14.5px;cursor:pointer}
-.essay .pts input{accent-color:var(--accent);margin-left:6px}
-@media print{.essay .model{display:block}.essay textarea{min-height:60px}}
-</style>
+<title>Fuzzy System Pipeline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Vazirmatn:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="../assets/teacher.css">
 </head>
 <body>
-<main>
-<div class="top"><a href="../index.html">← فهرست درس‌ها</a><span>درس ۳ از ۱۱ · فصل ۱ · حدود ۱۵ دقیقه</span></div>
-<h1>ساختار یک سیستم فازی</h1>
-<p class="goal">هدف: بعد از این درس می‌توانی چهار مرحله سیستم فازی را به ترتیب نام ببری و برای یک ورودی ساده هر مرحله را با عدد اجرا کنی. سه نوع سیستم فازی و عیب هر کدام را هم می‌شناسی.</p>
-
-<!-- ===== 1. IDEA ===== -->
-<section class="sec"><p class="lab">۱. ایده</p>
-<div class="card">
-  <h3>دو منبع اطلاعات و یک سؤال کلیدی (اسلاید ۲۵)</h3>
-  <p>در سیستم‌های عملی، اطلاعات مهم از دو جا می‌آید: (۱) <b>افراد خبره</b> <span class="en">(experts)</span> که دانششان را با <b>زبان طبیعی</b> می‌گویند، و (۲) <b>اندازه‌گیری‌ها و مدل‌های ریاضی</b>. سؤال کلیدی این است: <b>دانش بشری را چطور به فرمول ریاضی تبدیل کنیم؟</b> کار اصلی سیستم فازی همین تبدیل است.</p>
-
-  <h3>قلب سیستم: پایگاه قواعد اگر-آنگاه (اسلایدهای ۲۶–۲۹)</h3>
-  <p>سیستم‌های فازی <b>مبتنی بر دانش یا قاعده</b>اند. قلب‌شان یک <b>پایگاه دانش</b> <span class="en">(knowledge base)</span> است که از قواعد فازی اگر-آنگاه <span class="en">(fuzzy IF-THEN rules)</span> ساخته شده است. مثال رانندگی اسلاید ۲۶:</p>
-  <div class="soft" style="font-size:14.5px">۱. اگر سرعت <b>پایین</b> است، آنگاه نیروی <b>بیشتری</b> به پدال گاز وارد کن.<br>۲. اگر سرعت <b>متوسط</b> است، آنگاه نیروی <b>متعادلی</b> وارد کن.<br>۳. اگر سرعت <b>بالا</b>ست، آنگاه نیروی <b>کمتری</b> وارد کن.</div>
-  <p style="margin-top:8px">نقطه شروع ساخت سیستم فازی، به دست آوردن این قواعد از خبره‌ها یا از دانش آن حوزه است. قدم بعدی، ترکیب قواعد در <b>یک سیستم واحد</b> است. اسلاید ۲۷ الگوی کلی قاعده را این‌طور می‌نویسد (و به این قوانین «عملگرهای فازی» می‌گوید):</p>
-  <div class="mb">IF  variable  IS  set  THEN  action</div>
-  <p>مثال پنکه در اسلاید ۲۹: اگر دمای اتاق «خیلی گرم» است، سرعت پنکه را «خیلی زیاد» کن؛ «گرم» ← «زیاد»؛ «معتدل» ← همین اندازه نگه دار؛ «خنک» ← «کم»؛ «سرد» ← «خاموش». با این قواعد می‌شود دماسنجی ساخت که اتاق را خودکار کنترل کند.</p>
-
-  <h3>سه نوع سیستم فازی (اسلایدهای ۳۰–۳۲)</h3>
-  <table class="t" style="direction:rtl">
-    <tr><th>نوع</th><th>ورودی و خروجی</th><th>مشکل</th></tr>
-    <tr><td>۱. فازی خالص <span class="en">(pure fuzzy)</span></td><td>مجموعه فازی ← مجموعه فازی (موتور استنتاج، قواعد را به یک نگاشت از فضای ورودی به فضای خروجی تبدیل می‌کند)</td><td>سیستم‌های مهندسی عدد حقیقی می‌گیرند و عدد حقیقی می‌دهند، نه مجموعه فازی</td></tr>
-    <tr><td>۲. تاکاگی–سوگنو–کانگ <span class="en">(TSK)</span></td><td>عدد حقیقی ← عدد حقیقی؛ بخش «آنگاه» یک فرمول ساده است، مثلاً <span class="m">y = c·x</span> (نیروی پدال = ضریب × سرعت)</td><td>(۱) فرمول ریاضی چارچوبی برای نمایش دانش بشری نیست؛ (۲) دست ما را برای به کار بردن اصول مختلف منطق فازی باز نمی‌گذارد، پس انعطاف ندارد</td></tr>
-    <tr><td>۳. با فازی‌ساز و غیرفازی‌ساز</td><td>عدد ← <b>فازی‌ساز</b> ← سیستم فازی خالص ← <b>غیرفازی‌ساز</b> ← عدد</td><td>عیب‌های هر دو نوع قبلی را می‌پوشاند. از این به بعد «سیستم فازی» یعنی همین نوع</td></tr>
-  </table>
-  <div class="tip">فازی‌ساز <span class="en">(fuzzifier)</span> عدد حقیقی ورودی را به مجموعه فازی تبدیل می‌کند. غیرفازی‌ساز <span class="en">(defuzzifier)</span> مجموعه فازی خروجی را دوباره به عدد حقیقی برمی‌گرداند. اسلاید ۳۳ این‌ها را «Fuzzier» و «Defuzzier» نوشته؛ اسم استاندارد انگلیسی fuzzifier و defuzzifier است. بین این دو، «ماشین رابط فازی» (موتور استنتاج) با کمک قوانین پایه کار می‌کند.</div>
-
-  <h3 id="steps">چهار مرحله (اسلایدهای ۳۴–۳۹)</h3>
-  <ol>
-    <li><b>فازی‌سازی</b> <span class="en">(fuzzification)</span>: عدد حقیقی ورودی به درجه عضویت در مجموعه‌های فازی تبدیل می‌شود.</li>
-    <li><b>استنتاج</b> <span class="en">(inference)</span>: همه قواعد اگر-آنگاه ارزیابی می‌شوند و <b>«درجه درستی»</b> هر قاعده معلوم می‌شود.</li>
-    <li><b>ساخت / ترکیب</b> <span class="en">(composition / aggregation)</span>: نتیجه‌های همه قواعد با هم ترکیب می‌شوند تا <b>یک نتیجه کلی</b> به دست آید.</li>
-    <li><b>بازگرداندن از حالت فازی</b> یا غیرفازی‌سازی <span class="en">(defuzzification)</span>: نتیجه فازی به یک داده قابل استفاده تبدیل می‌شود. اسلاید می‌گوید این قسمت «اغلب پیچیده» است.</li>
-  </ol>
-  <p>مثال اسلاید ۳۵: دستگاه تهویه، <b>دما</b> و <b>رطوبت</b> اتاق را اندازه می‌گیرد (دو ورودی) و <b>میزان جریان هوا</b> را تعیین می‌کند (خروجی، با سه حالت <b>خاموش، کم، زیاد</b>). متخصص باید <b>دو تابع عضویت</b> تعیین کند: یکی برای دما و یکی برای رطوبت. قواعد اسلاید ۳۶ این‌هاست: (۱) اگر اتاق گرم است، هوای زیادی منتشر کن؛ (۲) اگر خنک است، هیچ هوایی منتشر نکن؛ (۳) اگر سرد <b>و</b> مرطوب است، کمی هوا به جریان بینداز. در اسلاید ۳۹ فرض شده نتیجه مرحله قبل <span class="m">0.7</span> است. این عدد برای دستگاه بی‌معناست و غیرفازی‌سازی باید آن را به یکی از فرمان‌های کم، زیاد یا خاموش تبدیل کند.</p>
-</div></section>
-
-<!-- ===== 2. SEE IT ===== -->
-<section class="sec"><p class="lab">۲. ببین چه اتفاقی می‌افتد</p>
-<div class="card">
-  <p>همان کولر اسلاید ۳۵–۳۶ را ساخته‌ایم. ما مجموعه‌ها را مشخص کرده‌ایم: <b>سرد</b> تا ۱۰ درجه برابر ۱ است و در ۱۸ به ۰ می‌رسد؛ <b>خنک</b> از ۱۰ تا ۱۸ بالا می‌رود و از ۱۸ تا ۲۶ پایین می‌آید؛ <b>گرم</b> از ۱۸ بالا می‌رود و از ۲۶ به بعد ۱ است؛ <b>مرطوب</b> در رطوبت ۴۰٪ برابر ۰ است و در ۸۰٪ به ۱ می‌رسد. دما و رطوبت را عوض کن و روی هر مرحله بزن.</p>
-  <svg id="p-tsvg" viewBox="0 0 640 200" role="img" aria-labelledby="p-ttitle">
-    <title id="p-ttitle">سه مجموعه فازی سرد، خنک و گرم روی محور دما و مجموعه مرطوب روی محور رطوبت، با خط عمودی برای مقدار فعلی</title>
-    <g id="p-tg"></g>
-  </svg>
-  <div class="legend"><span><span class="sw" style="background:var(--c1)"></span>سرد</span><span><span class="sw" style="background:var(--c2)"></span>خنک</span><span><span class="sw" style="background:var(--c3)"></span>گرم</span><span><span class="sw" style="background:var(--c4)"></span>مرطوب (نمودار پایین)</span></div>
-  <label for="p-T" style="display:block;margin-top:8px">دمای اتاق: <b id="p-Tv" class="m">14</b> درجه</label>
-  <input type="range" id="p-T" min="0" max="40" step="1" value="14">
-  <label for="p-H" style="display:block">رطوبت: <b id="p-Hv" class="m">70</b> درصد</label>
-  <input type="range" id="p-H" min="0" max="100" step="5" value="70">
-
-  <svg id="p-pipe" viewBox="0 0 640 120" role="img" aria-labelledby="p-ptitle" style="margin-top:10px">
-    <title id="p-ptitle">خط لوله چهار مرحله‌ای سیستم فازی از راست به چپ: فازی‌سازی، استنتاج، ترکیب، غیرفازی‌سازی</title>
-    <defs><marker id="p-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="var(--text-3)"/></marker></defs>
-    <g id="p-boxes"></g>
-  </svg>
-  <div class="row" id="p-btns" style="margin-top:4px">
-    <button type="button" data-s="0">۱. فازی‌سازی</button><button type="button" data-s="1">۲. استنتاج</button><button type="button" data-s="2">۳. ترکیب</button><button type="button" data-s="3">۴. غیرفازی‌سازی</button>
-  </div>
-  <div class="panel" id="p-panel" aria-live="polite"></div>
-  <p style="font-size:13.5px;color:var(--text-2);margin-top:8px">دو ساده‌سازی (روش‌های کامل در درس‌های ۷ و ۸ می‌آیند): «و» در قاعده ۳ را با <b>کمینه</b> (<span class="m">min</span>) حساب کرده‌ایم، که در درس ۴ دلیلش را می‌بینی. در مرحله ۴ هم برای هر فرمان یک عدد نماینده گذاشته‌ایم (خاموش = ۰٪، کم = ۴۰٪، زیاد = ۱۰۰٪) و از آن‌ها <b>میانگین وزنی</b> گرفته‌ایم.</p>
-</div></section>
-
-<!-- ===== 3. WORKED EXAMPLE ===== -->
-<section class="sec"><p class="lab">۳. مثال حل‌شده، قدم به قدم</p>
-<div class="card stepper">
-  <p>کولر بخش ۲ با دمای <span class="m">T = 14</span> و رطوبت <span class="m">H = 70%</span>. سرعت هوا چقدر می‌شود؟</p>
-  <div class="st">قدم ۱ (فازی‌سازی، دما): ۱۴ بین ۱۰ و ۱۸ است. <span class="m">μ_cold(14) = (18 − 14)/8 = 0.5</span>، <span class="m">μ_cool(14) = (14 − 10)/8 = 0.5</span>، <span class="m">μ_warm(14) = 0</span> (گرم از ۱۸ شروع می‌شود). با نماد درس ۲: <span class="m">T̃ = {0.5/سرد, 0.5/خنک, 0/گرم}</span>.</div>
-  <div class="st">قدم ۲ (فازی‌سازی، رطوبت): <span class="m">μ_humid(70) = (70 − 40)/40 = 0.75</span>.</div>
-  <div class="st">قدم ۳ (استنتاج، درجه درستی هر قاعده):<br>
-    قاعده ۱، گرم ← زیاد: <span class="m">w1 = μ_warm = 0</span><br>
-    قاعده ۲، خنک ← خاموش: <span class="m">w2 = μ_cool = 0.5</span><br>
-    قاعده ۳، سرد <b>و</b> مرطوب ← کم: <span class="m">w3 = min(0.5, 0.75) = 0.5</span></div>
-  <div class="st">قدم ۴ (ترکیب): همه نتیجه‌ها کنار هم یک مجموعه فازی روی فرمان‌ها می‌سازند: <span class="m">{0.5/خاموش, 0.5/کم, 0/زیاد}</span>. هنوز یک «عدد» نداریم.</div>
-  <div class="st">قدم ۵ (غیرفازی‌سازی): <span class="m">y = (0·0.5 + 40·0.5 + 100·0) / (0.5 + 0.5 + 0) = 20 / 1 = 20%</span>. کولر هوا را با ۲۰٪ قدرت می‌دمد. اگر مثل اسلاید ۳۹ دقیقاً یکی از سه فرمان لازم باشد، یک راه ساده انتخاب فرمانی است که درجه‌اش بیشتر است. اینجا «خاموش» و «کم» برابرند (هر دو ۰٫۵)، و همین نشان می‌دهد چرا اسلاید این مرحله را «اغلب پیچیده» می‌داند.</div>
-  <div class="row" style="margin-top:8px"><button class="next">قدم بعدی</button><button class="all">نمایش همه</button></div>
-</div></section>
-
-<!-- ===== 4. PRACTICE ===== -->
-<section class="sec"><p class="lab">۴. نوبت توست</p>
-<div class="card">
-  <div class="q practice" data-hint="خنک بین ۱۸ و ۲۶ پایین می‌آید: (۲۶ − T) ÷ ۸. گرم بین ۱۸ و ۲۶ بالا می‌رود: (T − ۱۸) ÷ ۸. سرد از ۱۸ به بعد صفر است. مرطوب: (H − ۴۰) ÷ ۴۰." data-yes="عالی! ورودی فازی‌شده را به همان نماد μ/x درس ۲ نوشتی.">
-    <p><b>سؤال ۱ (فازی‌سازی + نماد درس ۲).</b> برای <span class="m">T = 24</span> و <span class="m">H = 50</span>، ورودی‌های فازی‌شده را کامل کن.</p>
-    <div class="mb">T̃ = { <span style="display:inline-block;border-radius:8px;padding:2px"><input type="text" data-k="0" aria-label="درجه سرد"></span> /سرد ,  <span style="display:inline-block;border-radius:8px;padding:2px"><input type="text" data-k="0.25" aria-label="درجه خنک"></span> /خنک ,  <span style="display:inline-block;border-radius:8px;padding:2px"><input type="text" data-k="0.75" aria-label="درجه گرم"></span> /گرم }      μ_humid(50) = <span style="display:inline-block;border-radius:8px;padding:2px"><input type="text" data-k="0.25" aria-label="درجه مرطوب"></span></div>
-    <button class="check">بررسی</button>
-    <details class="sol"><summary>راه‌حل</summary>
-      <p>مجموعه‌های این درس: سرد تا ۱۰ برابر ۱ و در ۱۸ صفر؛ خنک از ۱۰ تا ۱۸ بالا و از ۱۸ تا ۲۶ پایین؛ گرم از ۱۸ بالا و از ۲۶ به بعد ۱؛ مرطوب در ۴۰٪ صفر و در ۸۰٪ یک.</p><p><b>قدم ۱ — دمای ۲۴:</b></p><div class="mb pre">cold(24) = 0                     (cold is 0 after 18)
-cool(24) = (26 − 24)/8 = 0.25    (falling side)
-warm(24) = (24 − 18)/8 = 0.75    (rising side)</div><p><b>قدم ۲ — رطوبت ۵۰:</b> <span class="m">μ_humid(50) = (50 − 40)/40 = 0.25</span>.</p>
-    </details><div class="fb"></div>
-  </div>
-
-  <div class="q practice" id="pq2" data-hint="اول فازی‌سازی: سرد = (۱۸ − ۱۲) ÷ ۸، خنک = (۱۲ − ۱۰) ÷ ۸، مرطوب = (۶۰ − ۴۰) ÷ ۴۰. بعد برای قاعده ۳ کمینه سرد و مرطوب را بگیر." data-yes="درست! قاعده ۳ با min(0.75, 0.5) = 0.5 فعال شد.">
-    <p><b>سؤال ۲ (استنتاج).</b> برای <span class="m">T = 12</span> و <span class="m">H = 60</span>، درجه درستی سه قاعده را پیدا کن.</p>
-    <table class="t"><tr><th>w1 (گرم ← زیاد)</th><th>w2 (خنک ← خاموش)</th><th>w3 (سرد و مرطوب ← کم)</th></tr>
-      <tr><td><input type="text" data-k="0" aria-label="w1"></td><td><input type="text" data-k="0.25" aria-label="w2"></td><td><input type="text" data-k="0.5" aria-label="w3"></td></tr></table>
-    <button class="check">بررسی</button>
-    <details class="sol"><summary>راه‌حل</summary>
-      <p><b>قدم ۱ — فازی‌سازی T = 12 و H = 60:</b></p><div class="mb pre">cold(12)  = (18 − 12)/8  = 0.75
-cool(12)  = (12 − 10)/8  = 0.25   (rising side)
-warm(12)  = 0                     (warm starts at 18)
-humid(60) = (60 − 40)/40 = 0.5</div><p><b>قدم ۲ — درجه درستی هر قاعده:</b> قاعده‌ای که یک شرط دارد، همان درجه شرطش را می‌گیرد؛ «و» یعنی min.</p><div class="mb pre">w1 = warm = 0
-w2 = cool = 0.25
-w3 = min(cold, humid) = min(0.75, 0.5) = 0.5</div>
-    </details><div class="fb"></div>
-  </div>
-
-  <div class="q practice" data-hint="y = (0·w2 + 40·w3 + 100·w1) ÷ (w1 + w2 + w3). با جواب‌های سؤال ۲: (0 + 40·0.5 + 0) ÷ 0.75." data-yes="درست! 20 ÷ 0.75 ≈ 26.7٪.">
-    <p><b>سؤال ۳ (غیرفازی‌سازی).</b> با جواب سؤال ۲ و همان عددهای نماینده (خاموش = ۰، کم = ۴۰، زیاد = ۱۰۰)، سرعت هوا چند درصد است؟ (تا یک رقم اعشار)</p>
-    <div class="given"><b>سؤال ۲ چه بود؟</b> برای <span class="m">T = 12</span> و <span class="m">H = 60</span> درجه درستی سه قاعده را پیدا کردی: <span class="m">w1</span> (گرم ← زیاد)، <span class="m">w2</span> (خنک ← خاموش) و <span class="m">w3</span> (سرد و مرطوب ← کم). همان سه عدد را اینجا به کار ببر. <a href="#pq2">↑ سؤال ۲</a></div>
-    <p>y = <span style="display:inline-block;border-radius:8px;padding:2px"><input type="text" data-k="26.67" data-tol="0.05" aria-label="سرعت هوا درصد"></span> %</p>
-    <button class="check">بررسی</button>
-    <details class="sol"><summary>راه‌حل</summary>
-      <p><b>قدم ۱:</b> میانگین وزنی: عدد نماینده هر فرمان را در درجه قاعده‌اش ضرب کن، جمع بزن و بر جمع درجه‌ها تقسیم کن.</p><div class="mb pre">y = (0·w2 + 40·w3 + 100·w1) / (w1 + w2 + w3)
-  = (0·0.25 + 40·0.5 + 100·0) / (0 + 0.25 + 0.5)
-  = 20 / 0.75
-  ≈ 26.67 %   →   26.7 %</div><p>یعنی کولر هوا را با حدود ۲۶٫۷٪ قدرت می‌دمد.</p>
-    </details><div class="fb"></div>
-  </div>
-
-  <div class="q practice" data-hint="ترتیب: اول عدد فازی می‌شود، بعد قواعد ارزیابی می‌شوند، بعد نتیجه‌ها ترکیب می‌شوند، آخر سر دوباره عدد می‌شود." data-yes="عالی! فازی‌سازی ← استنتاج ← ترکیب ← غیرفازی‌سازی.">
-    <p><b>سؤال ۴.</b> شماره هر مرحله را در روش چهار مرحله‌ای بنویس (۱ تا ۴).</p>
-    <table class="t" style="direction:rtl"><tr><th>ساخت (ترکیب)</th><th>فازی کردن</th><th>بازگرداندن از حالت فازی</th><th>استنتاج</th></tr>
-      <tr><td><input type="text" data-k="3" aria-label="شماره ترکیب"></td><td><input type="text" data-k="1" aria-label="شماره فازی کردن"></td><td><input type="text" data-k="4" aria-label="شماره غیرفازی سازی"></td><td><input type="text" data-k="2" aria-label="شماره استنتاج"></td></tr></table>
-    <button class="check">بررسی</button>
-    <details class="sol"><summary>راه‌حل</summary>
-      <p>منطق ترتیب: تا عدد ورودی فازی نشده، نمی‌شود قاعده‌ها را سنجید؛ تا قاعده‌ها سنجیده نشده‌اند، چیزی برای ترکیب نیست؛ و برگرداندن به عدد همیشه آخر است.</p><ol style="margin:0 0 6px;padding-right:22px"><li>فازی کردن ← 1</li><li>استنتاج ← 2</li><li>ساخت (ترکیب) ← 3</li><li>بازگرداندن از حالت فازی ← 4</li></ol>
-    </details><div class="fb"></div>
-  </div>
-
-  <div class="q practice" data-hint="لباسشویی: نوع کثیفی، مقدار کثیفی، حجم لباس ← تعداد دورها. کوره سیمان: اکسیژن، دمای گاز، گشتاور آسیاب، وزن کلینکر ← زغال‌سنگ و جریان هوا." data-yes="درست! لباسشویی «چند ورودی، یک خروجی» است و کوره سیمان «چند ورودی، چند خروجی».">
-    <p><b>سؤال ۵ (اسلایدهای ۴۲–۴۳).</b> تعداد ورودی‌ها و خروجی‌ها را بنویس.</p>
-    <div class="given"><b>اسلایدهای ۴۲ و ۴۳ چه می‌گویند؟</b> <br><b>ماشین لباسشویی فازی:</b> با سنسور نوری و سنسور بار، نوع کثیفی، مقدار کثیفی و حجم لباس را اندازه می‌گیرد و تعداد دورهای مناسب شستشو را تعیین می‌کند.<br><b>کنترل فازی کوره سیمان:</b> میزان اکسیژن، دمای گاز، گشتاور آسیاب و وزن کلینکر را اندازه می‌گیرد و میزان زغال‌سنگ و میزان جریان هوا را تنظیم می‌کند.<br>هر چیزی که <b>اندازه گرفته می‌شود</b> ورودی است و هر چیزی که <b>تعیین یا تنظیم می‌شود</b> خروجی.</div>
-    <table class="t" style="direction:rtl"><tr><th>سیستم</th><th>تعداد ورودی</th><th>تعداد خروجی</th></tr>
-      <tr><th>ماشین لباسشویی فازی</th><td><input type="text" data-k="3" aria-label="ورودی لباسشویی"></td><td><input type="text" data-k="1" aria-label="خروجی لباسشویی"></td></tr>
-      <tr><th>کنترل فازی کوره سیمان</th><td><input type="text" data-k="4" aria-label="ورودی کوره"></td><td><input type="text" data-k="2" aria-label="خروجی کوره"></td></tr></table>
-    <button class="check">بررسی</button>
-    <details class="sol"><summary>راه‌حل</summary>
-      <p>ورودی = چیزی که <b>اندازه گرفته می‌شود</b>؛ خروجی = چیزی که <b>تعیین یا تنظیم می‌شود</b>.</p><p><b>لباسشویی:</b> ورودی‌ها: نوع کثیفی، مقدار کثیفی، حجم لباس ← <b>3</b>. خروجی: تعداد دورهای شستشو ← <b>1</b>.</p><p><b>کوره سیمان:</b> ورودی‌ها: اکسیژن، دمای گاز، گشتاور آسیاب، وزن کلینکر ← <b>4</b>. خروجی‌ها: زغال‌سنگ و جریان هوا ← <b>2</b>.</p>
-    </details><div class="fb"></div>
-  </div>
-
-  <div class="q mcq" data-yes="درست! ورودی و خروجی سیستم خالص مجموعه فازی است، ولی سیستم‌های مهندسی با عدد حقیقی کار می‌کنند." data-no="نه. آن یکی عیب TSK است یا اصلاً درست نیست. اسلاید ۳۰: مشکل سیستم خالص این است که ورودی و خروجی‌اش مجموعه فازی است.">
-    <p><b>سؤال ۶.</b> مشکل اصلی سیستم فازی خالص چیست؟</p>
-    <div class="opts">
-      <button data-ok>ورودی و خروجی‌اش مجموعه فازی است</button>
-      <button>بخش آنگاه آن یک فرمول ریاضی است</button>
-      <button>قواعدش از افراد خبره گرفته نمی‌شود</button>
-      <button>خروجی‌اش همیشه یک عدد حقیقی است</button>
-    </div><div class="fb"></div>
-  </div>
-
-  <div class="q mcq" data-yes="درست! در TSK بخش «آنگاه» یک رابطه ریاضی ساده است، مثل y = c·x." data-no="نه. اسلاید ۳۱: فقط در TSK بخش «آنگاه» از عبارت زبانی به رابطه ریاضی تبدیل می‌شود.">
-    <p><b>سؤال ۷.</b> در کدام نوع، بخش «آنگاه» قاعده فرمولی مثل <span class="m">y = c·x</span> است؟</p>
-    <div class="opts">
-      <button>سیستم فازی خالص</button>
-      <button>سیستم دودویی کلاسیک</button>
-      <button>سیستم با فازی‌ساز</button>
-      <button data-ok>سیستم فازی TSK</button>
-    </div><div class="fb"></div>
-  </div>
-
-  <div class="q mcq" data-yes="درست! فازی‌ساز در ورودی و غیرفازی‌ساز در خروجی، عیب‌های هر دو نوع قبلی را می‌پوشانند." data-no="نه. اسلاید ۳۲: نوع سوم معایب سیستم خالص و TSK را می‌پوشاند. قاعده هم دارد و خروجی‌اش عدد است.">
-    <p><b>سؤال ۸.</b> چرا نوع سوم (با فازی‌ساز و غیرفازی‌ساز) به وجود آمد؟</p>
-    <div class="opts">
-      <button>به هیچ قاعده اگر-آنگاه‌ای نیاز ندارد</button>
-      <button>خروجی‌اش همیشه یک مجموعه فازی است</button>
-      <button data-ok>عیب‌های سیستم خالص و TSK را می‌پوشاند</button>
-      <button>از هر سیستم کلاسیکی همیشه سریع‌تر است</button>
-    </div><div class="fb"></div>
-  </div>
-
-  <div class="q mcq" data-yes="درست! استنتاج همه قواعد را ارزیابی می‌کند و درجه درستی هر کدام را می‌دهد." data-no="نه. اسلاید ۳۶: «درجه درستی» قواعد در مرحله استنتاج مشخص می‌شود.">
-    <p><b>سؤال ۹.</b> در کدام مرحله همه قواعد ارزیابی می‌شوند و «درجه درستی» هر قاعده معلوم می‌شود؟</p>
-    <div class="opts">
-      <button>فازی‌سازی</button>
-      <button data-ok>استنتاج</button>
-      <button>ترکیب</button>
-      <button>غیرفازی‌سازی</button>
-    </div><div class="fb"></div>
-  </div>
-
-  <div class="q mcq" data-yes="درست! تبدیل 0.7 به یک فرمان قابل اجرا، کار مرحله آخر است." data-no="نه. اسلاید ۳۹ این را «مثالی برای بازگرداندن از حالت فازی» می‌نامد.">
-    <p><b>سؤال ۱۰.</b> در اسلاید ۳۹، عدد <span class="m">0.7</span> باید به یکی از فرمان‌های «کم، زیاد، خاموش» تبدیل شود. این کار کدام مرحله است؟</p>
-    <div class="given"><b>اسلاید ۳۹ چه می‌گوید؟</b> ادامه مثال دستگاه تهویه است: دستگاه دما و رطوبت اتاق را می‌سنجد و باید جریان هوا را روی یکی از سه حالت «خاموش، کم، زیاد» بگذارد. مرحله‌های قبلی به عدد ۰٫۷ رسیده‌اند، ولی دستگاه با خودِ عدد ۰٫۷ کاری نمی‌تواند بکند. <a href="#steps">↑ چهار مرحله و همین مثال در بخش ۱، «چهار مرحله»</a></div>
-    <div class="opts">
-      <button>فازی‌سازی</button>
-      <button>استنتاج</button>
-      <button>ترکیب</button>
-      <button data-ok>غیرفازی‌سازی</button>
-    </div><div class="fb"></div>
-  </div>
-
-  <div class="q mcq" data-yes="درست! شاخه دوم: «منطق فازی در هوش مصنوعی»، یعنی ساختار تصمیم‌گیری‌های هوشمند، با مثال بازی‌های رایانه‌ای و جلوه‌های ویژه سینمایی." data-no="نه. اسلاید ۴۵ نرم‌افزار Massive (ارباب حلقه‌ها) را مثال شاخه «منطق فازی در هوش مصنوعی» آورده است.">
-    <p><b>سؤال ۱۱.</b> نرم‌افزار Massive که حرکت لشکرها در فیلم ارباب حلقه‌ها را ساخت، مثال کدام شاخه از پنج شاخه تئوری فازی است؟</p>
-    <div class="opts">
-      <button>ریاضیات فازی</button>
-      <button>تصمیم‌گیری فازی</button>
-      <button data-ok>هوش مصنوعی</button>
-      <button>عدم قطعیت</button>
-    </div><div class="fb"></div>
-  </div>
-</div></section>
-
-<!-- ===== 4b. ESSAY (descriptive exam questions) ===== -->
-<section class="sec"><p class="lab">۴ب. سؤال‌های تشریحی امتحانی — اول بنویس، بعد مقایسه کن</p>
-<div class="card">
-  <p>از این بخش جزوه احتمالاً سؤال <b>نوشتنی</b> می‌آید، نه محاسباتی. هر سؤال را با جمله‌های خودت جواب بده، مثل سر جلسه. بعد جواب نمونه را باز کن و ببین کدام نکته‌ها را گفتی. نکته‌ها همان چیزهایی‌اند که مصحح دنبالشان می‌گردد.</p>
-  <div class="essay">
-    <p><b>سؤال ۱.</b> مراحل استفاده از منطق فازی در یک سیستم را به ترتیب نام ببر و کار هر مرحله را در یک جمله توضیح بده.</p>
-    <textarea aria-label="جواب تو برای سؤال ۱" placeholder="مثلاً: مرحله اول ... است که در آن ..."></textarea>
-    <div class="row" style="margin-top:6px"><button class="reveal">نمایش جواب نمونه</button></div><div class="fb"></div>
-    <div class="model">
-      <p class="lab">جواب نمونه (۳ تا ۴ خط کافی است)</p>
-      <div class="ans"><b>۱) فازی‌سازی:</b> ورودی‌های عددی (مثل دما و رطوبت اتاق) با توابع عضویت به مجموعه‌های فازی تبدیل می‌شوند.<br>
-<b>۲) استنتاج:</b> همه قواعد اگر-آنگاه ارزیابی می‌شوند و «درجه درستی» هر قاعده مشخص می‌شود.<br>
-<b>۳) ساخت (ترکیب):</b> نتیجه همه قواعد با هم ترکیب می‌شود تا یک نتیجه کلی به دست آید.<br>
-<b>۴) بازگرداندن از حالت فازی (غیرفازی‌سازی):</b> نتیجه فازی به یک داده قابل استفاده تبدیل می‌شود؛ مثلاً عدد 0.7 به یکی از فرمان‌های کولر: خاموش، کم یا زیاد.</div>
-      <p class="lab">جواب تو کدام نکته‌ها را داشت؟ هر کدام را داشتی تیک بزن.</p>
-      <div class="pts"><label><input type="checkbox"> هر چهار مرحله را نام بردم</label><label><input type="checkbox"> ترتیب را درست نوشتم</label><label><input type="checkbox"> فازی‌سازی: عدد ← مجموعه فازی</label><label><input type="checkbox"> استنتاج: درجه درستی قواعد</label><label><input type="checkbox"> ساخت: ترکیب به یک نتیجه کلی</label><label><input type="checkbox"> غیرفازی‌سازی: نتیجه ← داده قابل استفاده</label><label><input type="checkbox"> یک مثال آوردم (مثل کولر)</label></div><div class="score fb"></div>
-    </div>
-  </div>
-  <div class="essay">
-    <p><b>سؤال ۲.</b> سه نوع سیستم فازی را نام ببر. عیب سیستم فازی خالص و سیستم TSK چیست و نوع سوم چطور این عیب‌ها را برطرف می‌کند؟</p>
-    <textarea aria-label="جواب تو برای سؤال ۲" placeholder="سه نوع: ... · عیب خالص: ... · عیب TSK: ... · نوع سوم: ..."></textarea>
-    <div class="row" style="margin-top:6px"><button class="reveal">نمایش جواب نمونه</button></div><div class="fb"></div>
-    <div class="model">
-      <p class="lab">جواب نمونه (۳ تا ۴ خط کافی است)</p>
-      <div class="ans"><b>۱) سیستم فازی خالص:</b> ورودی و خروجی‌اش مجموعه فازی است، ولی در سیستم‌های مهندسی ورودی و خروجی عدد حقیقی‌اند.<br>
-<b>۲) سیستم TSK (تاکاگی–سوگنو–کانگ):</b> ورودی و خروجی‌اش عدد حقیقی است، چون بخش «آنگاه» یک فرمول ریاضی است (مثلاً <span class="m">Y = C·X</span>). عیبش: چارچوبی برای نمایش دانش بشری ندارد و انعطاف‌پذیر نیست، چون دست ما را برای اعمال اصول منطق فازی باز نمی‌گذارد.<br>
-<b>۳) سیستم با فازی‌ساز و غیرفازی‌ساز:</b> همان سیستم خالص است، با یک فازی‌ساز در ورودی (عدد ← مجموعه فازی) و یک غیرفازی‌ساز در خروجی (مجموعه فازی ← عدد). این‌طور عیب هر دو نوع قبلی را می‌پوشاند. از این به بعد منظور از «سیستم فازی» همین نوع است.</div>
-      <p class="lab">جواب تو کدام نکته‌ها را داشت؟ هر کدام را داشتی تیک بزن.</p>
-      <div class="pts"><label><input type="checkbox"> هر سه نوع را نام بردم</label><label><input type="checkbox"> عیب خالص: ورودی/خروجی فازی است، نه عدد</label><label><input type="checkbox"> TSK: آنگاه = فرمول ریاضی</label><label><input type="checkbox"> عیب TSK: جایی برای دانش بشری ندارد</label><label><input type="checkbox"> عیب TSK: انعطاف ندارد</label><label><input type="checkbox"> نوع سوم: فازی‌ساز در ورودی، غیرفازی‌ساز در خروجی</label><label><input type="checkbox"> گفتم نوع سوم عیب هر دو را برطرف می‌کند</label></div><div class="score fb"></div>
-    </div>
-  </div>
-  <div class="essay">
-    <p><b>سؤال ۳.</b> اطلاعات یک سیستم فازی از کجا می‌آید؟ قلب یک سیستم فازی چیست؟ با یک مثال توضیح بده.</p>
-    <textarea aria-label="جواب تو برای سؤال ۳" placeholder="دو منبع اطلاعات ... · قلب سیستم ... · مثال: اگر ... آنگاه ..."></textarea>
-    <div class="row" style="margin-top:6px"><button class="reveal">نمایش جواب نمونه</button></div><div class="fb"></div>
-    <div class="model">
-      <p class="lab">جواب نمونه (۳ تا ۴ خط کافی است)</p>
-      <div class="ans">اطلاعات از <b>دو منبع</b> می‌آید: <b>افراد خبره</b> که دانششان را با زبان طبیعی بیان می‌کنند، و <b>اندازه‌گیری‌ها و مدل‌های ریاضی</b>. کار اصلی سیستم فازی این است که دانش بشری را به فرمول ریاضی تبدیل کند.<br>
-<b>قلب سیستم</b> یک <b>پایگاه دانش از قواعد اگر-آنگاه فازی</b> است، به شکل <span class="m">IF variable IS set THEN action</span>.<br>
-مثال (رفتار راننده): اگر سرعت پایین است، نیروی بیشتری به پدال گاز وارد کن؛ اگر سرعت بالاست، نیروی کمتری وارد کن.</div>
-      <p class="lab">جواب تو کدام نکته‌ها را داشت؟ هر کدام را داشتی تیک بزن.</p>
-      <div class="pts"><label><input type="checkbox"> دو منبع: افراد خبره</label><label><input type="checkbox"> دو منبع: اندازه‌گیری و مدل ریاضی</label><label><input type="checkbox"> تبدیل دانش بشری به فرمول</label><label><input type="checkbox"> قلب سیستم: پایگاه قواعد اگر-آنگاه</label><label><input type="checkbox"> یک قاعده اگر-آنگاه به عنوان مثال نوشتم</label></div><div class="score fb"></div>
-    </div>
-  </div>
-  <div class="essay">
-    <p><b>سؤال ۴.</b> دو کاربرد منطق فازی را نام ببر و برای هر کدام بگو سیستم فازی چه می‌کند (ورودی و خروجی‌اش چیست).</p>
-    <textarea aria-label="جواب تو برای سؤال ۴" placeholder="کاربرد اول: ... ورودی: ... خروجی: ..."></textarea>
-    <div class="row" style="margin-top:6px"><button class="reveal">نمایش جواب نمونه</button></div><div class="fb"></div>
-    <div class="model">
-      <p class="lab">جواب نمونه (۳ تا ۴ خط کافی است)</p>
-      <div class="ans"><b>ماشین لباسشویی:</b> سیستم سه‌ورودی و یک‌خروجی. ورودی‌ها نوع کثیفی، مقدار کثیفی و حجم لباس‌اند (با سنسور نوری و سنسور بار). خروجی تعداد دورهای مناسب شستشوست.<br>
-<b>کوره سیمان:</b> سیستم چهارورودی و دوخروجی. خروجی‌ها میزان زغال‌سنگ و میزان جریان هواست.<br>
-<span style="color:var(--text-2)">کاربردهای دیگر اسلاید ۴۰–۴۱ هم قبول است: تهویه مطبوع (دما را کم‌کم به دمای دلخواه می‌رساند)، تنظیم سرعت خودرو، دیگ بخار کشتی، دوربین فیلمبرداری (تشخیص حرکت سوژه از لرزش دست)، پیش‌بینی زردی نوزاد.</span></div>
-      <p class="lab">جواب تو کدام نکته‌ها را داشت؟ هر کدام را داشتی تیک بزن.</p>
-      <div class="pts"><label><input type="checkbox"> دو کاربرد درست نام بردم</label><label><input type="checkbox"> برای اولی گفتم سیستم چه می‌کند</label><label><input type="checkbox"> برای دومی گفتم سیستم چه می‌کند</label><label><input type="checkbox"> ورودی‌ها یا خروجی را مشخص کردم</label></div><div class="score fb"></div>
-    </div>
-  </div>
-</div></section>
-
-<!-- ===== 5. SUMMARY ===== -->
-<section class="sec"><p class="lab">۵. جمع‌بندی — همین را به خاطر بسپار</p>
-<div class="soft"><ul>
-  <li>دو منبع اطلاعات: <b>خبره‌ها</b> (زبان طبیعی) و <b>اندازه‌گیری/مدل ریاضی</b>. سیستم فازی دانش بشری را به فرمول تبدیل می‌کند.</li>
-  <li>قلب سیستم: <b>پایگاه قواعد اگر-آنگاه</b>، به شکل <span class="m">IF variable IS set THEN action</span>.</li>
-  <li>سه نوع: <b>خالص</b> (ورودی و خروجی فازی، به درد مهندسی نمی‌خورد)؛ <b>TSK</b> (آنگاه = فرمول، پس نه جایی برای دانش بشری دارد و نه انعطاف)؛ <b>با فازی‌ساز و غیرفازی‌ساز</b> (هر دو عیب را می‌پوشاند و منظور ما از «سیستم فازی» همین است).</li>
-  <li>چهار مرحله: <b>فازی‌سازی ← استنتاج</b> (درجه درستی قواعد) <b>← ساخت/ترکیب</b> (یک نتیجه کلی) <b>← بازگرداندن از حالت فازی</b> (داده قابل استفاده؛ اغلب پیچیده).</li>
-  <li>کاربردها: تهویه مطبوع، تنظیم سرعت خودرو، دیگ بخار کشتی، دوربین فیلمبرداری (لرزش دست)، لباسشویی (۳ ورودی، ۱ خروجی)، زردی نوزاد، خودروسازی، ربات تشخیص رنگ، لوازم خانگی، کوره سیمان (۴ ورودی، ۲ خروجی)، و پزشکی (دیابت، MRI مغز، سکته، تنش در بیهوشی، سرطان، زخم پوستی، …).</li>
-  <li>پنج شاخه: (۱) ریاضیات فازی، (۲) منطق فازی در هوش مصنوعی (Massive)، (۳) سیستم‌های فازی (کنترل، پردازش سیگنال، مخابرات)، (۴) عدم قطعیت (پیش‌بینی هوا)، (۵) تصمیم‌گیری فازی (بهینه‌سازی).</li>
-</ul></div>
-<div class="trap">نکته اسلاید ۴۳: قاعده ۱ کوره سیمان می‌گوید «درجه هوا را افزایش دهید»، در حالی که خروجی‌های سیستم «میزان زغال‌سنگ» و «میزان جریان هوا» هستند. احتمالاً منظور «جریان هوا» است. اگر در امتحان آمد، با عبارت خود جزوه جواب بده.</div>
-</section>
-
-<!-- ===== 6. SOURCE + ASK ===== -->
-<section class="sec"><p class="lab">منبع اصلی</p>
-<p>جزوه درس، اسلایدهای ۲۵ تا ۴۷ — به‌خصوص ۲۶ (پایگاه قواعد)، ۳۰ تا ۳۳ (سه نوع سیستم)، ۳۴ تا ۳۹ (چهار مرحله و کولر)، ۴۰ تا ۴۴ (کاربردها)، ۴۵ تا ۴۷ (پنج شاخه) · <a href="https://www.wiley.com/en-us/Fuzzy+Logic+with+Engineering+Applications%2C+4th+Edition-p-9781119235866">T. J. Ross, <i>Fuzzy Logic with Engineering Applications</i> (Wiley)</a> (فصل‌های سیستم‌های فازی و غیرفازی‌سازی)</p>
-<p><a href="../reference/cheatsheet.html">برگه فرمول‌ها</a> · <a href="../reference/glossary.html">واژه‌نامه</a></p>
-</section>
-
-<div class="nav"><a href="0002-writing-fuzzy-sets.html">← درس قبل: نوشتن و خواندن یک مجموعه فازی</a><a href="0004-union-intersection-complement.html">درس بعد: اجتماع، اشتراک و مکمل →</a></div>
-</main>
-
+<main id="app"></main>
+<script src="../assets/teacher.js"></script>
+<script src="../assets/graph.js"></script>
 <script>
-/* ===== SHARED JS — copy verbatim into every lesson ===== */
-(function(){
-function norm(s){return s.trim().replace(/[۰-۹]/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)}).replace(/[٠-٩]/g,function(d){return '٠١٢٣٤٥٦٧٨٩'.indexOf(d)}).replace(/[٫,]/g,'.').replace(/\s+/g,'')}
-function val(s){s=norm(s);if(/^-?\d*\.?\d+\/-?\d*\.?\d+$/.test(s)){var p=s.split('/');return +p[0]/+p[1]}return s===''?NaN:+s}
-document.querySelectorAll('.practice').forEach(function(q){
-  var ins=q.querySelectorAll('input[data-k]'),fb=q.querySelector('.fb'),btn=q.querySelector('.check');
-  ins.forEach(function(i){i.addEventListener('input',function(){i.parentNode.classList.remove('ok','no');fb.textContent='';fb.className='fb'})});
-  btn.addEventListener('click',function(){
-    var empty=0,ok=0;
-    ins.forEach(function(i){var c=i.parentNode;c.classList.remove('ok','no');if(!i.value.trim()){empty++;return}
-      var v=val(i.value),k=+i.dataset.k,tol=i.dataset.tol?+i.dataset.tol:0.01;
-      if(!isNaN(v)&&Math.abs(v-k)<=tol+1e-9){ok++;c.classList.add('ok')}else c.classList.add('no')});
-    if(empty){fb.className='fb bad';fb.textContent='اول همه خانه‌ها را پر کن ('+empty+' خانه خالی است).';return}
-    if(ok===ins.length){fb.className='fb good';fb.textContent=q.dataset.yes||('عالی! همه '+ins.length+' جواب درست است.')}
-    else{fb.className='fb bad';fb.textContent=ok+' از '+ins.length+' درست. '+(q.dataset.hint||'خانه‌های قرمز را دوباره حساب کن.')}
-  });
-});
-document.querySelectorAll('.mcq').forEach(function(q){
-  var fb=q.querySelector('.fb');
-  q.querySelectorAll('.opts button').forEach(function(b){b.addEventListener('click',function(){
-    q.querySelectorAll('.opts button').forEach(function(x){x.classList.remove('ok','no')});
-    if(b.hasAttribute('data-ok')){b.classList.add('ok');fb.className='fb good';fb.textContent=q.dataset.yes||'درست!'}
-    else{b.classList.add('no');fb.className='fb bad';fb.textContent=q.dataset.no||'نه، دوباره فکر کن.'}
-  })});
-});
-document.querySelectorAll('.stepper').forEach(function(s){
-  var st=s.querySelectorAll('.st'),n=0,nx=s.querySelector('.next'),al=s.querySelector('.all');
-  function upd(){st.forEach(function(e,i){e.classList.toggle('show',i<n)});if(nx)nx.textContent=n>=st.length?'از اول':'قدم بعدی ('+n+'/'+st.length+')'}
-  if(nx)nx.addEventListener('click',function(){n=n>=st.length?0:n+1;upd()});
-  if(al)al.addEventListener('click',function(){n=st.length;upd()});
-  upd();
-});
-window.addEventListener('beforeprint',function(){document.querySelectorAll('details.sol').forEach(function(d){d.open=true})});
-})();
-/* ===== END SHARED JS ===== */
-</script>
-<script>
-/* lesson 3: air-conditioner pipeline stepper */
-(function(){
-  var NS = 'http://www.w3.org/2000/svg';
-  function clip(v){ return Math.max(0, Math.min(1, v)); }
-  function cold(T){ return clip((18 - T) / 8); }
-  function cool(T){ return T <= 10 || T >= 26 ? 0 : (T <= 18 ? (T - 10) / 8 : (26 - T) / 8); }
-  function warm(T){ return clip((T - 18) / 8); }
-  function humid(H){ return clip((H - 40) / 40); }
-  var REP = {off: 0, low: 40, high: 100};
-  function el(tag, attrs, txt){
-    var e = document.createElementNS(NS, tag);
-    for (var k in attrs) e.setAttribute(k, attrs[k]);
-    if (txt !== undefined) e.textContent = txt;
-    return e;
-  }
-  function f2(v){ return v.toFixed(2); }
-  function sh(v){ return String(parseFloat(v.toFixed(2))); }
+// Lesson 3 — slides 25–47 (Part 1: what fuzzy logic is).
+// Explanations are Persian; numbers, math and technical terms stay in English.
 
-  /* ---- membership charts ---- */
-  var X = function(t){ return 40 + t * 575 / 40; }, Y = function(m){ return 95 - 70 * m; };
-  var XH = function(h){ return 40 + h * 5.75; }, YH = function(m){ return 175 - 45 * m; };
-  var tg = document.getElementById('p-tg');
-  [0, 1].forEach(function(m){
-    tg.appendChild(el('line', {x1: 40, x2: 615, y1: Y(m), y2: Y(m), stroke: 'var(--grid)'}));
-    tg.appendChild(el('text', {x: 32, y: Y(m) + 4, 'text-anchor': 'end'}, String(m)));
-    tg.appendChild(el('line', {x1: 40, x2: 615, y1: YH(m), y2: YH(m), stroke: 'var(--grid)'}));
-    tg.appendChild(el('text', {x: 32, y: YH(m) + 4, 'text-anchor': 'end'}, String(m)));
-  });
-  [0, 10, 18, 26, 40].forEach(function(t){ tg.appendChild(el('text', {x: X(t), y: 110, 'text-anchor': 'middle'}, t + '°')); });
-  [0, 40, 80, 100].forEach(function(h){ tg.appendChild(el('text', {x: XH(h), y: 192, 'text-anchor': 'middle'}, h + '%')); });
-  function poly(pts, fx, fy, col){
-    tg.appendChild(el('path', {d: pts.map(function(p, j){ return (j ? 'L' : 'M') + fx(p[0]).toFixed(1) + ' ' + fy(p[1]).toFixed(1); }).join(' '),
-      fill: 'none', stroke: col, 'stroke-width': 2.5}));
-  }
-  poly([[0,1],[10,1],[18,0],[40,0]], X, Y, 'var(--c1)');
-  poly([[0,0],[10,0],[18,1],[26,0],[40,0]], X, Y, 'var(--c2)');
-  poly([[0,0],[18,0],[26,1],[40,1]], X, Y, 'var(--c3)');
-  poly([[0,0],[40,0],[80,1],[100,1]], XH, YH, 'var(--c4)');
-  tg.appendChild(el('text', {x: 620, y: 20, 'text-anchor': 'end'}, 'دما'));
-  tg.appendChild(el('text', {x: 620, y: 124, 'text-anchor': 'end'}, 'رطوبت'));
-  var tLine = el('line', {y1: 25, y2: 95, stroke: 'var(--text-3)', 'stroke-width': 1.5, 'stroke-dasharray': '4 4'});
-  var hLine = el('line', {y1: 130, y2: 175, stroke: 'var(--text-3)', 'stroke-width': 1.5, 'stroke-dasharray': '4 4'});
-  tg.appendChild(tLine); tg.appendChild(hLine);
-  var dotC = el('circle', {r: 5, fill: 'var(--c1)'}), dotO = el('circle', {r: 5, fill: 'var(--c2)'}),
-      dotW = el('circle', {r: 5, fill: 'var(--c3)'}), dotH = el('circle', {r: 5, fill: 'var(--c4)'});
-  [dotC, dotO, dotW, dotH].forEach(function(d){ tg.appendChild(d); });
+const fmt = n => String(+n.toFixed(2));
+const all = list => Promise.all(list);
+const LTR = s => `⁦${s}⁩`; // keeps a left-to-right run (numbers, math) intact inside Persian board text
 
-  /* ---- pipeline boxes ---- */
-  var names = ['۱. فازی‌سازی', '۲. استنتاج', '۳. ترکیب', '۴. غیرفازی‌سازی'];
-  var boxes = document.getElementById('p-boxes'), stg = [], vals = [];
-  var bx = function(i){ return 488 - i * 155; };
-  for (var i = 0; i < 4; i++){
-    var gg = el('g', {'class': 'stg'});
-    gg.appendChild(el('rect', {x: bx(i), y: 20, width: 130, height: 80, rx: 10}));
-    gg.appendChild(el('text', {'class': 'tt', x: bx(i) + 65, y: 50, 'text-anchor': 'middle'}, names[i]));
-    var v = el('text', {'class': 'vv', x: bx(i) + 65, y: 78, 'text-anchor': 'middle'}, '');
-    gg.appendChild(v); vals.push(v);
-    (function(k){ gg.addEventListener('click', function(){ cur = k; render(); }); })(i);
-    boxes.appendChild(gg); stg.push(gg);
-    if (i < 3) boxes.appendChild(el('line', {x1: bx(i) - 3, x2: bx(i + 1) + 133, y1: 60, y2: 60, stroke: 'var(--text-3)', 'stroke-width': 2, 'marker-end': 'url(#p-arr)'}));
-  }
-  boxes.appendChild(el('text', {x: 618, y: 14, 'text-anchor': 'end'}, 'ورودی: عدد'));
-  boxes.appendChild(el('text', {x: 23, y: 14, 'text-anchor': 'start'}, 'خروجی: عدد'));
+// The air conditioner of slides 35–36, with the lesson's own membership functions.
+const cold = t => Math.max(0, Math.min(1, (18 - t) / 8));          // 1 up to 10, 0 from 18
+const cool = t => Math.max(0, Math.min((t - 10) / 8, (26 - t) / 8)); // 10 / 18 / 26
+const warm = t => Math.max(0, Math.min(1, (t - 18) / 8));          // 0 up to 18, 1 from 26
+const humid = h => Math.max(0, Math.min(1, (h - 40) / 40));        // 0 at 40 %, 1 at 80 %
+const REP = { off: 0, low: 40, high: 100 };                         // representative air flow (%)
+function ac(T, H) {
+  const w1 = warm(T), w2 = cool(T), w3 = Math.min(cold(T), humid(H));
+  const y = (REP.high * w1 + REP.off * w2 + REP.low * w3) / (w1 + w2 + w3);
+  return { cold: cold(T), cool: cool(T), warm: warm(T), humid: humid(H), w1, w2, w3, y };
+}
+const R14 = ac(14, 70), R12 = ac(12, 60);
+const GT = () => Graph({ x: 80, y: 170, w: 420, h: 220, from: 0, to: 34 });
+const GH = () => Graph({ x: 630, y: 170, w: 260, h: 220, from: 20, to: 100 });
 
-  var btns = document.querySelectorAll('#p-btns button'), cur = 0;
-  btns.forEach(function(b){ b.addEventListener('click', function(){ cur = +b.getAttribute('data-s'); render(); }); });
+// A labelled block for diagrams.
+async function block(b, id, x, y, w, h, en, fa, color = 'blue') {
+  await b.box(id, x, y, w, h, { color, fill: color, dur: 400 });
+  if (en) await b.write(`${id}-en`, x + w / 2, y + h / 2 - (fa ? 4 : -8), en, { size: 24, color, bold: true, dur: 250 });
+  if (fa) await b.write(`${id}-fa`, x + w / 2, y + h / 2 + (en ? 30 : 8), fa, { size: 22, fa: true, dur: 250 });
+}
 
-  /* ---- panel helpers ---- */
-  var panel = document.getElementById('p-panel');
-  function para(parts){
-    var p = document.createElement('p'); p.style.margin = '4px 0';
-    parts.forEach(function(x){
-      var s = document.createElement('span');
-      if (typeof x === 'string'){ s.textContent = x; }
-      else { s.textContent = x.m; s.className = 'm'; }
-      p.appendChild(s);
-    });
-    panel.appendChild(p);
-  }
-  function bar(label, v, col, max, unit){
-    var d = document.createElement('div'); d.className = 'bar';
-    var l = document.createElement('span'); l.className = 'lbl'; l.textContent = label;
-    var t = document.createElement('span'); t.className = 'trk';
-    var f = document.createElement('span'); f.className = 'fill'; f.style.display = 'block';
-    f.style.width = (100 * v / max) + '%'; f.style.background = col;
-    t.appendChild(f);
-    var n = document.createElement('span'); n.className = 'num'; n.textContent = unit ? v.toFixed(1) + unit : f2(v);
-    d.appendChild(l); d.appendChild(t); d.appendChild(n);
-    panel.appendChild(d);
-  }
+function quizBoard(n, question, o = { size: 44 }, sub) {
+  return async b => {
+    await b.clear();
+    await b.write('q-n', 500, 60, `سؤال ${n} از 6`, { size: 24, color: 'soft', fa: true });
+    await b.write('q-q', 500, 130, question, o);
+    if (sub) await b.write('q-s', 500, 185, sub, { size: 24, color: 'blue' });
+  };
+}
+const SETS = 'cold 10→18 ↓   ·   cool 10/18/26   ·   warm 18→26 ↑   ·   humid 40→80 ↑';
 
-  var TI = document.getElementById('p-T'), HI = document.getElementById('p-H');
-  function render(){
-    var T = +TI.value, H = +HI.value;
-    document.getElementById('p-Tv').textContent = T;
-    document.getElementById('p-Hv').textContent = H;
-    var c = cold(T), o = cool(T), w = warm(T), h = humid(H);
-    var w1 = w, w2 = o, w3 = Math.min(c, h), sum = w1 + w2 + w3;
-    var y = sum > 0 ? (REP.off * w2 + REP.low * w3 + REP.high * w1) / sum : null;
-
-    tLine.setAttribute('x1', X(T)); tLine.setAttribute('x2', X(T));
-    hLine.setAttribute('x1', XH(H)); hLine.setAttribute('x2', XH(H));
-    dotC.setAttribute('cx', X(T)); dotC.setAttribute('cy', Y(c));
-    dotO.setAttribute('cx', X(T)); dotO.setAttribute('cy', Y(o));
-    dotW.setAttribute('cx', X(T)); dotW.setAttribute('cy', Y(w));
-    dotH.setAttribute('cx', XH(H)); dotH.setAttribute('cy', YH(h));
-
-    vals[0].textContent = 'T=' + T + '  H=' + H + '%';
-    vals[1].textContent = 'w=' + sh(w1) + ', ' + sh(w2) + ', ' + sh(w3);
-    vals[2].textContent = '{' + sh(w2) + ', ' + sh(w3) + ', ' + sh(w1) + '}';
-    vals[3].textContent = y === null ? 'y = ?' : 'y = ' + y.toFixed(1) + '%';
-    stg.forEach(function(g, i){ g.classList.toggle('on', i === cur); });
-    btns.forEach(function(b, i){ b.classList.toggle('on', i === cur); });
-
-    panel.textContent = '';
-    if (cur === 0){
-      para(['فازی‌سازی: هر عدد دقیق ورودی به درجه عضویت در مجموعه‌ها تبدیل می‌شود.']);
-      bar('سرد', c, 'var(--c1)', 1); bar('خنک', o, 'var(--c2)', 1); bar('گرم', w, 'var(--c3)', 1); bar('مرطوب', h, 'var(--c4)', 1);
-      para(['با نماد درس ۲: ', {m: 'T̃ = {' + sh(c) + '/سرد, ' + sh(o) + '/خنک, ' + sh(w) + '/گرم}'}, '  و  ', {m: 'μ_humid(' + H + ') = ' + sh(h)}]);
-    } else if (cur === 1){
-      para(['استنتاج: هر قاعده ارزیابی می‌شود و «درجه درستی» آن به دست می‌آید.']);
-      para(['قاعده ۱ — اگر گرم ← هوای زیاد: ', {m: 'w1 = μ_warm = ' + sh(w1)}]);
-      para(['قاعده ۲ — اگر خنک ← خاموش: ', {m: 'w2 = μ_cool = ' + sh(w2)}]);
-      para(['قاعده ۳ — اگر سرد و مرطوب ← هوای کم: ', {m: 'w3 = min(' + sh(c) + ', ' + sh(h) + ') = ' + sh(w3)}]);
-    } else if (cur === 2){
-      para(['ترکیب (ساخت): نتیجه همه قواعد کنار هم یک مجموعه فازی روی فرمان‌ها می‌سازند.']);
-      bar('خاموش', w2, 'var(--c2)', 1); bar('کم', w3, 'var(--c1)', 1); bar('زیاد', w1, 'var(--c3)', 1);
-      para([{m: 'out = {' + sh(w2) + '/خاموش, ' + sh(w3) + '/کم, ' + sh(w1) + '/زیاد}'}]);
-      para(['هنوز یک عدد نداریم؛ موتور کولر نمی‌فهمد «۰٫۵ خاموش و ۰٫۵ کم» یعنی چه.']);
-    } else {
-      para(['غیرفازی‌سازی: مجموعه خروجی دوباره به یک عدد قابل استفاده تبدیل می‌شود (میانگین وزنی ساده).']);
-      if (y === null){
-        para(['هیچ قاعده‌ای فعال نیست (همه درجه‌ها صفر است)، پس مخرج صفر می‌شود و خروجی تعریف نشده است. سیستم واقعی باید برای این حالت یک پیش‌فرض داشته باشد؛ یعنی پایگاه قواعد ما کامل نیست.']);
-      } else {
-        para([{m: 'y = (0·' + sh(w2) + ' + 40·' + sh(w3) + ' + 100·' + sh(w1) + ') / ' + sh(sum) + ' = ' + y.toFixed(1) + '%'}]);
-        bar('سرعت هوا', y, 'var(--accent)', 100, '%');
-      }
-    }
-  }
-  TI.addEventListener('input', render); HI.addEventListener('input', render);
-  render();
-})();
-</script>
-<script>
-/* lesson 3: essay questions (write first, then reveal model answer and self-check key points) */
-document.querySelectorAll('.essay').forEach(function(e){
-  var ta=e.querySelector('textarea'),fb=e.querySelector('.fb'),btn=e.querySelector('.reveal'),boxes=e.querySelectorAll('.pts input'),sc=e.querySelector('.score');
-  ta.addEventListener('input',function(){fb.textContent='';fb.className='fb'});
-  btn.addEventListener('click',function(){
-    if(!e.classList.contains('open')&&ta.value.trim().length<15){fb.className='fb bad';fb.textContent='اول جوابت را بنویس، حتی چند خط ناقص. همین تلاش برای یادآوری است که مطلب را ماندگار می‌کند.';return}
-    e.classList.toggle('open');btn.textContent=e.classList.contains('open')?'پنهان کردن جواب نمونه':'نمایش جواب نمونه';
-  });
-  function upd(){var n=0;boxes.forEach(function(b){if(b.checked)n++});
-    if(!n){sc.textContent='';sc.className='score fb';return}
-    var all=n===boxes.length;sc.className='score fb '+(all?'good':(n>=boxes.length/2?'good':'bad'));
-    sc.textContent=n+' از '+boxes.length+' نکته. '+(all?'کامل! این سؤال را سر جلسه نمره کامل می‌گیری.':(n>=boxes.length/2?'خوب است. نکته‌های تیک‌نخورده را یک بار بلند بخوان.':'جواب نمونه را بخوان، فردا دوباره بدون نگاه کردن بنویس.'))}
-  boxes.forEach(function(b){b.addEventListener('change',upd)});
+Teacher.start({
+  id: 'L03',
+  number: 3,
+  title: 'ساختار یک سیستم فازی',
+  chapter: 'بخش 1 · منطق فازی چیست',
+  slides: '25–47',
+  intro: 'قواعد اگر-آنگاه، سه نوع سیستم فازی و چهار مرحله: فازی‌سازی، استنتاج، ساخت، غیرفازی‌سازی.',
+  next: { href: '0004-union-intersection-complement.html', title: 'اجتماع، اشتراک و مکمل' },
+  steps: [
+    // ---------------------------------------------------------- 1. two sources
+    {
+      say: 'سلام! اسلاید 25: در سیستم‌های عملی، اطلاعات مهم از *دو منبع* می‌آید. یک: افراد خبره (experts) که دانششان را با زبان طبیعی می‌گویند. دو: اندازه‌گیری‌ها و مدل‌های ریاضی. سؤال کلیدی این است: دانش بشری را چطور به یک فرمول ریاضی تبدیل کنیم؟ کار اصلی یک سیستم فازی *همین تبدیل* است.',
+      draw: async b => {
+        await block(b, 's1', 80, 120, 300, 110, null, 'افراد خبره', 'blue');
+        await b.write('s1b', 230, 270, 'زبان طبیعی', { size: 24, color: 'soft', fa: true });
+        await block(b, 's2', 620, 120, 300, 110, null, 'اندازه‌گیری و مدل ریاضی', 'green');
+        await all([b.arrow('a1', 230, 290, 430, 380, { color: 'blue' }), b.arrow('a2', 770, 240, 570, 380, { color: 'green' })]);
+        await block(b, 'fs', 360, 380, 280, 90, null, 'سیستم فازی', 'orange');
+        await b.write('q', 500, 530, 'دانش بشری ← فرمول ریاضی', { size: 30, color: 'orange', bold: true, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 2. rule base
+    {
+      say: 'سیستم‌های فازی *مبتنی بر دانش یا قاعده* هستند (اسلاید 26). قلبشان یک *knowledge base* یا پایگاه دانش است که از قواعد فازی اگر-آنگاه ساخته شده. مثال اسلاید، رفتار راننده: اگر سرعت پایین است، نیروی بیشتری به پدال گاز وارد کن؛ اگر متوسط است، نیروی متعادل؛ اگر بالاست، نیروی کمتر. نقطه‌ی شروع ساخت سیستم، گرفتن این قواعد از خبره‌هاست؛ قدم بعد، ترکیبشان در یک سیستم واحد.',
+      term: ['Fuzzy IF-THEN rule', 'قاعده‌ی اگر-آنگاه فازی'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 80, 'قلب سیستم: پایگاه قواعد اگر-آنگاه', { size: 38, color: 'orange', bold: true, fa: true });
+        const R = [['سرعت پایین', 'نیروی بیشتر به پدال گاز'], ['سرعت متوسط', 'نیروی متعادل'], ['سرعت بالا', 'نیروی کمتر']];
+        for (const [k, [ifp, thenp]] of R.entries()) {
+          const y = 190 + k * 100;
+          await b.write(`n${k}`, 900, y, String(k + 1), { size: 34, color: 'purple', bold: true });
+          await b.write(`i${k}`, 860, y, `اگر ${ifp}`, { size: 30, color: 'blue', anchor: 'start', fa: true });
+          await b.write(`t${k}`, 540, y, `آنگاه ${thenp}`, { size: 30, color: 'green', anchor: 'start', fa: true });
+        }
+        await b.write('src', 500, 500, 'از کجا؟ از دانش افراد خبره', { size: 28, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 3. IF variable IS set THEN action
+    {
+      say: 'اسلاید 27 الگوی کلی قاعده را می‌دهد: IF variable IS set THEN action، و به این قوانین «عملگرهای فازی» می‌گوید. مثال پنکه در اسلاید 29: اگر دمای اتاق «خیلی گرم» است، سرعت پنکه را «خیلی زیاد» کن؛ گرم ← زیاد؛ معتدل ← همین اندازه؛ خنک ← کم؛ سرد ← خاموش. با این قواعد دماسنجی می‌سازیم که اتاق را خودکار کنترل کند.',
+      draw: async b => {
+        await b.clear();
+        await b.box('pb', 150, 60, 700, 80, { color: 'purple', fill: 'blue' });
+        await b.write('p', 500, 112, 'IF variable IS set THEN action', { size: 38, color: 'purple', bold: true });
+        const F = [['خیلی گرم', 'خیلی زیاد'], ['گرم', 'زیاد'], ['معتدل', 'همین اندازه'], ['خنک', 'کم'], ['سرد', 'خاموش']];
+        await b.write('hc', 690, 200, 'دمای اتاق', { size: 26, color: 'soft', fa: true });
+        await b.write('hf', 310, 200, 'سرعت پنکه', { size: 26, color: 'soft', fa: true });
+        for (const [k, [t, f]] of F.entries()) {
+          const y = 250 + k * 58;
+          await b.write(`ft${k}`, 690, y, t, { size: 30, color: 'orange', fa: true, dur: 200 });
+          await b.arrow(`fa${k}`, 590, y - 10, 410, y - 10, { color: 'soft', dur: 250 });
+          await b.write(`ff${k}`, 310, y, f, { size: 30, color: 'blue', fa: true, dur: 200 });
+        }
+      },
+    },
+    // ---------------------------------------------------------- 4. pure fuzzy system
+    {
+      say: 'اسلاید 30: معمولاً از *سه نوع* سیستم فازی حرف می‌زنیم. نوع 1، *فازی خالص*: موتور استنتاج قواعد را به یک نگاشت از مجموعه‌های فازی در فضای ورودی به مجموعه‌های فازی در فضای خروجی تبدیل می‌کند. مشکل اصلی‌اش: ورودی و خروجی‌اش *مجموعه‌ی فازی* است، ولی در سیستم‌های مهندسی ورودی و خروجی عدد حقیقی‌اند.',
+      term: ['Pure fuzzy system', 'سیستم فازی خالص'],
+      draw: async b => {
+        await b.clear();
+        await b.write('t', 500, 70, `سه نوع: ${LTR('1')} خالص · ${LTR('2')} TSK · ${LTR('3')} با فازی‌ساز و غیرفازی‌ساز`, { size: 28, color: 'soft', fa: true });
+        await b.write('h', 500, 140, 'نوع 1: سیستم فازی خالص', { size: 38, color: 'blue', bold: true, fa: true });
+        await b.write('in', 140, 290, 'مجموعه‌ی فازی', { size: 26, color: 'orange', fa: true });
+        await b.arrow('a1', 230, 280, 320, 280, { color: 'soft' });
+        await block(b, 'eng', 320, 220, 360, 120, 'inference engine', 'پایگاه قواعد + موتور استنتاج', 'blue');
+        await b.arrow('a2', 680, 280, 770, 280, { color: 'soft' });
+        await b.write('out', 860, 290, 'مجموعه‌ی فازی', { size: 26, color: 'orange', fa: true });
+        await b.box('pr', 120, 400, 760, 110, { color: 'red', fill: 'red' });
+        await b.write('p1', 500, 445, 'مشکل: ورودی و خروجی مجموعه‌ی فازی است', { size: 28, color: 'red', bold: true, fa: true });
+        await b.write('p2', 500, 488, 'ولی در مهندسی ورودی و خروجی عدد حقیقی‌اند', { size: 26, color: 'red', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 5. TSK
+    {
+      say: 'نوع 2، *TSK* یعنی تاکاگی–سوگنو–کانگ (اسلاید 31). ورودی و خروجی‌اش عدد حقیقی است، چون بخش «آنگاه» قاعده یک *فرمول ریاضی ساده* شده: اگر سرعت اتومبیل x باشد، نیروی پدال y = c·x. ولی دو مشکل دارد: یک، فرمول ریاضی چارچوبی برای نمایش دانش بشری نیست. دو، دست ما را برای اعمال اصول مختلف منطق فازی باز نمی‌گذارد، پس انعطاف ندارد.',
+      term: ['TSK (Takagi–Sugeno–Kang)', 'تاکاگی–سوگنو–کانگ'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 90, 'نوع 2: سیستم فازی TSK', { size: 38, color: 'blue', bold: true, fa: true });
+        await b.write('in', 140, 230, 'x', { size: 40, color: 'orange' });
+        await b.write('inl', 140, 270, 'عدد حقیقی', { size: 22, color: 'soft', fa: true });
+        await b.arrow('a1', 190, 220, 300, 220, { color: 'soft' });
+        await b.box('bx', 300, 160, 400, 120, { color: 'blue', fill: 'blue' });
+        await b.write('r', 500, 210, 'IF speed is x', { size: 28 });
+        await b.write('r2', 500, 255, 'THEN y = c·x', { size: 32, color: 'green', bold: true });
+        await b.arrow('a2', 700, 220, 810, 220, { color: 'soft' });
+        await b.write('out', 860, 230, 'y', { size: 40, color: 'orange' });
+        await b.write('outl', 860, 270, 'عدد حقیقی', { size: 22, color: 'soft', fa: true });
+        await b.box('pr', 100, 330, 800, 180, { color: 'red', fill: 'red' });
+        await b.write('p0', 500, 375, 'مشکل‌های TSK', { size: 28, color: 'red', bold: true, fa: true });
+        await b.write('p1', 500, 425, '1. «آنگاه» فرمول است ← چارچوبی برای دانش بشری ندارد', { size: 26, fa: true });
+        await b.write('p2', 500, 475, '2. اصول منطق فازی را نمی‌شود اعمال کرد ← انعطاف ندارد', { size: 26, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 6. fuzzifier + defuzzifier
+    {
+      say: 'نوع 3 (اسلاید 32): همان سیستم فازی خالص را برمی‌داریم و یک *fuzzifier* یا فازی‌ساز به ورودی‌اش اضافه می‌کنیم که عدد حقیقی را به مجموعه‌ی فازی تبدیل کند، و یک *defuzzifier* یا غیرفازی‌ساز به خروجی‌اش که مجموعه‌ی فازی را دوباره عدد حقیقی کند. این سیستم عیب‌های هر دو نوع قبلی را می‌پوشاند. از این به بعد، منظور از «سیستم فازی» همین نوع است.',
+      term: ['Fuzzifier / Defuzzifier', 'فازی‌ساز / غیرفازی‌ساز'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 90, 'نوع 3: با فازی‌ساز و غیرفازی‌ساز', { size: 38, color: 'blue', bold: true, fa: true });
+        await b.write('x', 70, 245, 'x', { size: 40, color: 'orange' });
+        await b.arrow('a0', 95, 235, 150, 235, { color: 'soft' });
+        await block(b, 'f', 150, 180, 170, 110, 'fuzzifier', 'فازی‌ساز', 'purple');
+        await b.arrow('a1', 320, 235, 380, 235, { color: 'soft' });
+        await block(b, 'p', 380, 180, 240, 110, 'pure fuzzy', 'قواعد + موتور استنتاج', 'blue');
+        await b.arrow('a2', 620, 235, 680, 235, { color: 'soft' });
+        await block(b, 'd', 680, 180, 170, 110, 'defuzzifier', 'غیرفازی‌ساز', 'purple');
+        await b.arrow('a3', 850, 235, 905, 235, { color: 'soft' });
+        await b.write('y', 930, 245, 'y', { size: 40, color: 'orange' });
+        await b.write('n1', 235, 330, 'عدد ← مجموعه‌ی فازی', { size: 20, color: 'soft', fa: true });
+        await b.write('n2', 765, 330, 'مجموعه‌ی فازی ← عدد', { size: 20, color: 'soft', fa: true });
+        await b.write('g1', 500, 440, 'عیب‌های خالص و TSK را می‌پوشاند', { size: 32, color: 'green', bold: true, fa: true });
+        await b.write('g2', 500, 500, 'از این به بعد: «سیستم فازی» = همین نوع', { size: 28, color: 'orange', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 7. slide 33 names
+    {
+      say: 'اسلاید 33 همین را با کلمه‌های دیگر می‌گوید: در قسمت «Fuzzier» یا مبدل فازی، مقدار حقیقی به مجموعه‌ی فازی تبدیل می‌شود؛ بعد از طریق «ماشین رابط فازی» و قوانین پایه، نتیجه به «Defuzzier» می‌رود. اسلاید املای Fuzzier و Defuzzier را نوشته؛ اسم استاندارد انگلیسی fuzzifier و defuzzifier است. «ماشین رابط فازی» هم همان موتور استنتاج است.',
+      draw: async b => {
+        await b.write('s1', 235, 375, 'اسلاید: Fuzzier', { size: 20, color: 'red', fa: true });
+        await b.write('s2', 500, 330, 'ماشین رابط فازی', { size: 20, color: 'purple', fa: true });
+        await b.write('s3', 765, 375, 'اسلاید: Defuzzier', { size: 20, color: 'red', fa: true });
+        await b.pulse(['f-en', 'd-en']);
+      },
+    },
+    // ---------------------------------------------------------- 8. four steps
+    {
+      say: 'حالا *روش چهار مرحله‌ای* استفاده از منطق فازی، اسلایدهای 34 تا 38. یک: فازی کردن، عدد ورودی به درجه‌ی عضویت تبدیل می‌شود. دو: استنتاج، همه‌ی قواعد ارزیابی می‌شوند. سه: ساخت یا ترکیب، نتیجه‌ها با هم یک نتیجه‌ی کلی می‌شوند. چهار: بازگرداندن از حالت فازی، نتیجه به یک داده‌ی قابل استفاده تبدیل می‌شود؛ اسلاید 38 می‌گوید این قسمت «اغلب پیچیده» است. این ترتیب را حفظ کن.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 90, 'روش چهار مرحله‌ای', { size: 40, color: 'orange', bold: true, fa: true });
+        const S = [
+          ['fuzzification', 'فازی کردن', 'عدد ← درجه‌ی عضویت'],
+          ['inference', 'استنتاج', 'درجه‌ی درستی قواعد'],
+          ['composition', 'ساخت (ترکیب)', 'یک نتیجه‌ی کلی'],
+          ['defuzzification', 'غیرفازی‌سازی', 'نتیجه ← داده‌ی قابل استفاده'],
+        ];
+        for (const [k, [en, fa, role]] of S.entries()) {
+          const x = 50 + k * 230;
+          await b.box(`sb${k}`, x, 170, 190, 150, { color: k === 3 ? 'red' : 'blue', fill: 'blue', dur: 350 });
+          await b.write(`sn${k}`, x + 95, 210, String(k + 1), { size: 32, color: 'purple', bold: true, dur: 150 });
+          await b.write(`se${k}`, x + 95, 255, en, { size: 21, color: 'blue', bold: true, dur: 250 });
+          await b.write(`sf${k}`, x + 95, 297, fa, { size: 22, fa: true, dur: 250 });
+          await b.write(`sr${k}`, x + 95, 365, role, { size: 17, color: 'soft', fa: true, dur: 250 });
+          if (k < 3) await b.arrow(`sa${k}`, x + 192, 245, x + 228, 245, { color: 'orange', head: 10, dur: 200 });
+        }
+        await b.write('hard', 845, 420, '«اغلب پیچیده»', { size: 24, color: 'red', fa: true });
+        await b.write('ord', 500, 500, 'fuzzify → infer → compose → defuzzify', { size: 30, color: 'green' });
+      },
+    },
+    // ---------------------------------------------------------- 9. the air conditioner
+    {
+      say: 'مثال اسلاید 35: یک دستگاه تهویه، دما و رطوبت اتاق را اندازه می‌گیرد؛ این دو *ورودی* هستند. *خروجی* سطح جریان هوای دستگاه است، با سه حالت: خاموش، کم، زیاد. متخصص باید دو تابع عضویت تعیین کند: یکی برای تبدیل دما به مقدار فازی و یکی برای رطوبت.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 80, 'دستگاه تهویه — اسلاید 35', { size: 38, color: 'blue', bold: true, fa: true });
+        await b.write('i1', 150, 210, 'دما T', { size: 32, color: 'orange', fa: true });
+        await b.write('i2', 150, 330, 'رطوبت H', { size: 32, color: 'orange', fa: true });
+        await all([b.arrow('a1', 230, 200, 340, 240, { color: 'soft' }), b.arrow('a2', 250, 320, 340, 290, { color: 'soft' })]);
+        await block(b, 'acb', 340, 200, 300, 120, null, 'سیستم فازی تهویه', 'blue');
+        await b.arrow('a3', 640, 260, 730, 260, { color: 'soft' });
+        await b.write('o', 840, 250, 'جریان هوا', { size: 32, color: 'green', fa: true });
+        await b.write('o2', 840, 300, 'خاموش · کم · زیاد', { size: 24, color: 'green', fa: true });
+        await b.write('n', 500, 450, 'متخصص دو تابع عضویت تعیین می‌کند: یکی برای دما، یکی برای رطوبت', { size: 26, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 10. membership functions
+    {
+      say: 'اسلاید عدد نداده، پس ما مجموعه‌ها را مشخص کرده‌ایم. دما: «سرد» تا 10 درجه برابر 1 است و در 18 به 0 می‌رسد؛ «خنک» از 10 تا 18 بالا می‌رود و از 18 تا 26 پایین می‌آید؛ «گرم» از 18 بالا می‌رود و از 26 به بعد 1 است. رطوبت: «مرطوب» در 40 درصد 0 است و در 80 درصد به 1 می‌رسد.',
+      draw: async b => {
+        await b.clear();
+        const gt = GT(), gh = GH();
+        await b.write('ht', 290, 90, 'دما (°C)', { size: 30, color: 'blue', bold: true, fa: true });
+        await b.write('hh', 760, 90, 'رطوبت (%)', { size: 30, color: 'blue', bold: true, fa: true });
+        await gt.axes(b, 'at', { ticks: [0, 10, 18, 26, 34], label: '°C' });
+        await gh.axes(b, 'ah', { ticks: [40, 60, 80, 100], label: '%' });
+        await gt.curve(b, 'cc', cold, { color: 'blue', steps: 136, dur: 500 });
+        await b.write('lc', gt.X(4), gt.Y(1) - 12, 'سرد', { size: 22, color: 'blue', bold: true, fa: true });
+        await gt.curve(b, 'ck', cool, { color: 'purple', steps: 136, dur: 500 });
+        await b.write('lk', gt.X(18), gt.Y(1) - 12, 'خنک', { size: 22, color: 'purple', bold: true, fa: true });
+        await gt.curve(b, 'cw', warm, { color: 'orange', steps: 136, dur: 500 });
+        await b.write('lw', gt.X(30), gt.Y(1) - 12, 'گرم', { size: 22, color: 'orange', bold: true, fa: true });
+        await gh.curve(b, 'ch', humid, { color: 'green', steps: 80, dur: 500 });
+        await b.write('lh', gh.X(90), gh.Y(1) - 12, 'مرطوب', { size: 22, color: 'green', bold: true, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 11. fuzzification
+    {
+      say: 'مرحله‌ی 1، *fuzzification* یا فازی‌سازی. فرض کن دما T = 14 و رطوبت H = 70 درصد است. 14 بین 10 و 18 است: سرد (18 − 14) / 8 = 0.5 و خنک (14 − 10) / 8 = 0.5؛ گرم 0، چون گرم از 18 شروع می‌شود. رطوبت: (70 − 40) / 40 = 0.75. حالا به جای دو عدد، چهار درجه‌ی عضویت داریم.',
+      term: ['Fuzzification', 'فازی‌سازی'],
+      draw: async b => {
+        const gt = GT(), gh = GH();
+        await gt.guide(b, 'g14', 14, R14.cold);
+        await gh.guide(b, 'g70', 70, R14.humid, { color: 'green' });
+        await b.write('r1', 290, 460, `cold(14) = (18 − 14)/8 = ${fmt(R14.cold)}`, { size: 22, color: 'blue' });
+        await b.write('r2', 290, 495, `cool(14) = (14 − 10)/8 = ${fmt(R14.cool)}`, { size: 22, color: 'purple' });
+        await b.write('r3', 290, 530, `warm(14) = ${fmt(R14.warm)}`, { size: 22, color: 'orange' });
+        await b.write('r4', 760, 460, `humid(70) = (70 − 40)/40 = ${fmt(R14.humid)}`, { size: 22, color: 'green' });
+      },
+    },
+    // ---------------------------------------------------------- 12. inference
+    {
+      say: 'مرحله‌ی 2، *inference* یا استنتاج. قواعد اسلاید 36: (1) اگر اتاق گرم است، هوای زیادی منتشر کن. (2) اگر خنک است، هیچ هوایی منتشر نکن. (3) اگر سرد *و* مرطوب است، کمی هوا به جریان بینداز. استنتاج «درجه‌ی درستی» هر قاعده را حساب می‌کند. قاعده‌ی تک‌شرطی همان درجه‌ی شرطش را می‌گیرد: w1 = 0 و w2 = 0.5. برای «و» کمینه می‌گیریم: w3 = min(0.5, 0.75) = 0.5؛ دلیل min را در درس 4 می‌بینی.',
+      term: ['Inference — degree of truth', 'استنتاج — درجه‌ی درستی'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'استنتاج: درجه‌ی درستی هر قاعده', { size: 36, color: 'orange', bold: true, fa: true });
+        const R = [
+          ['اگر گرم ← هوای زیاد', `w1 = warm = ${fmt(R14.w1)}`],
+          ['اگر خنک ← خاموش', `w2 = cool = ${fmt(R14.w2)}`],
+          ['اگر سرد و مرطوب ← هوای کم', `w3 = min(${fmt(R14.cold)}, ${fmt(R14.humid)}) = ${fmt(R14.w3)}`],
+        ];
+        for (const [k, [rule, w]] of R.entries()) {
+          const y = 170 + k * 110;
+          await b.write(`rn${k}`, 920, y, String(k + 1), { size: 32, color: 'purple', bold: true });
+          await b.write(`rr${k}`, 885, y, rule, { size: 28, anchor: 'start', fa: true });
+          await b.write(`rw${k}`, 290, y, w, { size: 28, color: k === 0 ? 'soft' : 'green', bold: k > 0 });
+        }
+        await b.write('and', 500, 490, `«و» ← ${LTR('min')}  (دلیلش در درس 4)`, { size: 28, color: 'blue', fa: true });
+        await b.ring('r3', 290, 380, 210, 40, { color: 'orange', tilt: 0 });
+      },
+    },
+    // ---------------------------------------------------------- 13. composition
+    {
+      say: 'مرحله‌ی 3، *composition* یا ساخت (ترکیب)، اسلاید 37: همه‌ی نتیجه‌های استنتاج با هم ترکیب می‌شوند تا یک نتیجه‌ی کلی به دست بیاید. اینجا نتیجه یک مجموعه‌ی فازی روی فرمان‌هاست: {0.5/خاموش، 0.5/کم، 0/زیاد} — با همان نماد درس 2. ولی دقت کن: هنوز *یک عدد* نداریم که دستگاه با آن کار کند.',
+      term: ['Composition / aggregation', 'ساخت (ترکیب)'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'ساخت: یک نتیجه‌ی کلی', { size: 36, color: 'orange', bold: true, fa: true });
+        await b.line('base', 150, 330, 850, 330, { color: 'soft' });
+        const C = [['خاموش', R14.w2, 250], ['کم', R14.w3, 500], ['زیاد', R14.w1, 750]];
+        for (const [k, [name, m, x]] of C.entries()) {
+          await b.write(`cn${k}`, x, 370, name, { size: 30, fa: true });
+          if (m > 0) await b.box(`cb${k}`, x - 50, 330 - m * 200, 100, m * 200, { color: 'green', fill: 'green', r: 4 });
+          await b.write(`cv${k}`, x, 330 - m * 200 - 14, fmt(m), { size: 32, color: 'green', bold: true });
+        }
+        await b.write('set', 500, 475, `{ ${LTR('0.5')}/خاموش ، ${LTR('0.5')}/کم ، ${LTR('0')}/زیاد }`, { size: 32, color: 'purple', fa: true });
+        await b.write('no', 500, 530, 'هنوز یک عدد نداریم!', { size: 26, color: 'red', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 14. defuzzification
+    {
+      say: 'مرحله‌ی 4، *defuzzification* یا بازگرداندن از حالت فازی. اسلاید 39 می‌گوید: فرض کن نتیجه‌ی مرحله‌ی قبل 0.7 است؛ این عدد برای دستگاه قابل فهم نیست و باید به یکی از فرمان‌های کم، زیاد یا خاموش تبدیل شود. یک راه ساده (ساده‌سازی خود ما): به هر فرمان یک عدد نماینده بدهیم، خاموش 0، کم 40، زیاد 100، و میانگین وزنی بگیریم: هر عدد نماینده ضرب در درجه‌اش، جمع، تقسیم بر جمع درجه‌ها. صورت کسر فقط 40 × 0.5 = 20 است و مخرج 0.5 + 0.5 = 1؛ پس جواب 20 درصد. روش‌های کامل در درس 8 می‌آیند.',
+      term: ['Defuzzification', 'غیرفازی‌سازی'],
+      draw: async b => {
+        await b.erase(['set', 'no']);
+        const X = [250, 500, 750], V = [REP.off, REP.low, REP.high];
+        await all(X.map((x, k) => b.write(`rp${k}`, x, 410, `${V[k]}%`, { size: 26, color: 'blue', bold: true })));
+        await b.write('f', 500, 470, 'y = (0·0.5 + 40·0.5 + 100·0) / (0.5 + 0.5 + 0)', { size: 28 });
+        await b.write('y', 500, 525, `= 20 / 1 = ${fmt(R14.y)}%`, { size: 36, color: 'green', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 15. why "often complicated"
+    {
+      say: 'اگر مثل اسلاید 39 دقیقاً *یکی* از سه فرمان لازم باشد، یک راه ساده این است که فرمانی را بگیریم که درجه‌اش بیشتر است. ولی اینجا «خاموش» و «کم» مساوی‌اند، هر دو 0.5! کدام را انتخاب کنیم؟ همین نشان می‌دهد چرا اسلاید 38 این مرحله را «اغلب پیچیده» می‌داند.',
+      tip: true,
+      draw: async b => {
+        await all([b.ring('t0', 250, 240, 80, 120, { color: 'red', tilt: 0 }), b.ring('t1', 500, 240, 80, 120, { color: 'red', tilt: 0 })]);
+        await b.write('tie', 375, 140, '؟', { size: 50, color: 'red', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 16. applications
+    {
+      say: 'کاربردها، اسلایدهای 40 و 41: دستگاه تهویه‌ی مطبوع که دما را کم‌کم به دمای دلخواه می‌رساند؛ تنظیم سرعت خودرو با کم و زیاد کردن شتاب، سوخت و ترمز؛ دیگ بخار کشتی (دما، فشار، مواد شیمیایی)؛ دوربین فیلمبرداری که حرکت سوژه را از لرزش دست تشخیص می‌دهد؛ ماشین لباسشویی؛ پیش‌بینی زردی نوزاد؛ خودروسازی؛ رباتی که رنگ‌ها را تشخیص می‌دهد؛ و کنترل‌کننده‌ی لوازم خانگی.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'کاربردها — اسلایدهای 40 و 41', { size: 36, color: 'blue', bold: true, fa: true });
+        const L = ['تهویه‌ی مطبوع', 'تنظیم سرعت خودرو', 'دیگ بخار کشتی', 'دوربین: سوژه یا لرزش دست؟', 'ماشین لباسشویی', 'پیش‌بینی زردی نوزاد', 'خودروسازی', 'ربات تشخیص رنگ', 'لوازم خانگی'];
+        for (const [k, l] of L.entries()) {
+          const col = k < 5 ? 0 : 1, row = k < 5 ? k : k - 5;
+          await b.write(`ap${k}`, col ? 440 : 900, 150 + row * 72, '•  ' + l, { size: 28, anchor: 'start', fa: true, dur: 300 });
+        }
+      },
+    },
+    // ---------------------------------------------------------- 17. washing machine
+    {
+      say: 'ماشین لباسشویی فازی، اسلاید 42: یک سیستم *سه ورودی، یک خروجی*. ورودی‌ها: نوع کثیفی، مقدار کثیفی و حجم لباس. خروجی: تعداد دورهای مناسب شستشو. سنسور نوری نور عبوری از آب را می‌سنجد: گل زود در آب حل می‌شود و نور سریع کم می‌شود؛ چربی کندتر. سنسور بار هم حجم لباس را ثبت می‌کند.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'لباسشویی فازی: 3 ورودی، 1 خروجی', { size: 36, color: 'blue', bold: true, fa: true });
+        const I = ['نوع کثیفی', 'مقدار کثیفی', 'حجم لباس'];
+        for (const [k, l] of I.entries()) {
+          const y = 190 + k * 90;
+          await b.write(`wi${k}`, 300, y + 8, l, { size: 28, color: 'orange', anchor: 'start', fa: true });
+          await b.arrow(`wa${k}`, 310, y, 400, 280, { color: 'soft', dur: 250 });
+        }
+        await block(b, 'wm', 400, 230, 220, 100, 'fuzzy', 'سیستم فازی', 'blue');
+        await b.arrow('wo', 620, 280, 700, 280, { color: 'soft' });
+        await b.write('wol', 710, 290, 'تعداد دور شستشو', { size: 28, color: 'green', anchor: 'end', fa: true });
+        await b.write('sen', 500, 490, 'سنسور نوری: گل ← نور سریع کم می‌شود · چربی ← کند', { size: 24, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 18. cement kiln
+    {
+      say: 'کنترل فازی کوره‌ی سیمان، اسلاید 43: *چهار ورودی، دو خروجی*. ورودی‌ها: درصد اکسیژن گازهای اگزوز، دمای گازهای اگزوز، گشتاور آسیاب کوره و وزن حجمی کلینکر. خروجی‌ها: میزان زغال‌سنگ و میزان جریان هوا. یک نکته: قاعده‌ی 1 اسلاید می‌گوید «درجه‌ی هوا را افزایش دهید»، در حالی که خروجی «جریان هوا» است؛ احتمالاً منظور همان جریان هواست.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'کوره‌ی سیمان: 4 ورودی، 2 خروجی', { size: 36, color: 'blue', bold: true, fa: true });
+        const I = ['درصد اکسیژن', 'دمای گاز اگزوز', 'گشتاور آسیاب', 'وزن کلینکر'];
+        for (const [k, l] of I.entries()) {
+          const y = 160 + k * 80;
+          await b.write(`ki${k}`, 290, y + 8, l, { size: 26, color: 'orange', anchor: 'start', fa: true });
+          await b.arrow(`ka${k}`, 300, y, 400, 280, { color: 'soft', dur: 200 });
+        }
+        await block(b, 'km', 400, 230, 200, 100, 'fuzzy', 'سیستم فازی', 'blue');
+        const O = ['میزان زغال‌سنگ', 'میزان جریان هوا'];
+        for (const [k, l] of O.entries()) {
+          const y = 230 + k * 100;
+          await b.arrow(`ko${k}`, 600, 280, 690, y, { color: 'soft', dur: 200 });
+          await b.write(`kol${k}`, 700, y + 8, l, { size: 26, color: 'green', anchor: 'end', fa: true });
+        }
+        await b.write('n', 500, 500, 'قاعده‌ی 1 اسلاید: «درجه‌ی هوا» ← منظور: جریان هوا', { size: 24, color: 'red', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 19. medicine
+    {
+      say: 'اسلاید 44، کاربرد در پزشکی: پیش‌بینی پاسخ به درمان بیماری‌های وابسته به الکل، تحلیل بیماری دیابت، محاسبه‌ی حجم بافت‌های مغز از تصاویر MRI، بررسی سکته، کنترل تنش در بیهوشی، تشخیص انواع سرطان، تشخیص نوع زخم‌های پوستی، و بخش‌بندی تصاویر مغز با طبقه‌بندی‌کننده‌های فازی.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'منطق فازی در پزشکی — اسلاید 44', { size: 36, color: 'blue', bold: true, fa: true });
+        const L = ['درمان بیماری‌های وابسته به الکل', 'بیماری دیابت', `حجم بافت مغز از ${LTR('MRI')}`, 'بررسی سکته', 'کنترل تنش در بیهوشی', 'تشخیص سرطان', 'زخم‌های پوستی', 'بخش‌بندی تصاویر مغز'];
+        for (const [k, l] of L.entries()) {
+          const col = k < 4 ? 0 : 1, row = k < 4 ? k : k - 4;
+          await b.write(`md${k}`, col ? 440 : 900, 160 + row * 85, '•  ' + l, { size: 27, anchor: 'start', fa: true, dur: 300 });
+        }
+      },
+    },
+    // ---------------------------------------------------------- 20. five branches
+    {
+      say: 'آخر بخش، اسلایدهای 45 تا 47: تئوری فازی *پنج شاخه‌ی* اصلی دارد. یک: ریاضیات فازی، که مفاهیم ریاضی کلاسیک را با جایگزین کردن مجموعه‌های فازی گسترش می‌دهد. دو: منطق فازی در هوش مصنوعی؛ مثلاً نرم‌افزار Massive که حرکت لشکرها را در فیلم ارباب حلقه‌ها ساخت. سه: سیستم‌های فازی، یعنی کنترل فازی، پردازش سیگنال و مخابرات. چهار: عدم قطعیت، مثل پیش‌بینی وضع هوا. پنج: تصمیم‌گیری فازی، یعنی مسائل بهینه‌سازی.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'پنج شاخه‌ی تئوری فازی', { size: 38, color: 'orange', bold: true, fa: true });
+        const L = [
+          ['ریاضیات فازی', 'مجموعه‌ی فازی به جای کلاسیک'],
+          ['منطق فازی در هوش مصنوعی', `${LTR('Massive')} — ارباب حلقه‌ها`],
+          ['سیستم‌های فازی', 'کنترل، پردازش سیگنال، مخابرات'],
+          ['عدم قطعیت', 'پیش‌بینی وضع هوا'],
+          ['تصمیم‌گیری فازی', 'بهینه‌سازی'],
+        ];
+        for (const [k, [name, ex]] of L.entries()) {
+          const y = 150 + k * 80;
+          await b.write(`bn${k}`, 910, y, String(k + 1), { size: 32, color: 'purple', bold: true });
+          await b.write(`bt${k}`, 880, y, name, { size: 30, color: 'blue', anchor: 'start', fa: true });
+          await b.write(`be${k}`, 470, y, ex, { size: 24, color: 'soft', anchor: 'start', fa: true });
+        }
+        await b.ring('rm', 330, 222, 150, 32, { color: 'orange', tilt: 0 });
+      },
+    },
+    // ---------------------------------------------------------- 21. summary
+    {
+      say: 'جمع‌بندی: این شش نکته را برای امتحان به خاطر بسپار. این بخش بیشتر سؤال تشریحی دارد، پس ترتیب مرحله‌ها و عیب هر نوع سیستم را بتوانی با جمله‌ی خودت بنویسی.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'یادت باشد', { size: 46, color: 'orange', bold: true, fa: true });
+        const L = [
+          'دو منبع: افراد خبره (زبان طبیعی) و اندازه‌گیری / مدل ریاضی',
+          `قلب سیستم: پایگاه قواعد ${LTR('IF variable IS set THEN action')}`,
+          'خالص: ورودی و خروجی فازی · TSK: آنگاه = فرمول، بی‌انعطاف',
+          'نوع 3: فازی‌ساز + خالص + غیرفازی‌ساز ← عیب هر دو را می‌پوشاند',
+          'فازی‌سازی ← استنتاج ← ساخت ← غیرفازی‌سازی (اغلب پیچیده)',
+          `لباسشویی ${LTR('3')} ورودی ${LTR('1')} خروجی · کوره‌ی سیمان ${LTR('4')} ورودی ${LTR('2')} خروجی`,
+        ];
+        for (const [k, l] of L.entries()) await b.write(`m${k}`, 920, 140 + k * 68, '•  ' + l, { size: 25, anchor: 'start', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- quizzes
+    {
+      say: 'نوبت شماست! با مجموعه‌های دمای این درس، دمای T = 24 را فازی کنید. درجه‌ی «گرم» چند است؟',
+      draw: quizBoard(1, 'T = 24   →   μ_warm(24) = ?', undefined, SETS),
+      quiz: { answer: ['0.75', '.75'], hint: '«گرم» از 18 بالا می‌رود و در 26 به 1 می‌رسد؛ شیبش 1/8 است.', explain: '(24 − 18) / 8 = 6 / 8 = 0.75. خنک در 24 روی ضلع پایین‌رونده است: (26 − 24) / 8 = 0.25؛ سرد 0.' },
+      solve: async b => {
+        await b.write('s1', 500, 270, `warm(24) = (24 − 18) / 8 = 6/8 = ${fmt(warm(24))}`, { size: 36, color: 'green', bold: true });
+        await b.write('s2', 500, 340, `cool(24) = (26 − 24) / 8 = ${fmt(cool(24))}`, { size: 28, color: 'purple' });
+        await b.write('s3', 500, 400, `cold(24) = ${fmt(cold(24))}`, { size: 28, color: 'blue' });
+      },
+    },
+    {
+      say: 'حالا T = 12 و H = 60. درجه‌ی درستی قاعده‌ی 3، یعنی «اگر سرد و مرطوب، آنگاه هوای کم»، چند است؟',
+      draw: quizBoard(2, 'T = 12 ,  H = 60   →   w3 = ?', undefined, SETS),
+      quiz: { answer: ['0.5', '.5'], hint: 'اول سرد(12) و مرطوب(60) را حساب کن؛ «و» یعنی min.', explain: `سرد(12) = (18 − 12) / 8 = 0.75 و مرطوب(60) = (60 − 40) / 40 = 0.5؛ پس w3 = min(0.75, 0.5) = 0.5.` },
+      solve: async b => {
+        await b.write('s1', 500, 260, `cold(12) = (18 − 12) / 8 = ${fmt(R12.cold)}`, { size: 30, color: 'blue' });
+        await b.write('s2', 500, 320, `humid(60) = (60 − 40) / 40 = ${fmt(R12.humid)}`, { size: 30, color: 'green' });
+        await b.write('s3', 500, 410, `w3 = min(${fmt(R12.cold)}, ${fmt(R12.humid)}) = ${fmt(R12.w3)}`, { size: 40, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'ادامه‌ی همان: برای T = 12 و H = 60 داریم w1 = 0، w2 = 0.25 و w3 = 0.5. با عددهای نماینده‌ی خاموش 0، کم 40، زیاد 100، سرعت هوا چند درصد است؟ تا یک رقم اعشار بنویسید.',
+      draw: quizBoard(3, 'w1 = 0 ,  w2 = 0.25 ,  w3 = 0.5   →   y = ? %', { size: 34 }, 'off = 0   ·   low = 40   ·   high = 100'),
+      quiz: { answer: ['26.7', '26.67', '26.66'], hint: 'هر عدد نماینده × درجه‌ی قاعده‌اش، جمع، تقسیم بر جمع درجه‌ها.', explain: 'صورت کسر: 40 × 0.5 = 20 (بقیه‌ی جمله‌ها صفرند). مخرج: 0 + 0.25 + 0.5 = 0.75. پس 20 / 0.75 ≈ 26.7 درصد.' },
+      solve: async b => {
+        await b.write('s1', 500, 270, 'y = (100·w1 + 0·w2 + 40·w3) / (w1 + w2 + w3)', { size: 32 });
+        await b.write('s2', 500, 340, '= (100·0 + 0·0.25 + 40·0.5) / (0 + 0.25 + 0.5)', { size: 30, color: 'blue' });
+        await b.write('s3', 500, 420, `= 20 / 0.75 ≈ ${(+R12.y.toFixed(1))}%`, { size: 44, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'ترتیب درست چهار مرحله‌ی استفاده از منطق فازی کدام است؟',
+      draw: quizBoard(4, 'ترتیب چهار مرحله؟', { size: 44, fa: true }),
+      quiz: {
+        choices: [
+          'inference → fuzzification → composition → defuzzification',
+          'fuzzification → inference → composition → defuzzification',
+          'fuzzification → composition → inference → defuzzification',
+          'defuzzification → inference → composition → fuzzification',
+        ], correct: 1,
+        explain: 'تا عدد ورودی فازی نشده، قاعده‌ها را نمی‌شود سنجید؛ تا قاعده‌ها سنجیده نشده‌اند، چیزی برای ترکیب نیست؛ و برگرداندن به عدد همیشه آخر است.',
+      },
+      solve: async b => {
+        const S = ['فازی کردن', 'استنتاج', 'ساخت', 'غیرفازی‌سازی'];
+        for (const [k, s] of S.entries()) {
+          await b.write(`so${k}`, 160 + k * 230, 300, `${LTR(String(k + 1))}. ${s}`, { size: 30, color: 'green', fa: true });
+          if (k < 3) await b.arrow(`sa${k}`, 245 + k * 230, 290, 300 + k * 230, 290, { color: 'soft', head: 10 });
+        }
+      },
+    },
+    {
+      say: 'در کدام نوع سیستم فازی، بخش «آنگاه» قاعده یک فرمول ریاضی مثل y = c·x است؟',
+      draw: quizBoard(5, 'THEN y = c·x  →  ?', { size: 48 }),
+      quiz: {
+        choices: ['pure fuzzy system', 'TSK fuzzy system', 'with fuzzifier and defuzzifier', 'classical crisp system'], correct: 1,
+        explain: 'در سیستم TSK (تاکاگی–سوگنو–کانگ) بخش «آنگاه» یک فرمول ساده است، مثل y = c·x. برای همین ورودی و خروجی‌اش عدد است، ولی جایی برای دانش بشری ندارد و انعطاف ندارد.',
+      },
+      solve: async b => {
+        await b.write('s1', 500, 280, 'TSK: IF x … THEN y = c·x', { size: 40, color: 'green', bold: true });
+        await b.write('s2', 500, 370, 'ورودی و خروجی عدد · بی‌انعطاف · بی‌جا برای دانش بشری', { size: 28, color: 'soft', fa: true });
+      },
+    },
+    {
+      say: 'سؤال آخر: مشکل اصلی سیستم فازی *خالص* چیست؟',
+      draw: quizBoard(6, 'مشکل سیستم فازی خالص؟', { size: 44, fa: true }),
+      quiz: {
+        choices: ['ورودی و خروجی‌اش مجموعه‌ی فازی است', 'بخش آنگاه آن یک فرمول ریاضی است', 'قواعدش از افراد خبره گرفته نمی‌شود', 'خروجی‌اش همیشه یک عدد حقیقی است'], correct: 0,
+        explain: 'ورودی و خروجی سیستم فازی خالص مجموعه‌ی فازی است، ولی سیستم‌های مهندسی عدد حقیقی می‌گیرند و می‌دهند. «فرمول در آنگاه» مشکل TSK است.',
+      },
+      solve: async b => {
+        await b.write('s1', 500, 270, 'خالص: مجموعه‌ی فازی ← مجموعه‌ی فازی', { size: 34, color: 'red', fa: true });
+        await b.write('s2', 500, 350, 'مهندسی: عدد ← عدد', { size: 34, color: 'green', fa: true });
+        await b.write('s3', 500, 440, 'راه‌حل: فازی‌ساز + غیرفازی‌ساز (نوع 3)', { size: 30, color: 'blue', fa: true });
+      },
+    },
+  ],
 });
 </script>
 </body>

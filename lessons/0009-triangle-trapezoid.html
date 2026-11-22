@@ -3,694 +3,525 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>درس ۹ — توابع عضویت مثلثی و ذوزنقه‌ای</title>
-<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
-<style>
-/* ===== SHARED STYLE — copy verbatim into every lesson, do not edit per lesson ===== */
-:root{--bg:#fbfaf7;--surface:#ffffff;--surface-1:#f3f1ec;--text:#1f1e1c;--text-2:#5f5e5a;--text-3:#888780;--border:#e3e0d8;--border-strong:#c9c6bc;
---accent:#534AB7;--accent-bg:#EEEDFE;--ok:#3B6D11;--ok-bg:#EAF3DE;--bad:#A32D2D;--bad-bg:#FCEBEB;--warn:#854F0B;--warn-bg:#FAEEDA;
---c1:#7F77DD;--c2:#1D9E75;--c3:#EF9F27;--c4:#D4537E;--grid:#e3e0d8}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1a1a19;--surface:#232322;--surface-1:#2c2c2a;--text:#ecebe6;--text-2:#b4b2a9;--text-3:#888780;--border:#3a3a37;--border-strong:#55554f;
---accent:#AFA9EC;--accent-bg:#26215C;--ok:#97C459;--ok-bg:#173404;--bad:#F09595;--bad-bg:#501313;--warn:#FAC775;--warn-bg:#412402;--grid:#3a3a37}}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:Vazirmatn,Tahoma,sans-serif;font-size:16px;line-height:1.95}
-main{max-width:760px;margin:0 auto;padding:24px 16px 64px}
-a{color:var(--accent)}
-h1{font-size:26px;font-weight:700;line-height:1.5;margin:6px 0 6px}
-h2{font-size:19px;font-weight:500;margin:0 0 8px}
-h3{font-size:16px;font-weight:500;margin:12px 0 4px}
-p{margin:0 0 10px}
-.top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:13px;color:var(--text-2)}
-.goal{color:var(--text-2);margin-bottom:22px}
-.sec{margin:0 0 28px}
-.lab{font-size:13px;color:var(--text-3);margin:0 0 4px;letter-spacing:0}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
-.soft{background:var(--surface-1);border-radius:12px;padding:12px 14px}
-.m{direction:ltr;unicode-bidi:isolate;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14.5px;white-space:nowrap}
-@media (max-width:700px){.m{white-space:normal;display:inline-block;max-width:100%}}
-.mb{direction:ltr;text-align:left;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14.5px;background:var(--surface-1);border-radius:8px;padding:8px 12px;margin:6px 0;overflow-x:auto;line-height:1.8}
-.en{direction:ltr;unicode-bidi:isolate;font-size:13px;color:var(--text-2)}
-b,strong{font-weight:500}
-.key{background:var(--warn-bg);color:var(--warn);border-radius:6px;padding:0 6px}
-.tip{border-right:3px solid var(--accent);background:var(--accent-bg);padding:8px 12px;border-radius:0;margin:8px 0}
-.trap{border-right:3px solid var(--bad);background:var(--bad-bg);padding:8px 12px;border-radius:0;margin:8px 0}
-button{font-family:inherit;font-size:14px;background:var(--surface);color:var(--text);border:1px solid var(--border-strong);border-radius:8px;padding:5px 14px;cursor:pointer}
-button:hover{background:var(--surface-1)}
-button.on{background:var(--accent-bg);border-color:var(--accent);color:var(--accent)}
-input[type=text]{font-family:inherit;font-size:15px;direction:ltr;text-align:center;width:72px;height:34px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text)}
-input[type=range]{width:100%;accent-color:var(--accent);direction:ltr}
-table.t{border-collapse:collapse;direction:ltr;font-size:14.5px;margin:6px 0;display:block;max-width:100%;overflow-x:auto}
-table.t>tbody,table.t>thead{display:table;width:100%}
-table.t th,table.t td{border:1px solid var(--border);padding:5px 6px;text-align:center;font-weight:400}
-table.t th{background:var(--surface-1)}
-.ok{background:var(--ok-bg)!important}.no{background:var(--bad-bg)!important}
-.fb{font-size:14px;margin-top:8px;min-height:1em}.fb.good{color:var(--ok)}.fb.bad{color:var(--bad)}
-.q{margin:0 0 18px}
-.mcq .opts{display:grid;gap:6px;margin-top:6px}
-.mcq .opts button{text-align:right;padding:7px 12px}
-.stepper .st{display:none;padding:6px 0;border-bottom:1px dashed var(--border)}
-.stepper .st.show{display:block}
-.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-svg{max-width:100%;height:auto;direction:ltr}
-svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12px}
-.nav{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:14px;border-top:1px solid var(--border);padding-top:14px;margin-top:28px}
-.ask{font-size:14px;color:var(--text-2)}
-@media print{body{background:#fff}.card,.soft{break-inside:avoid}.stepper .st{display:block}button{display:none}}
-.given{font-size:14px;color:var(--text-2);background:var(--surface-1);border-right:3px solid var(--border-strong);border-radius:0 8px 8px 0;padding:6px 12px;margin:2px 0 10px}
-.given b{color:var(--text)}
-[id]{scroll-margin-top:16px}
-h3:target,.card:target{outline:2px solid var(--accent);outline-offset:6px;border-radius:8px}
-details.sol{margin-top:10px;border:1px dashed var(--border-strong);border-radius:10px;padding:6px 12px;background:var(--surface)}
-details.sol summary{cursor:pointer;color:var(--accent);font-weight:500}
-details.sol[open] summary{margin-bottom:6px}
-.q>details.sol:not([open]){display:inline-block;vertical-align:middle;margin:0;padding:0;border:0;background:none}
-.q>details.sol summary{list-style:none;display:inline-block;font-size:14px;border:1px solid var(--border-strong);border-radius:8px;padding:5px 14px;background:var(--surface)}
-.q>details.sol summary::-webkit-details-marker{display:none}
-.q>details.sol summary:hover{background:var(--surface-1)}
-@media print{details.sol{border-style:solid}}
-/* ===== END SHARED STYLE ===== */
-</style>
-<style>
-/* lesson 9 only */
-.ctl{display:grid;grid-template-columns:auto 1fr auto;gap:2px 10px;align-items:center;margin-top:8px}
-.ctl label{font-size:14px;color:var(--text-2)}
-.ctl output{direction:ltr;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14px;min-width:34px;text-align:left}
-.ctl .hide{display:none}
-#readout{white-space:normal}
-.mb.pre{white-space:pre}
-/* animated walk-through */
-.anim:focus{outline:none}
-.an-head{display:flex;gap:10px;align-items:stretch}
-.an-cap{flex:1;background:var(--surface-1);border-radius:10px;padding:8px 14px;min-height:8.2em;font-size:15px;line-height:1.85}
-.an-btns{display:flex;flex-direction:column;gap:6px;justify-content:center;min-width:104px}
-#anNext{font-size:16px;font-weight:500;padding:12px 14px}
-.an-btns .cnt{font-size:12.5px;color:var(--text-3);text-align:center}
-.an-f{direction:ltr;text-align:left;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14px;background:var(--surface);border-radius:6px;padding:3px 10px;margin:5px 0;white-space:pre-wrap;line-height:1.7}
-.an-new{margin-top:6px;font-size:13.5px;line-height:1.8;border-right:3px solid var(--warn);background:var(--warn-bg);padding:3px 10px}
-.an-new .an-from{color:var(--text-2)}
-.an-prog{height:4px;background:var(--border);border-radius:2px;margin:8px 0 4px;overflow:hidden}
-.an-prog>i{display:block;height:100%;background:var(--accent);transition:width .4s}
-.an-stage{overflow-x:auto;margin:0 -4px;direction:ltr}
-#anSvg{display:block;width:100%;min-width:500px}
-#anSvg text{font-size:13px}
-#anSvg .mono{font-family:"SF Mono",Menlo,Consolas,monospace;font-size:13px}
-#anSvg .an-ttl{font-size:14px;font-weight:700;fill:var(--text)}
-#anSvg .an-val{font-size:12px;fill:var(--text)}
-#anSvg .an-ax{font-size:11px;fill:var(--text-3)}
-#anSvg .cellt{font-size:13px;fill:var(--text)}
-#anSvg .fly{font-size:15px;font-weight:700}
-#anSvg .flash{animation:anFlash .8s ease-out}
-@keyframes anFlash{from{fill:var(--accent);font-size:17px}to{fill:var(--text)}}
-#anSvg .fd,#anSvg .fd *{transition:opacity .45s}
-#anSvg .an-bar{transition:fill .45s,opacity .45s}
-#anSvg .an-ghost{fill:none;stroke:var(--text-3);stroke-dasharray:4 3}
-#anSvg .an-hl{fill:none;stroke:var(--accent);stroke-width:2.5}
-#anSvg .an-band{fill:var(--accent-bg)}
-.an-swipe{display:none;font-size:12px;color:var(--text-3);margin:2px 0 0}
-button:disabled{opacity:.45;cursor:default}
-details.an-gld{margin-top:10px}
-details.an-gld summary{cursor:pointer;color:var(--accent);font-size:14px}
-table.an-gl{direction:rtl;font-size:14px}
-table.an-gl td,table.an-gl th{text-align:right;vertical-align:top}
-table.an-gl td:first-child{white-space:nowrap}
-@media (max-width:540px){.an-head{flex-direction:column}.an-btns{flex-direction:row;align-items:center}.an-btns #anNext{flex:1}.an-swipe{display:block}}
-@media (prefers-reduced-motion:reduce){#anSvg .fd,#anSvg .fd *,#anSvg .an-bar,.an-prog>i{transition:none}#anSvg .flash{animation:none}}
-@media print{.an-btns{display:none}}
-</style>
+<title>Triangle and Trapezoid</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Vazirmatn:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="../assets/teacher.css">
 </head>
 <body>
-<main>
-<div class="top"><a href="../index.html">← فهرست درس‌ها</a><span>درس ۹ از ۱۱ · فصل ۳ · حدود ۱۲ دقیقه</span></div>
-<h1>توابع عضویت مثلثی و ذوزنقه‌ای</h1>
-<p class="goal">هدف: بعد از این درس می‌توانی با داشتن گوشه‌های یک مثلث <span class="m">[a b c]</span> یا ذوزنقه <span class="m">[a b c d]</span>، مقدار <span class="m">μ(x)</span> را برای هر x با دست حساب کنی، گوشه‌ها را از روی شکل بخوانی و دستور متلب آن را بنویسی.</p>
-
-<!-- ===== 0. ANIMATED WALK-THROUGH ===== -->
-<section class="sec" id="anim"><p class="lab">از اینجا شروع کن: کل درس در یک انیمیشن قدم به قدم</p>
-<div class="card anim" id="anBox" tabindex="0" aria-label="انیمیشن قدم به قدم حساب μ برای مثلث و ذوزنقه">
-  <div class="an-head">
-    <div class="an-cap" id="anCap" aria-live="polite"></div>
-    <div class="an-btns">
-      <button id="anNext" class="on">بعدی ←</button>
-      <button id="anPrev">→ قبلی</button>
-      <button id="anAgain">↻ دوباره ببین</button>
-      <span class="cnt" id="anCnt"></span>
-    </div>
-  </div>
-  <div class="an-prog"><i id="anBar"></i></div>
-  <div class="an-stage"><svg id="anSvg" viewBox="0 0 640 336" role="img" aria-labelledby="anT"><title id="anT">حل قدم به قدم: μ(x) برای trimf و trapmf</title></svg></div>
-  <p class="an-swipe">روی گوشی: اگر تصویر جا نشد، آن را به چپ و راست بکش.</p>
-  <details class="an-gld"><summary>همه نمادها: هر کدام چیست و از کجا آمد</summary>
-    <table class="t an-gl"><tbody id="anGl"></tbody></table>
-  </details>
-</div></section>
-
-<!-- ===== 1. IDEA ===== -->
-<section class="sec"><p class="lab">۱. ایده (همان انیمیشن بالا، به صورت متن)</p>
-<div class="card">
-  <p><b>تابع عضویت</b> <span class="en">(membership function)</span> همان قاعده‌ای است که به هر x یک درجه عضویت <span class="m">μ(x)</span> می‌دهد. طبق اسلاید ۸۲، شکلش هر منحنی دلخواهی می‌تواند باشد؛ <span class="key">تنها شرط این است که مقدارش بین ۰ و ۱ تغییر کند</span>.</p>
-  <p>نرم‌افزار متلب <span class="en">(MATLAB)</span> ۱۱ نوع تابع عضویت آماده دارد که از چند پایه ساخته شده‌اند: توابع تکه‌ای خطی، تابع گاوسی، منحنی سیگموئید و منحنی‌های چندجمله‌ای درجه دوم و سوم. طبق قرارداد، نام همه آن‌ها به <span class="m">mf</span> ختم می‌شود (مخفف membership function). در این درس دو تابع <b>تکه‌ای خطی</b> را می‌بینیم: یعنی شکل از چند پاره‌خط صاف ساخته شده است.</p>
-
-  <h3 id="tri">۱) مثلثی <span class="en">(Triangular)</span> — دستور <span class="m">trimf</span></h3>
-  <p>ساده‌ترین تابع عضویت. سه نقطه <span class="m">{a,b,c}</span> روی محور x داریم و سه گوشه مثلث <span class="m">{(a,0),(b,1),(c,0)}</span> هستند: از a بالا می‌رود، در b به ۱ می‌رسد، تا c پایین می‌آید.</p>
-  <div class="mb pre">           ⎧ 0,              x ≤ a
-           ⎪ (x−a)/(b−a),    a ≤ x ≤ b
-f(x;a,b,c)=⎨ (c−x)/(c−b),    b ≤ x ≤ c
-           ⎩ 0,              c ≤ x</div>
-  <div class="given"><b>به زبان ساده:</b> آکولاد بزرگ <span class="m">⎧⎨⎩</span> یعنی «جواب بستگی دارد x کجاست». هر خط دو قسمت دارد: سمت چپ <b>چه عددی</b>، سمت راست <b>کِی</b>. پس اول ببین x در کدام بازه است، بعد فقط فرمول همان خط را حساب کن.<br>• <span class="m">f(x;a,b,c)</span> یعنی «تابع x، با سه عدد تنظیمی a و b و c». نقطه‌ویرگول فقط ورودی (x) را از تنظیم‌ها جدا می‌کند.<br>• <span class="m">(x−a)/(b−a)</span> = «چقدر از a راه افتاده‌ای ÷ کل راه تا قله». در a صفر است و در b یک.<br>• <span class="m">(c−x)/(c−b)</span> = «چقدر تا c مانده ÷ کل راه از قله تا c». در b یک است و در c صفر.<br>مثال با <span class="m">a=0, b=10, c=20</span>: <span class="m">x=4</span> در خط دوم است ← <span class="m">(4−0)/(10−0) = 0.4</span>. <span class="m">x=15</span> در خط سوم است ← <span class="m">(20−15)/(20−10) = 0.5</span>. <span class="m">x=25</span> در خط آخر است ← <span class="m">0</span>.</div>
-  <p>همین را می‌شود در یک خط هم نوشت (این شکل فشرده در اسلاید نیست؛ از مستندات MathWorks است و جواب یکسان می‌دهد):</p>
-  <div class="mb">f(x;a,b,c) = max( min( (x−a)/(b−a), (c−x)/(c−b) ), 0 )</div>
-  <div class="given"><b>به زبان ساده:</b> «هر دو خط شیب‌دار را حساب کن، کوچک‌تر را بردار، و اگر منفی شد صفرش کن». دیگر لازم نیست اول ببینی x در کدام بازه است.<br>مثال با <span class="m">a=0, b=10, c=20</span>: <span class="m">x=4 → min(0.4, 1.6) = 0.4; max(0.4, 0) = 0.4</span>. <span class="m">x=25 → min(2.5, −0.5) = −0.5; max(−0.5, 0) = 0</span>.</div>
-  <p>چرا کار می‌کند؟ <span class="m">min</span> از بین «خط بالارونده» و «خط پایین‌رونده» آن که پایین‌تر است را برمی‌دارد، پس نوک مثلث ساخته می‌شود. بیرون از <span class="m">[a,c]</span> این عدد منفی می‌شود و <span class="m">max(…,0)</span> آن را صفر می‌کند.</p>
-
-  <h3 id="trap">۲) ذوزنقه‌ای <span class="en">(Trapezoidal)</span> — دستور <span class="m">trapmf</span></h3>
-  <p>چهار گوشه دارد: <span class="m">{(a,0),(b,1),(c,1),(d,0)}</span>. بین b و c یک «سقف صاف» با مقدار ۱ دارد.</p>
-  <div class="mb pre">             ⎧ 0,              x ≤ a
-             ⎪ (x−a)/(b−a),    a ≤ x ≤ b
-f(x;a,b,c,d)=⎨ 1,              b ≤ x ≤ c
-             ⎪ (d−x)/(d−c),    c ≤ x ≤ d
-             ⎩ 0,              d ≤ x</div>
-  <div class="given"><b>به زبان ساده:</b> همان مثلث است با یک خط اضافه در وسط: «بین b و c جواب همیشه ۱ است» (سقف صاف). شیب بالارونده مثل مثلث است، و شیب پایین‌رونده حالا از c تا d است: <span class="m">(d−x)/(d−c)</span> = «چقدر تا d مانده ÷ پهنای شیب راست».<br>مثال با <span class="m">a=0, b=10, c=20, d=30</span>: <span class="m">x=5 → (5−0)/(10−0) = 0.5</span>. <span class="m">x=15</span> روی سقف است ← <span class="m">1</span>. <span class="m">x=25 → (30−25)/(30−20) = 0.5</span>.</div>
-  <div class="tip">ترفند حفظ کردن: <b>بالارونده</b> همیشه «فاصله x از گوشه چپ ÷ پهنای شیب چپ» است و <b>پایین‌رونده</b> «فاصله x تا گوشه راست ÷ پهنای شیب راست». مثلث همان ذوزنقه‌ای است که <span class="m">b = c</span> (سقفش به یک نقطه جمع شده).</div>
-  <div class="tip">در فرمول اسلاید، مرزها دو بار آمده‌اند (مثلاً <span class="m">x ≤ a</span> و <span class="m">a ≤ x ≤ b</span> هر دو شامل <span class="m">x = a</span> هستند). اشکالی ندارد: در نقطه مرزی هر دو تکه یک جواب می‌دهند (اینجا هر دو ۰).</div>
-</div></section>
-
-<!-- ===== 2. SEE IT ===== -->
-<section class="sec"><p class="lab">۲. ببین چه اتفاقی می‌افتد</p>
-<div class="card">
-  <p>گوشه‌ها را جابه‌جا کن و ببین شکل عوض می‌شود. بعد x را حرکت بده: تکه‌ای از فرمول که الان فعال است نارنجی می‌شود و عددها جای حروف می‌نشینند.</p>
-  <div class="row">
-    <button id="m-tri" class="on" type="button">مثلثی trimf</button>
-    <button id="m-trap" type="button">ذوزنقه‌ای trapmf</button>
-  </div>
-  <svg id="plot" viewBox="0 0 560 262" role="img" aria-labelledby="plot-t">
-    <title id="plot-t">نمودار تابع عضویت مثلثی یا ذوزنقه‌ای با نقطه x و مقدار μ(x)</title>
-    <g id="grid"></g>
-    <path id="curve" fill="none" stroke="var(--c1)" stroke-width="2.5" stroke-linejoin="round"></path>
-    <path id="active" fill="none" stroke="var(--c3)" stroke-width="5" stroke-linecap="round" opacity="0.85"></path>
-    <line id="vx" stroke="var(--c2)" stroke-dasharray="4 3" stroke-width="1.5"></line>
-    <line id="hx" stroke="var(--c2)" stroke-dasharray="4 3" stroke-width="1.5"></line>
-    <circle id="pt" r="6" fill="var(--c2)"></circle>
-    <text id="mulab" font-size="13" style="fill:var(--c2)"></text>
-    <g id="corners"></g>
-  </svg>
-  <div class="ctl">
-    <label for="s-a">a</label><input type="range" id="s-a" min="0" max="10" step="0.5"><output id="o-a"></output>
-    <label for="s-b">b</label><input type="range" id="s-b" min="0" max="10" step="0.5"><output id="o-b"></output>
-    <label for="s-c">c</label><input type="range" id="s-c" min="0" max="10" step="0.5"><output id="o-c"></output>
-    <label for="s-d" class="dd">d</label><input type="range" id="s-d" class="dd" min="0" max="10" step="0.5"><output id="o-d" class="dd"></output>
-    <label for="s-x"><b>x</b></label><input type="range" id="s-x" min="0" max="10" step="0.25"><output id="o-x"></output>
-  </div>
-  <div class="mb" id="cmd"></div>
-  <div class="mb" id="readout" aria-live="polite"></div>
-  <p style="font-size:14px;color:var(--text-2)">امتحان کن: در حالت مثلثی b را روی a بگذار — شیب چپ عمود می‌شود. در حالت ذوزنقه c را روی b بگذار — ذوزنقه مثلث می‌شود.</p>
-</div></section>
-
-<!-- ===== 3. WORKED EXAMPLE ===== -->
-<section class="sec"><p class="lab">۳. مثال حل‌شده، قدم به قدم (اسلاید ۸۴ و ۸۶)</p>
-<div class="card stepper">
-  <p>اسلاید ۸۴ در متلب می‌نویسد:</p>
-  <div class="mb pre">x=0:0.1:10;
-y=trimf(x,[3 6 8]);
-plot(x,y)
-xlabel('trimf, P=[3 6 8]')</div>
-  <p style="font-size:14px;color:var(--text-2)"><span class="m">x=0:0.1:10</span> یعنی x از ۰ تا ۱۰ با گام ۰٫۱. <span class="m">trimf(x,[3 6 8])</span> برای همه این xها μ را حساب می‌کند. حالا خودمان چند نقطه را دستی حساب می‌کنیم.</p>
-  <div class="st">قدم ۱ — گوشه‌ها را بخوان: <span class="m">a=3, b=6, c=8</span>. پس شیب چپ از ۳ تا ۶ (پهنا ۳) و شیب راست از ۶ تا ۸ (پهنا ۲).</div>
-  <div class="st">قدم ۲ — <span class="m">x = 2</span>: چون <span class="m">2 ≤ a=3</span>، بیرون مثلث است: <span class="m">μ(2) = 0</span>.</div>
-  <div class="st">قدم ۳ — <span class="m">x = 4.5</span>: بین a و b است، پس تکه بالارونده: <span class="m">(4.5−3)/(6−3) = 1.5/3 = 0.5</span>.</div>
-  <div class="st">قدم ۴ — <span class="m">x = 7</span>: بین b و c است، پس تکه پایین‌رونده: <span class="m">(8−7)/(8−6) = 1/2 = 0.5</span>. دو نقطه متفاوت، یک درجه عضویت؛ چون شیب راست تندتر است، x=7 به قله نزدیک‌تر است.</div>
-  <div class="st">قدم ۵ — همین با فرمول فشرده برای <span class="m">x = 7</span>: <span class="m">max(min((7−3)/3, (8−7)/2), 0) = max(min(1.333, 0.5), 0) = 0.5</span>. همان جواب.</div>
-  <div class="st">قدم ۶ — ذوزنقه اسلاید ۸۶، <span class="m">trapmf(x,[1 5 7 8])</span>: در <span class="m">x=3</span> بالارونده <span class="m">(3−1)/(5−1) = 0.5</span>؛ در <span class="m">x=6</span> روی سقف است، <span class="m">μ=1</span>؛ در <span class="m">x=7.5</span> پایین‌رونده <span class="m">(8−7.5)/(8−7) = 0.5</span>.</div>
-  <div class="row" style="margin-top:8px"><button class="next" type="button">قدم بعدی</button><button class="all" type="button">نمایش همه</button></div>
-</div></section>
-
-<!-- ===== 4. PRACTICE ===== -->
-<section class="sec"><p class="lab">۴. نوبت توست</p>
-<div class="card">
-  <div class="q practice" data-hint="اول ببین x در کدام بازه است: x≤3 یا 3..6 یا 6..8 یا x≥8. بالارونده (x−3)/3، پایین‌رونده (8−x)/2." data-yes="عالی! هر پنج نقطه درست است.">
-    <p><b>سؤال ۱ (مثلث اسلاید ۸۴).</b> برای <span class="m">trimf(x,[3 6 8])</span> مقدار μ را حساب کن (تا دو رقم اعشار کافی است؛ کسر هم قبول است، مثل 1/3).</p>
-    <div class="given"><b>اسلاید ۸۴ چه می‌گوید؟</b> در <span class="m">trimf(x,[a b c])</span> منحنی از <span class="m">a</span> بالا می‌رود، در <span class="m">b</span> به ۱ می‌رسد و تا <span class="m">c</span> پایین می‌آید؛ بیرون از این بازه صفر است. تکه بالارونده <span class="m">(x−a)/(b−a)</span> و تکه پایین‌رونده <span class="m">(c−x)/(c−b)</span>. <a href="#tri">↑ فرمول کامل در بخش ۱</a></div>
-    <table class="t"><tr><th>x</th><th>4</th><th>5</th><th>6</th><th>7.5</th><th>9</th></tr>
-      <tr><th>μ(x)</th><td><input type="text" data-k="0.3333" data-tol="0.01" aria-label="mu at 4"></td><td><input type="text" data-k="0.6667" data-tol="0.01" aria-label="mu at 5"></td><td><input type="text" data-k="1" aria-label="mu at 6"></td><td><input type="text" data-k="0.25" aria-label="mu at 7.5"></td><td><input type="text" data-k="0" aria-label="mu at 9"></td></tr></table>
-    <button class="check" type="button">بررسی</button>
-    <details class="sol"><summary>راه‌حل</summary>
-      <p>گوشه‌ها: a=3، b=6، c=8. اول ببین x در کدام بازه است:</p><div class="mb pre">x=4   (3..6, rising):   (4 − 3)/3   = 1/3 ≈ 0.33
-x=5   (3..6, rising):   (5 − 3)/3   = 2/3 ≈ 0.67
-x=6   (peak, x = b):    1
-x=7.5 (6..8, falling):  (8 − 7.5)/2 = 0.25
-x=9   (x ≥ c = 8):      0</div>
-    </details><div class="fb"></div>
-  </div>
-
-  <div class="q practice" data-hint="گوشه‌ها a=1، b=5، c=7، d=8. بین ۵ و ۷ همیشه ۱. بالارونده (x−1)/4، پایین‌رونده (8−x)/1." data-yes="عالی! دقت کن شیب راست (پهنای ۱) خیلی تندتر از شیب چپ (پهنای ۴) است.">
-    <p><b>سؤال ۲ (ذوزنقه اسلاید ۸۶).</b> برای <span class="m">trapmf(x,[1 5 7 8])</span> مقدار μ را حساب کن.</p>
-    <div class="given"><b>اسلاید ۸۶ چه می‌گوید؟</b> در <span class="m">trapmf(x,[a b c d])</span> منحنی از <span class="m">a</span> بالا می‌رود، از <span class="m">b</span> تا <span class="m">c</span> روی ۱ صاف می‌ماند و تا <span class="m">d</span> پایین می‌آید؛ بیرون از این بازه صفر است. تکه بالارونده <span class="m">(x−a)/(b−a)</span> و تکه پایین‌رونده <span class="m">(d−x)/(d−c)</span>. <a href="#trap">↑ فرمول کامل در بخش ۱</a></div>
-    <table class="t"><tr><th>x</th><th>2</th><th>4</th><th>6</th><th>7.25</th><th>8.5</th></tr>
-      <tr><th>μ(x)</th><td><input type="text" data-k="0.25" aria-label="mu at 2"></td><td><input type="text" data-k="0.75" aria-label="mu at 4"></td><td><input type="text" data-k="1" aria-label="mu at 6"></td><td><input type="text" data-k="0.75" aria-label="mu at 7.25"></td><td><input type="text" data-k="0" aria-label="mu at 8.5"></td></tr></table>
-    <button class="check" type="button">بررسی</button>
-    <details class="sol"><summary>راه‌حل</summary>
-      <p>گوشه‌ها: a=1، b=5، c=7، d=8. اول ببین x در کدام بازه است:</p><div class="mb pre">x=2    (1..5, rising):   (2 − 1)/4    = 0.25
-x=4    (1..5, rising):   (4 − 1)/4    = 0.75
-x=6    (5..7, flat top): 1
-x=7.25 (7..8, falling):  (8 − 7.25)/1 = 0.75
-x=8.5  (x ≥ d = 8):      0</div>
-    </details><div class="fb"></div>
-  </div>
-
-  <div class="q practice" data-hint="گوشه‌ها نقطه‌هایی هستند که شکل می‌شکند: کجا از ۰ جدا می‌شود، کجا به ۱ می‌رسد، کجا از ۱ جدا می‌شود و کجا دوباره ۰ می‌شود.">
-    <p><b>سؤال ۳ (خواندن از شکل).</b> پارامترهای این ذوزنقه را بخوان تا دستور <span class="m">trapmf(x,[a b c d])</span> کامل شود.</p>
-    <svg viewBox="0 0 560 250" role="img" aria-labelledby="q3t">
-      <title id="q3t">ذوزنقه‌ای روی محور ۰ تا ۱۰ که باید گوشه‌هایش را بخوانی</title>
-      <g id="q3grid"></g>
-      <polyline points="40,220 140,220 240,30 340,30 490,220 540,220" fill="none" stroke="var(--c4)" stroke-width="2.5" stroke-linejoin="round"></polyline>
-    </svg>
-    <div class="row"><span class="m">trapmf(x,[</span>
-      <span>a=</span><input type="text" data-k="2" data-tol="0" aria-label="a">
-      <span>b=</span><input type="text" data-k="4" data-tol="0" aria-label="b">
-      <span>c=</span><input type="text" data-k="6" data-tol="0" aria-label="c">
-      <span>d=</span><input type="text" data-k="9" data-tol="0" aria-label="d"><span class="m">])</span></div>
-    <button class="check" type="button">بررسی</button>
-    <details class="sol"><summary>راه‌حل</summary>
-      <p>روی شکل از چپ به راست برو و چهار جایی را که خط می‌شکند پیدا کن:</p><ol style="margin:0 0 6px;padding-right:22px"><li>a = 2: جایی که خط از صفر جدا می‌شود و بالا می‌رود.</li><li>b = 4: جایی که به ۱ می‌رسد.</li><li>c = 6: جایی که سقف صاف تمام می‌شود و پایین آمدن شروع می‌شود.</li><li>d = 9: جایی که دوباره به صفر می‌رسد.</li></ol><p>پس <span class="m">trapmf(x,[2 4 6 9])</span>.</p>
-    </details><div class="fb"></div>
-  </div>
-
-  <div class="q practice" data-hint="Cold بین ۱۰ و ۳۰ پایین می‌آید: (30−x)/(30−10). Medium از ۲۵ بالا می‌رود: (x−25)/(45−25). AND = min و OR = max (درس ۴)." data-yes="عالی! این دقیقاً قدم اول تمرین ۳ است: اول μ هر مجموعه را از روی شکل حساب کن، بعد AND/OR را با min/max.">
-    <p><b>سؤال ۴ (به سبک تمرین ۳ + یادآوری درس ۴).</b> در یک کنترل‌کننده دما، «سرد» <span class="m">Cold = trapmf(x,[0 0 10 30])</span> و «متوسط» <span class="m">Medium = trimf(x,[25 45 65])</span> است. دمای <span class="m">x = 27</span> درجه است.</p>
-    <div class="given" id="hw3"><b>صورت تمرین ۳:</b> «یک کنترل‌کننده فازی رطوبت یک انکوباتور میکروبیولوژیکی را در نظر بگیرید (ورودی سیستم: رطوبت نسبی هوا و دما؛ خروجی: سرعت). قوانین: ۱) اگر دما سرد و رطوبت نسبی متوسط باشد، آنگاه سرعت پایین است. ۲) اگر دما متوسط و رطوبت نسبی متوسط باشد، سرعت متوسط است. ۳) اگر دما زیاد و رطوبت نسبی بالا باشد، سرعت بالاست. حال اگر معیارهای گرفته‌شده از سنسورها برای رطوبت نسبی ۶۱ و دما ۲۹ درجه سانتی‌گراد است: الف) مجموعه فازی نهایی سرعت را به دست آورید. ب) مقدار سرعت خروجی چقدر خواهد بود؟»<br>مجموعه‌های ورودی و خروجی در برگه تمرین به شکل نمودار (مثلث و ذوزنقه) آمده‌اند و برگه این درجه‌ها را برای ورودی‌ها می‌دهد: رطوبت: <span class="m">low = 0, medium = 0.58, high = 0.5</span> · دما: <span class="m">cold = 0.1, medium = 0.2, high = 0</span><br><i>عددهای این سؤال با تمرین فرق دارد؛ این سؤال فقط قدم اول آن است.</i></div>
-    <p style="font-size:14px;color:var(--text-2)">(در Cold چون <span class="m">a = b = 0</span>، شیب چپ ندارد و از ۰ تا ۱۰ مقدارش ۱ است — به این «شانه چپ» می‌گویند.)</p>
-    <table class="t"><tr><th>μ_Cold(27)</th><th>μ_Medium(27)</th><th>Cold AND Medium</th><th>Cold OR Medium</th></tr>
-      <tr><td><input type="text" data-k="0.15" aria-label="cold"></td><td><input type="text" data-k="0.1" aria-label="medium"></td><td><input type="text" data-k="0.1" aria-label="and"></td><td><input type="text" data-k="0.15" aria-label="or"></td></tr></table>
-    <button class="check" type="button">بررسی</button>
-    <details class="sol"><summary>راه‌حل</summary>
-      <div class="mb pre">Cold(27)   = (30 − 27)/(30 − 10) = 3/20 = 0.15   (falling side)
-Medium(27) = (27 − 25)/(45 − 25) = 2/20 = 0.1    (rising side)
-AND = min(0.15, 0.1) = 0.1
-OR  = max(0.15, 0.1) = 0.15</div>
-    </details><div class="fb"></div>
-  </div>
-
-  <div class="q mcq" data-yes="درست! 6 بین b=5 و c=9 است، پس روی شیب پایین‌رونده‌ایم: (9−6)/(9−5) = 0.75." data-no="نه. اول ببین x=6 بین کدام دو گوشه است. b=5 و c=9، پس شیب پایین‌رونده.">
-    <p><b>سؤال ۵.</b> برای <span class="m">trimf(x,[2 5 9])</span> در <span class="m">x = 6</span> کدام تکه فرمول را استفاده می‌کنی؟</p>
-    <div class="opts">
-      <button type="button"><span class="m">(x−a)/(b−a)</span></button>
-      <button type="button"><span class="m">(b−x)/(b−a)</span></button>
-      <button type="button" data-ok><span class="m">(c−x)/(c−b)</span></button>
-      <button type="button"><span class="m">(x−b)/(c−b)</span></button>
-    </div><div class="fb"></div>
-  </div>
-
-  <div class="q mcq" data-yes="درست! trapmf برای ذوزنقه با چهار پارامتر [a b c d] است." data-no="نه. trimf سه گوشه دارد (مثلث). ذوزنقه چهار گوشه دارد و دستورش trapmf است.">
-    <p><b>سؤال ۶.</b> کدام دستور متلب یک تابع عضویت با چهار گوشه <span class="m">{(a,0),(b,1),(c,1),(d,0)}</span> می‌سازد؟</p>
-    <div class="opts">
-      <button type="button"><span class="m">trimf</span></button>
-      <button type="button" data-ok><span class="m">trapmf</span></button>
-      <button type="button"><span class="m">gaussmf</span></button>
-      <button type="button"><span class="m">sigmf</span></button>
-    </div><div class="fb"></div>
-  </div>
-
-  <div class="q mcq" data-yes="درست! وقتی b = c، سقف صاف به یک نقطه جمع می‌شود و ذوزنقه همان مثلث است." data-no="نه. سقف ذوزنقه بین b و c است. اگر این دو یکی شوند، سقف یک نقطه (نوک مثلث) می‌شود.">
-    <p><b>سؤال ۷.</b> ذوزنقه <span class="m">trapmf(x,[a b c d])</span> در چه حالتی دقیقاً همان مثلث است؟</p>
-    <div class="opts">
-      <button type="button"><span class="m">a = b</span></button>
-      <button type="button"><span class="m">c = d</span></button>
-      <button type="button"><span class="m">a = d</span></button>
-      <button type="button" data-ok><span class="m">b = c</span></button>
-    </div><div class="fb"></div>
-  </div>
-
-  <div class="q mcq" data-yes="درست! طبق اسلاید ۸۲ تنها شرط این است که مقدار بین ۰ و ۱ بماند؛ ۱٫۲ این شرط را می‌شکند." data-no="نه. شکل می‌تواند نامتقارن باشد، به ۱ نرسد یا همه‌جا مثبت باشد. تنها شرط اسلاید ۸۲: مقدار بین ۰ و ۱.">
-    <p><b>سؤال ۸.</b> کدام ویژگی باعث می‌شود یک منحنی <b>نتواند</b> تابع عضویت باشد؟</p>
-    <div class="opts">
-      <button type="button" data-ok>جایی مقدارش به ۱٫۲ برسد</button>
-      <button type="button">شکلش نسبت به قله نامتقارن باشد</button>
-      <button type="button">بیشترین مقدارش کمتر از ۱ باشد</button>
-      <button type="button">در هیچ نقطه‌ای صفر نشود</button>
-    </div><div class="fb"></div>
-  </div>
-</div></section>
-
-<!-- ===== 5. SUMMARY ===== -->
-<section class="sec"><p class="lab">۵. جمع‌بندی — همین را به خاطر بسپار</p>
-<div class="soft"><ul>
-  <li>تنها شرط تابع عضویت: مقدارش بین ۰ و ۱ باشد. نام همه توابع عضویت متلب به <span class="m">mf</span> ختم می‌شود.</li>
-  <li>مثلثی: <span class="m">trimf(x,[a b c])</span>، گوشه‌ها <span class="m">(a,0),(b,1),(c,0)</span>. فشرده: <span class="m">max(min((x−a)/(b−a),(c−x)/(c−b)),0)</span>.</li>
-  <li>ذوزنقه‌ای: <span class="m">trapmf(x,[a b c d])</span>، گوشه‌ها <span class="m">(a,0),(b,1),(c,1),(d,0)</span>؛ بین b و c مقدار ۱.</li>
-  <li>روش حل: (۱) بازه x را پیدا کن، (۲) تکه درست را بردار: بالارونده <span class="m">(x−a)/(b−a)</span>، پایین‌رونده <span class="m">(c−x)/(c−b)</span> یا <span class="m">(d−x)/(d−c)</span>، (۳) عدد بگذار.</li>
-  <li>مثال‌های اسلاید: <span class="m">trimf(x,[3 6 8])</span> و <span class="m">trapmf(x,[1 5 7 8])</span> روی <span class="m">x=0:0.1:10</span>.</li>
-</ul></div></section>
-
-<!-- ===== 6. SOURCE + ASK ===== -->
-<section class="sec"><p class="lab">منبع اصلی</p>
-<p>جزوه درس، اسلایدهای ۸۲ تا ۸۶ (فصل ۳) · <a href="https://www.mathworks.com/help/fuzzy/membership-functions.html">MathWorks Fuzzy Logic Toolbox — Membership Functions</a> (منبع شکل فشرده فرمول مثلث)</p>
-<p><a href="../reference/cheatsheet.html">برگه فرمول‌ها</a> · <a href="../reference/glossary.html">واژه‌نامه</a></p>
-</section>
-
-<div class="nav"><a href="0008-max-product-defuzzify.html">← درس قبل: استنتاج max-product و غیرفازی‌سازی</a><a href="0010-gaussian-bell-sigmoid.html">درس بعد: توابع گاوسی، زنگوله‌ای، سیگموئید و چندجمله‌ای →</a></div>
-</main>
-
+<main id="app"></main>
+<script src="../assets/teacher.js"></script>
+<script src="../assets/graph.js"></script>
 <script>
-/* ===== SHARED JS — copy verbatim into every lesson ===== */
-(function(){
-function norm(s){return s.trim().replace(/[۰-۹]/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)}).replace(/[٠-٩]/g,function(d){return '٠١٢٣٤٥٦٧٨٩'.indexOf(d)}).replace(/[٫,]/g,'.').replace(/\s+/g,'')}
-function val(s){s=norm(s);if(/^-?\d*\.?\d+\/-?\d*\.?\d+$/.test(s)){var p=s.split('/');return +p[0]/+p[1]}return s===''?NaN:+s}
-document.querySelectorAll('.practice').forEach(function(q){
-  var ins=q.querySelectorAll('input[data-k]'),fb=q.querySelector('.fb'),btn=q.querySelector('.check');
-  ins.forEach(function(i){i.addEventListener('input',function(){i.parentNode.classList.remove('ok','no');fb.textContent='';fb.className='fb'})});
-  btn.addEventListener('click',function(){
-    var empty=0,ok=0;
-    ins.forEach(function(i){var c=i.parentNode;c.classList.remove('ok','no');if(!i.value.trim()){empty++;return}
-      var v=val(i.value),k=+i.dataset.k,tol=i.dataset.tol?+i.dataset.tol:0.01;
-      if(!isNaN(v)&&Math.abs(v-k)<=tol+1e-9){ok++;c.classList.add('ok')}else c.classList.add('no')});
-    if(empty){fb.className='fb bad';fb.textContent='اول همه خانه‌ها را پر کن ('+empty+' خانه خالی است).';return}
-    if(ok===ins.length){fb.className='fb good';fb.textContent=q.dataset.yes||('عالی! همه '+ins.length+' جواب درست است.')}
-    else{fb.className='fb bad';fb.textContent=ok+' از '+ins.length+' درست. '+(q.dataset.hint||'خانه‌های قرمز را دوباره حساب کن.')}
-  });
+// Lesson 9 — slides 82–86 (Part 3: membership function shapes — trimf, trapmf).
+// Explanations are Persian; numbers, math and technical terms stay in English.
+
+const all = list => Promise.all(list);
+const LTR = s => `⁦${s}⁩`; // keeps a left-to-right run intact inside Persian board text
+const r = (v, d = 3) => String(+v.toFixed(d));
+
+// MATLAB trimf / trapmf, written piece by piece like the slides.
+const trimf = (x, [a, b, c]) => (x === b ? 1 : x <= a || x >= c ? 0 : x < b ? (x - a) / (b - a) : (c - x) / (c - b));
+const trapmf = (x, [a, b, c, d]) => (x >= b && x <= c ? 1 : x <= a || x >= d ? 0 : x < b ? (x - a) / (b - a) : (d - x) / (d - c));
+// Corner points for Graph.poly.
+const triPts = ([a, b, c], from = 0, to = 10) => [[from, 0], [a, 0], [b, 1], [c, 0], [to, 0]];
+const trapPts = ([a, b, c, d], from = 0, to = 10) => [[from, 0], [a, 0], [b, 1], [c, 1], [d, 0], [to, 0]];
+
+// Big graph on the left, formulas in the right column (x 600–960).
+const GL = () => Graph({ x: 110, y: 120, w: 420, h: 270, from: 0, to: 10 });
+// Graph on the right, code box on the left (slides 84 and 86).
+const GR = () => Graph({ x: 560, y: 110, w: 360, h: 250, from: 0, to: 10 });
+
+async function codeBox(b, lines) {
+  await b.box('cb', 50, 70, 410, 190, { color: 'soft' });
+  for (const [k, l] of lines.entries()) await b.write(`cb${k}`, 70, 115 + k * 40, l, { size: 22, anchor: 'start', dur: 250 });
+}
+
+const QN = 6;
+function quizBoard(n, question, o = {}) {
+  return async b => {
+    await b.clear();
+    await b.write('q-n', 500, 52, `سؤال ${n} از ${QN}`, { size: 22, color: 'soft', fa: true });
+    await b.write('q-q', 500, 110, question, { size: 32, ...o });
+  };
+}
+// Quiz graph: question on top, graph below-left, working on the right.
+const GQ = (from = 0, to = 10) => Graph({ x: 120, y: 200, w: 440, h: 250, from, to });
+
+// Slide 84 and 86 examples
+const T = [3, 6, 8];
+const Z = [1, 5, 7, 8];
+
+Teacher.start({
+  id: 'L09',
+  number: 9,
+  title: 'توابع عضویت مثلثی و ذوزنقه‌ای',
+  chapter: 'بخش 3 · شکل توابع عضویت',
+  slides: '82–86',
+  intro: 'با سه یا چهار گوشه، μ(x) را برای هر x با دست حساب کن — trimf و trapmf.',
+  next: { href: '0010-gaussian-bell-sigmoid.html', title: 'گاوسی، زنگوله‌ای، سیگموئید و چندجمله‌ای' },
+  steps: [
+    // ---------------------------------------------------------- 1. intro
+    {
+      say: 'سلام! به بخش 3 خوش آمدید: شکل توابع عضویت. تا اینجا μ را آماده، به شکل جدول یا نمودار، می‌گرفتیم. حالا می‌خواهیم خودمان آن را با *فرمول* بسازیم، همان‌طور که نرم‌افزار متلب (MATLAB) می‌سازد. این درس دو شکل ساده دارد: مثلث با دستور trimf و ذوزنقه با دستور trapmf.',
+      draw: async b => {
+        await b.write('t1', 500, 170, 'بخش 3', { size: 64, color: 'blue', bold: true, fa: true });
+        await b.write('t2', 500, 255, 'شکل توابع عضویت', { size: 46, fa: true });
+        await b.write('t3', 500, 325, 'Membership function shapes', { size: 38, color: 'orange' });
+        await b.write('t4', 500, 420, 'trimf   ·   trapmf', { size: 42, color: 'purple', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 2. slide 82: the only rule
+    {
+      say: 'اسلاید 82 اول یک آزادی بزرگ می‌دهد: شکل تابع عضویت می‌تواند *هر منحنی دلخواهی* باشد. فقط یک شرط دارد: مقدارش باید بین 0 و 1 بماند. منحنی چپ مجاز است، هرچقدر هم کج و معوج. منحنی راست جایی به 1.2 رسیده، پس تابع عضویت نیست.',
+      term: ['membership function', 'تابع عضویت'],
+      draw: async b => {
+        await b.clear();
+        const g1 = Graph({ x: 110, y: 150, w: 330, h: 230, from: 0, to: 10 });
+        const g2 = Graph({ x: 570, y: 150, w: 330, h: 230, from: 0, to: 10 });
+        await all([g1.axes(b, 'a1', { yTicks: [0, 1] }), g2.axes(b, 'a2', { yTicks: [0, 1] })]);
+        await g1.curve(b, 'ok', x => 0.5 + 0.33 * Math.sin(x * 0.9) + 0.1 * Math.sin(x * 2.3), { color: 'green' });
+        await b.write('l1', 275, 450, '✓ مجاز', { size: 30, color: 'green', bold: true, fa: true });
+        await b.line('lim', g2.X(0), g2.Y(1), g2.X(10), g2.Y(1), { color: 'soft', width: 2 });
+        await g2.curve(b, 'bad', x => 1.2 * Math.exp(-((x - 5) ** 2) / 4), { color: 'red' });
+        await b.ring('rb', g2.X(5), g2.Y(1.2), 42, 18, { color: 'red' });
+        await b.write('l2', 735, 450, `✗ ${LTR('μ = 1.2')} ← تابع عضویت نیست`, { size: 26, color: 'red', fa: true });
+        await b.write('rule', 500, 515, `تنها شرط:  ${LTR('0 ≤ μ(x) ≤ 1')}`, { size: 30, color: 'orange', bold: true, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 3. slide 82: 11 MATLAB functions
+    {
+      say: 'در نرم‌افزار متلب 11 نوع تابع عضویت آماده وجود دارد. همه از چند تابع پایه ساخته شده‌اند: توابع *تکه‌ای خطی*، تابع گاوسی، منحنی سیگموئید، و منحنی‌های چندجمله‌ای درجه‌ی 2 و 3. طبق قرارداد، نام همه‌شان به mf ختم می‌شود، یعنی membership function. «تکه‌ای خطی» یعنی شکل فقط از چند پاره‌خط صاف ساخته شده؛ امروز همین‌ها را می‌بینیم.',
+      term: ['piecewise linear', 'تکه‌ای خطی'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 80, `متلب: ${LTR('11')} نوع تابع عضویت`, { size: 40, color: 'orange', bold: true, fa: true });
+        const R = [['توابع تکه‌ای خطی', 'trimf, trapmf'], ['تابع گاوسی', 'gaussmf, gauss2mf'], ['منحنی سیگموئید', 'sigmf'], ['چندجمله‌ای درجه‌ی 2 و 3', 'zmf, smf, pimf']];
+        for (const [k, [fa, en]] of R.entries()) {
+          const y = 165 + k * 68;
+          await b.write(`r${k}f`, 900, y, fa, { size: 30, anchor: 'start', fa: true, dur: 300 });
+          await b.arrow(`r${k}a`, 560, y - 10, 440, y - 10, { color: 'soft', head: 10, dur: 250 });
+          await b.write(`r${k}e`, 120, y, en, { size: 30, anchor: 'start', color: 'blue', dur: 300 });
+        }
+        await b.write('mf', 500, 460, '…mf  =  membership function', { size: 34, color: 'purple' });
+        await all([b.recolor('r0f', 'orange'), b.recolor('r0e', 'orange')]);
+        await b.write('today', 500, 520, 'امروز: توابع تکه‌ای خطی', { size: 24, color: 'orange', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 4. slide 83: triangle corners
+    {
+      say: 'شکل 1: *مثلثی* یا Triangular، در متلب trimf. ساده‌ترین تابع عضویت است. سه نقطه‌ی a، b، c روی محور x داریم و سه گوشه‌ی مثلث این‌ها هستند: (a,0)، (b,1) و (c,0). یعنی از a بالا می‌رود، در b به قله‌ی 1 می‌رسد و تا c پایین می‌آید.',
+      term: ['Triangular — trimf', 'مثلثی'],
+      draw: async b => {
+        await b.clear();
+        const g = GL();
+        await g.axes(b, 'ax', { yTicks: [0, 1] });
+        await all(['a', 'b', 'c'].map((l, k) => b.write(`tk${l}`, g.X([2, 5, 8][k]), g.Y(0) + 26, l, { size: 26, color: 'purple', dur: 150 })));
+        await g.poly(b, 'tri', triPts([2, 5, 8]), { color: 'blue' });
+        await b.line('bd', g.X(5), g.Y(1), g.X(5), g.Y(0), { color: 'soft', width: 2 });
+        await all([
+          b.dot('c1', g.X(2), g.Y(0), { color: 'purple' }), b.dot('c2', g.X(5), g.Y(1), { color: 'purple' }), b.dot('c3', g.X(8), g.Y(0), { color: 'purple' }),
+        ]);
+        await b.write('c1t', g.X(2) - 10, g.Y(0) - 14, '(a,0)', { size: 20, color: 'purple', anchor: 'end' });
+        await b.write('c2t', g.X(5), g.Y(1) - 14, '(b,1)', { size: 20, color: 'purple' });
+        await b.write('c3t', g.X(8) + 10, g.Y(0) - 14, '(c,0)', { size: 20, color: 'purple', anchor: 'start' });
+        await b.write('rc1', 780, 170, 'trimf', { size: 56, color: 'blue', bold: true });
+        await b.write('rc2', 780, 225, 'Triangular', { size: 30, color: 'orange' });
+        await b.write('rc3', 780, 270, 'مثلثی', { size: 30, fa: true });
+        await b.write('rc4', 780, 340, `سه پارامتر: ${LTR('[a b c]')}`, { size: 28, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 5. rising piece
+    {
+      say: 'بین a و b منحنی بالا می‌رود. فرمولش (x-a)/(b-a) است. به زبان ساده: «چقدر از a راه افتاده‌ای» تقسیم بر «کل راه از a تا قله». در x = a صورت کسر صفر است، پس μ = 0؛ در x = b صورت و مخرج برابرند، پس μ = 1.',
+      draw: async b => {
+        const g = GL();
+        await b.erase('rc*');
+        await g.poly(b, 'up', [[2, 0], [5, 1]], { color: 'orange', width: 6 });
+        await b.write('lx', g.X(3.5), g.Y(0) + 26, 'x', { size: 24, color: 'blue' });
+        await g.guide(b, 'gx', 3.5, 0.5);
+        await b.arrow('ar1', g.X(2), 455, g.X(3.5), 455, { color: 'purple', head: 8 });
+        await b.write('ar1t', (g.X(2) + g.X(3.5)) / 2, 482, 'x - a', { size: 20, color: 'purple' });
+        await b.arrow('ar2', g.X(2), 505, g.X(5), 505, { color: 'purple', head: 8 });
+        await b.write('ar2t', (g.X(2) + g.X(5)) / 2, 532, 'b - a', { size: 20, color: 'purple' });
+        await b.write('fh', 610, 140, 'f(x; a, b, c) =', { size: 28, anchor: 'start' });
+        await b.line('fbr', 625, 160, 625, 335, { color: 'purple', width: 3 });
+        await b.write('f1', 645, 225, '(x - a)/(b - a)', { size: 26, color: 'orange', anchor: 'start' });
+        await b.write('f1c', 955, 225, 'a ≤ x ≤ b', { size: 20, color: 'soft', anchor: 'end' });
+      },
+    },
+    // ---------------------------------------------------------- 6. falling piece + full formula
+    {
+      say: 'بین b و c منحنی پایین می‌آید: (c-x)/(c-b)، یعنی «چقدر تا c مانده» تقسیم بر «کل راه از قله تا c». بیرون از بازه‌ی a تا c جواب 0 است. آکولاد بزرگ اسلاید یعنی: اول ببین x کجاست، بعد فقط فرمول همان خط را حساب کن. مرزها دو بار آمده‌اند، مثلاً x = a در دو خط هست؛ اشکالی ندارد، چون هر دو خط آنجا یک جواب می‌دهند.',
+      draw: async b => {
+        const g = GL();
+        await b.erase(['ar*', 'gx-*', 'lx']);
+        await b.dim('up', 0.35);
+        await g.poly(b, 'down', [[5, 1], [8, 0]], { color: 'green', width: 6 });
+        await b.write('lx', g.X(6.5), g.Y(0) + 26, 'x', { size: 24, color: 'blue' });
+        await g.guide(b, 'gx', 6.5, 0.5, { color: 'green' });
+        await b.arrow('ar1', g.X(8), 455, g.X(6.5), 455, { color: 'purple', head: 8 });
+        await b.write('ar1t', (g.X(8) + g.X(6.5)) / 2, 482, 'c - x', { size: 20, color: 'purple' });
+        await b.arrow('ar2', g.X(8), 505, g.X(5), 505, { color: 'purple', head: 8 });
+        await b.write('ar2t', (g.X(8) + g.X(5)) / 2, 532, 'c - b', { size: 20, color: 'purple' });
+        const rows = [['f0', '0', 'x ≤ a', 180, 'ink'], ['f2', '(c - x)/(c - b)', 'b ≤ x ≤ c', 270, 'green'], ['f3', '0', 'x ≥ c', 315, 'ink']];
+        for (const [id, f, c, y, color] of rows) {
+          await all([b.write(id, 645, y, f, { size: 26, color, anchor: 'start' }), b.write(id + 'c', 955, y, c, { size: 20, color: 'soft', anchor: 'end' })]);
+        }
+        await b.write('note', 780, 400, 'اول بازه‌ی x، بعد همان خط', { size: 24, color: 'orange', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 7. slide 84: MATLAB example
+    {
+      say: 'مثال اسلاید 84 در متلب. x=0:0.1:10 یعنی x از 0 تا 10 با گام 0.1. دستور trimf(x,[3 6 8]) برای همه‌ی این xها μ را حساب می‌کند، با a = 3، b = 6، c = 8. پس شیب چپ از 3 تا 6 است، یعنی پهنای 3، و شیب راست از 6 تا 8، یعنی فقط پهنای 2.',
+      draw: async b => {
+        await b.clear();
+        await codeBox(b, ['x=0:0.1:10;', 'y=trimf(x,[3 6 8]);', 'plot(x,y)', "xlabel('trimf, P=[3 6 8]')"]);
+        const g = GR();
+        await g.axes(b, 'ax', { ticks: [0, 3, 6, 8, 10] });
+        await g.poly(b, 'p', triPts(T), { color: 'blue' });
+        await b.write('abc', 255, 300, '[3 6 8] = [a b c]', { size: 28, color: 'blue', bold: true });
+        await b.write('w1', 255, 350, `شیب چپ: ${LTR('3 → 6')}، پهنای 3`, { size: 24, color: 'orange', fa: true });
+        await b.write('w2', 255, 395, `شیب راست: ${LTR('6 → 8')}، پهنای 2`, { size: 24, color: 'green', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 8. x = 2 and x = 4.5
+    {
+      say: 'حالا چند نقطه را با دست حساب کنیم. x = 2: چون 2 از a = 3 کوچک‌تر است، بیرون مثلث است و μ = 0. x = 4.5: بین a و b است، پس تکه‌ی بالارونده: (4.5-3)/(6-3) = 1.5/3 = 0.5.',
+      draw: async b => {
+        const g = GR();
+        await b.erase(['w1', 'w2']);
+        await b.dot('d2', g.X(2), g.Y(0), { color: 'red', r: 7 });
+        await b.write('e1', 50, 355, 'x = 2 ≤ a   →   μ = 0', { size: 24, anchor: 'start', color: 'red' });
+        await g.guide(b, 'g45', 4.5, trimf(4.5, T));
+        await b.write('e2', 50, 410, 'x = 4.5:  (4.5 - 3)/(6 - 3)', { size: 24, anchor: 'start' });
+        await b.write('e2r', 110, 455, `= 1.5/3 = ${r(trimf(4.5, T))}`, { size: 26, anchor: 'start', color: 'green', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 9. x = 7
+    {
+      say: 'x = 7: بین b و c است، پس تکه‌ی پایین‌رونده: (8-7)/(8-6) = 1/2 = 0.5. دو نقطه‌ی متفاوت، یک درجه‌ی عضویت! x = 7 فقط 1 واحد با قله فاصله دارد ولی x = 4.5 یک و نیم واحد؛ چون شیب راست تندتر است، زودتر پایین می‌آید.',
+      draw: async b => {
+        const g = GR();
+        await g.guide(b, 'g7', 7, trimf(7, T), { color: 'green' });
+        await b.write('e3', 50, 505, 'x = 7:  (8 - 7)/(8 - 6)', { size: 24, anchor: 'start' });
+        await b.write('e3r', 375, 505, `= ${r(trimf(7, T))}`, { size: 26, anchor: 'start', color: 'green', bold: true });
+        await b.pulse(['g45-d', 'g7-d']);
+      },
+    },
+    // ---------------------------------------------------------- 10. compact form (MathWorks)
+    {
+      say: 'یک میان‌بر که در اسلاید نیست و از مستندات MathWorks است: f = max(min(L, R), 0). یعنی هر دو خط شیب‌دار را تا آخر ادامه بده، در هر x کوچک‌ترشان را بردار، و اگر منفی شد صفرش کن. min نوک مثلث را می‌سازد و max زیر محور را صاف می‌کند. برای x = 7: min(4/3, 1/2) = 0.5. برای x = 9: min(2, -0.5) = -0.5 که صفر می‌شود.',
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        const g = Graph({ x: 100, y: 120, w: 440, h: 330, from: 0, to: 10, min: -0.5, max: 1.5 });
+        await g.axes(b, 'ax', { ticks: [0, 10], yTicks: [-0.5, 0.5, 1, 1.5] });
+        await all([b.write('ka', g.X(3) + 8, g.Y(0) + 24, 'a=3', { size: 18, color: 'soft', anchor: 'start', dur: 120 }), b.write('kb', g.X(6), g.Y(0) + 24, 'b=6', { size: 18, color: 'soft', dur: 120 }), b.write('kc', g.X(8) - 8, g.Y(0) + 24, 'c=8', { size: 18, color: 'soft', anchor: 'end', dur: 120 })]);
+        await g.curve(b, 'L', x => (x - 3) / 3, { color: 'purple', lo: 1.5, hi: 7.5, steps: 2 });
+        await b.write('Lt', g.X(7.5) - 14, g.Y(1.5) + 4, 'L', { size: 24, color: 'purple', anchor: 'end' });
+        await g.curve(b, 'R', x => (8 - x) / 2, { color: 'purple', lo: 5, hi: 9, steps: 2 });
+        await b.write('Rt', g.X(5) - 12, g.Y(1.5) + 4, 'R', { size: 24, color: 'purple', anchor: 'end' });
+        await b.write('f', 780, 150, 'f = max( min( L, R ), 0 )', { size: 30, bold: true });
+        await b.write('fL', 780, 200, 'L = (x - a)/(b - a)', { size: 24, color: 'purple' });
+        await b.write('fR', 780, 240, 'R = (c - x)/(c - b)', { size: 24, color: 'purple' });
+        await g.poly(b, 'mn', [[1.5, -0.5], [6, 1], [9, -0.5]], { color: 'orange', width: 6 });
+        await b.write('e7', 780, 310, 'x = 7:  min(4/3, 1/2) = 0.5', { size: 22 });
+        await b.write('e7r', 780, 350, 'max(0.5, 0) = 0.5', { size: 22, color: 'green' });
+        await g.poly(b, 'fin', triPts(T), { color: 'green', width: 6 });
+        await b.write('e9', 780, 410, 'x = 9:  min(2, -0.5) = -0.5', { size: 22 });
+        await b.write('e9r', 780, 450, 'max(-0.5, 0) = 0', { size: 22, color: 'green' });
+        await b.write('src', 780, 515, 'شکل فشرده از MathWorks است، نه اسلاید', { size: 20, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 11. moving b
+    {
+      say: 'حالا ببینیم هر پارامتر شکل را چطور جابه‌جا می‌کند. a و c پاهای مثلث‌اند و b نوک آن. اگر b را از 6 به 4 ببریم، قله به چپ می‌رود: شیب چپ تند و شیب راست ملایم می‌شود. اگر b را روی a بگذاریم، یعنی [3 3 8]، شیب چپ عمود می‌شود و در x = 3 یک‌باره از 0 به 1 می‌پرد.',
+      draw: async b => {
+        await b.clear();
+        const g = Graph({ x: 110, y: 120, w: 440, h: 280, from: 0, to: 10 });
+        await g.axes(b, 'ax', { ticks: [0, 3, 4, 6, 8, 10] });
+        const L = [['p0', [3, 6, 8], 'soft', 'trimf [3 6 8]', ''], ['p1', [3, 4, 8], 'orange', 'trimf [3 4 8]', 'b = 4'], ['p2', [3, 3, 8], 'red', 'trimf [3 3 8]', 'b = a']];
+        for (const [k, [id, p, color, label, note]] of L.entries()) {
+          const y = 170 + k * 65;
+          await g.poly(b, id, triPts(p), { color, width: k ? 4 : 3 });
+          await b.line(`lg${k}`, 610, y - 8, 650, y - 8, { color, width: 5, dur: 200 });
+          await b.write(`lg${k}t`, 665, y, label, { size: 24, color, anchor: 'start', dur: 250 });
+          if (note) await b.write(`lg${k}n`, 955, y, note, { size: 22, color, anchor: 'end', dur: 250 });
+        }
+        await b.write('rule', 780, 400, 'b = نوک ·  a و c = پاها', { size: 26, color: 'purple', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 12. moving a and c
+    {
+      say: 'حالا پاها: اگر a را از 3 به 1 و c را از 8 به 10 ببریم، یعنی [1 6 10]، مثلث پهن‌تر و شیب‌ها ملایم‌تر می‌شوند. هرچه پهنای یک شیب بیشتر، آن طرف آرام‌تر بالا یا پایین می‌رود. پس در یک x ثابت، μ بیشتر می‌شود: در x = 4، مثلث [3 6 8] مقدار 1/3 می‌دهد ولی [1 6 10] مقدار 3/5 = 0.6.',
+      draw: async b => {
+        const g = Graph({ x: 110, y: 120, w: 440, h: 280, from: 0, to: 10 });
+        await b.erase(['p1', 'p2', 'lg*', 'rule']);
+        await b.recolor('p0', 'blue');
+        await b.write('t1x', g.X(1), g.Y(0) + 24, '1', { size: 18, color: 'soft', dur: 100 });
+        await g.poly(b, 'p3', triPts([1, 6, 10]), { color: 'green', width: 4 });
+        await b.line('lg0', 610, 162, 650, 162, { color: 'blue', width: 5, dur: 200 });
+        await b.write('lg0t', 665, 170, 'trimf [3 6 8]', { size: 24, color: 'blue', anchor: 'start' });
+        await b.line('lg1', 610, 227, 650, 227, { color: 'green', width: 5, dur: 200 });
+        await b.write('lg1t', 665, 235, 'trimf [1 6 10]', { size: 24, color: 'green', anchor: 'start' });
+        await g.guide(b, 'ga', 4, trimf(4, T), { color: 'blue' });
+        await g.guide(b, 'gb', 4, trimf(4, [1, 6, 10]), { color: 'green' });
+        await b.write('v1', 780, 320, `x = 4:  (4 - 3)/3 = 1/3 ≈ ${r(trimf(4, T), 2)}`, { size: 22, color: 'blue' });
+        await b.write('v2', 780, 365, `x = 4:  (4 - 1)/5 = ${r(trimf(4, [1, 6, 10]))}`, { size: 22, color: 'green' });
+        await b.write('rule', 780, 430, 'پای پهن‌تر ← شیب ملایم‌تر', { size: 26, color: 'purple', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 13. slide 85: trapezoid corners
+    {
+      say: 'شکل 2: *ذوزنقه‌ای* یا Trapezoidal، در متلب trapmf. چهار گوشه دارد: (a,0)، (b,1)، (c,1) و (d,0). از a بالا می‌رود، از b تا c روی 1 صاف می‌ماند و از c تا d پایین می‌آید. یعنی ذوزنقه یک «سقف صاف» دارد.',
+      term: ['Trapezoidal — trapmf', 'ذوزنقه‌ای'],
+      draw: async b => {
+        await b.clear();
+        const g = GL(), P = [1.5, 4, 6.5, 8.5];
+        await g.axes(b, 'ax', { yTicks: [0, 1] });
+        await all(['a', 'b', 'c', 'd'].map((l, k) => b.write(`tk${l}`, g.X(P[k]), g.Y(0) + 26, l, { size: 26, color: 'purple', dur: 150 })));
+        await g.poly(b, 'trap', trapPts(P), { color: 'blue' });
+        await all([b.line('bd', g.X(4), g.Y(1), g.X(4), g.Y(0), { color: 'soft', width: 2 }), b.line('cd', g.X(6.5), g.Y(1), g.X(6.5), g.Y(0), { color: 'soft', width: 2 })]);
+        await b.write('c2t', g.X(4) - 8, g.Y(1) - 14, '(b,1)', { size: 20, color: 'purple', anchor: 'end' });
+        await b.write('c3t', g.X(6.5) + 8, g.Y(1) - 14, '(c,1)', { size: 20, color: 'purple', anchor: 'start' });
+        await b.write('c1t', g.X(1.5) - 8, g.Y(0) - 14, '(a,0)', { size: 20, color: 'purple', anchor: 'end' });
+        await b.write('c4t', g.X(8.5) + 8, g.Y(0) - 14, '(d,0)', { size: 20, color: 'purple', anchor: 'start' });
+        await g.poly(b, 'top', [[4, 1], [6.5, 1]], { color: 'orange', width: 7 });
+        await b.write('topt', g.X(5.25), g.Y(1) + 34, 'سقف صاف', { size: 22, color: 'orange', fa: true });
+        await b.write('rc1', 780, 170, 'trapmf', { size: 56, color: 'blue', bold: true });
+        await b.write('rc2', 780, 225, 'Trapezoidal', { size: 30, color: 'orange' });
+        await b.write('rc3', 780, 270, 'ذوزنقه‌ای', { size: 30, fa: true });
+        await b.write('rc4', 780, 340, `چهار پارامتر: ${LTR('[a b c d]')}`, { size: 28, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 14. trapezoid formula
+    {
+      say: 'فرمولش همان مثلث است با یک خط اضافه در وسط: بین b و c جواب همیشه 1 است. شیب بالارونده مثل قبل (x-a)/(b-a) است و شیب پایین‌رونده حالا (d-x)/(d-c)، یعنی «چقدر تا d مانده» تقسیم بر «پهنای شیب راست». ترفند حفظ کردن: بالارونده = فاصله از گوشه‌ی چپ تقسیم بر پهنای شیب چپ؛ پایین‌رونده = فاصله تا گوشه‌ی راست تقسیم بر پهنای شیب راست.',
+      draw: async b => {
+        const g = GL();
+        await b.erase('rc*');
+        await b.write('fh', 610, 125, 'f(x; a, b, c, d) =', { size: 26, anchor: 'start' });
+        await b.line('fbr', 625, 145, 625, 365, { color: 'purple', width: 3 });
+        const rows = [['0', 'x ≤ a', 'ink'], ['(x - a)/(b - a)', 'a ≤ x ≤ b', 'orange'], ['1', 'b ≤ x ≤ c', 'purple'], ['(d - x)/(d - c)', 'c ≤ x ≤ d', 'green'], ['0', 'x ≥ d', 'ink']];
+        for (const [k, [f, c, color]] of rows.entries()) {
+          const y = 175 + k * 45;
+          await all([b.write(`f${k}`, 645, y, f, { size: 26, color, anchor: 'start', dur: 300 }), b.write(`f${k}c`, 955, y, c, { size: 20, color: 'soft', anchor: 'end', dur: 250 })]);
+          if (k === 1) await g.poly(b, 'up', [[1.5, 0], [4, 1]], { color: 'orange', width: 6 });
+          if (k === 3) await g.poly(b, 'down', [[6.5, 1], [8.5, 0]], { color: 'green', width: 6 });
+        }
+        await b.recolor('top', 'purple');
+        await b.write('trick', 500, 470, 'بالارونده: فاصله از گوشه‌ی چپ ÷ پهنای شیب چپ', { size: 22, color: 'orange', fa: true });
+        await b.write('trick2', 500, 510, 'پایین‌رونده: فاصله تا گوشه‌ی راست ÷ پهنای شیب راست', { size: 22, color: 'green', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 15. slide 86: MATLAB example
+    {
+      say: 'مثال اسلاید 86: trapmf(x,[1 5 7 8]) روی همان x=0:0.1:10. پس a = 1، b = 5، c = 7، d = 8. شیب چپ پهن است، از 1 تا 5، یعنی پهنای 4؛ سقف از 5 تا 7 است؛ و شیب راست خیلی تند است، از 7 تا 8، فقط پهنای 1.',
+      draw: async b => {
+        await b.clear();
+        await codeBox(b, ['x=0:0.1:10;', 'y=trapmf(x,[1 5 7 8]);', 'plot(x,y)', "xlabel('trapmf, P=[1 5 7 8]')"]);
+        const g = GR();
+        await g.axes(b, 'ax', { ticks: [0, 1, 5, 7, 8, 10] });
+        await g.poly(b, 'p', trapPts(Z), { color: 'blue' });
+        await b.write('abc', 255, 300, '[1 5 7 8] = [a b c d]', { size: 28, color: 'blue', bold: true });
+        await b.write('w1', 255, 350, `شیب چپ: ${LTR('1 → 5')}، پهنای 4`, { size: 24, color: 'orange', fa: true });
+        await b.write('w2', 255, 395, `سقف: ${LTR('5 → 7')}`, { size: 24, color: 'purple', fa: true });
+        await b.write('w3', 255, 440, `شیب راست: ${LTR('7 → 8')}، پهنای 1`, { size: 24, color: 'green', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 16. worked points
+    {
+      say: 'سه نقطه. x = 3 روی شیب چپ است: (3-1)/(5-1) = 2/4 = 0.5. x = 6 روی سقف است، پس μ = 1 بی‌هیچ حسابی. x = 7.5 روی شیب راست است: (8-7.5)/(8-7) = 0.5/1 = 0.5.',
+      draw: async b => {
+        const g = GR();
+        await b.erase(['w1', 'w2', 'w3']);
+        await g.guide(b, 'g3', 3, trapmf(3, Z), { color: 'orange' });
+        await b.write('e1', 50, 355, `x = 3:  (3 - 1)/(5 - 1) = ${r(trapmf(3, Z))}`, { size: 24, anchor: 'start', color: 'orange' });
+        await g.guide(b, 'g6', 6, trapmf(6, Z), { color: 'purple' });
+        await b.write('e2', 50, 405, `x = 6:  b ≤ x ≤ c   →   μ = ${r(trapmf(6, Z))}`, { size: 24, anchor: 'start', color: 'purple' });
+        await g.guide(b, 'g75', 7.5, trapmf(7.5, Z), { color: 'green' });
+        await b.write('e3', 50, 455, `x = 7.5:  (8 - 7.5)/(8 - 7) = ${r(trapmf(7.5, Z))}`, { size: 24, anchor: 'start', color: 'green' });
+      },
+    },
+    // ---------------------------------------------------------- 17. special cases
+    {
+      say: 'دو حالت خاص که در امتحان می‌پرسند. یک: اگر b = c باشد، سقف صاف به یک نقطه جمع می‌شود و ذوزنقه همان مثلث است؛ مثلاً trapmf(x,[1 5 5 8]) همان trimf(x,[1 5 8]) است. دو: اگر a = b باشد، شیب چپ از بین می‌رود و منحنی از همان اول 1 است؛ به این *شانه‌ی چپ* می‌گویند. مثال: «سرد» = trapmf(x,[0 0 10 30]) که از 0 تا 10 مقدارش 1 است.',
+      term: ['left shoulder', 'شانه‌ی چپ'],
+      draw: async b => {
+        await b.clear();
+        const ga = Graph({ x: 90, y: 150, w: 330, h: 220, from: 0, to: 10 });
+        const gb = Graph({ x: 590, y: 150, w: 300, h: 220, from: 0, to: 40 });
+        await b.write('ha', 255, 80, `${LTR('b = c')}  ←  مثلث`, { size: 30, color: 'orange', bold: true, fa: true });
+        await b.write('hb', 740, 80, `${LTR('a = b')}  ←  شانه‌ی چپ`, { size: 30, color: 'blue', bold: true, fa: true });
+        await all([ga.axes(b, 'xa', { ticks: [0, 1, 5, 8, 10], yTicks: [0, 1] }), gb.axes(b, 'xb', { ticks: [0, 10, 20, 30, 40], yTicks: [0, 1] })]);
+        await ga.poly(b, 'pa0', trapPts([1, 4, 6, 8]), { color: 'soft' });
+        await ga.poly(b, 'pa1', trapPts([1, 5, 5, 8]), { color: 'orange', width: 5 });
+        await b.write('la1', 255, 450, 'trapmf(x,[1 5 5 8])', { size: 22, color: 'orange' });
+        await b.write('la2', 255, 485, '= trimf(x,[1 5 8])', { size: 22, color: 'orange' });
+        await gb.poly(b, 'pb', trapPts([0, 0, 10, 30], 0, 40), { color: 'blue', width: 5 });
+        await b.write('lb1', 740, 450, 'Cold = trapmf(x,[0 0 10 30])', { size: 22, color: 'blue' });
+        await b.write('lb2', 740, 485, `از ${LTR('0')} تا ${LTR('10')}: ${LTR('μ = 1')}`, { size: 22, color: 'blue', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 18. exam method + reading a figure
+    {
+      say: 'روش امتحانی در سه قدم: یک، ببین x در کدام بازه است. دو، تکه‌ی درست را بردار: بالارونده، سقف یا پایین‌رونده. سه، عدد بگذار. و اگر شکل را دادند و دستور را خواستند، از چپ به راست چهار جایی را که خط *می‌شکند* بخوان: جدا شدن از صفر a است، رسیدن به 1 b است، پایان سقف c است و رسیدن دوباره به صفر d. این شکل می‌شود trapmf(x,[1 3 7 8]).',
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'روش حل در سه قدم', { size: 36, color: 'orange', bold: true, fa: true });
+        const S = ['1.  بازه‌ی x را پیدا کن', '2.  تکه‌ی درست: بالارونده / سقف / پایین‌رونده', '3.  عدد بگذار و ساده کن'];
+        for (const [k, s] of S.entries()) await b.write(`s${k}`, 800, 130 + k * 48, s, { size: 26, anchor: 'start', fa: true, dur: 350 });
+        const g = Graph({ x: 200, y: 330, w: 520, h: 150, from: 0, to: 10 });
+        await g.axes(b, 'ax', { ticks: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], yTicks: [0, 1] });
+        const P = [1, 3, 7, 8];
+        await g.poly(b, 'fig', trapPts(P), { color: 'blue' });
+        const L = [['a', P[0], 0, -12], ['b', P[1], 1, -12], ['c', P[2], 1, 12], ['d', P[3], 0, 12]];
+        for (const [l, v, m, dx] of L) {
+          await b.ring(`rr${l}`, g.X(v), g.Y(m), 12, 12, { color: 'orange', dur: 250 });
+          await b.write(`rl${l}`, g.X(v) + dx, g.Y(m) + (m ? -16 : -18), l, { size: 24, color: 'purple', bold: true, anchor: dx < 0 ? 'end' : 'start', dur: 150 });
+        }
+        await b.write('ans', 850, 420, 'trapmf(x,[1 3 7 8])', { size: 20, color: 'green', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 19. summary
+    {
+      say: 'جمع‌بندی کنیم: شش نکته برای امتحان. یک بار دیگر بخوانیدشان، بعد برویم سراغ سؤال‌ها.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 75, 'یادت باشد', { size: 48, color: 'orange', bold: true, fa: true });
+        const L = [
+          `تنها شرط تابع عضویت: ${LTR('0 ≤ μ ≤ 1')} · نام‌های متلب به mf ختم می‌شوند`,
+          `مثلث: ${LTR('trimf(x,[a b c])')} — گوشه‌ها ${LTR('(a,0) (b,1) (c,0)')}`,
+          `ذوزنقه: ${LTR('trapmf(x,[a b c d])')} — بین b و c مقدار 1`,
+          `بالارونده ${LTR('(x-a)/(b-a)')} · پایین‌رونده ${LTR('(c-x)/(c-b)')} یا ${LTR('(d-x)/(d-c)')}`,
+          `${LTR('b = c')} ← ذوزنقه همان مثلث · ${LTR('a = b')} ← شانه‌ی چپ`,
+          'اول بازه، بعد تکه، بعد عدد',
+        ];
+        for (const [k, l] of L.entries()) await b.write(`m${k}`, 930, 150 + k * 64, '•  ' + l, { size: 25, anchor: 'start', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- quizzes
+    {
+      say: 'نوبت شماست! مثلث اسلاید 84: برای trimf(x,[3 6 8]) مقدار μ را در x = 7.5 حساب کنید.',
+      draw: async b => {
+        await quizBoard(1, 'trimf(x,[3 6 8])   x = 7.5   →   μ = ?')(b);
+        const g = GQ();
+        await g.axes(b, 'qa', { ticks: [0, 3, 6, 8, 10] });
+        await g.poly(b, 'qp', triPts(T), { color: 'blue' });
+      },
+      quiz: { answer: ['0.25', '1/4'], hint: 'x = 7.5 بین b = 6 و c = 8 است؛ تکه‌ی پایین‌رونده (c-x)/(c-b).', explain: '7.5 بین 6 و 8 است، پس (8 - 7.5)/(8 - 6) = 0.5/2 = 0.25.' },
+      solve: async b => {
+        const g = GQ();
+        await g.guide(b, 'sg', 7.5, trimf(7.5, T), { color: 'green' });
+        await b.write('s1', 780, 240, `${LTR('6 ≤ 7.5 ≤ 8')} ← پایین‌رونده`, { size: 24, color: 'orange', fa: true });
+        await b.write('s2', 780, 300, '(8 - 7.5)/(8 - 6)', { size: 30 });
+        await b.write('s3', 780, 360, `= 0.5/2 = ${r(trimf(7.5, T))}`, { size: 34, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'ذوزنقه‌ی اسلاید 86: برای trapmf(x,[1 5 7 8]) مقدار μ را در x = 4 حساب کنید.',
+      draw: async b => {
+        await quizBoard(2, 'trapmf(x,[1 5 7 8])   x = 4   →   μ = ?')(b);
+        const g = GQ();
+        await g.axes(b, 'qa', { ticks: [0, 1, 5, 7, 8, 10] });
+        await g.poly(b, 'qp', trapPts(Z), { color: 'blue' });
+      },
+      quiz: { answer: ['0.75', '3/4'], hint: 'x = 4 بین a = 1 و b = 5 است؛ تکه‌ی بالارونده (x-a)/(b-a).', explain: '4 روی شیب چپ است: (4 - 1)/(5 - 1) = 3/4 = 0.75.' },
+      solve: async b => {
+        const g = GQ();
+        await g.guide(b, 'sg', 4, trapmf(4, Z), { color: 'green' });
+        await b.write('s1', 780, 240, `${LTR('1 ≤ 4 ≤ 5')} ← بالارونده`, { size: 24, color: 'orange', fa: true });
+        await b.write('s2', 780, 300, '(4 - 1)/(5 - 1)', { size: 30 });
+        await b.write('s3', 780, 360, `= 3/4 = ${r(trapmf(4, Z))}`, { size: 34, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'خواندن از روی شکل: این ذوزنقه با کدام دستور ساخته شده؟',
+      draw: async b => {
+        await quizBoard(3, 'این شکل کدام دستور است؟', { fa: true })(b);
+        const g = Graph({ x: 150, y: 200, w: 600, h: 230, from: 0, to: 10 });
+        await g.axes(b, 'qa', { ticks: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], yTicks: [0, 1] });
+        await g.poly(b, 'qp', trapPts([2, 4, 6, 9]), { color: 'blue' });
+      },
+      quiz: {
+        choices: ['trapmf(x,[2 6 4 9])', 'trapmf(x,[0 2 4 6])', 'trapmf(x,[2 4 6 9])', 'trimf(x,[2 4 9])'], correct: 2,
+        hint: 'از چپ به راست چهار جایی را پیدا کن که خط می‌شکند.',
+        explain: 'خط در 2 از صفر جدا می‌شود، در 4 به 1 می‌رسد، سقف در 6 تمام می‌شود و در 9 دوباره صفر است: trapmf(x,[2 4 6 9]).',
+      },
+      solve: async b => {
+        const g = Graph({ x: 150, y: 200, w: 600, h: 230, from: 0, to: 10 });
+        const L = [['a', 2, 0, -12], ['b', 4, 1, -12], ['c', 6, 1, 12], ['d', 9, 0, 12]];
+        for (const [l, v, m, dx] of L) {
+          await b.ring(`sr${l}`, g.X(v), g.Y(m), 12, 12, { color: 'orange', dur: 250 });
+          await b.write(`sl${l}`, g.X(v) + dx, g.Y(m) - 16, `${l} = ${v}`, { size: 22, color: 'purple', bold: true, anchor: dx < 0 ? 'end' : 'start', dur: 200 });
+        }
+        await b.write('s', 500, 520, 'trapmf(x,[2 4 6 9])', { size: 32, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'سؤال ترکیبی، به سبک تمرین 3 و یادآوری درس 4. دما: «سرد» = trapmf(x,[0 0 10 30]) و «متوسط» = trimf(x,[25 45 65]). در x = 27 درجه، مقدار «سرد AND متوسط» چقدر است؟ AND یعنی min.',
+      draw: async b => {
+        await quizBoard(4, 'μ_{Cold}(27)  AND  μ_{Medium}(27) = ?')(b);
+        const g = Graph({ x: 100, y: 200, w: 500, h: 250, from: 0, to: 70 });
+        await g.axes(b, 'qa', { ticks: [0, 10, 25, 30, 45, 65] });
+        await g.poly(b, 'qc', trapPts([0, 0, 10, 30], 0, 70), { color: 'blue' });
+        await g.poly(b, 'qm', triPts([25, 45, 65], 0, 70), { color: 'purple' });
+        await b.write('lc', 800, 230, 'Cold = trapmf(x,[0 0 10 30])', { size: 20, color: 'blue' });
+        await b.write('lm', 800, 265, 'Medium = trimf(x,[25 45 65])', { size: 20, color: 'purple' });
+      },
+      quiz: { answer: ['0.1', '.1'], hint: 'Cold(27) روی شیب پایین‌رونده است: (30-27)/(30-10). Medium(27) روی شیب بالارونده: (27-25)/(45-25). بعد min بگیر.', explain: 'Cold(27) = 3/20 = 0.15 و Medium(27) = 2/20 = 0.1؛ پس AND = min(0.15, 0.1) = 0.1.' },
+      solve: async b => {
+        const g = Graph({ x: 100, y: 200, w: 500, h: 250, from: 0, to: 70 });
+        const c = trapmf(27, [0, 0, 10, 30]), m = trimf(27, [25, 45, 65]);
+        await g.guide(b, 'sc', 27, c, { color: 'blue' });
+        await g.guide(b, 'sm', 27, m, { color: 'purple' });
+        await b.write('s1', 800, 330, `Cold(27) = 3/20 = ${r(c)}`, { size: 22, color: 'blue' });
+        await b.write('s2', 800, 375, `Medium(27) = 2/20 = ${r(m)}`, { size: 22, color: 'purple' });
+        await b.write('s3', 800, 440, `min(${r(c)}, ${r(m)}) = ${r(Math.min(c, m))}`, { size: 30, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'برای trimf(x,[2 5 9]) در x = 6، کدام تکه‌ی فرمول را به کار می‌بری؟',
+      draw: quizBoard(5, 'trimf(x,[2 5 9])   x = 6   →   کدام تکه؟', { fa: true }),
+      quiz: {
+        choices: ['(x-a)/(b-a)', '(b-x)/(b-a)', '(c-x)/(c-b)', '(x-b)/(c-b)'], correct: 2,
+        hint: 'اول ببین 6 بین کدام دو گوشه است.',
+        explain: '6 بین b = 5 و c = 9 است، پس شیب پایین‌رونده: (c-x)/(c-b) = (9-6)/(9-5) = 0.75.',
+      },
+      solve: async b => {
+        const g = GQ();
+        await g.axes(b, 'qa', { ticks: [0, 2, 5, 6, 9, 10] });
+        await g.poly(b, 'qp', triPts([2, 5, 9]), { color: 'blue' });
+        await g.poly(b, 'qd', [[5, 1], [9, 0]], { color: 'green', width: 6 });
+        await g.guide(b, 'sg', 6, trimf(6, [2, 5, 9]), { color: 'green' });
+        await b.write('s1', 780, 260, `${LTR('5 ≤ 6 ≤ 9')} ← پایین‌رونده`, { size: 24, color: 'orange', fa: true });
+        await b.write('s2', 780, 320, '(c - x)/(c - b)', { size: 30, color: 'green', bold: true });
+        await b.write('s3', 780, 380, `(9 - 6)/(9 - 5) = ${r(trimf(6, [2, 5, 9]))}`, { size: 26 });
+      },
+    },
+    {
+      say: 'سؤال آخر: ذوزنقه‌ی trapmf(x,[a b c d]) در چه حالتی دقیقاً همان مثلث است؟',
+      draw: quizBoard(6, 'trapmf(x,[a b c d]) = مثلث وقتی …', { fa: true }),
+      quiz: {
+        choices: ['a = b', 'c = d', 'b = c', 'a = d'], correct: 2,
+        hint: 'سقف صاف ذوزنقه بین کدام دو گوشه است؟',
+        explain: 'سقف صاف بین b و c است. اگر b = c باشد سقف به یک نقطه جمع می‌شود و ذوزنقه مثلث می‌شود. a = b فقط شانه‌ی چپ می‌سازد.',
+      },
+      solve: async b => {
+        const g = GQ();
+        await g.axes(b, 'qa', { ticks: [0, 1, 5, 8, 10], yTicks: [0, 1] });
+        await g.poly(b, 'q0', trapPts([1, 4, 6, 8]), { color: 'soft' });
+        await g.poly(b, 'q1', trapPts([1, 5, 5, 8]), { color: 'green', width: 5 });
+        await b.write('s1', 780, 280, 'b = c', { size: 40, color: 'green', bold: true });
+        await b.write('s2', 780, 340, 'سقف صاف ← یک نقطه', { size: 26, color: 'orange', fa: true });
+        await b.write('s3', 780, 400, 'trapmf [1 5 5 8] = trimf [1 5 8]', { size: 20 });
+      },
+    },
+  ],
 });
-document.querySelectorAll('.mcq').forEach(function(q){
-  var fb=q.querySelector('.fb');
-  q.querySelectorAll('.opts button').forEach(function(b){b.addEventListener('click',function(){
-    q.querySelectorAll('.opts button').forEach(function(x){x.classList.remove('ok','no')});
-    if(b.hasAttribute('data-ok')){b.classList.add('ok');fb.className='fb good';fb.textContent=q.dataset.yes||'درست!'}
-    else{b.classList.add('no');fb.className='fb bad';fb.textContent=q.dataset.no||'نه، دوباره فکر کن.'}
-  })});
-});
-document.querySelectorAll('.stepper').forEach(function(s){
-  var st=s.querySelectorAll('.st'),n=0,nx=s.querySelector('.next'),al=s.querySelector('.all');
-  function upd(){st.forEach(function(e,i){e.classList.toggle('show',i<n)});if(nx)nx.textContent=n>=st.length?'از اول':'قدم بعدی ('+n+'/'+st.length+')'}
-  if(nx)nx.addEventListener('click',function(){n=n>=st.length?0:n+1;upd()});
-  if(al)al.addEventListener('click',function(){n=st.length;upd()});
-  upd();
-});
-window.addEventListener('beforeprint',function(){document.querySelectorAll('details.sol').forEach(function(d){d.open=true})});
-})();
-/* ===== END SHARED JS ===== */
-</script>
-<script>
-/* ===== lesson 9: interactive triangle / trapezoid ===== */
-(function(){
-var NS='http://www.w3.org/2000/svg';
-function X(x){return 40+50*x}
-function Y(m){return 220-190*m}
-function el(tag,attrs,txt){var e=document.createElementNS(NS,tag);for(var k in attrs)e.setAttribute(k,attrs[k]);if(txt!=null)e.textContent=txt;return e}
-function grid(g){
-  for(var i=0;i<=10;i++){g.appendChild(el('line',{x1:X(i),x2:X(i),y1:Y(0),y2:Y(1),stroke:'var(--grid)'}));g.appendChild(el('text',{x:X(i),y:236,'text-anchor':'middle'},i))}
-  [0,0.25,0.5,0.75,1].forEach(function(m){g.appendChild(el('line',{x1:X(0),x2:X(10),y1:Y(m),y2:Y(m),stroke:'var(--grid)'}));g.appendChild(el('text',{x:34,y:Y(m)+4,'text-anchor':'end'},m))});
-  g.appendChild(el('line',{x1:X(0),x2:X(10),y1:Y(0),y2:Y(0),stroke:'var(--border-strong)','stroke-width':1.5}));
-}
-grid(document.getElementById('grid'));
-grid(document.getElementById('q3grid'));
-
-var mode='tri',P={},x=4.5,KEYS=['a','b','c','d'];
-var PRE={tri:{a:3,b:6,c:8,d:8},trap:{a:1,b:5,c:7,d:8}};
-function keys(){return mode==='tri'?KEYS.slice(0,3):KEYS}
-function f(n){return String(+(+n).toFixed(3))}
-function setMode(m){
-  mode=m;P=JSON.parse(JSON.stringify(PRE[m]));x=m==='tri'?4.5:3;
-  document.getElementById('m-tri').classList.toggle('on',m==='tri');
-  document.getElementById('m-trap').classList.toggle('on',m==='trap');
-  document.querySelectorAll('.dd').forEach(function(e){e.classList.toggle('hide',m==='tri')});
-  KEYS.forEach(function(k){document.getElementById('s-'+k).value=P[k]});
-  document.getElementById('s-x').value=x;
-  draw();
-}
-/* which piece is active + mu */
-function evalMu(){
-  var a=P.a,b=P.b,c=P.c,d=P.d;
-  if(mode==='tri'){
-    if(x===b)return{i:-1,mu:1,t:'x = b = '+f(b)+'  →  μ = 1 (نوک مثلث)'};
-    if(x<=a)return{i:0,mu:0,t:'x ≤ a  ('+f(x)+' ≤ '+f(a)+')  →  μ = 0'};
-    if(x>=c)return{i:3,mu:0,t:'x ≥ c  ('+f(x)+' ≥ '+f(c)+')  →  μ = 0'};
-    if(x<b){var m=(x-a)/(b-a);return{i:1,mu:m,t:'a ≤ x ≤ b  →  μ = (x−a)/(b−a) = ('+f(x)+'−'+f(a)+')/('+f(b)+'−'+f(a)+') = '+f(x-a)+'/'+f(b-a)+' = '+f(m)}}
-    var m2=(c-x)/(c-b);return{i:2,mu:m2,t:'b ≤ x ≤ c  →  μ = (c−x)/(c−b) = ('+f(c)+'−'+f(x)+')/('+f(c)+'−'+f(b)+') = '+f(c-x)+'/'+f(c-b)+' = '+f(m2)};
-  }
-  if(x>=b&&x<=c)return{i:2,mu:1,t:'b ≤ x ≤ c  ('+f(b)+' ≤ '+f(x)+' ≤ '+f(c)+')  →  μ = 1 (سقف)'};
-  if(x<=a)return{i:0,mu:0,t:'x ≤ a  ('+f(x)+' ≤ '+f(a)+')  →  μ = 0'};
-  if(x>=d)return{i:4,mu:0,t:'x ≥ d  ('+f(x)+' ≥ '+f(d)+')  →  μ = 0'};
-  if(x<b){var r=(x-a)/(b-a);return{i:1,mu:r,t:'a ≤ x ≤ b  →  μ = (x−a)/(b−a) = ('+f(x)+'−'+f(a)+')/('+f(b)+'−'+f(a)+') = '+f(x-a)+'/'+f(b-a)+' = '+f(r)}}
-  var s=(d-x)/(d-c);return{i:3,mu:s,t:'c ≤ x ≤ d  →  μ = (d−x)/(d−c) = ('+f(d)+'−'+f(x)+')/('+f(d)+'−'+f(c)+') = '+f(d-x)+'/'+f(d-c)+' = '+f(s)};
-}
-function pts(){
-  var a=P.a,b=P.b,c=P.c,d=P.d;
-  return mode==='tri'?[[0,0],[a,0],[b,1],[c,0],[10,0]]:[[0,0],[a,0],[b,1],[c,1],[d,0],[10,0]];
-}
-function pathOf(p){return p.map(function(q,i){return(i?'L':'M')+X(q[0])+' '+Y(q[1])}).join(' ')}
-function draw(){
-  var p=pts(),r=evalMu();
-  document.getElementById('curve').setAttribute('d',pathOf(p));
-  document.getElementById('active').setAttribute('d',r.i>=0?pathOf([p[r.i],p[r.i+1]]):'');
-  var px=X(x),py=Y(r.mu);
-  var vx=document.getElementById('vx'),hx=document.getElementById('hx'),pt=document.getElementById('pt'),lb=document.getElementById('mulab');
-  vx.setAttribute('x1',px);vx.setAttribute('x2',px);vx.setAttribute('y1',Y(0));vx.setAttribute('y2',py);
-  hx.setAttribute('x1',X(0));hx.setAttribute('x2',px);hx.setAttribute('y1',py);hx.setAttribute('y2',py);
-  pt.setAttribute('cx',px);pt.setAttribute('cy',py);
-  lb.setAttribute('x',Math.min(px+8,470));lb.setAttribute('y',Math.max(py-10,16));lb.textContent='μ('+f(x)+') = '+f(r.mu);
-  var cg=document.getElementById('corners');cg.innerHTML='';
-  var used={};
-  keys().forEach(function(k){var v=P[k],n=used[v]||0;used[v]=n+1;
-    cg.appendChild(el('text',{x:X(v)+n*10,y:254,'text-anchor':'middle','font-size':14,style:'fill:var(--accent);font-weight:500'},k))});
-  keys().forEach(function(k){document.getElementById('o-'+k).textContent=f(P[k])});
-  document.getElementById('o-x').textContent=f(x);
-  document.getElementById('cmd').textContent=mode==='tri'?('trimf(x,['+f(P.a)+' '+f(P.b)+' '+f(P.c)+'])'):('trapmf(x,['+f(P.a)+' '+f(P.b)+' '+f(P.c)+' '+f(P.d)+'])');
-  var t=r.t;
-  if(mode==='tri'&&P.a<P.b&&P.b<P.c){
-    var u=(x-P.a)/(P.b-P.a),w=(P.c-x)/(P.c-P.b);
-    t+='\nفشرده: max(min('+f(u)+', '+f(w)+'), 0) = '+f(Math.max(Math.min(u,w),0));
-  }
-  var ro=document.getElementById('readout');ro.textContent='';
-  t.split('\n').forEach(function(line,i){if(i)ro.appendChild(document.createElement('br'));ro.appendChild(document.createTextNode(line))});
-}
-KEYS.forEach(function(k){
-  document.getElementById('s-'+k).addEventListener('input',function(e){
-    var v=+e.target.value,ks=keys(),j=ks.indexOf(k);if(j<0)return;
-    P[k]=v;
-    for(var q=j+1;q<ks.length;q++){if(P[ks[q]]<v){P[ks[q]]=v;document.getElementById('s-'+ks[q]).value=v}}
-    for(var q2=0;q2<j;q2++){if(P[ks[q2]]>v){P[ks[q2]]=v;document.getElementById('s-'+ks[q2]).value=v}}
-    if(mode==='tri')P.d=P.c;
-    draw();
-  });
-});
-document.getElementById('s-x').addEventListener('input',function(e){x=+e.target.value;draw()});
-document.getElementById('m-tri').addEventListener('click',function(){setMode('tri')});
-document.getElementById('m-trap').addEventListener('click',function(){setMode('trap')});
-setMode('tri');
-})();
-</script>
-<script>
-/* ===== SHARED CURVE PLAYER — same text in lessons 9 and 10 ===== */
-function anM(s){return '<span class="m">'+s+'</span>'}
-function anF(s){return '<div class="an-f">'+s+'</div>'}
-function anPlayer(FN,GL,RAW){
-var NS='http://www.w3.org/2000/svg',svg=document.getElementById('anSvg'),box=document.getElementById('anBox');
-var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
-function f(v){return String(Math.round(v*1000)/1000)}
-function el(p,tag,a,txt){var e=document.createElementNS(NS,tag);for(var k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;p.appendChild(e);return e}
-function op(e,v){e.style.opacity=v}
-function ease(p){return p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2}
-function flash(t){t.classList.remove('flash');void t.getBBox();t.classList.add('flash')}
-function clear(g){while(g.firstChild)g.removeChild(g.firstChild)}
-
-/* ---- plot geometry: x axis AX[0]..AX[1], μ from 0 (PB) to 1 (PT) ---- */
-var PX0=70,PX1=600,PB=232,PT=72,AX=null,CMDY=30;
-function px(x){return PX0+(x-AX[0])/(AX[1]-AX[0])*(PX1-PX0)}
-function py(m){return PB-m*(PB-PT)}
-var gAxis=el(svg,'g',{});
-var halfL=el(svg,'line',{x1:PX0,x2:PX1,y1:py(.5),y2:py(.5),'class':'fd',style:'opacity:0;stroke:var(--c4);stroke-dasharray:2 4'});
-var gMark=el(svg,'g',{}),gBrk=el(svg,'g',{});
-var pieceP=el(svg,'path',{'class':'fd',style:'opacity:0;fill:none;stroke:var(--c3);stroke-width:9;stroke-linecap:round;stroke-opacity:.5'});
-var curveP=el(svg,'path',{style:'fill:none;stroke:var(--c1);stroke-width:2.5;stroke-linejoin:round'});
-var xg=el(svg,'g',{'class':'fd',style:'opacity:0'});
-var xLine=el(xg,'line',{y1:PT-8,y2:PB,style:'stroke:var(--c4);stroke-width:1.5;stroke-dasharray:4 3'});
-var xArr=el(xg,'polygon',{style:'fill:var(--c4)'});
-var xTxt=el(xg,'text',{y:PT-14,'text-anchor':'middle','class':'mono',style:'fill:var(--c4);font-weight:700;font-size:14px'},'');
-var mg=el(svg,'g',{'class':'fd',style:'opacity:0'});
-var mH=el(mg,'line',{x1:PX0,style:'stroke:var(--c2);stroke-width:1.5;stroke-dasharray:4 3'});
-var mDot=el(mg,'circle',{r:6,style:'fill:var(--c2)'});
-var mTxt=el(mg,'text',{'class':'mono',style:'fill:var(--c2);font-weight:700;font-size:15px'},'');
-var cmdG=el(svg,'g',{}),cmdT=[];
-var BX=335,BYC=124,BUB=el(svg,'g',{'class':'fd',style:'opacity:0'});
-var bubR=el(BUB,'rect',{rx:12,style:'fill:var(--surface);stroke:var(--accent);stroke-width:2.5'});
-var bubT=el(BUB,'text',{x:BX,y:BYC+9,'text-anchor':'middle','class':'mono',style:'font-size:24px;font-weight:700;fill:var(--text)'},'');
-var FL=el(svg,'g',{});
-
-function drawAxis(){clear(gAxis);
-  [0,.5,1].forEach(function(m){el(gAxis,'line',{x1:PX0,x2:PX1,y1:py(m),y2:py(m),style:'stroke:var(--grid)'});el(gAxis,'text',{x:PX0-8,y:py(m)+4,'text-anchor':'end'},String(m))});
-  for(var v=AX[0];v<=AX[1];v++){el(gAxis,'line',{x1:px(v),x2:px(v),y1:PB,y2:PB+4,style:'stroke:var(--text-3)'});el(gAxis,'text',{x:px(v),y:PB+17,'text-anchor':'middle'},String(v))}
-  el(gAxis,'line',{x1:PX0,x2:PX1,y1:PB,y2:PB,style:'stroke:var(--text-3)'});
-  el(gAxis,'text',{x:PX1+12,y:PB+4,'class':'mono'},'x');
-  el(gAxis,'text',{x:PX0-8,y:PT-14,'text-anchor':'end','class':'mono'},'μ');
-}
-function pathFor(key,r){var F=FN[key],a=r?r[0]:AX[0],b=r?r[1]:AX[1],xs=[];
-  for(var i=0;i<=300;i++)xs.push(a+(b-a)*i/300);(F.k||[]).forEach(function(k){if(k>a&&k<b)xs.push(k)});
-  xs.sort(function(p,q){return p-q});return xs.map(function(x,i){return (i?'L':'M')+px(x).toFixed(1)+' '+py(F.f(x)).toFixed(1)}).join('')}
-
-/* marks (corner labels on the axis, or free labels) and brackets (measured distances) */
-var MK={},BK={};
-function key(o){return JSON.stringify(o)}
-function makeMark(m){var g=el(gMark,'g',{'class':'fd'}),lx,ly;
-  if(m.tx==null){lx=px(m.x);ly=PB+34;el(g,'line',{x1:lx,x2:lx,y1:PT,y2:PB+20,style:'stroke:var(--c2);stroke-opacity:.45;stroke-dasharray:3 4'})}
-  else{lx=m.tx;ly=m.ty}
-  var lab=el(g,'text',{x:lx,y:ly,'text-anchor':'middle','class':'mono',style:'fill:var(--c2);font-weight:700;font-size:14px'},m.t);
-  return {g:g,lab:lab,lx:lx,ly:ly}}
-function makeBrk(b){var g=el(gBrk,'g',{'class':'fd'}),y=PB+52+b.lv*26,x1=px(b.a),x2=px(b.b),c=b.col||'var(--c3)';
-  el(g,'path',{d:'M'+x1+' '+(y-5)+'V'+(y+5)+'M'+x1+' '+y+'H'+x2+'M'+x2+' '+(y-5)+'V'+(y+5),style:'fill:none;stroke-width:2;stroke:'+c});
-  var lab=el(g,'text',{x:(x1+x2)/2,y:y+15,'text-anchor':'middle','class':'mono',style:'font-size:12.5px;font-weight:700;fill:'+c},b.t);
-  return {g:g,lab:lab,lx:(x1+x2)/2,ly:y+15}}
-function sync(g,map,list,make){var want={};
-  list.forEach(function(it){var k=key(it);want[k]=1;if(!map[k])map[k]=make(it)});
-  Object.keys(map).forEach(function(k){if(!want[k]){g.removeChild(map[k].g);delete map[k]}})}
-
-/* command line at the top, one text piece per token so numbers can fly out of it */
-var cmdKey=null;
-function buildCmd(tokens){clear(cmdG);cmdT=[];if(!tokens)return;var x=0;
-  tokens.forEach(function(t,i){var isP=i%2===1&&tokens.length>1;
-    var e=el(cmdG,'text',{x:x,y:CMDY,'class':'mono',style:'font-size:19px;font-weight:700;fill:'+(isP?'var(--accent)':'var(--text)')},t.replace(/ /g,'\u00a0'));
-    var w=e.getComputedTextLength();cmdT.push({e:e,x:x,w:w});x+=w});
-  var sh=BX-x/2;cmdT.forEach(function(c){c.e.setAttribute('x',c.x+sh);c.cx=c.x+sh+c.w/2})}
-
-/* x marker and μ point */
-function setX(x){var X=px(x);xLine.setAttribute('x1',X);xLine.setAttribute('x2',X);
-  xArr.setAttribute('points',(X-6)+','+(PB+9)+' '+(X+6)+','+(PB+9)+' '+X+','+(PB+1));
-  xTxt.setAttribute('x',X);xTxt.textContent='x = '+f(x)}
-var curKey=null;
-function muPos(x){var m=FN[curKey].f(x),X=px(x),Y=py(m),right=X>PX1-120;return {X:X,Y:Y,m:m,lx:right?X-10:X+10,ly:Y-10,anchor:right?'end':'start'}}
-function setMu(x,mt){var p=muPos(x);mH.setAttribute('x2',p.X);mH.setAttribute('y1',p.Y);mH.setAttribute('y2',p.Y);
-  mDot.setAttribute('cx',p.X);mDot.setAttribute('cy',p.Y);
-  mTxt.setAttribute('x',p.lx);mTxt.setAttribute('y',p.ly);mTxt.setAttribute('text-anchor',p.anchor);mTxt.textContent='μ = '+(mt||f(p.m));return p}
-
-/* ---- steps ---- */
-var base={ax:[0,10],cmd:null,fn:null,marks:[],brk:[],piece:null,x:null,mu:0,mt:null,half:0};
-var S=[],prev=base;
-RAW.forEach(function(r){var s=Object.assign({},prev,r[0]);prev=s;S.push({s:s,gl:r[1],cap:r[2],anim:r[3]||[]})});
-var glBody=document.getElementById('anGl');
-var hr=document.createElement('tr');hr.innerHTML='<th>نماد</th><th>یعنی</th><th>از کجا آمد</th>';glBody.appendChild(hr);
-Object.keys(GL).forEach(function(g){var tr=document.createElement('tr');tr.innerHTML='<td>'+GL[g][0]+'</td><td>'+GL[g][1]+'</td><td>'+GL[g][2]+'</td>';glBody.appendChild(tr)});
-
-function snap(s){
-  if(!AX||AX[0]!==s.ax[0]||AX[1]!==s.ax[1]){AX=s.ax.slice();drawAxis();clear(gMark);clear(gBrk);MK={};BK={};curKey=null}
-  var ck=s.cmd?s.cmd.join('|'):'';if(ck!==cmdKey){cmdKey=ck;buildCmd(s.cmd)}
-  if(s.fn!==curKey){curKey=s.fn;if(s.fn)curveP.setAttribute('d',pathFor(s.fn))}
-  curveP.style.strokeDasharray='none';curveP.style.strokeDashoffset=0;op(curveP,s.fn?1:0);
-  if(s.piece&&s.fn){pieceP.setAttribute('d',pathFor(s.fn,s.piece));op(pieceP,1)}else op(pieceP,0);
-  sync(gMark,MK,s.marks,makeMark);sync(gBrk,BK,s.brk,makeBrk);
-  Object.keys(MK).forEach(function(k){op(MK[k].lab,1)});Object.keys(BK).forEach(function(k){op(BK[k].g,1)});
-  op(halfL,s.half);
-  if(s.x!=null){setX(s.x);op(xg,1)}else op(xg,0);
-  if(s.mu&&s.x!=null&&s.fn){setMu(s.x,s.mt);op(mg,1)}else op(mg,0);
-}
-
-/* ---- motions: each hides what it introduces now, reveals it from time t, returns its end time ---- */
-var T=[],FD=1100,GAP=500,RAF=[];
-function later(ms,fn){T.push(setTimeout(fn,ms))}
-function cancelAnim(){T.forEach(clearTimeout);T=[];RAF.forEach(cancelAnimationFrame);RAF=[];clear(FL);op(BUB,0)}
-function tw(dur,step,done){var t0=null;function fr(now){if(t0===null)t0=now;var p=Math.min(1,(now-t0)/dur);step(ease(p));if(p<1)RAF.push(requestAnimationFrame(fr));else if(done)done()}RAF.push(requestAnimationFrame(fr))}
-function fly(txt,x1,y1,x2,y2,at,color,done,fs0){later(at,function(){
-  var t=el(FL,'text',{x:x1,y:y1,'text-anchor':'middle','class':'mono fly',style:'fill:'+color},txt);
-  tw(FD,function(e){t.setAttribute('x',x1+(x2-x1)*e);t.setAttribute('y',y1+(y2-y1)*e-Math.sin(e*Math.PI)*28);if(fs0)t.style.fontSize=(fs0+(15-fs0)*e)+'px'},
-    function(){if(t.parentNode)FL.removeChild(t);if(done)done()})})}
-function bubbleShow(txt){bubT.textContent=txt;var w=bubT.getBBox().width+40;
-  bubR.setAttribute('x',BX-w/2);bubR.setAttribute('y',BYC-24);bubR.setAttribute('width',w);bubR.setAttribute('height',46);op(BUB,1)}
-var ANIM={
- params:function(s,p,arg,t){arg.forEach(function(a,n){var it=a[1]==='b'?BK[key(s.brk[a[2]])]:MK[key(s.marks[a[2]])],c=cmdT[a[0]];
-     op(it.lab,0);fly(c.e.textContent,c.cx,CMDY-6,it.lx,it.ly-4,t+n*GAP,'var(--accent)',function(){op(it.lab,1);flash(it.lab)})});
-   return t+(arg.length-1)*GAP+FD},
- draw:function(s,p,arg,t){var len=curveP.getTotalLength();curveP.style.strokeDasharray=len;curveP.style.strokeDashoffset=len;
-   later(t,function(){tw(1800,function(e){curveP.style.strokeDashoffset=len*(1-e)},function(){curveP.style.strokeDasharray='none'})});return t+1800},
- xin:function(s,p,arg,t){var from=(p&&p.x!=null&&p.ax[0]===s.ax[0])?p.x:AX[0];op(mg,0);op(pieceP,0);setX(from);op(xg,1);
-   later(t,function(){tw(1100,function(e){setX(from+(s.x-from)*e)},function(){if(s.piece)op(pieceP,1)})});return t+1300},
- brk:function(s,p,arg,t){var old={};(p?p.brk:[]).forEach(function(b){old[key(b)]=1});var n=0;
-   s.brk.forEach(function(b){var k=key(b);if(old[k])return;var g=BK[k].g;op(g,0);later(t+n*700,function(){op(g,1)});n++});return t+n*700+300},
- calc:function(s,p,arg,t){op(mg,0);var L=arg.l;
-   L.forEach(function(line,i){later(t+i*1900,function(){bubbleShow(line)})});
-   var end=t+L.length*1900;later(end-200,function(){op(BUB,0)});
-   var pos=setMu(s.x,s.mt);fly(arg.r,BX,BYC+9,pos.lx+(pos.anchor==='start'?30:-30),pos.ly-4,end-200,'var(--c2)',function(){op(mg,1);flash(mTxt)},26);
-   return end+FD}
-};
-
-/* ---- controls ---- */
-var k=0;
-var cap=document.getElementById('anCap'),cnt=document.getElementById('anCnt'),bar=document.getElementById('anBar');
-var bPrev=document.getElementById('anPrev'),bNext=document.getElementById('anNext'),bAgain=document.getElementById('anAgain');
-function show(n,animate){
-  cancelAnim();k=n;var st=S[k],p=k?S[k-1].s:null;snap(st.s);
-  if(animate&&!reduce){var t=250;st.anim.forEach(function(a){t=ANIM[a[0]](st.s,p,a[1],t)+300})}
-  cap.innerHTML='<b style="color:var(--accent)">قدم '+(k+1)+'.</b> '+st.cap+st.gl.map(function(g){
-    return '<div class="an-new"><b>نماد تازه:</b> '+GL[g][0]+' — '+GL[g][1]+' <span class="an-from">· از کجا آمد: '+GL[g][2]+'</span></div>'}).join('');
-  cnt.textContent=(k+1)+' از '+S.length;bar.style.width=((k+1)/S.length*100)+'%';
-  bPrev.disabled=k===0;bAgain.disabled=!st.anim.length||reduce;bNext.textContent=k===S.length-1?'از اول ↺':'بعدی ←';
-}
-function keepInView(){var r=box.getBoundingClientRect(),sb=svg.getBoundingClientRect();
-  if(r.top<-8||(sb.bottom>innerHeight&&r.top>8))box.scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'})}
-bNext.addEventListener('click',function(){if(k===S.length-1)show(0,false);else show(k+1,true);keepInView()});
-bAgain.addEventListener('click',function(){if(S[k].anim.length)show(k,true)});
-bPrev.addEventListener('click',function(){if(k>0)show(k-1,false);keepInView()});
-box.addEventListener('keydown',function(e){if(e.key==='ArrowLeft'&&k<S.length-1){show(k+1,true);e.preventDefault()}else if(e.key==='ArrowRight'&&k>0){show(k-1,false);e.preventDefault()}});
-show(0,false);
-}
-/* ===== END SHARED CURVE PLAYER ===== */
-</script>
-<script>
-/* ===== lesson 9: animated walk-through (slides 84 and 86) ===== */
-(function(){
-var M=anM,F=anF;
-var FN={
- tri:{f:function(x){return Math.max(Math.min((x-3)/3,(8-x)/2),0)},k:[3,6,8]},
- trap:{f:function(x){return Math.max(Math.min((x-1)/4,1,(8-x)/1),0)},k:[1,5,7,8]}
-};
-var GL={
- cmd:[M('trimf(x,[a b c])'),'دستور متلب برای تابع عضویت مثلثی. سه عدد داخل کروشه، گوشه‌های مثلث روی محور x هستند.','اسلاید ۸۴'],
- abc:[M('a , b , c'),'a = جایی که مثلث از صفر جدا می‌شود؛ b = قله (μ = 1)؛ c = جایی که دوباره صفر می‌شود.','عددهای داخل کروشه، به همان ترتیب'],
- mu:[M('μ(x)'),'درجه عضویت x: ارتفاع منحنی درست بالای x. همیشه بین ۰ و ۱.','تعریف تابع عضویت (اسلاید ۸۲)'],
- up:[M('(x − a) / (b − a)'),'تکه بالارونده: «چقدر از a راه آمده‌ای ÷ پهنای کل سربالایی».','فرمول مثلثی (بخش ۱ همین درس)'],
- down:[M('(c − x) / (c − b)'),'تکه پایین‌رونده: «چقدر تا c مانده ÷ پهنای کل سرپایینی».','فرمول مثلثی (بخش ۱ همین درس)'],
- d:[M('trapmf(x,[a b c d])'),'ذوزنقه: چهار گوشه؛ بین b و c یک سقف صاف روی ۱ دارد.','اسلاید ۸۶'],
- downT:[M('(d − x) / (d − c)'),'تکه پایین‌رونده ذوزنقه: «چقدر تا d مانده ÷ پهنای شیب راست».','فرمول ذوزنقه‌ای (بخش ۱ همین درس)']
-};
-var P='var(--c4)',W='var(--c1)';
-var RAW=[
- [{cmd:['trimf(x,[','3',' ','6',' ','8','])']},[],
-  '<b>سؤال (اسلاید ۸۴):</b> برای '+M('trimf(x,[3 6 8])')+' مقدار μ در x = 4.5 و x = 7 چقدر است؟<br><b>هدف:</b> تابع عضویت به هر عدد x یک درجه بین ۰ و ۱ می‌دهد. می‌خواهیم این درجه را برای یک x مشخص، با دست حساب کنیم. «بعدی» را بزن.'],
- [{marks:[{x:3,t:'a=3'},{x:6,t:'b=6'},{x:8,t:'c=8'}]},['cmd','abc'],
-  'سه عدد داخل کروشه از دستور بیرون می‌آیند و روی محور x می‌نشینند. این‌ها <b>گوشه‌های مثلث</b> هستند، به همین ترتیب: a = 3 (شروع)، b = 6 (قله)، c = 8 (پایان).',
-  [['params',[[1,'m',0],[3,'m',1],[5,'m',2]]]]],
- [{fn:'tri'},['mu'],
-  'حالا مثلث کشیده می‌شود: از a روی صفر، بالا تا قله ۱ در b، پایین تا صفر در c. بیرون از ۳ تا ۸ مقدار صفر است.<br>ارتفاع منحنی بالای هر x، همان '+M('μ(x)')+' است.',
-  [['draw']]],
- [{x:4.5,piece:[3,6]},['up'],
-  '<b>x = 4.5</b> (پیکان صورتی). قدم اول همیشه این است: <b>x کجاست؟</b> بین a = 3 و b = 6، یعنی روی <b>سربالایی</b> (نارنجی). پس فقط تکه بالارونده فرمول به کار می‌آید:'+F('(x − a) / (b − a)'),
-  [['xin']]],
- [{brk:[{a:3,b:4.5,t:'x − a = 1.5',lv:0,col:P},{a:3,b:6,t:'b − a = 3',lv:1,col:W}]},[],
-  'دو عدد فرمول، دو فاصله روی محورند:<br>• <b style="color:var(--c4)">x − a = 1.5</b>: چقدر از شروع سربالایی راه آمده‌ای.<br>• <b style="color:var(--c1)">b − a = 3</b>: پهنای کل سربالایی.<br>کسرشان یعنی «چه کسری از سربالایی را رفته‌ای».',
-  [['brk']]],
- [{mu:1},[],
-  'حساب، بزرگ وسط تصویر می‌آید؛ بعد جوابش روی منحنی، بالای x، می‌نشیند:'+F('(4.5 − 3) / (6 − 3) = 1.5 / 3 = 0.5')+'یعنی نصف سربالایی را رفته‌ای، پس '+M('μ(4.5) = 0.5')+'.',
-  [['calc',{l:['(x − a) / (b − a)','(4.5 − 3) / (6 − 3)','1.5 / 3 = 0.5'],r:'0.5'}]]],
- [{x:7,piece:[6,8],mu:0,brk:[{a:7,b:8,t:'c − x = 1',lv:0,col:P},{a:6,b:8,t:'c − b = 2',lv:1,col:W}]},['down'],
-  '<b>x = 7.</b> x کجاست؟ بین b = 6 و c = 8، یعنی روی <b>سرپایینی</b>. فرمول این تکه:'+F('(c − x) / (c − b)')+'فاصله‌ها: <b style="color:var(--c4)">c − x = 1</b> (چقدر تا پایان مانده) و <b style="color:var(--c1)">c − b = 2</b> (پهنای سرپایینی).',
-  [['xin'],['brk']]],
- [{mu:1},[],
-  'حساب کن:'+F('(8 − 7) / (8 − 6) = 1 / 2 = 0.5')+'هر دو نقطه 0.5 شدند، ولی ۷ به قله نزدیک‌تر است. چرا؟ سرپایینی کوتاه‌تر (تندتر) است، پس با فاصله کمتر به نصف می‌رسی.',
-  [['calc',{l:['(c − x) / (c − b)','(8 − 7) / (8 − 6)','1 / 2 = 0.5'],r:'0.5'}]]],
- [{x:2,piece:null,brk:[],mu:1},[],
-  '<b>x = 2</b> قبل از a = 3 است، یعنی بیرون مثلث. اینجا فرمولی لازم نیست: '+M('μ(2) = 0')+'.',
-  [['xin'],['calc',{l:['x = 2  <  a = 3','μ = 0'],r:'0'}]]],
- [{cmd:['trapmf(x,[','1',' ','5',' ','7',' ','8','])'],marks:[{x:1,t:'a=1'},{x:5,t:'b=5'},{x:7,t:'c=7'},{x:8,t:'d=8'}],fn:'trap',x:null,mu:0},['d'],
-  '<b>ذوزنقه (اسلاید ۸۶):</b> همان ایده با <b>چهار</b> گوشه. عددها دوباره از دستور بیرون می‌آیند و روی محور می‌نشینند. فرقش با مثلث: بین b و c یک <b>سقف صاف</b> روی ۱ دارد.',
-  [['params',[[1,'m',0],[3,'m',1],[5,'m',2],[7,'m',3]]],['draw']]],
- [{x:3,piece:[1,5],mu:1,brk:[{a:1,b:3,t:'x − a = 2',lv:0,col:P},{a:1,b:5,t:'b − a = 4',lv:1,col:W}]},[],
-  '<b>x = 3</b>: بین a = 1 و b = 5، روی سربالایی. همان فرمول مثلث:'+F('(3 − 1) / (5 − 1) = 2 / 4 = 0.5'),
-  [['xin'],['brk'],['calc',{l:['(x − a) / (b − a)','(3 − 1) / (5 − 1)','2 / 4 = 0.5'],r:'0.5'}]]],
- [{x:6,piece:[5,7],mu:1,brk:[]},[],
-  '<b>x = 6</b>: بین b = 5 و c = 7، یعنی <b>روی سقف</b>. روی سقف حسابی لازم نیست: '+M('μ = 1')+'.',
-  [['xin'],['calc',{l:['b = 5  ≤  x = 6  ≤  c = 7','μ = 1'],r:'1'}]]],
- [{x:7.5,piece:[7,8],mu:1,brk:[{a:7.5,b:8,t:'d − x = 0.5',lv:0,col:P},{a:7,b:8,t:'d − c = 1',lv:1,col:W}]},['downT'],
-  '<b>x = 7.5</b>: بین c = 7 و d = 8، روی سرپایینی. در ذوزنقه سرپایینی از c تا d است:'+F('(d − x) / (d − c) = (8 − 7.5) / (8 − 7) = 0.5'),
-  [['xin'],['brk'],['calc',{l:['(d − x) / (d − c)','(8 − 7.5) / (8 − 7)','0.5 / 1 = 0.5'],r:'0.5'}]]],
- [{},[],
-  '<b>خلاصه — دستور کار همیشه سه قدم است:</b><br>۱) گوشه‌ها را به ترتیب از کروشه بخوان.<br>۲) ببین x روی کدام تکه است: بیرون (۰)، سربالایی، سقف (۱)، یا سرپایینی.<br>۳) روی شیب‌ها: «فاصله ÷ پهنای همان شیب».<br>همه نمادها در جدول زیر تصویر آمده‌اند.']
-];
-anPlayer(FN,GL,RAW);
-})();
 </script>
 </body>
 </html>

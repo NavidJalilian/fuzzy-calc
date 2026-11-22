@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>تکنیک‌های ارزیابی</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Vazirmatn:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="../assets/teacher.css">
+</head>
+<body>
+<main id="app"></main>
+<script src="../assets/teacher.js"></script>
+<script src="../assets/graph.js"></script>
+<script>
+// Lesson 20 — slides 186–197 (part 6: machine learning). Train / validation / test, holdout, k-fold,
+// leave-one-out, random subsampling.
+
+const all = list => Promise.all(list);
+const LTR = s => `⁦${s}⁩`; // keeps a left-to-right run intact inside Persian board text
+const FA = /[؀-ۿ]/;
+
+async function node(b, id, x, y, w, h, label, o = {}) {
+  await b.box(id, x, y, w, h, { color: o.color || 'blue', fill: o.fill ?? (o.color || 'blue'), dur: o.dur ?? 350 });
+  const size = o.size || 24;
+  await b.write(id + '-t', x + w / 2, y + h / 2 + size / 3, label, { size, fa: FA.test(label), color: o.text || 'ink', bold: o.bold, dur: 250 });
+}
+
+function digit(b, id, x, y, d, s = 34) {
+  return all([
+    b.box(id, x - s / 2, y - s / 2, s, s, { color: 'ink', fill: 'ink', r: 4, dur: 120 }),
+    b.write(id + '-d', x, y + s * 0.3, String(d), { size: s * 0.8, dur: 120 }),
+  ]);
+}
+
+function quizBoard(n, question, o = { size: 30, fa: true }) {
+  return async b => {
+    await b.clear();
+    await b.write('q-n', 500, 60, `سؤال ${n} از 6`, { size: 24, color: 'soft', fa: true });
+    await b.write('q-q', 500, 140, question, o);
+  };
+}
+
+// Colours used for the three parts everywhere in this lesson.
+const TRAIN = 'green', VALID = 'orange', TEST = 'blue';
+
+// A row of equal cells; test(k) says whether cell k is a test cell (marked with a blue dot).
+function cells(b, id, x, y, w, h, n, test) {
+  const cw = w / n;
+  return all([...Array(n)].map((_, k) => all([
+    b.box(`${id}-${k}`, x + k * cw, y, cw, h, { color: test(k) ? TEST : TRAIN, fill: test(k) ? TEST : TRAIN, r: 0, dur: 120 }),
+    test(k) ? b.dot(`${id}-${k}d`, x + (k + 0.5) * cw, y + h / 2, { color: TEST, r: Math.min(9, cw / 4) }) : null,
+  ])));
+}
+
+// The MNIST grid of slide 188: 4 rows × digits 0–9.
+const GX = c => 210 + c * 58;
+const GY = r => 140 + r * 58;
+
+// The diabetes table of slides 189–192 (only the columns we need to show the split).
+const PIMA = [
+  [1, 6, 148, 72, 35, 0, 33.6, 0.627, 50, 'Positive'],
+  [2, 1, 85, 66, 29, 0, 26.6, 0.351, 31, 'Negative'],
+  [3, 8, 183, 64, 0, 0, 23.3, 0.672, 32, 'Positive'],
+  [4, 1, 89, 66, 23, 94, 28.1, 0.167, 21, 'Negative'],
+  [5, 0, 137, 40, 35, 168, 43.1, 2.288, 33, 'Positive'],
+  [6, 5, 116, 74, 0, 0, 25.6, 0.201, 30, 'Negative'],
+];
+const PH = ['Case', 'preg', 'plas', 'pres', 'skin', 'insu', 'mass', 'pedi', 'age', 'class'];
+const TX = [90, 160, 225, 290, 355, 420, 490, 565, 635, 720];
+const TY = r => 150 + r * 46;
+
+function rng(seed) { return () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; }; }
+// Random subsampling: in each of 4 rounds, 4 of 20 cells are picked at random as test.
+const RANDOM_TEST = (() => {
+  const r = rng(11);
+  return [0, 1, 2, 3].map(() => {
+    const s = new Set();
+    while (s.size < 4) s.add(Math.floor(r() * 20));
+    return s;
+  });
+})();
+
+Teacher.start({
+  id: 'L20',
+  number: 20,
+  title: 'تکنیک‌های ارزیابی',
+  chapter: 'بخش 6 · یادگیری ماشین',
+  slides: '186–197',
+  intro: 'داده‌ها را چطور بین آموزش، اعتبارسنجی و تست تقسیم کنیم — holdout، k-fold، leave-one-out و نمونه‌گیری تصادفی.',
+  next: { href: '0021-overfitting.html', title: 'بیش‌برازش و تعمیم' },
+  steps: [
+    // ---------------------------------------------------------- 1. intro
+    {
+      say: 'سلام! این درس درباره‌ی *ارزیابی* است — اسلاید 186 به بعد. مدل را یاد دادیم؛ حالا از کجا بفهمیم خوب یاد گرفته؟ جوابِ کوتاه: باید آن را روی داده‌ای امتحان کنیم که *ندیده است*. پس از همان اول، داده‌ها را تقسیم می‌کنیم.',
+      draw: async b => {
+        await b.write('t1', 500, 160, 'ارزیابی مدل', { size: 64, color: 'blue', bold: true, fa: true });
+        await b.write('t2', 500, 240, 'Evaluation', { size: 40, color: 'orange' });
+        await b.write('t3', 500, 360, 'مدل را روی داده‌ای امتحان کن که ندیده است', { size: 32, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 2. three parts
+    {
+      say: 'اسلاید 187: برای آموزش یک مدل، ابتدا داده‌ها را به *3 بخش* تقسیم می‌کنیم: *training data* یا داده‌های آموزشی، *validation data* یا داده‌های اعتبارسنجی، و *test data* یا داده‌های آزمایش یا تست.',
+      term: ['Training / Validation / Test set', 'آموزش / اعتبارسنجی / تست'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 80, 'سه بخش داده', { size: 40, color: 'orange', bold: true, fa: true });
+        await node(b, 'p-tr', 100, 170, 450, 80, 'آموزش', { color: TRAIN, size: 30, bold: true });
+        await node(b, 'p-va', 550, 170, 175, 80, 'اعتبارسنجی', { color: VALID, size: 24, bold: true });
+        await node(b, 'p-te', 725, 170, 175, 80, 'تست', { color: TEST, size: 30, bold: true });
+        await all([
+          b.write('e-tr', 325, 285, 'Training', { size: 24, color: TRAIN }),
+          b.write('e-va', 637, 285, 'Validation', { size: 24, color: VALID }),
+          b.write('e-te', 812, 285, 'Test', { size: 24, color: TEST }),
+        ]);
+      },
+    },
+    // ---------------------------------------------------------- 3. roles
+    {
+      say: 'هر بخش یک کار دارد. با *مجموعه‌ی آموزشی*، مدل را *آموزش* می‌دهیم — داده‌ای که برای یادگیری مدل لازم است. با *مجموعه‌ی اعتبارسنجی*، پارامترها را *تنظیم* می‌کنیم — داده‌ای دیده‌نشده برای اعتبارسنجی و تنظیم بهتر پارامترها. و با *مجموعه‌ی تست*، عملکرد نهایی مدل را *آزمایش* می‌کنیم — داده‌ای دیده‌نشده برای ارزیابی نهایی.',
+      draw: async b => {
+        await all([b.arrow('a-tr', 325, 300, 325, 345, { color: TRAIN }), b.arrow('a-va', 637, 300, 637, 345, { color: VALID }), b.arrow('a-te', 812, 300, 812, 345, { color: TEST })]);
+        await b.write('r-tr', 325, 385, 'یادگیری مدل', { size: 28, fa: true, bold: true, color: TRAIN });
+        await b.write('r-va', 637, 385, 'تنظیم پارامترها', { size: 24, fa: true, bold: true, color: VALID });
+        await b.write('r-te', 812, 385, 'ارزیابی نهایی', { size: 24, fa: true, bold: true, color: TEST });
+        await b.write('u-va', 637, 425, 'دیده‌نشده', { size: 20, fa: true, color: 'soft' });
+        await b.write('u-te', 812, 425, 'دیده‌نشده', { size: 20, fa: true, color: 'soft' });
+      },
+    },
+    // ---------------------------------------------------------- 4. the rule
+    {
+      say: 'نکته‌ی مهمی که خود اسلاید 187 تأکید می‌کند: در حین آموزش، *فقط* مجموعه‌ی آموزش و اعتبارسنجی در دسترس است. از مجموعه‌ی تست *نباید* هنگام آموزش استفاده شود؛ مجموعه‌ی تست فقط هنگام تستِ نهایی در دسترس است. مثل سؤال‌های امتحان: اگر دانشجو از قبل دیده باشدشان، نمره‌اش چیزی را نشان نمی‌دهد.',
+      draw: async b => {
+        await b.box('rule', 90, 455, 820, 85, { color: 'red', fill: 'red' });
+        await b.write('rule-t', 500, 492, 'تله: از داده‌ی تست هنگام آموزش استفاده نکن', { size: 28, fa: true, bold: true, color: 'red' });
+        await b.write('rule-s', 500, 528, 'تست فقط در پایان، برای ارزیابی نهایی', { size: 22, fa: true, color: 'red' });
+        await b.ring('lock', 812, 210, 105, 60, { color: 'red' });
+      },
+    },
+    // ---------------------------------------------------------- 5. MNIST 40
+    {
+      say: 'اسلاید 188 این تقسیم را روی تصاویر MNIST نشان می‌دهد: 4 ردیف، هر ردیف رقم‌های 0 تا 9. یعنی 40 تصویر، از هر رقم 4 تا. دو راهِ برش کشیده است: یکی با خط‌های *عمودی*، یکی با خط‌های *افقی*. کدام درست است؟',
+      draw: async b => {
+        await b.clear();
+        for (let r = 0; r < 4; r++) await all([...Array(10)].map((_, c) => digit(b, `g-${r}-${c}`, GX(c), GY(r), c, 44)));
+        await b.write('g-n', 500, 440, `${LTR('4 × 10 = 40')} تصویر  ·  از هر رقم ${LTR('4')} تا`, { size: 28, fa: true, color: 'blue' });
+      },
+    },
+    // ---------------------------------------------------------- 6. vertical split = bad
+    {
+      say: 'برش عمودی: رقم‌های 0 تا 4 برای آموزش، 5 و 6 برای اعتبارسنجی، 7 تا 9 برای تست. مشکل را می‌بینید؟ مدل در آموزش *هرگز* رقم 7، 8 یا 9 را نمی‌بیند؛ پس در تست چیزی را می‌پرسیم که اصلاً یاد نگرفته. اسلاید صریح نمی‌گوید کدام برش درست است؛ این برداشت من است: برش عمودی کار را خراب می‌کند.',
+      tip: true,
+      draw: async b => {
+        await all([b.line('v1', (GX(4) + GX(5)) / 2, 95, (GX(4) + GX(5)) / 2, 330, { color: 'red' }), b.line('v2', (GX(6) + GX(7)) / 2, 95, (GX(6) + GX(7)) / 2, 330, { color: 'red' })]);
+        await b.write('vl1', GX(2), 360, 'آموزش', { size: 24, fa: true, color: TRAIN, bold: true });
+        await b.write('vl2', (GX(5) + GX(6)) / 2, 360, 'اعتبار', { size: 24, fa: true, color: VALID, bold: true });
+        await b.write('vl3', GX(8), 360, 'تست', { size: 24, fa: true, color: TEST, bold: true });
+        await b.erase('g-n');
+        await b.write('vx', 500, 450, `مدل رقم‌های ${LTR('7, 8, 9')} را هیچ‌وقت در آموزش نمی‌بیند  ✗`, { size: 26, fa: true, color: 'red', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 7. horizontal split = good
+    {
+      say: 'برش افقی: ردیف 1 و 2 برای آموزش — 20 تصویر؛ ردیف 3 برای اعتبارسنجی — 10 تصویر؛ ردیف 4 برای تست — 10 تصویر. این بار *هر رقم* در هر سه بخش هست. یعنی 50 درصد آموزش، 25 درصد اعتبارسنجی، 25 درصد تست. قاعده: هر بخش باید نماینده‌ی همه‌ی داده باشد.',
+      draw: async b => {
+        await b.erase(['v1', 'v2', 'vl1', 'vl2', 'vl3', 'vx']);
+        await all([b.line('h1', 160, (GY(1) + GY(2)) / 2, 800, (GY(1) + GY(2)) / 2, { color: 'red' }), b.line('h2', 160, (GY(2) + GY(3)) / 2, 800, (GY(2) + GY(3)) / 2, { color: 'red' })]);
+        await b.write('hl1', 900, (GY(0) + GY(1)) / 2 + 8, 'آموزش: 20', { size: 24, fa: true, color: TRAIN, bold: true });
+        await b.write('hl2', 900, GY(2) + 8, 'اعتبار: 10', { size: 24, fa: true, color: VALID, bold: true });
+        await b.write('hl3', 900, GY(3) + 8, 'تست: 10', { size: 24, fa: true, color: TEST, bold: true });
+        await b.write('hok', 500, 420, 'هر رقم در هر سه بخش هست  ✓', { size: 28, fa: true, color: 'green', bold: true });
+        await b.write('hp', 500, 470, `${LTR('50%')} آموزش  ·  ${LTR('25%')} اعتبارسنجی  ·  ${LTR('25%')} تست`, { size: 24, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 8. table: train + test
+    {
+      say: 'اسلاید 189 تا 191 همین کار را با جدول دیابتِ درس 18 می‌کنند. شش نمونه داریم. در اسلاید 191 دو بخش است: ردیف‌های 1 تا 4 *آموزش*، ردیف‌های 5 و 6 *تست*. ارزیابی (Test) یعنی همین بخشی که کنار گذاشته شده.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'تقسیم‌بندی داده', { size: 36, color: 'orange', bold: true, fa: true });
+        await all(PH.map((h, c) => b.write(`t-0-${c}`, TX[c], TY(0), h, { size: 20, color: 'ink', bold: true, dur: 120 })));
+        for (const [r, row] of PIMA.entries()) await all(row.map((v, c) => b.write(`t-${r + 1}-${c}`, TX[c], TY(r + 1), String(v), { size: 19, dur: 100 })));
+        await b.box('s-tr', 50, TY(1) - 30, 730, 4 * 46 - 4, { color: TRAIN, fill: TRAIN, r: 6 });
+        await b.box('s-te', 50, TY(5) - 30, 730, 2 * 46 - 4, { color: TEST, fill: TEST, r: 6 });
+        await b.write('l-tr', 880, TY(2) + 20, 'آموزش', { size: 28, fa: true, bold: true, color: TRAIN });
+        await b.write('l-te', 880, TY(5) + 20, 'تست', { size: 28, fa: true, bold: true, color: TEST });
+      },
+    },
+    // ---------------------------------------------------------- 9. table: train + valid + test
+    {
+      say: 'اسلاید 192 هر سه بخش را دارد: ردیف 1 تا 3 آموزش، ردیف 4 *اعتبارسنجی*، ردیف 5 و 6 تست. یعنی اعتبارسنجی را از دلِ داده‌های آموزش جدا کردیم؛ تست دست نخورد.',
+      draw: async b => {
+        await b.erase(['s-tr', 'l-tr']);
+        await b.box('s-tr2', 50, TY(1) - 30, 730, 3 * 46 - 4, { color: TRAIN, fill: TRAIN, r: 6 });
+        await b.box('s-va', 50, TY(4) - 30, 730, 42, { color: VALID, fill: VALID, r: 6 });
+        await b.write('l-tr2', 880, TY(2) + 8, 'آموزش', { size: 28, fa: true, bold: true, color: TRAIN });
+        await b.write('l-va', 880, TY(4) + 2, 'اعتبارسنجی', { size: 24, fa: true, bold: true, color: VALID });
+        await b.write('n', 500, 500, `${LTR('3')} آموزش  ·  ${LTR('1')} اعتبارسنجی  ·  ${LTR('2')} تست`, { size: 26, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 10. techniques overview
+    {
+      say: 'حالا اسلاید 193: *تکنیک‌های ارزیابی*. چهار روش برای اینکه داده را چطور برای آموزش و تست برش بزنیم: Holdout، K-Fold Cross-Validation، Leave-One-Out Cross-Validation و Random Subsampling. یکی‌یکی.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 80, 'تکنیک‌های ارزیابی', { size: 44, color: 'orange', bold: true, fa: true });
+        const L = ['Holdout', 'K-Fold Cross-Validation', 'Leave-One-Out Cross-Validation', 'Random Subsampling'];
+        for (const [k, l] of L.entries()) await b.write(`m${k}`, 250, 180 + k * 80, `${k + 1}.  ${l}`, { size: 34, anchor: 'start', color: 'blue' });
+      },
+    },
+    // ---------------------------------------------------------- 11. holdout
+    {
+      say: '*Holdout*، اسلاید 194: ساده‌ترین روش. داده‌ها را *یک بار* به دو بخش تقسیم می‌کنیم: آموزش و تست. بعد داده‌های آموزش را هم دوباره به دو بخش تقسیم می‌کنیم: آموزش و اعتبارسنجی. بخش کوچک‌تر را «کنار نگه می‌داریم» — اسمش هم از همین است.',
+      term: ['Holdout', 'کنار گذاشتن بخشی از داده'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'Holdout', { size: 46, color: 'red', bold: true });
+        await b.box('b1-te', 150, 130, 175, 60, { color: TEST, fill: TEST, r: 0 });
+        await b.box('b1-tr', 325, 130, 525, 60, { color: TRAIN, fill: TRAIN, r: 0 });
+        await b.write('b1-tel', 237, 170, 'تست', { size: 26, fa: true, bold: true });
+        await b.write('b1-trl', 587, 170, 'آموزش', { size: 26, fa: true, bold: true });
+        await b.arrow('down', 587, 200, 587, 260, { color: 'ink' });
+        await b.box('b2-va', 325, 270, 130, 60, { color: VALID, fill: VALID, r: 0 });
+        await b.box('b2-tr', 455, 270, 395, 60, { color: TRAIN, fill: TRAIN, r: 0 });
+        await b.write('b2-val', 390, 310, 'اعتبار', { size: 24, fa: true, bold: true });
+        await b.write('b2-trl', 652, 310, 'آموزش', { size: 26, fa: true, bold: true });
+        await b.write('n1', 900, 170, 'برش 1', { size: 22, fa: true, color: 'soft' });
+        await b.write('n2', 900, 310, 'برش 2', { size: 22, fa: true, color: 'soft' });
+      },
+    },
+    // ---------------------------------------------------------- 12. holdout numbers
+    {
+      say: 'یک مثال عددی خودم، چون اسلاید عدد نمی‌دهد: 1000 نمونه داریم. 20 درصد برای تست: 200 نمونه کنار می‌رود و 800 می‌ماند. حالا 25 درصدِ همان 800 را برای اعتبارسنجی جدا می‌کنیم: 200 نمونه. آموزش واقعی: 800 منهای 200، یعنی 600. حواستان باشد درصد دوم از *باقیمانده* حساب می‌شود، نه از کل.',
+      tip: true,
+      draw: async b => {
+        await b.write('c1', 500, 400, 'تست: 1000 × 20% = 200؛   می‌ماند: 800', { size: 28, fa: true, color: TEST });
+        await b.write('c2', 500, 450, `${LTR('800 × 25% = 200')} اعتبارسنجی`, { size: 28, fa: true, color: VALID });
+        await b.write('c3', 500, 510, `آموزش: ${LTR('800 − 200 = 600')}`, { size: 34, fa: true, color: TRAIN, bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 13. holdout weakness
+    {
+      say: 'ضعف Holdout: فقط *یک بار* برش می‌زنیم. اگر از بدشانسی نمونه‌های سخت همه در تست بیفتند، نمره بد می‌شود؛ اگر نمونه‌های آسان، نمره زیادی خوب. نتیجه به *شانس* همان یک برش بستگی دارد، و بخشی از داده هم هیچ‌وقت در آموزش نیست. روش‌های بعدی برای حل همین مشکل‌اند: چند بار برش بزن و میانگین بگیر.',
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 90, 'ضعف Holdout', { size: 42, color: 'red', bold: true, fa: true });
+        await b.write('l1', 850, 200, '◂ فقط یک برش', { size: 30, fa: true, anchor: 'start' });
+        await b.write('l2', 850, 270, '◂ نتیجه به شانس همان برش بستگی دارد', { size: 30, fa: true, anchor: 'start' });
+        await b.write('l3', 850, 340, '◂ داده‌ی تست هیچ‌وقت در آموزش نیست', { size: 30, fa: true, anchor: 'start' });
+        await b.write('fix', 500, 460, 'راه‌حل: چند بار برش بزن و میانگین بگیر', { size: 32, fa: true, color: 'green', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 14. k-fold
+    {
+      say: '*K-Fold Cross-Validation*، اسلاید 195: داده‌ها به *k قسمت* مساوی تقسیم می‌شوند — هر قسمت یک *fold*. هر بار یک قسمت را به عنوان آزمون و بقیه‌ی قسمت‌ها را به عنوان آموزش در نظر می‌گیریم. اینجا k = 5، پس 5 دور داریم و در هر دور fold بعدی تست می‌شود. دقت کنید: در اسلاید 195 رنگ تست فیروزه‌ای است، ولی در اسلاید 196 و 197 قرمز؛ من اینجا همه‌جا تست را آبی و آموزش را سبز می‌کشم.',
+      term: ['K-Fold Cross-Validation', 'اعتبارسنجی متقابل k-لایه'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'K-Fold Cross-Validation   (k = 5)', { size: 36, color: 'red', bold: true });
+        for (let r = 0; r < 5; r++) {
+          await cells(b, `kf${r}`, 200, 120 + r * 70, 600, 46, 5, k => k === r);
+          await b.write(`kr${r}`, 900, 152 + r * 70, `دور ${r + 1}`, { size: 24, fa: true, color: 'purple' });
+        }
+        await all([0, 1, 2, 3, 4].map(k => b.write(`kn${k}`, 260 + k * 120, 112, `fold ${k + 1}`, { size: 17, color: 'soft' })));
+        await b.write('kl', 500, 500, 'آبی با نقطه = تست   ·   سبز = آموزش', { size: 24, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 15. k-fold numbers
+    {
+      say: 'حساب k-fold، که در امتحان زیاد می‌آید. اگر N = 100 نمونه و k = 5 باشد: اندازه‌ی هر fold می‌شود 100 تقسیم بر 5، یعنی 20. در هر دور 20 نمونه تست و 100 منهای 20، یعنی 80 نمونه آموزش است. مدل 5 بار آموزش می‌بیند، و *هر نمونه دقیقاً یک بار* تست می‌شود. معمولاً نمره‌ی نهایی میانگینِ نمره‌ی این 5 دور است.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, `حساب ${LTR('k-fold')}:   ${LTR('N = 100 ,  k = 5')}`, { size: 34, fa: true, color: 'orange', bold: true });
+        await b.write('f1', 500, 160, 'test = N / k = 100 / 5 = 20', { size: 36, color: TEST });
+        await b.write('f2', 500, 230, 'train = N − N/k = 100 − 20 = 80', { size: 36, color: TRAIN });
+        await b.write('f3', 500, 300, 'rounds = k = 5', { size: 36, color: 'purple' });
+        await b.write('f4', 500, 380, 'هر نمونه دقیقاً یک بار تست می‌شود', { size: 28, fa: true, bold: true });
+        await b.write('f5', 500, 440, 'نمره‌ی نهایی = میانگین 5 دور', { size: 26, fa: true, color: 'soft' });
+      },
+    },
+    // ---------------------------------------------------------- 16. LOO
+    {
+      say: '*Leave-One-Out Cross-Validation*، اسلاید 196: شبیه k-fold است، با این تفاوت که هر بار *فقط یک داده* را به عنوان تست کنار می‌گذاریم و با *بقیه‌ی* داده‌ها آموزش می‌دهیم. یعنی همان k-fold با k = N: هر fold فقط یک نمونه دارد.',
+      term: ['Leave-One-Out (LOO)', 'یکی را کنار بگذار'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'Leave-One-Out Cross-Validation', { size: 36, color: 'red', bold: true });
+        for (let r = 0; r < 3; r++) {
+          await cells(b, `lo${r}`, 200, 115 + r * 62, 600, 40, 10, k => k === r);
+          await b.write(`lr${r}`, 900, 143 + r * 62, `دور ${r + 1}`, { size: 22, fa: true, color: 'purple' });
+        }
+        await b.write('ldots', 500, 335, '⋮', { size: 40, color: 'soft' });
+        await cells(b, 'lo9', 200, 360, 600, 40, 10, k => k === 9);
+        await b.write('lr9', 900, 388, 'دور 10', { size: 22, fa: true, color: 'purple' });
+        await b.write('ln', 500, 460, 'اینجا N = 10، پس 10 دور؛ هر دور 9 آموزش و 1 تست', { size: 26, fa: true });
+        await b.write('lk', 500, 515, `${LTR('LOO')} = ${LTR('k-fold')} با ${LTR('k = N')}`, { size: 30, fa: true, color: 'orange', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 17. LOO numbers
+    {
+      say: 'حساب LOO: با N = 100 نمونه، 100 دور داریم؛ در هر دور 99 نمونه آموزش و 1 نمونه تست. یعنی مدل 100 بار آموزش می‌بیند! از هر نمونه برای تست استفاده می‌شود و تقریباً همه‌ی داده در آموزش است، ولی برای داده‌ی بزرگ خیلی کند است.',
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, `حساب ${LTR('LOO')}:   ${LTR('N = 100')}`, { size: 34, fa: true, color: 'orange', bold: true });
+        await b.write('f1', 500, 170, 'rounds = N = 100', { size: 38, color: 'purple' });
+        await b.write('f2', 500, 245, 'train = N − 1 = 99', { size: 38, color: TRAIN });
+        await b.write('f3', 500, 320, 'test = 1', { size: 38, color: TEST });
+        await b.write('f4', 500, 410, 'مزیت: تقریباً همه‌ی داده در آموزش', { size: 26, fa: true, color: 'green' });
+        await b.write('f5', 500, 460, `عیب: ${LTR('N')} بار آموزش ← کند`, { size: 26, fa: true, color: 'red' });
+      },
+    },
+    // ---------------------------------------------------------- 18. random subsampling
+    {
+      say: '*Random Subsampling*، اسلاید 197: در هر دور، *چند داده به صورت تصادفی* به عنوان تست کنار گذاشته می‌شوند و با بقیه آموزش می‌دهیم؛ و این را چند بار تکرار می‌کنیم. فرقش با k-fold: اینجا تست‌ها تصادفی‌اند، پس ممکن است یک نمونه چند بار تست شود و نمونه‌ی دیگری هیچ‌وقت. در k-fold هر نمونه دقیقاً یک بار تست می‌شود.',
+      term: ['Random Subsampling', 'نمونه‌گیری تصادفی'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'Random Subsampling', { size: 38, color: 'red', bold: true });
+        for (let r = 0; r < 4; r++) {
+          await cells(b, `rs${r}`, 200, 115 + r * 62, 600, 40, 20, k => RANDOM_TEST[r].has(k));
+          await b.write(`rr${r}`, 900, 143 + r * 62, `دور ${r + 1}`, { size: 22, fa: true, color: 'purple' });
+        }
+        await b.write('rn1', 500, 400, 'هر دور: چند نمونه‌ی تصادفی تست، بقیه آموزش', { size: 26, fa: true });
+        await b.write('rn2', 500, 460, 'یک نمونه ممکن است چند بار تست شود، یا هیچ‌وقت', { size: 26, fa: true, color: 'orange', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 19. compare
+    {
+      say: 'مقایسه برای امتحان، با N نمونه. Holdout: یک برش، یک دور. K-Fold: k دور، هر دور N تقسیم بر k نمونه تست. LOO: N دور، هر دور 1 نمونه تست. Random Subsampling: چند دور با تست‌های تصادفی.',
+      draw: async b => {
+        await b.clear();
+        const X = [800, 500, 200];
+        await all(['روش', 'تست در هر دور', 'تعداد دور'].map((h, k) => b.write(`th${k}`, X[k], 80, h, { size: 28, fa: true, bold: true, color: 'blue' })));
+        await b.line('hl', 60, 100, 940, 100, { color: 'soft', width: 2 });
+        const R = [
+          ['Holdout', 'یک بخش ثابت', '1'],
+          ['K-Fold', 'N / k', 'k'],
+          ['Leave-One-Out', '1', 'N'],
+          ['Random Subsampling', 'چند نمونه‌ی تصادفی', 'چند بار'],
+        ];
+        for (const [r, row] of R.entries()) {
+          const y = 170 + r * 80;
+          await all(row.map((v, k) => b.write(`t${r}-${k}`, X[k], y, v, { size: k ? 28 : 26, fa: FA.test(v), bold: !k, color: k ? 'ink' : 'red', dur: 250 })));
+        }
+      },
+    },
+    // ---------------------------------------------------------- 20. summary
+    {
+      say: 'جمع‌بندی برای امتحان. یک بار دیگر بخوانید، بعد سؤال‌ها.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'یادت باشد', { size: 46, color: 'orange', bold: true, fa: true });
+        const L = [
+          'آموزش: یادگیری  ·  اعتبارسنجی: تنظیم پارامتر  ·  تست: ارزیابی نهایی',
+          'تست هرگز در حین آموزش استفاده نمی‌شود',
+          'هر بخش باید از همه‌ی کلاس‌ها نمونه داشته باشد',
+          'Holdout: یک برش؛ درصد دوم از باقیمانده حساب می‌شود',
+          `${LTR('k-fold')}: ${LTR('k')} دور، تست ${LTR('N/k')}، آموزش ${LTR('N − N/k')}`,
+          `${LTR('LOO')}: ${LTR('N')} دور، آموزش ${LTR('N − 1')}   ·   تصادفی: تست‌ها تصادفی`,
+        ];
+        for (const [k, l] of L.entries()) {
+          await b.dot(`mb${k}`, 950, 142 + k * 66, { color: 'orange', r: 5 });
+          await b.write(`m${k}`, 932, 150 + k * 66, l, { size: 24, anchor: 'start', fa: true });
+        }
+      },
+    },
+    // ---------------------------------------------------------- quizzes
+    {
+      say: 'نوبت شماست! در برش افقیِ اسلاید 188، از 40 تصویر، ردیف 1 و 2 برای آموزش است. چند تصویر برای آموزش داریم؟',
+      draw: quizBoard(1, '40 تصویر، 4 ردیف — ردیف 1 و 2 آموزش'),
+      quiz: {
+        answer: ['20'],
+        hint: 'هر ردیف رقم‌های 0 تا 9 است.',
+        explain: 'هر ردیف 10 تصویر دارد؛ دو ردیف یعنی 2 × 10 = 20 تصویر آموزش (50 درصد). ردیف 3 و 4 هر کدام 10 تصویر برای اعتبارسنجی و تست.',
+      },
+      solve: async b => {
+        await b.write('s1', 500, 250, 'هر ردیف: 10 تصویر', { size: 32, fa: true });
+        await b.write('s2', 500, 330, '2 × 10 = 20', { size: 48, color: 'green', bold: true });
+        await b.write('s3', 500, 410, `آموزش ${LTR('20')}  ·  اعتبار ${LTR('10')}  ·  تست ${LTR('10')}`, { size: 28, fa: true, color: 'soft' });
+      },
+    },
+    {
+      say: 'پارامترهای مدل را با کدام مجموعه تنظیم می‌کنیم؟',
+      draw: quizBoard(2, 'تنظیم پارامترها با کدام مجموعه؟'),
+      quiz: {
+        choices: ['مجموعه‌ی آموزشی', 'مجموعه‌ی اعتبارسنجی', 'مجموعه‌ی تست'],
+        correct: 1,
+        hint: 'تست هنگام آموزش ممنوع است، و آموزش برای یادگیری خود مدل است.',
+        explain: 'اسلاید 187: مدل را با آموزشی یاد می‌دهیم، پارامترها را با اعتبارسنجی تنظیم می‌کنیم، و عملکرد نهایی را روی تست می‌سنجیم.',
+      },
+      solve: async b => {
+        await b.write('s1', 500, 250, 'آموزش  ←  یادگیری مدل', { size: 30, fa: true, color: TRAIN });
+        await b.write('s2', 500, 320, 'اعتبارسنجی  ←  تنظیم پارامترها', { size: 34, fa: true, color: VALID, bold: true });
+        await b.write('s3', 500, 390, 'تست  ←  ارزیابی نهایی', { size: 30, fa: true, color: TEST });
+      },
+    },
+    {
+      say: 'دیتاستی با 100 نمونه داریم و 5-fold cross-validation اجرا می‌کنیم. در هر دور، چند نمونه برای *آموزش* استفاده می‌شود؟',
+      draw: quizBoard(3, 'N = 100 ,  k = 5  →  train = ?', { size: 44 }),
+      quiz: {
+        answer: ['80'],
+        hint: 'اول اندازه‌ی هر fold را حساب کن: N / k. یک fold تست است، بقیه آموزش.',
+        explain: 'هر fold = 100 / 5 = 20 نمونه. یک fold تست است، پس آموزش = 100 − 20 = 80.',
+      },
+      solve: async b => {
+        await cells(b, 'sq', 200, 220, 600, 50, 5, k => k === 0);
+        await b.write('s1', 500, 330, 'fold = 100 / 5 = 20', { size: 36, color: TEST });
+        await b.write('s2', 500, 400, 'train = 100 − 20 = 80', { size: 44, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'روی دیتاستی با 50 نمونه، leave-one-out cross-validation اجرا می‌کنیم. مدل در کل *چند بار* آموزش داده می‌شود؟',
+      draw: quizBoard(4, 'Leave-One-Out ,  N = 50  →  rounds = ?', { size: 44 }),
+      quiz: {
+        answer: ['50'],
+        hint: 'در هر دور فقط یک نمونه تست است و هر نمونه یک بار تست می‌شود.',
+        explain: 'LOO همان k-fold با k = N است: 50 دور، هر دور 49 نمونه آموزش و 1 نمونه تست. پس مدل 50 بار آموزش می‌بیند.',
+      },
+      solve: async b => {
+        await b.write('s1', 500, 260, 'LOO = k-fold ,  k = N', { size: 38, color: 'orange' });
+        await b.write('s2', 500, 340, 'rounds = N = 50', { size: 46, color: 'green', bold: true });
+        await b.write('s3', 500, 410, 'each round: train 49 , test 1', { size: 30, color: 'soft' });
+      },
+    },
+    {
+      say: 'Holdout روی 1000 نمونه: اول 20 درصد کل داده را برای تست کنار می‌گذاریم، بعد 25 درصدِ *باقیمانده* را برای اعتبارسنجی. چند نمونه برای *آموزش* می‌ماند؟',
+      draw: quizBoard(5, '1000 نمونه:  20% تست، بعد 25% باقیمانده اعتبارسنجی'),
+      quiz: {
+        answer: ['600'],
+        hint: 'بعد از جدا کردن تست، چند نمونه می‌ماند؟ 25 درصد را از همان عدد حساب کن.',
+        explain: 'تست = 1000 × 0.2 = 200، می‌ماند 800. اعتبارسنجی = 800 × 0.25 = 200. آموزش = 800 − 200 = 600.',
+      },
+      solve: async b => {
+        await b.write('s1', 500, 250, '1000 × 0.2 = 200   →   1000 − 200 = 800', { size: 32, color: TEST });
+        await b.write('s2', 500, 320, '800 × 0.25 = 200', { size: 32, color: VALID });
+        await b.write('s3', 500, 400, '800 − 200 = 600', { size: 46, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'سؤال آخر: دانشجویی چند مدل را آموزش می‌دهد، هر کدام را روی *مجموعه‌ی تست* امتحان می‌کند و بهترین را انتخاب می‌کند، و همان نمره‌ی تست را به عنوان دقت نهایی گزارش می‌کند. اشکال کارش چیست؟',
+      draw: quizBoard(6, 'انتخاب بهترین مدل با مجموعه‌ی تست — اشکال؟'),
+      quiz: {
+        choices: ['اشکالی ندارد؛ تست برای همین است', 'تست در انتخاب مدل استفاده شده و دیگر «دیده‌نشده» نیست؛ باید با اعتبارسنجی انتخاب می‌کرد', 'باید به جای تست، روی داده‌ی آموزش انتخاب می‌کرد و همان را گزارش می‌کرد'],
+        correct: 1,
+        hint: 'اسلاید 187: کدام مجموعه در حین آموزش و تنظیم در دسترس است؟',
+        explain: 'انتخاب مدل یعنی تنظیم؛ کار مجموعه‌ی اعتبارسنجی است. وقتی با تست انتخاب کنی، تست دیگر داده‌ی دیده‌نشده نیست و نمره‌اش بیش از حد خوش‌بینانه است.',
+      },
+      solve: async b => {
+        await b.write('s1', 500, 250, 'انتخاب مدل = تنظیم  ←  اعتبارسنجی', { size: 30, fa: true, color: VALID, bold: true });
+        await b.write('s2', 500, 320, 'تست فقط یک بار، در پایان', { size: 30, fa: true, color: TEST });
+        await b.write('s3', 500, 400, 'تست دیده شد  ←  نمره‌ی گزارش‌شده قابل اعتماد نیست', { size: 26, fa: true, color: 'red' });
+      },
+    },
+  ],
+});
+</script>
+</body>
+</html>

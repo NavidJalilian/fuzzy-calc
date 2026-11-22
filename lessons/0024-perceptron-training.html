@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Perceptron Training</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Vazirmatn:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="../assets/teacher.css">
+</head>
+<body>
+<main id="app"></main>
+<script src="../assets/teacher.js"></script>
+<script src="../assets/graph.js"></script>
+<script>
+// Lesson 24 — slides 237–260 (Part 7: neural networks).
+// Explanations are Persian; numbers, math and technical terms stay as written in English.
+
+const all = list => Promise.all(list);
+const LTR = s => `⁦${s}⁩`; // keeps a left-to-right run (numbers, math) intact inside Persian board text
+const num = v => String(+v.toFixed(6));
+const QUIZZES = 6;
+
+async function node(b, id, x, y, r, label, o = {}) {
+  const size = o.size || 24;
+  await b.ring(id, x, y, r, r, { color: o.color || 'blue', fill: o.fill || o.color || 'blue', tilt: 0, dur: o.dur ?? 250 });
+  if (label) await b.write(id + '-t', x, y + size * 0.35, label, { size, bold: true, dur: 120 });
+}
+
+// ---- bus vs Pride (slides 242–246): [length, height, isBus]
+const CARS = [[7, 4, 1], [6.5, 4.5, 1], [7.5, 4.5, 1], [9, 4.5, 1], [3, 1.5, 0], [2.5, 1.7, 0], [2, 1.6, 0]];
+const W = [1, 2];       // weight of length, weight of height (slide 245)
+const B = -9;           // -b = 9 is the threshold (slide 246)
+const wx = (l, h) => +(W[0] * l + W[1] * h).toFixed(6);
+const out = (l, h) => (wx(l, h) + B > 0 ? 1 : 0); // slide 246: 1 if w·x + b > 0, else 0
+const G1 = () => Graph({ x: 90, y: 120, w: 360, h: 320, from: 0, to: 10, min: 0, max: 7 });
+const TC = { n: 930, l: 865, h: 790, t: 705, s: 600 }; // table columns (right to left, like the slide)
+const rowY = r => 150 + r * 40;
+
+// ---- cats vs dogs (slides 247–248), my coordinates copied from the picture's layout
+const DOGS = [[5, 8], [6, 7.5], [5.5, 6.8], [6.5, 6.5], [2, 3.5], [1.5, 1.5], [2.5, 1.5], [6.5, 1.5], [7.5, 1.5]];
+const CATS = [[2, 6.5], [2.5, 5.8], [1.8, 5.2], [5, 4.5], [5.5, 4], [4.8, 3.5], [7.8, 4.6]];
+const G2 = () => Graph({ x: 90, y: 110, w: 380, h: 360, from: 0, to: 10, min: 0, max: 10 });
+
+// ---- XOR (slides 250–251) and my two-hidden-neuron solution
+const XOR = [[0, 0], [0, 1], [1, 0], [1, 1]];
+const step = z => (z > 0 ? 1 : 0); // none of the z values below is exactly 0
+const h1 = (a, c) => step(a + c - 0.5); // OR
+const h2 = (a, c) => step(a + c - 1.5); // AND
+const xorNet = (a, c) => step(h1(a, c) - h2(a, c) - 0.5);
+const XC = { x1: 600, x2: 680, h1: 760, h2: 840, y: 920 };
+const G3 = () => Graph({ x: 110, y: 130, w: 320, h: 320, from: 0, to: 2, min: 0, max: 2 });
+
+// ---- km → miles prediction machine (slides 253–259)
+const TRUTH = 62.137;
+const GUESS = [0.5, 0.6, 0.7, 0.61];
+const calc = c => +(100 * c).toFixed(6);
+const err = c => +(TRUTH - calc(c)).toFixed(6);
+const KC = { c: 220, calc: 410, truth: 600, err: 800 };
+const kRow = k => 425 + k * 37;
+async function guessRow(b, k) {
+  const c = GUESS[k], e = err(c);
+  await b.write('cval', 500, 168, `× ${c}`, { size: 26, color: 'red', bold: true, dur: 150 });
+  await b.write(`g${k}-c`, KC.c, kRow(k), String(c), { size: 24, color: 'red' });
+  await b.write(`g${k}-calc`, KC.calc, kRow(k), num(calc(c)), { size: 24 });
+  await b.write(`g${k}-t`, KC.truth, kRow(k), String(TRUTH), { size: 24, color: 'green' });
+  await b.write(`g${k}-e`, KC.err, kRow(k), num(e), { size: 24, color: e < 0 ? 'red' : 'orange', bold: true });
+}
+
+function quizBoard(n, lines) {
+  return async b => {
+    await b.clear();
+    await b.write('q-n', 500, 60, `سؤال ${n} از ${QUIZZES}`, { size: 24, color: 'soft', fa: true });
+    for (const [k, l] of lines.entries()) await b.write(`q-l${k}`, 500, 130 + k * 52, l.text, { size: l.size || 34, fa: l.fa, color: l.color || 'ink' });
+  };
+}
+async function solveLines(b, lines, y0 = 320) {
+  for (const [k, l] of lines.entries()) await b.write(`s-l${k}`, 500, y0 + k * 52, l.text, { size: l.size || 30, fa: l.fa, color: l.color || 'ink', bold: l.bold });
+}
+
+Teacher.start({
+  id: 'L24',
+  number: 24,
+  title: 'آموزش پرسپترون',
+  chapter: 'بخش 7 · شبکه‌ی عصبی',
+  slides: '237–260',
+  intro: 'یاد دادن با مثال: خط جداکننده‌ی اتوبوس و پراید، حد آستانه، مسئله‌های غیرخطی (سگ و گربه، XOR) و ماشین پیش‌بینی ساده.',
+  next: { href: '0025-loss-function.html', title: 'تابع خطا (loss)' },
+  steps: [
+    // ---------------------------------------------------------- 1. intro
+    {
+      say: 'تا اینجا وزن‌ها را خودمان می‌دادیم. ولی شبکه از کجا بفهمد وزن‌ها چه باشند؟ این درس درباره‌ی *training* یا آموزش شبکه است: پرسپترون چطور از روی مثال‌ها یاد می‌گیرد.',
+      term: ['Training', 'آموزش'],
+      draw: async b => {
+        await b.write('t1', 500, 190, 'درس 24', { size: 60, color: 'blue', bold: true, fa: true });
+        await b.write('t2', 500, 280, 'آموزش پرسپترون', { size: 48, fa: true });
+        await b.write('t3', 500, 360, 'Training a perceptron', { size: 40, color: 'orange' });
+      },
+    },
+    // ---------------------------------------------------------- 2. teaching by examples
+    {
+      say: 'اسلاید 239 می‌پرسد: به یک بچه‌ی کوچک چطور یاد می‌دهید اتوبوس چیست؟ ساده: چند اتوبوس نشانش می‌دهیم و می‌گوییم «این اتوبوس است»، و چند ماشین دیگر و می‌گوییم «این اتوبوس نیست». بعد از چند بار، خودش فرق را می‌فهمد. با کامپیوتر هم همین کار را می‌کنیم: برای هر نمونه چند *feature* یا ویژگی، مثل طول و ارتفاع، و یک *label* یا برچسب، مثل «اتوبوس» یا «پراید»، می‌دهیم. اسلاید می‌گوید این روش پایه‌ی یادگیری در پرسپترون است.',
+      term: ['Feature · label', 'ویژگی · برچسب'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 65, 'یاد دادن با مثال', { size: 40, color: 'orange', bold: true, fa: true });
+        await b.line('sep', 500, 110, 500, 440, { color: 'soft', width: 2 });
+        await b.write('ch', 750, 145, 'به یک بچه', { size: 30, bold: true, fa: true });
+        await b.write('c1', 750, 210, 'این اتوبوس است ✓', { size: 28, color: 'green', fa: true });
+        await b.write('c2', 750, 265, 'این هم اتوبوس است ✓', { size: 28, color: 'green', fa: true });
+        await b.write('c3', 750, 320, 'این اتوبوس نیست ✗', { size: 28, color: 'red', fa: true });
+        await b.write('ph', 250, 145, 'به کامپیوتر', { size: 30, bold: true, fa: true });
+        await b.write('p1', 250, 210, 'ویژگی‌ها: طول، ارتفاع', { size: 26, color: 'blue', fa: true });
+        await b.write('p2', 250, 260, 'برچسب: اتوبوس / پراید', { size: 26, color: 'purple', fa: true });
+        await b.arrow('pa', 250, 285, 250, 335, { head: 12 });
+        await b.write('p3', 250, 375, 'الگوریتم شبکه‌ی عصبی', { size: 26, color: 'orange', fa: true });
+        await b.write('p4', 250, 420, 'یاد می‌گیرد', { size: 26, color: 'green', bold: true, fa: true });
+        await b.write('base', 500, 505, 'این روش پایه‌ی یادگیری در پرسپترون است', { size: 26, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 3. the table
+    {
+      say: 'این جدول اسلاید 242 است: هفت ماشین. ستون‌ها: طول، ارتفاع و نوع. چهار تای اول اتوبوس‌اند، مثلاً شماره‌ی 1 با طول 7 و ارتفاع 4. سه تای آخر پراید هستند، مثلاً شماره‌ی 5 با طول 3 و ارتفاع 1.5. اعداد اسلاید با ویرگول نوشته شده‌اند؛ 6,5 یعنی 6.5.',
+      draw: async b => {
+        await b.clear();
+        await b.write('head', 760, 55, 'اسلاید 242: اتوبوس یا پراید؟', { size: 26, color: 'orange', bold: true, fa: true });
+        await all([['n', '#'], ['l', 'طول'], ['h', 'ارتفاع'], ['t', 'نوع']].map(([k, t]) => b.write(`th-${k}`, TC[k], 108, t, { size: 22, color: 'blue', bold: true, fa: t !== '#', dur: 120 })));
+        await b.line('hl', 660, 122, 960, 122, { color: 'soft', width: 2, dur: 250 });
+        await all([900, 830, 750].map((x, k) => b.line(`tv${k}`, x, 85, x, 400, { color: 'soft', width: 2, dur: 250 })));
+        for (const [r, [l, h, bus]] of CARS.entries()) {
+          await all([
+            b.write(`r${r}-n`, TC.n, rowY(r), String(r + 1), { size: 22, color: 'purple', dur: 100 }),
+            b.write(`r${r}-l`, TC.l, rowY(r), String(l), { size: 22, dur: 100 }),
+            b.write(`r${r}-h`, TC.h, rowY(r), String(h), { size: 22, dur: 100 }),
+            b.write(`r${r}-t`, TC.t, rowY(r), bus ? 'اتوبوس' : 'پراید', { size: 20, color: bus ? 'red' : 'green', fa: true, dur: 100 }),
+          ]);
+        }
+      },
+    },
+    // ---------------------------------------------------------- 4. the scatter plot
+    {
+      say: 'حالا هر ماشین را یک نقطه روی صفحه می‌گذاریم، مثل اسلاید 243: طول روی محور افقی، ارتفاع روی محور عمودی. اتوبوس‌ها، قرمز، بالا و راست جمع شده‌اند چون بلند و درازند. پرایدها، سبز، پایین و چپ هستند.',
+      draw: async b => {
+        const g = G1();
+        await g.axes(b, 'ax', { ticks: [0, 2, 4, 6, 8, 10], yTicks: [2, 4, 6], label: 'x_1', yLabel: 'x_2' });
+        await all([b.write('xl-fa', 495, 482, 'طول', { size: 18, color: 'soft', fa: true }), b.write('yl-fa', 150, 92, 'ارتفاع', { size: 18, color: 'soft', fa: true })]);
+        await all(CARS.map(([l, h, bus], k) => b.dot(`pt${k}`, g.X(l), g.Y(h), { color: bus ? 'red' : 'green', r: 7 })));
+      },
+    },
+    // ---------------------------------------------------------- 5. separating line
+    {
+      say: 'اسلاید 244 یک خط بین دو گروه می‌کشد: همه‌ی نقطه‌های بالای خط اتوبوس‌اند و همه‌ی نقطه‌های پایین خط پراید. کار پرسپترون دقیقاً *پیدا کردن همین خط* است. در مثال ما خروجی پرسپترون برای اتوبوس 1 است و برای پراید 0.',
+      draw: async b => {
+        const g = G1();
+        await g.poly(b, 'line', [[0, 4.5], [9, 0]], { color: 'blue', width: 4 });
+        await b.write('busL', g.X(8.3), g.Y(6.2), 'اتوبوس: خروجی 1', { size: 22, color: 'red', bold: true, fa: true });
+        await b.write('prL', g.X(1.7), g.Y(0.55), 'پراید: خروجی 0', { size: 22, color: 'green', bold: true, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 6. weighted sum per car
+    {
+      say: 'خط را چطور با عدد بسازیم؟ اسلاید 245: دو ورودی داریم، x_1 = طول و x_2 = ارتفاع، پس دو وزن. وزن طول را 1 و وزن ارتفاع را 2 می‌گیریم. برای هر ماشین: طول × 1 + ارتفاع × 2، یعنی همان *ضرب داخلی* w·x. ماشین 1: 7×1 + 4×2 = 15. ماشین 5: 3×1 + 1.5×2 = 6. ستون جدید را ببین.',
+      term: ['Dot product w·x', 'ضرب داخلی'],
+      draw: async b => {
+        await b.erase('head');
+        await b.write('wxf', 760, 55, 'w·x = 1·x_1 + 2·x_2', { size: 28, color: 'purple', bold: true });
+        await b.write(`th-s`, TC.s, 108, 'w·x', { size: 22, color: 'purple', bold: true });
+        await b.line('hl2', 560, 122, 660, 122, { color: 'soft', width: 2, dur: 200 });
+        await b.line('tv3', 655, 85, 655, 400, { color: 'soft', width: 2, dur: 200 });
+        for (const [r, [l, h]] of CARS.entries()) await b.write(`r${r}-s`, TC.s, rowY(r), num(wx(l, h)), { size: 22, color: 'purple', bold: true, dur: 150 });
+      },
+    },
+    // ---------------------------------------------------------- 7. threshold
+    {
+      say: 'حالا نگاه کن: اتوبوس‌ها 15، 15.5، 16.5 و 18 گرفته‌اند؛ پرایدها 6، 5.9 و 5.2. اسلاید 246 عدد -b را برابر 9 می‌گیرد و به آن *threshold* یا حد آستانه می‌گوید: ضرب داخلی بالای 9 یعنی اتوبوس، پایین 9 یعنی پراید. به زبان نورون: b = -9، و خروجی 1 است اگر w·x + b > 0، وگرنه 0.',
+      term: ['Threshold (-b)', 'حد آستانه'],
+      draw: async b => {
+        await b.recolor(CARS.map((c, r) => `r${r}-s`).filter((_, r) => CARS[r][2]), 'red');
+        await b.recolor(CARS.map((c, r) => `r${r}-s`).filter((_, r) => !CARS[r][2]), 'green');
+        await b.write('th1', 880, 445, 'حد آستانه:', { size: 24, color: 'orange', bold: true, fa: true });
+        await b.write('th1m', 700, 445, '-b = 9   ⇒   b = -9', { size: 24, color: 'orange', bold: true });
+        await b.write('th2', 760, 488, 'w·x + b > 0   →   1', { size: 26, color: 'red' });
+        await b.write('th3', 760, 530, 'w·x + b ≤ 0   →   0', { size: 26, color: 'green' });
+      },
+    },
+    // ---------------------------------------------------------- 8. the line equation
+    {
+      say: 'مرز دقیقاً جایی است که w·x + b = 0؛ اسلاید می‌نویسد «معادله خط: w.x + b = 0». اینجا یعنی x_1 + 2x_2 - 9 = 0، یا x_1 + 2x_2 = 9. این همان خط آبی روی نمودار است: از (9, 0) و (1, 4) می‌گذرد. خط اسلاید 244 با دست کشیده شده و فقط یک طرح است؛ خطی که از عددهای خود اسلاید درمی‌آید همین x_1 + 2x_2 = 9 است.',
+      draw: async b => {
+        const g = G1();
+        await b.write('leq', g.X(6.2), g.Y(0.75), 'x_1 + 2x_2 = 9', { size: 20, color: 'blue', bold: true });
+        await b.pulse('line');
+        await all([b.dot('lp1', g.X(9), g.Y(0), { color: 'blue', r: 6 }), b.dot('lp2', g.X(1), g.Y(4), { color: 'blue', r: 6 })]);
+      },
+    },
+    // ---------------------------------------------------------- 9. linear separability
+    {
+      say: 'به این دست مسئله‌ها *linear separability* یا تفکیک‌پذیر خطی می‌گویند: می‌شود دو گروه را با یک خط از هم جدا کرد. نکته: فقط یک خط درست وجود ندارد. هر آستانه‌ای بین 6 و 15 هم جواب می‌دهد؛ مثلاً با آستانه‌ی 12 خط x_1 + 2x_2 = 12 را داریم، خط‌چین. پرسپترون فقط باید *یکی* از این خط‌ها را پیدا کند.',
+      term: ['Linear separability', 'تفکیک‌پذیری خطی'],
+      tip: true,
+      draw: async b => {
+        const g = G1();
+        await g.poly(b, 'line12', [[0, 6], [10, 1]], { color: 'soft', width: 3 });
+        await b.write('ls', 300, 62, 'تفکیک‌پذیر خطی', { size: 26, color: 'orange', bold: true, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 10. cats and dogs
+    {
+      say: 'مثال 2 اسلاید 247: تشخیص سگ از گربه، باز با دو ویژگی، طول و ارتفاع حیوان. ولی این بار نقطه‌ها را ببین: گربه‌ها، نارنجی، وسط هستند و سگ‌ها، آبی، هم بالای آن‌ها هستند هم پایینشان. هر خط راستی بکشی، یک طرفش سگ و گربه قاطی می‌شوند. پس پرسپترون ساده کار نمی‌کند، چون فقط تفکیک خطی می‌کند.',
+      draw: async b => {
+        await b.clear();
+        const g = G2();
+        await g.axes(b, 'ax', { ticks: [], yTicks: [], label: 'x_1', yLabel: 'x_2' });
+        await all([b.write('xl-fa', 515, 502, 'طول', { size: 18, color: 'soft', fa: true }), b.write('yl-fa', 150, 82, 'ارتفاع', { size: 18, color: 'soft', fa: true })]);
+        await all(DOGS.map(([u, v], k) => b.dot(`d${k}`, g.X(u), g.Y(v), { color: 'blue', r: 8 })));
+        await all(CATS.map(([u, v], k) => b.dot(`c${k}`, g.X(u), g.Y(v), { color: 'orange', r: 8 })));
+        await b.dot('lg-d', 880, 150, { color: 'blue', r: 8 });
+        await b.write('lg-dt', 850, 158, 'سگ', { size: 24, fa: true, anchor: 'start' });
+        await b.dot('lg-c', 880, 195, { color: 'orange', r: 8 });
+        await b.write('lg-ct', 850, 203, 'گربه', { size: 24, fa: true, anchor: 'start' });
+        await g.poly(b, 'try', [[0.5, 9], [9.5, 0.5]], { color: 'soft', width: 3 });
+        await b.write('x', g.X(8.6), g.Y(2.4), '✗', { size: 40, color: 'red', bold: true });
+        await b.write('no', 740, 300, 'با یک خط راست جدا نمی‌شود', { size: 26, color: 'red', fa: true });
+        await b.write('no2', 740, 345, 'پرسپترون ساده فقط تفکیک خطی می‌کند', { size: 22, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 11. two lines → multilayer
+    {
+      say: 'اسلاید 248 دو راه نشان می‌دهد: یک خط *غیرمستقیم*، یعنی خمیده، یا دو خط راست. با دو خط، گربه‌ها در نوار وسط می‌افتند. سازوکارش این است: هر نورون لایه‌ی پنهان یک خط می‌کشد، و نورون خروجی می‌پرسد «بین دو خط هست یا نه؟». این کار از پرسپترون ساده برنمی‌آید و یک یا چند لایه‌ی مخفی لازم دارد: *multi layer perceptron* یا پرسپترون چندلایه. اسلاید: وظیفه‌ی لایه‌های مخفی همین است که الگوهای پیچیده‌تر را یاد بگیرند.',
+      term: ['Multi-layer perceptron (MLP)', 'پرسپترون چندلایه'],
+      draw: async b => {
+        const g = G2();
+        await b.erase(['try', 'x', 'no', 'no2']);
+        await g.poly(b, 'up', [[1, 7], [9, 4.8]], { color: 'blue', width: 3 });
+        await g.poly(b, 'lo', [[1, 4.2], [9, 1.8]], { color: 'blue', width: 3 });
+        await b.write('m1', 740, 290, 'هر نورون پنهان = یک خط', { size: 26, color: 'blue', fa: true });
+        await b.write('m2', 740, 340, 'خروجی: بین دو خط؟ ← گربه', { size: 26, color: 'orange', fa: true });
+        await b.write('m3', 740, 420, 'multi layer perceptron', { size: 26, color: 'green', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 12. the hidden-layer network
+    {
+      say: 'شکل اسلاید 249 و 252: ورودی‌ها دیگر مستقیم به خروجی وصل نیستند. بین آن‌ها یک لایه‌ی میانی، یعنی *لایه‌ی مخفی*، هست. این لایه همان کار لایه‌ی اول را می‌کند: ضرب در وزن‌ها و جمع با bias. ولی به کمکش شبکه الگوهای پیچیده‌تر را کشف می‌کند، مثل جدا کردن سگ و گربه. یعنی برای این مسئله‌ها یک *تفکیک غیرخطی* لازم است.',
+      draw: async b => {
+        await b.clear();
+        const IN = [[220, 200], [220, 330]], HID = [100, 180, 260, 340, 420].map(y => [500, y]), OUT = [780, 260];
+        await all(IN.map(([x, y], k) => node(b, `i${k}`, x, y, 24, '', { color: 'blue' })));
+        await all(HID.map(([x, y], k) => node(b, `h${k}`, x, y, 24, '', { color: 'blue' })));
+        await node(b, 'o', OUT[0], OUT[1], 24, '', { color: 'blue' });
+        await all(IN.flatMap(([x1, y1], i) => HID.map(([x2, y2], j) => b.line(`e${i}-${j}`, x1 + 24, y1, x2 - 24, y2, { width: 2, dur: 300 }))));
+        await all(HID.map(([x, y], j) => b.line(`f${j}`, x + 24, y, OUT[0] - 24, OUT[1], { width: 2, dur: 300 })));
+        await all([440, 560].map((x, k) => b.line(`g${k}`, x, 70, x, 450, { color: 'green', width: 3 })));
+        await b.write('li0', 110, 208, 'ویژگی اول', { size: 22, color: 'red', fa: true });
+        await b.write('li1', 110, 338, 'ویژگی دوم', { size: 22, color: 'red', fa: true });
+        await b.write('lo', 870, 268, 'خروجی', { size: 22, color: 'red', fa: true });
+        await b.write('lh', 500, 490, 'لایه‌ی میانی (لایه‌ی مخفی)', { size: 26, color: 'red', bold: true, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 13. XOR table
+    {
+      say: 'مثال سخت‌تر اسلاید 250: تابع *XOR*. دو ورودی 0 یا 1؛ خروجی 1 است فقط وقتی دو ورودی *با هم فرق دارند*. پس 0،0 می‌دهد 0؛ 0،1 و 1،0 می‌دهند 1؛ و 1،1 می‌دهد 0. مثل اتوبوس و پراید، برای هر نمونه ویژگی‌ها و یک برچسب داریم.',
+      term: ['XOR', 'یای انحصاری'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 760, 70, 'XOR', { size: 40, color: 'orange', bold: true });
+        await all([['x1', 'x_1'], ['x2', 'x_2'], ['y', 'y']].map(([k, t]) => b.write(`th-${k}`, XC[k], 140, t, { size: 26, color: 'blue', bold: true, dur: 120 })));
+        await b.line('hl', 560, 155, 960, 155, { color: 'soft', width: 2, dur: 250 });
+        for (const [r, [a, c]] of XOR.entries()) {
+          const y = 200 + r * 48;
+          await all([b.write(`r${r}-x1`, XC.x1, y, String(a), { size: 26, dur: 100 }), b.write(`r${r}-x2`, XC.x2, y, String(c), { size: 26, dur: 100 })]);
+          await b.write(`r${r}-y`, XC.y, y, String(a ^ c), { size: 26, color: a ^ c ? 'red' : 'blue', bold: true, dur: 150 });
+        }
+        await b.write('cap', 760, 395, 'خروجی 1 فقط وقتی دو ورودی فرق دارند', { size: 22, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 14. XOR plot
+    {
+      say: 'حالا نقطه‌ها روی صفحه، اسلاید 251: دو نقطه‌ی 0 در گوشه‌های (0, 0) و (1, 1) هستند و دو نقطه‌ی 1 در گوشه‌های (0, 1) و (1, 0)، یعنی ضربدری. هر خط راستی بکشی، دست‌کم یک نقطه در طرف اشتباه می‌ماند. پس XOR تفکیک‌پذیر خطی *نیست* و یک پرسپترون ساده نمی‌تواند آن را یاد بگیرد.',
+      draw: async b => {
+        const g = G3();
+        await g.axes(b, 'ax', { ticks: [0, 1, 2], yTicks: [1, 2], label: 'x_1', yLabel: 'x_2' });
+        for (const [k, [a, c]] of XOR.entries()) {
+          const one = a ^ c;
+          await b.dot(`p${k}`, g.X(a), g.Y(c), { color: one ? 'red' : 'blue', r: 10 });
+          await b.write(`pl${k}`, g.X(a) + 22, g.Y(c) - 12, String(one), { size: 24, color: one ? 'red' : 'blue', bold: true, anchor: 'start' });
+        }
+        await g.poly(b, 'try', [[0, 1.6], [1.6, 0]], { color: 'soft', width: 3 });
+        await b.write('x', g.X(1.55), g.Y(1.45), '✗', { size: 36, color: 'red', bold: true });
+        await b.write('no', 270, 525, 'با یک خط راست جدا نمی‌شود', { size: 24, color: 'red', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 15. XOR with a hidden layer (my example)
+    {
+      say: 'یک مثال از خودم که سازوکار را دقیق نشان می‌دهد. دو نورون پنهان با تابع پله: h_1 = step(x_1 + x_2 - 0.5) که همان OR است، و h_2 = step(x_1 + x_2 - 1.5) که همان AND است. خروجی: y = step(h_1 - h_2 - 0.5)، یعنی «OR هست ولی AND نیست». جدول را ببین: دقیقاً XOR درمی‌آید. روی نمودار، این دو نورون دو خط موازی می‌کشند و نقطه‌های 1 در نوار بینشان می‌افتند؛ درست مثل سگ و گربه.',
+      tip: true,
+      draw: async b => {
+        const g = G3();
+        await b.erase(['try', 'x', 'no']);
+        await g.poly(b, 'l1', [[0, 0.5], [0.5, 0]], { color: 'green', width: 3 });
+        await g.poly(b, 'l2', [[0, 1.5], [1.5, 0]], { color: 'green', width: 3 });
+        await all([['h1', 'h_1'], ['h2', 'h_2']].map(([k, t]) => b.write(`th-${k}`, XC[k], 140, t, { size: 26, color: 'green', bold: true, dur: 120 })));
+        for (const [r, [a, c]] of XOR.entries()) {
+          const y = 200 + r * 48;
+          await all([b.write(`r${r}-h1`, XC.h1, y, String(h1(a, c)), { size: 26, color: 'green', dur: 120 }), b.write(`r${r}-h2`, XC.h2, y, String(h2(a, c)), { size: 26, color: 'green', dur: 120 })]);
+          await b.pulse(`r${r}-y`);
+        }
+        await b.write('f1', 760, 445, 'h_1 = step(x_1 + x_2 - 0.5)   (OR)', { size: 22 });
+        await b.write('f2', 760, 488, 'h_2 = step(x_1 + x_2 - 1.5)   (AND)', { size: 22 });
+        await b.write('f3', 760, 531, 'y = step(h_1 - h_2 - 0.5)', { size: 24, color: 'red', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 16. the prediction machine
+    {
+      say: 'خب، شبکه وزن‌ها را چطور پیدا می‌کند؟ اسلاید 253 با یک ماشین خیلی ساده شروع می‌کند: کیلومتر را می‌گیرد و مایل می‌دهد. فرض می‌کنیم رابطه miles = kilometres × c است ولی c را نمی‌دانیم. فقط دو *نمونه‌ی درست* داریم: 0 کیلومتر یعنی 0 مایل، و 100 کیلومتر یعنی 62.137 مایل. خطا را هم این‌طور تعریف می‌کنیم: error = truth - calculated، یعنی جواب درست منهای جواب ماشین.',
+      term: ['Error = truth − calculated', 'خطا'],
+      draw: async b => {
+        await b.clear();
+        await b.write('km', 125, 150, 'kilometres', { size: 28, color: 'blue' });
+        await b.arrow('a1', 220, 140, 400, 140, { color: 'blue', head: 14 });
+        await b.ring('mc', 500, 140, 90, 90, { color: 'purple', tilt: 0 });
+        await b.write('calc', 500, 122, 'calculate', { size: 24 });
+        await b.write('cval', 500, 168, '???', { size: 26, color: 'green', bold: true });
+        await b.arrow('a2', 600, 140, 770, 140, { color: 'blue', head: 14 });
+        await b.write('mi', 840, 150, 'miles', { size: 28, color: 'blue' });
+        await b.write('rel', 500, 262, 'miles = kilometres × c', { size: 26, color: 'purple' });
+        await b.write('tr', 500, 305, `نمونه‌های درست: ${LTR('0 km → 0 miles')}   و   ${LTR('100 km → 62.137 miles')}`, { size: 22, color: 'green', fa: true });
+        await b.write('ef', 500, 345, 'error = truth - calculated', { size: 24, color: 'orange', bold: true });
+        await all([['c', 'c'], ['calc', 'calculated'], ['truth', 'truth'], ['err', 'error']].map(([k, t]) => b.write(`kh-${k}`, KC[k], 385, t, { size: 22, color: 'blue', bold: true, dur: 120 })));
+        await b.line('khl', 140, 397, 880, 397, { color: 'soft', width: 2, dur: 250 });
+      },
+    },
+    // ---------------------------------------------------------- 17. c = 0.5
+    {
+      say: `اولین حدس، اسلاید 255: c = 0.5. ماشین برای 100 کیلومتر می‌گوید 50 مایل. جواب درست 62.137 است، پس error = 62.137 - 50 = ${num(err(0.5))}. خطا مثبت است: ماشین *کمتر* از جواب گفته، پس c باید بزرگ‌تر شود.`,
+      draw: async b => { await guessRow(b, 0); },
+    },
+    // ---------------------------------------------------------- 18. c = 0.6
+    {
+      say: `حدس دوم، اسلاید 257: c را کمی بیشتر می‌کنیم، 0.6. خروجی 60 و خطا ${num(err(0.6))}. خطا خیلی کوچک‌تر شد. هنوز مثبت است، پس باز هم باید کمی بالا برویم.`,
+      draw: async b => { await guessRow(b, 1); },
+    },
+    // ---------------------------------------------------------- 19. c = 0.7, then 0.61
+    {
+      say: `اسلاید 258: c = 0.7 می‌دهد 70 و خطا ${num(err(0.7))}. خطا *منفی* شد: از جواب رد شدیم! علامت خطا جهت را می‌گوید: منفی یعنی c زیادی بزرگ است. پس برمی‌گردیم، ولی این بار با قدم کوچک: اسلاید 259، c = 0.61 می‌دهد 61 و خطا ${num(err(0.61))}. وقتی خطا کوچک است، اصلاح هم باید کوچک باشد.`,
+      draw: async b => {
+        await guessRow(b, 2);
+        await b.pulse('g2-e');
+        await guessRow(b, 3);
+      },
+    },
+    // ---------------------------------------------------------- 20. what a prediction machine must do
+    {
+      say: 'اسلاید 260 نتیجه را می‌گیرد. یک ماشین پیش‌بینی ساده باید: یک، با ارزیابی خطا به جواب برسد. دو، هرچه خطا بیشتر باشد تصحیح بیشتری اعمال کند. سه، پیدا کردن رابطه‌ی درست یک فرآیند تکراری یا *iterative* است: باید مراحل را بارها تکرار کند تا به دقت مورد نظر برسد. همین ایده در درس بعد به تابع خطا و بعد به gradient descent تبدیل می‌شود.',
+      term: ['Iterative', 'تکراری'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 100, 'یک ماشین پیش‌بینی ساده باید:', { size: 40, color: 'red', bold: true, fa: true });
+        const L = [
+          'با ارزیابی خطا به جواب برسد',
+          'هرچه خطا بیشتر باشد، تصحیح بیشتری اعمال کند',
+          'مراحل را بارها تکرار کند تا به دقت مورد نظر برسد',
+        ];
+        for (const [k, l] of L.entries()) {
+          await b.write(`rn${k}`, 900, 210 + k * 90, String(k + 1), { size: 34, color: 'red', bold: true });
+          await b.write(`r${k}`, 870, 210 + k * 90, l, { size: 30, anchor: 'start', fa: true });
+        }
+        await b.write('it', 500, 500, 'iterative', { size: 34, color: 'orange', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 21. summary
+    {
+      say: 'جمع‌بندی کنیم. این نکته‌ها را یک بار دیگر بخوانید، بعد سؤال‌ها.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'یادت باشد', { size: 46, color: 'orange', bold: true, fa: true });
+        const L = [
+          'آموزش با مثال: ویژگی‌ها + برچسب برای هر نمونه',
+          'پرسپترون: اگر w·x + b > 0 باشد خروجی 1 است، وگرنه 0',
+          'مرز پرسپترون یک خط است؛ در مثال اتوبوس:',
+          { math: 'w·x + b = 0,   b = -9   ⇒   x_1 + 2x_2 = 9' },
+          'تفکیک‌پذیر خطی → پرسپترون ساده کافی است',
+          'سگ و گربه، XOR: غیرخطی → لایه‌ی مخفی (MLP)',
+          'خطا: error = truth - calculated؛ علامتش جهت اصلاح را می‌گوید',
+        ];
+        for (const [k, l] of L.entries()) {
+          if (l.math) await b.write(`m${k}`, 890, 140 + k * 58, l.math, { size: 25, anchor: 'end', color: 'blue' });
+          else await b.write(`m${k}`, 920, 140 + k * 58, '•  ' + l, { size: 25, anchor: 'start', fa: true });
+        }
+      },
+    },
+    // ---------------------------------------------------------- quizzes
+    {
+      say: 'نوبت شماست! یک ماشین جدید: طول 5 و ارتفاع 2.5. با وزن‌های اسلاید، w·x چند است؟',
+      draw: quizBoard(1, [
+        { text: 'w = [1, 2]', color: 'purple' },
+        { text: 'x = [5, 2.5]', color: 'blue' },
+        { text: 'w·x = ?', color: 'orange' },
+      ]),
+      quiz: { answer: [num(wx(5, 2.5))], hint: 'طول × 1 + ارتفاع × 2.', explain: `5×1 + 2.5×2 = 5 + 5 = ${num(wx(5, 2.5))}. چون از 9 بیشتر است، پرسپترون می‌گوید اتوبوس.` },
+      solve: b => solveLines(b, [
+        { text: `5×1 + 2.5×2 = 5 + 5 = ${num(wx(5, 2.5))}` },
+        { text: `${num(wx(5, 2.5))} - 9 = ${num(wx(5, 2.5) + B)} > 0  →  1`, color: 'green', bold: true },
+        { text: 'اتوبوس', fa: true, color: 'red', bold: true },
+      ], 330),
+    },
+    {
+      say: 'ماشین دیگری با طول 4 و ارتفاع 2. پرسپترون اسلاید آن را چه تشخیص می‌دهد؟',
+      draw: quizBoard(2, [
+        { text: 'x = [4, 2]', color: 'blue' },
+        { text: 'w·x + b > 0 ?', color: 'orange' },
+      ]),
+      quiz: {
+        choices: ['اتوبوس، خروجی 1', 'پراید، خروجی 0'], correct: out(4, 2) ? 0 : 1,
+        explain: `w·x = 4×1 + 2×2 = ${num(wx(4, 2))}. با b = -9 می‌شود ${num(wx(4, 2) + B)}، که منفی است؛ پس خروجی 0 یعنی پراید.`,
+      },
+      solve: b => solveLines(b, [
+        { text: `w·x = 4×1 + 2×2 = ${num(wx(4, 2))}` },
+        { text: `${num(wx(4, 2))} - 9 = ${num(wx(4, 2) + B)} ≤ 0  →  0`, color: 'green', bold: true },
+        { text: 'پراید', fa: true, color: 'green', bold: true },
+      ], 300),
+    },
+    {
+      say: 'خط جداکننده‌ی مثال: x_1 + 2x_2 = 9. اگر x_1 = 3 باشد، نقطه‌ی روی خط چه x_2 ای دارد؟',
+      draw: quizBoard(3, [
+        { text: 'x_1 + 2x_2 = 9', color: 'blue', size: 40 },
+        { text: 'x_1 = 3   →   x_2 = ?', color: 'orange' },
+      ]),
+      quiz: { answer: [num((9 - 3) / 2)], hint: '3 را از 9 کم کن و بر 2 تقسیم کن.', explain: `2x_2 = 9 - 3 = 6، پس x_2 = ${num((9 - 3) / 2)}.` },
+      solve: b => solveLines(b, [
+        { text: '3 + 2x_2 = 9' },
+        { text: '2x_2 = 6' },
+        { text: `x_2 = ${num((9 - 3) / 2)}`, color: 'green', bold: true, size: 36 },
+      ], 300),
+    },
+    {
+      say: 'کدام‌یک از این توابع با یک پرسپترون ساده، یعنی یک خط راست، یاد گرفته *نمی‌شود*؟',
+      draw: quizBoard(4, [
+        { text: 'تفکیک‌پذیر خطی نیست؟', fa: true, size: 40 },
+      ]),
+      quiz: {
+        choices: ['AND', 'OR', 'XOR'], correct: 2,
+        explain: 'در AND فقط (1, 1) خروجی 1 دارد و در OR فقط (0, 0) خروجی 0؛ هر دو را یک خط جدا می‌کند. در XOR نقطه‌های 1 ضربدری روبه‌روی هم هستند و یک خط کافی نیست؛ لایه‌ی مخفی لازم است.',
+      },
+      solve: async b => {
+        const R = [
+          ['AND:  (1, 1) → 1', 'یک خط کافی است ✓', 'soft'],
+          ['OR:  (0, 0) → 0', 'یک خط کافی است ✓', 'soft'],
+          ['XOR:  1, 0, 0, 1', 'یک‌ها ضربدری؛ لایه‌ی مخفی لازم است ✗', 'red'],
+        ];
+        for (const [k, [m, t, c]] of R.entries()) {
+          await all([b.write(`s-m${k}`, 300, 290 + k * 60, m, { size: 28, color: c }), b.write(`s-t${k}`, 700, 290 + k * 60, t, { size: 26, color: c, fa: true, bold: c === 'red' })]);
+        }
+      },
+    },
+    {
+      say: 'ماشین کیلومتر به مایل با c = 0.62. برای 100 کیلومتر خطا چقدر است؟',
+      draw: quizBoard(5, [
+        { text: 'c = 0.62,   100 km', color: 'red' },
+        { text: 'truth = 62.137', color: 'green' },
+        { text: 'error = ?', color: 'orange' },
+      ]),
+      quiz: { answer: [num(err(0.62))], hint: 'calculated = 100 × 0.62. بعد error = truth - calculated.', explain: `calculated = 100 × 0.62 = 62، پس error = 62.137 - 62 = ${num(err(0.62))}. خیلی نزدیک شدیم.` },
+      solve: b => solveLines(b, [
+        { text: 'calculated = 100 × 0.62 = 62' },
+        { text: `error = 62.137 - 62 = ${num(err(0.62))}`, color: 'green', bold: true },
+      ], 330),
+    },
+    {
+      say: 'سؤال آخر: با c = 0.7 خطا -7.863 شد. قدم بعدی ماشین پیش‌بینی چیست؟',
+      draw: quizBoard(6, [
+        { text: 'c = 0.7   →   error = -7.863', color: 'red' },
+        { text: 'قدم بعدی؟', fa: true, color: 'orange' },
+      ]),
+      quiz: {
+        choices: ['c را کمی کم کن، مثلاً تا 0.61', 'c را بیشتر کن، مثلاً تا 0.8', 'همان 0.7 را نگه دار'], correct: 0,
+        explain: 'خطای منفی یعنی ماشین بیشتر از جواب درست گفته، پس c زیادی بزرگ است و باید کم شود. چون خطا دیگر بزرگ نیست، قدم را کوچک برمی‌داریم؛ اسلاید 259 همین کار را با 0.61 می‌کند.',
+      },
+      solve: b => solveLines(b, [
+        { text: 'error < 0  →  calculated > truth', color: 'red' },
+        { text: 'c ↓   (0.7 → 0.61)', color: 'green', bold: true, size: 34 },
+        { text: `خطای جدید: ${LTR(num(err(0.61)))}`, fa: true, color: 'green' },
+      ], 300),
+    },
+  ],
+});
+</script>
+</body>
+</html>

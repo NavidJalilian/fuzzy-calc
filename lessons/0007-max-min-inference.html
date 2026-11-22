@@ -3,629 +3,587 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>درس ۷ — استنتاج max-min</title>
-<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
-<style>
-/* ===== SHARED STYLE — copy verbatim into every lesson, do not edit per lesson ===== */
-:root{--bg:#fbfaf7;--surface:#ffffff;--surface-1:#f3f1ec;--text:#1f1e1c;--text-2:#5f5e5a;--text-3:#888780;--border:#e3e0d8;--border-strong:#c9c6bc;
---accent:#534AB7;--accent-bg:#EEEDFE;--ok:#3B6D11;--ok-bg:#EAF3DE;--bad:#A32D2D;--bad-bg:#FCEBEB;--warn:#854F0B;--warn-bg:#FAEEDA;
---c1:#7F77DD;--c2:#1D9E75;--c3:#EF9F27;--c4:#D4537E;--grid:#e3e0d8}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1a1a19;--surface:#232322;--surface-1:#2c2c2a;--text:#ecebe6;--text-2:#b4b2a9;--text-3:#888780;--border:#3a3a37;--border-strong:#55554f;
---accent:#AFA9EC;--accent-bg:#26215C;--ok:#97C459;--ok-bg:#173404;--bad:#F09595;--bad-bg:#501313;--warn:#FAC775;--warn-bg:#412402;--grid:#3a3a37}}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:Vazirmatn,Tahoma,sans-serif;font-size:16px;line-height:1.95}
-main{max-width:760px;margin:0 auto;padding:24px 16px 64px}
-a{color:var(--accent)}
-h1{font-size:26px;font-weight:700;line-height:1.5;margin:6px 0 6px}
-h2{font-size:19px;font-weight:500;margin:0 0 8px}
-h3{font-size:16px;font-weight:500;margin:12px 0 4px}
-p{margin:0 0 10px}
-.top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:13px;color:var(--text-2)}
-.goal{color:var(--text-2);margin-bottom:22px}
-.sec{margin:0 0 28px}
-.lab{font-size:13px;color:var(--text-3);margin:0 0 4px;letter-spacing:0}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
-.soft{background:var(--surface-1);border-radius:12px;padding:12px 14px}
-.m{direction:ltr;unicode-bidi:isolate;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14.5px;white-space:nowrap}
-@media (max-width:700px){.m{white-space:normal;display:inline-block;max-width:100%}}
-.mb{direction:ltr;text-align:left;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14.5px;background:var(--surface-1);border-radius:8px;padding:8px 12px;margin:6px 0;overflow-x:auto;line-height:1.8}
-.en{direction:ltr;unicode-bidi:isolate;font-size:13px;color:var(--text-2)}
-b,strong{font-weight:500}
-.key{background:var(--warn-bg);color:var(--warn);border-radius:6px;padding:0 6px}
-.tip{border-right:3px solid var(--accent);background:var(--accent-bg);padding:8px 12px;border-radius:0;margin:8px 0}
-.trap{border-right:3px solid var(--bad);background:var(--bad-bg);padding:8px 12px;border-radius:0;margin:8px 0}
-button{font-family:inherit;font-size:14px;background:var(--surface);color:var(--text);border:1px solid var(--border-strong);border-radius:8px;padding:5px 14px;cursor:pointer}
-button:hover{background:var(--surface-1)}
-button.on{background:var(--accent-bg);border-color:var(--accent);color:var(--accent)}
-input[type=text]{font-family:inherit;font-size:15px;direction:ltr;text-align:center;width:72px;height:34px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text)}
-input[type=range]{width:100%;accent-color:var(--accent);direction:ltr}
-table.t{border-collapse:collapse;direction:ltr;font-size:14.5px;margin:6px 0;display:block;max-width:100%;overflow-x:auto}
-table.t>tbody,table.t>thead{display:table;width:100%}
-table.t th,table.t td{border:1px solid var(--border);padding:5px 6px;text-align:center;font-weight:400}
-table.t th{background:var(--surface-1)}
-.ok{background:var(--ok-bg)!important}.no{background:var(--bad-bg)!important}
-.fb{font-size:14px;margin-top:8px;min-height:1em}.fb.good{color:var(--ok)}.fb.bad{color:var(--bad)}
-.q{margin:0 0 18px}
-.mcq .opts{display:grid;gap:6px;margin-top:6px}
-.mcq .opts button{text-align:right;padding:7px 12px}
-.stepper .st{display:none;padding:6px 0;border-bottom:1px dashed var(--border)}
-.stepper .st.show{display:block}
-.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-svg{max-width:100%;height:auto;direction:ltr}
-svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12px}
-.nav{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:14px;border-top:1px solid var(--border);padding-top:14px;margin-top:28px}
-.ask{font-size:14px;color:var(--text-2)}
-@media print{body{background:#fff}.card,.soft{break-inside:avoid}.stepper .st{display:block}button{display:none}}
-.given{font-size:14px;color:var(--text-2);background:var(--surface-1);border-right:3px solid var(--border-strong);border-radius:0 8px 8px 0;padding:6px 12px;margin:2px 0 10px}
-.given b{color:var(--text)}
-[id]{scroll-margin-top:16px}
-h3:target,.card:target{outline:2px solid var(--accent);outline-offset:6px;border-radius:8px}
-details.sol{margin-top:10px;border:1px dashed var(--border-strong);border-radius:10px;padding:6px 12px;background:var(--surface)}
-details.sol summary{cursor:pointer;color:var(--accent);font-weight:500}
-details.sol[open] summary{margin-bottom:6px}
-.q>details.sol:not([open]){display:inline-block;vertical-align:middle;margin:0;padding:0;border:0;background:none}
-.q>details.sol summary{list-style:none;display:inline-block;font-size:14px;border:1px solid var(--border-strong);border-radius:8px;padding:5px 14px;background:var(--surface)}
-.q>details.sol summary::-webkit-details-marker{display:none}
-.q>details.sol summary:hover{background:var(--surface-1)}
-@media print{details.sol{border-style:solid}}
-/* ===== END SHARED STYLE ===== */
-</style>
-<style>
-/* lesson 7 only */
-.mb{white-space:pre}
-.matw{display:flex;align-items:center;gap:8px;direction:ltr;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14px;margin:6px 0}
-.mat{border-collapse:collapse;border-left:2px solid var(--text-2);border-right:2px solid var(--text-2);border-radius:4px}
-.mat td{padding:2px 10px;text-align:center}
-.sl{display:grid;grid-template-columns:70px 1fr 44px;gap:8px;align-items:center;direction:ltr;font-size:14px}
-.sl span{font-family:"SF Mono",Menlo,Consolas,monospace}
-.cell{cursor:pointer}
-.wstep{border-top:1px dashed var(--border);padding-top:10px;margin-top:12px}
-.wstep svg{max-width:520px;display:block;margin:6px auto 0}
-.wstep .num{display:inline-block;min-width:1.8em;text-align:center;background:var(--accent-bg);color:var(--accent);border-radius:999px;margin-left:6px;font-weight:500}
-table.t.pair{direction:rtl}
-.pair td.win{background:var(--ok-bg);font-weight:500}
-.who{margin:6px 0;padding-inline-start:20px}
-.who li{margin:4px 0}
-</style>
+<title>Max-Min Inference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Vazirmatn:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="../assets/teacher.css">
 </head>
 <body>
-<main>
-<div class="top"><a href="../index.html">← فهرست درس‌ها</a><span>درس ۷ از ۱۱ · فصل ۲ · حدود ۱۵ دقیقه</span></div>
-<h1>استنتاج max-min</h1>
-<p class="goal">هدف: بعد از این درس می‌توانی یک قانون «اگر x برابر A است آنگاه y برابر B است» را به یک ماتریس تبدیل کنی، و با ترکیب max-min خروجی را برای هر ورودی حساب کنی — درست مثل <a href="#ex72">مثال اسلاید ۷۲</a> (در بخش ۳ کامل آمده).</p>
-
-<!-- ===== 1. IDEA ===== -->
-<section class="sec"><p class="lab">۱. ایده</p>
-<div class="card">
-  <div class="given"><b>شماره اسلایدها برای چیست؟</b> فقط برای اینکه اگر جزوه را داری، جایش را پیدا کنی. هرچه هر اسلاید می‌گوید (قانون، فرمول، عددها) همین‌جا کنار شماره‌اش آمده و برای فهمیدن درس به خود اسلاید نیازی نیست.</div>
-  <h3>قانون فازی و ماتریس آن</h3>
-  <p>در سیستم خبره فازی، دانش به شکل قانون نوشته می‌شود <span class="en">(slide 69)</span>:</p>
-  <div class="mb">If x is A then y is B</div>
-  <p>A و B هر دو مجموعه فازی‌اند. سیستم، جفت <span class="m">(A,B)</span> را در قالب یک <b>ماتریس</b> به نام <span class="m">M</span> ذخیره می‌کند. کار M این است که مجموعه A را به مجموعه B <b>نگاشت</b> کند (یعنی از A به B برساند). دو روش برای این کار در اسلایدها آمده: <span class="m">Max-Min</span> (همین درس) و <span class="m">Max-product</span> (درس بعد).</p>
-
-  <h3>ضرب بردار در ماتریس — نسخه معمولی و نسخه فازی</h3>
-  <p>در ضرب معمولی بردار در ماتریس <span class="en">(vector-matrix multiplication)</span> داریم <span class="en">(slide 70)</span>:</p>
-  <div class="mb">X(1×n) · A(n×p) = Y(1×p)        y_j = Σ_{i=1..n} x_i · a_ij</div>
-  <div class="given"><b>به زبان ساده:</b><br>• <span class="m">1×n</span> یعنی «یک ردیف با n عدد». <span class="m">n×p</span> یعنی «جدولی با n سطر و p ستون». پس یک ردیف n تایی ضرب در جدول، یک ردیف p تایی می‌دهد: <b>به تعداد ستون‌های جدول جواب داریم.</b><br>• حرف کوچک پایین‌نویس شماره است: <span class="m">i</span> = شماره سطر، <span class="m">j</span> = شماره ستون. <span class="m">x_i</span> = عدد i ام ورودی؛ <span class="m">a_ij</span> = عدد جدول در سطر i و ستون j.<br>• <span class="m">Σ_{i=1..n}</span> یعنی «برای همه سطرها از ۱ تا n حساب کن و همه را جمع بزن».<br>• پس <span class="m">y_j</span> را این‌طور بخوان: «ستون j جدول را بردار، هر عددش را در عدد هم‌ردیفش در ورودی ضرب کن، و حاصل‌ها را جمع بزن».<br>مثال: ورودی <span class="m">(1, 2)</span> و ستون <span class="m">(3, 4) → 1·3 + 2·4 = 11</span>.</div>
-  <p>نسخه فازی، که به آن ترکیب max-min <span class="en">(max-min composition)</span> می‌گویند و با علامت <span class="m">∘</span> نشان می‌دهند، همان کار را می‌کند با دو جابه‌جایی:</p>
-  <ul>
-    <li>به جای <b>ضرب</b> دوبه‌دو ← <b>min</b> دوبه‌دو</li>
-    <li>به جای <b>جمع</b> ← <b>max</b></li>
-  </ul>
-  <div class="mb">A(1×n) ∘ M(n×p) = B(1×p)        b_j = max_{1≤i≤n} { min(a_i , m_ij) }</div>
-  <div class="given"><b>به زبان ساده:</b> درست همان جمله قبلی است، فقط با دو کلمه عوض‌شده: «ستون j جدول را بردار، هر عددش را با عدد هم‌ردیفش در ورودی <b>مقایسه کن و کوچک‌تر را بردار</b> (به جای ضرب)، و از این‌ها <b>بزرگ‌ترین را بردار</b> (به جای جمع)».<br>• <span class="m">∘</span> فقط اسم این عملیات است؛ بخوان «ترکیب max-min».<br>• <span class="m">max_{1≤i≤n}</span> یعنی «بین همه سطرها، از ۱ تا n، بزرگ‌ترین».<br>مثال با همان عددهای بالا ولی فازی: ورودی <span class="m">(0.2, 0.4)</span> و ستون <span class="m">(0.1, 0.6)</span> ← کوچک‌ترها <span class="m">0.1</span> و <span class="m">0.4</span> ← بزرگ‌ترین <span class="m">0.4</span>.</div>
-  <p><span class="key">دستور کار برای b_j:</span> ستون j ماتریس را از بالا به پایین بخوان؛ هر عدد ستون را با عدد هم‌ردیفش در A جفت کن و min بگیر؛ از این minها، بزرگ‌ترین (max) را بردار.</p>
-  <div class="tip">یادآوری از درس ۴: <span class="m">min</span> همان اشتراک <span class="en">(intersection, AND)</span> است و <span class="m">max</span> همان اجتماع <span class="en">(union, OR)</span>. پس b_j یعنی: «یا (x1 و ستون) یا (x2 و ستون) یا …».</div>
-
-  <h3>ساختن ماتریس قانون از A و B</h3>
-  <p>اگر <span class="m">A = (a_1, …, a_n)</span> با <span class="m">a_i = μ_A(x_i)</span> و <span class="m">B = (b_1, …, b_p)</span> با <span class="m">b_j = μ_B(y_j)</span> باشد، ماتریس فازی <span class="m">M(n×p)</span> این‌طور ساخته می‌شود <span class="en">(slide 71)</span>:</p>
-  <div class="mb">m_ij = min(a_i , b_j)</div>
-  <div class="given"><b>به زبان ساده:</b> «خانه سطر i و ستون j جدول = کوچک‌ترِ دو عدد: عضویت نقطه i ام در A و عضویت نقطه j ام در B».<br>• معنی: این خانه می‌گوید «چقدر درست است که <b>هم</b> x برابر x_i باشد <b>و هم</b> y برابر y_j». «و» در فازی یعنی min (درس ۴).<br>مثال (قانون «دمای نرمال ← سرعت متوسط»): دمای ۱۲۵ با درجه <span class="m">0.5</span> نرمال است و سرعت ۳۰ با درجه <span class="m">1</span> متوسط ← خانه آن‌ها <span class="m">min(0.5, 1) = 0.5</span>.</div>
-  <p>هر <b>سطر</b> یک نقطه از x است و هر <b>ستون</b> یک نقطه از y.</p>
-
-  <h3>قاعده ترکیبی استنتاج زاده</h3>
-  <p>پروفسور لطفی‌زاده: اگر اطلاعاتی درباره A داشته باشیم و اسمش را <span class="m">A′</span> بگذاریم، با کمک ماتریس قانون می‌توانیم اطلاعاتی درباره B به دست بیاوریم و اسمش را <span class="m">B′</span> بگذاریم. به این روش قاعده ترکیبی استنتاج <span class="en">(compositional rule of inference)</span> می‌گویند <span class="en">(slide 73)</span>:</p>
-  <div class="mb">B′ = A′ ∘ μ_AB</div>
-  <div class="given"><b>به زبان ساده:</b> «آنچه الان درباره ورودی می‌دانیم (A′) را از جدول قانون (μ_AB) رد کن (با ∘، یعنی همان max-min بالا)؛ چیزی که بیرون می‌آید (B′) چیزی است که قانون درباره خروجی می‌گوید».<br>• علامت ′ (پریم) یعنی «نسخه تازه»: A قسمت «اگر» قانون است، A′ چیزی است که الان واقعاً دیده‌ایم.<br>• μ_AB همان جدول M است که با <span class="m">m_ij = min(a_i , b_j)</span> ساخته شد.<br>مثال: قانون «اگر دما نرمال است، سرعت متوسط است». امروز دما ۱۲۵ است (A′). از جدول قانون ردش می‌کنیم و B′ می‌گوید سرعت «تا درجه 0.5 متوسط» است. قدم به قدمش در بخش ۲ (دکمه «قانون دما ← سرعت») آمده.</div>
-  <div class="tip">نام‌گذاری اسلایدها: یک ماتریس قانون با سه اسم آمده — <span class="m">M</span> (در فرمول ساختن ماتریس، بالا)، <span class="m">μ_AB</span> (در فرمول زاده، همین بالا) و <span class="m">μ_ij</span> (در <a href="#ex74">مثال دما و سرعت</a>، بخش ۳). هر سه یکی‌اند. در کتاب‌ها معمولاً <span class="m">R</span> (رابطه، <span class="en">relation</span>) می‌نویسند.</div>
-  <div class="trap">دو نکته اگر جزوه را می‌خوانی:
-    (۱) در <a href="#ex72">مثال اسلاید ۷۲</a> (بخش ۳)، ماتریس M از هیچ A و B ساخته نشده؛ فقط چند عدد دلخواه است تا عملگر ∘ را تمرین کنیم.
-    (۲) دو غلط تایپی در جزوه: در فرمول ساختن ماتریس (اسلاید ۷۱) نوشته شده <span class="m">b_i = μ_B(y_i)</span>؛ منظور <span class="m">b_j = μ_B(y_j)</span> است. و در <a href="#ex74">مثال دما و سرعت</a> (اسلاید ۷۵–۷۶)، خانه آخر ماتریس (سطر دمای ۲۰۰، ستون سرعت ۵۰) به شکل <span class="m">min(0,0.6)</span> نوشته شده، در حالی که درستش <span class="m">min(0,0)</span> است، چون عضویت B در سرعت ۵۰ صفر است. جواب هر دو صفر است، پس نتیجه عوض نمی‌شود.</div>
-</div></section>
-
-<!-- ===== 2. SEE IT ===== -->
-<section class="sec"><p class="lab">۲. ببین چه اتفاقی می‌افتد</p>
-<div class="card">
-  <h3>الف) ترکیب max-min، قدم به قدم</h3>
-  <div class="row" id="cmpPreset">
-    <button class="on" data-p="0">مثال اسلاید ۷۲</button>
-    <button data-p="1">قانون دما ← سرعت، ورودی ۱۲۵</button>
-  </div>
-  <div class="soft" id="cmpCtx" style="margin-top:10px"></div>
-  <div id="cmpWalk"></div>
-  <h3 style="margin-top:18px">حالا خودت امتحان کن</h3>
-  <div class="soft" id="cmpOut" aria-live="polite" style="margin-top:6px"></div>
-  <svg id="cmpSvg" viewBox="0 0 600 320" role="img" aria-labelledby="cmpTitle"><title id="cmpTitle">ترکیب max-min: بردار A کنار ماتریس M؛ برای ستون انتخاب‌شده، minهای دوبه‌دو و بزرگ‌ترین آن‌ها نشان داده می‌شود</title></svg>
-  <div id="cmpFree">
-    <p style="font-size:14px;color:var(--text-2)">روی هر ستون جدول (یا دکمه‌های زیر) کلیک کن، یا عددهای بردار ورودی را با لغزنده‌ها عوض کن و ببین کدام سطر «برنده» max می‌شود.</p>
-    <div class="row" id="cmpPick"></div>
-    <div id="cmpSliders"></div>
-  </div>
-
-  <h3 style="margin-top:20px">ب) ساختن ماتریس قانون خانه به خانه (مثال اسلاید ۷۴)، قدم به قدم</h3>
-  <div id="relWalk"></div>
-  <h3 style="margin-top:18px">حالا خودت امتحان کن</h3>
-  <p style="font-size:14px;color:var(--text-2)">روی هر خانه جدول کلیک کن تا ببینی از کدام دو عدد ساخته شده، یا «خانه بعدی» را بزن تا خانه‌ها یکی‌یکی پر شوند.</p>
-  <svg id="relSvg" viewBox="0 0 480 280" role="img" aria-labelledby="relTitle"><title id="relTitle">ساخت ماتریس قانون: هر خانه کمینه عضویت سطر و ستون است</title></svg>
-  <div class="row"><button id="relNext">خانه بعدی</button><button id="relAll">پر کردن همه</button><button id="relReset">پاک کردن</button></div>
-  <div class="soft" id="relOut" aria-live="polite" style="margin-top:6px"></div>
-</div></section>
-
-<!-- ===== 3. WORKED EXAMPLE ===== -->
-<section class="sec"><p class="lab">۳. مثال حل‌شده، قدم به قدم</p>
-<div class="card stepper" id="ex72">
-  <h3>مثال اسلاید ۷۲: B = A ∘ M را حساب کن</h3>
-  <p>صورت سؤال اسلاید: «فرض کنید A و M به صورت زیر داده شده است؛ B را محاسبه نمایید.»</p>
-  <div class="mb">A = (0.2 , 0.4 , 0.6 , 1)</div>
-  <div class="matw"><span>M =</span><table class="mat"><tr><td>0.1</td><td>0.6</td><td>0.8</td></tr><tr><td>0.6</td><td>0.8</td><td>0.6</td></tr><tr><td>0.8</td><td>0.6</td><td>0.5</td></tr><tr><td>0.0</td><td>0.5</td><td>0.5</td></tr></table></div>
-  <p class="ask">روی «قدم بعدی» بزن تا قدم به قدم جلو برویم.</p>
-
-  <div class="st"><b>قدم ۱ — هر حرف چیست؟</b>
-    <ul class="who">
-      <li><span class="m">A</span> = <b>ورودی</b>. چهار عدد است.</li>
-      <li><span class="m">M</span> = <b>یک جدول عدد که صورت سؤال به تو داده</b> (۴ سطر، ۳ ستون). اینجا آن را نمی‌سازی؛ فقط از آن استفاده می‌کنی.</li>
-      <li><span class="m">B</span> = <b>جوابی که باید پیدا کنی</b>.</li>
-    </ul>
-    <div class="trap">چرا گیج‌کننده است: در اسلاید قبل (۷۱) حرف B بخش «آنگاه» قانون بود و M از روی A و B <b>ساخته</b> می‌شد. اینجا نه: M از هیچ قانونی نیامده و B فقط اسم جواب است. این مثال فقط برای تمرین عملگر ∘ است. ساختن M از یک قانون را در <a href="#ex74">مثال بعدی</a> می‌بینی.</div></div>
-
-  <div class="st"><b>قدم ۲ — جواب چند عدد دارد؟</b>
-    <ul class="who">
-      <li>A چهار عدد دارد و M چهار سطر؛ پس <b>هر عدد A کنار یک سطر M</b> می‌نشیند (عدد اول کنار سطر اول، …).</li>
-      <li>M سه ستون دارد؛ پس B سه عدد دارد: <span class="m">b1, b2, b3</span>.</li>
-      <li><b>هر ستون M یک عدد B می‌سازد</b>: ستون ۱ ← b1، ستون ۲ ← b2، ستون ۳ ← b3. کادرهایی که در اسلاید دور ستون‌ها کشیده شده همین را نشان می‌دهد.</li>
-    </ul></div>
-
-  <div class="st"><b>قدم ۳ — b1 را از ستون ۱ بساز.</b> ستون ۱ را کنار A بگذار. در هر سطر، از دو عدد <b>کوچک‌تر</b> را بردار (min):
-    <table class="t pair"><tr><th>سطر</th><th>عدد A</th><th>عدد ستون ۱</th><th>کوچک‌تر (min)</th></tr>
-      <tr><td>1</td><td>0.2</td><td>0.1</td><td>0.1</td></tr>
-      <tr><td>2</td><td>0.4</td><td>0.6</td><td>0.4</td></tr>
-      <tr><td>3</td><td>0.6</td><td>0.8</td><td class="win">0.6</td></tr>
-      <tr><td>4</td><td>1</td><td>0.0</td><td>0</td></tr></table>
-    حالا از ستون آخر <b>بزرگ‌ترین</b> را بردار (max): <span class="m">max(0.1, 0.4, 0.6, 0) = 0.6</span>. پس <span class="key"><span class="m">b1 = 0.6</span></span>.</div>
-
-  <div class="st"><b>قدم ۴ — b2 را از ستون ۲ بساز.</b> همان کار، با ستون ۲:
-    <table class="t pair"><tr><th>سطر</th><th>عدد A</th><th>عدد ستون ۲</th><th>کوچک‌تر (min)</th></tr>
-      <tr><td>1</td><td>0.2</td><td>0.6</td><td>0.2</td></tr>
-      <tr><td>2</td><td>0.4</td><td>0.8</td><td>0.4</td></tr>
-      <tr><td>3</td><td>0.6</td><td>0.6</td><td class="win">0.6</td></tr>
-      <tr><td>4</td><td>1</td><td>0.5</td><td>0.5</td></tr></table>
-    بزرگ‌ترین: <span class="m">max(0.2, 0.4, 0.6, 0.5) = 0.6</span>. پس <span class="key"><span class="m">b2 = 0.6</span></span>.</div>
-
-  <div class="st"><b>قدم ۵ — b3 را از ستون ۳ بساز.</b>
-    <table class="t pair"><tr><th>سطر</th><th>عدد A</th><th>عدد ستون ۳</th><th>کوچک‌تر (min)</th></tr>
-      <tr><td>1</td><td>0.2</td><td>0.8</td><td>0.2</td></tr>
-      <tr><td>2</td><td>0.4</td><td>0.6</td><td>0.4</td></tr>
-      <tr><td>3</td><td>0.6</td><td>0.5</td><td class="win">0.5</td></tr>
-      <tr><td>4</td><td>1</td><td>0.5</td><td class="win">0.5</td></tr></table>
-    بزرگ‌ترین: <span class="m">max(0.2, 0.4, 0.5, 0.5) = 0.5</span>. پس <span class="key"><span class="m">b3 = 0.5</span></span>.</div>
-
-  <div class="st"><b>قدم ۶ — جواب.</b> <span class="m">B = (0.6 , 0.6 , 0.5)</span>، همان جواب اسلاید ۷۲.
-    <div class="tip">خلاصه کل کار در یک جمله: <b>برای هر ستون، در هر سطر کوچک‌تر را بردار، بعد بزرگ‌ترینِ آن‌ها را.</b> درست مثل ضرب بردار در ماتریس، فقط «ضرب» شده «کوچک‌تر» و «جمع» شده «بزرگ‌ترین».</div></div>
-  <div class="row" style="margin-top:8px"><button class="next">قدم بعدی</button><button class="all">نمایش همه</button></div>
-</div>
-
-<div class="card" style="margin-top:12px">
-  <div class="q practice" id="try72" data-hint="در هر سطر فقط دو عدد را مقایسه کن و کوچک‌تر را بنویس؛ بعد از ستون «کوچک‌تر» بزرگ‌ترین را بردار." data-yes="عالی! B = (0.7, 0.5). دیدی که برنده b1 سطر ۲ بود و برنده b2 سطر ۱.">
-    <h3>حالا تو: همین کار را با عددهای تازه انجام بده</h3>
-    <p><span class="m">A</span> ورودی است و <span class="m">M</span> جدول داده‌شده. <span class="m">B = A ∘ M</span> را حساب کن. M دو ستون دارد، پس B دو عدد دارد.</p>
-    <div class="mb">A = (0.5 , 1 , 0.3)</div>
-    <div class="matw"><span>M =</span><table class="mat"><tr><td>0.4</td><td>0.9</td></tr><tr><td>0.7</td><td>0.2</td></tr><tr><td>1.0</td><td>0.6</td></tr></table></div>
-    <p><b>b1 از ستون ۱:</b></p>
-    <table class="t pair"><tr><th>سطر</th><th>عدد A</th><th>عدد ستون ۱</th><th>کوچک‌تر (min)</th></tr>
-      <tr><td>1</td><td>0.5</td><td>0.4</td><td><input type="text" data-k="0.4" aria-label="سطر ۱ ستون ۱"></td></tr>
-      <tr><td>2</td><td>1</td><td>0.7</td><td><input type="text" data-k="0.7" aria-label="سطر ۲ ستون ۱"></td></tr>
-      <tr><td>3</td><td>0.3</td><td>1.0</td><td><input type="text" data-k="0.3" aria-label="سطر ۳ ستون ۱"></td></tr>
-      <tr><th colspan="3">b1 = بزرگ‌ترین (max)</th><td><input type="text" data-k="0.7" aria-label="b1"></td></tr></table>
-    <p><b>b2 از ستون ۲:</b></p>
-    <table class="t pair"><tr><th>سطر</th><th>عدد A</th><th>عدد ستون ۲</th><th>کوچک‌تر (min)</th></tr>
-      <tr><td>1</td><td>0.5</td><td>0.9</td><td><input type="text" data-k="0.5" aria-label="سطر ۱ ستون ۲"></td></tr>
-      <tr><td>2</td><td>1</td><td>0.2</td><td><input type="text" data-k="0.2" aria-label="سطر ۲ ستون ۲"></td></tr>
-      <tr><td>3</td><td>0.3</td><td>0.6</td><td><input type="text" data-k="0.3" aria-label="سطر ۳ ستون ۲"></td></tr>
-      <tr><th colspan="3">b2 = بزرگ‌ترین (max)</th><td><input type="text" data-k="0.5" aria-label="b2"></td></tr></table>
-    <button class="check">بررسی</button>
-    <details class="sol"><summary>راه‌حل</summary><div class="mb pre">b1 = max( min(0.5,0.4), min(1,0.7), min(0.3,1.0) ) = max(0.4, 0.7, 0.3) = 0.7
-b2 = max( min(0.5,0.9), min(1,0.2), min(0.3,0.6) ) = max(0.5, 0.2, 0.3) = 0.5</div></details><div class="fb"></div>
-  </div>
-</div>
-
-<div class="card stepper" id="ex74" style="margin-top:12px">
-  <h3>مثال اسلاید ۷۴–۷۵: ماتریس قانون «اگر دما نرمال باشد، سرعت متوسط است»</h3>
-  <p>این بار <b>خودمان M را از روی یک قانون می‌سازیم</b> (کاری که در مثال قبل لازم نبود).</p>
-  <div class="mb">Normal temperature (A) = {0/100 , 0.5/125 , 1/150 , 0.5/175 , 0/200}
-Medium velocity (B)    = {0/10 , 0.6/20 , 1/30 , 0.6/40 , 0/50}</div>
-  <p class="ask">روی «قدم بعدی» بزن.</p>
-
-  <div class="st"><b>قدم ۱ — هر چیز چیست؟</b>
-    <ul class="who">
-      <li>قانون: «<b>اگر</b> دما نرمال باشد، <b>آنگاه</b> سرعت متوسط است.»</li>
-      <li><span class="m">A</span> = بخش «اگر»: پنج دما، و کنار هر کدام اینکه چقدر «نرمال» است.</li>
-      <li><span class="m">B</span> = بخش «آنگاه»: پنج سرعت، و کنار هر کدام اینکه چقدر «متوسط» است.</li>
-      <li><span class="m">μ_AB</span> = ماتریس قانون، یعنی همان M با یک اسم دیگر. <b>این را باید بسازیم.</b></li>
-    </ul>
-    <div class="tip">خواندن نماد (درس ۲): <span class="m">0.5/125</span> یعنی «دمای ۱۲۵ با درجه ۰٫۵ نرمال است». عدد بالا درجه است و عدد پایین خود دما؛ خط کج تقسیم نیست.</div></div>
-
-  <div class="st"><b>قدم ۲ — شکل جدول را بکش.</b> سطرها = دماها، ستون‌ها = سرعت‌ها. کنار هر دما و هر سرعت درجه‌اش را بنویس (داخل پرانتز):
-    <table class="t"><tr><th></th><th>10 (0)</th><th>20 (0.6)</th><th>30 (1)</th><th>40 (0.6)</th><th>50 (0)</th></tr>
-      <tr><th>100 (0)</th><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td></tr>
-      <tr><th>125 (0.5)</th><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td></tr>
-      <tr><th>150 (1)</th><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td></tr>
-      <tr><th>175 (0.5)</th><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td></tr>
-      <tr><th>200 (0)</th><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td></tr></table>
-    پس جدول <span class="m">5×5</span> است.</div>
-
-  <div class="st"><b>قدم ۳ — قانون پر کردن هر خانه.</b> هر خانه = <b>کوچک‌ترِ</b> درجه سطرش و درجه ستونش: <span class="m">m_ij = min(a_i , b_j)</span>.
-    <p>مثال: خانه دمای ۱۲۵ و سرعت ۳۰. درجه سطر ۰٫۵ است و درجه ستون ۱؛ پس <span class="m">min(0.5, 1) = 0.5</span>. به زبان ساده: «دما ۱۲۵ نرمال است <b>و</b> سرعت ۳۰ متوسط است» حداکثر به اندازه ضعیف‌ترینِ این دو درست است.</p></div>
-
-  <div class="st"><b>قدم ۴ — یک سطر کامل: دمای ۱۲۵ (درجه ۰٫۵).</b>
-    <table class="t pair"><tr><th>سرعت</th><th>درجه سطر</th><th>درجه ستون</th><th>کوچک‌تر = خانه</th></tr>
-      <tr><td>10</td><td>0.5</td><td>0</td><td>0</td></tr>
-      <tr><td>20</td><td>0.5</td><td>0.6</td><td>0.5</td></tr>
-      <tr><td>30</td><td>0.5</td><td>1</td><td>0.5</td></tr>
-      <tr><td>40</td><td>0.5</td><td>0.6</td><td>0.5</td></tr>
-      <tr><td>50</td><td>0.5</td><td>0</td><td>0</td></tr></table>
-    سطر ۱۲۵ = <span class="m">(0, 0.5, 0.5, 0.5, 0)</span>. دمای ۱۷۵ هم درجه ۰٫۵ دارد، پس سطرش دقیقاً همین است.</div>
-
-  <div class="st"><b>قدم ۵ — بقیه سطرها با دو میان‌بر.</b>
-    <ul class="who">
-      <li>دمای ۱۵۰ درجه ۱ دارد. کوچک‌ترِ ۱ و هر عدد، خود آن عدد است؛ پس این سطر <b>خود B</b> است: <span class="m">(0, 0.6, 1, 0.6, 0)</span>.</li>
-      <li>دماهای ۱۰۰ و ۲۰۰ درجه ۰ دارند. کوچک‌ترِ ۰ و هر عدد، ۰ است؛ پس این سطرها <b>همه صفر</b>اند.</li>
-    </ul></div>
-
-  <div class="st"><b>قدم ۶ — ماتریس کامل</b> (همان اسلاید ۷۵):
-    <div class="matw"><span>μ_AB =</span><table class="mat"><tr><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr><tr><td>0</td><td>0.5</td><td>0.5</td><td>0.5</td><td>0</td></tr><tr><td>0</td><td>0.6</td><td>1</td><td>0.6</td><td>0</td></tr><tr><td>0</td><td>0.5</td><td>0.5</td><td>0.5</td><td>0</td></tr><tr><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr></table></div>
-    الگو: هر سطر همان B است که از ارتفاع درجه آن سطر «بریده» شده. در درس بعد با همین ماتریس، سرعت را برای دمای ۱۲۵ حساب می‌کنیم.</div>
-  <div class="row" style="margin-top:8px"><button class="next">قدم بعدی</button><button class="all">نمایش همه</button></div>
-</div>
-
-<div class="card" style="margin-top:12px">
-  <div class="q practice" id="try74" data-hint="هر خانه = کوچک‌ترِ درجه سطر (کنار x) و درجه ستون (کنار y). سطری که درجه‌اش ۱ است، خود B را کپی می‌کند." data-yes="عالی! ماتریس قانون را خودت ساختی. سطر x=2 (درجه ۱) دقیقاً خود B شد.">
-    <h3>حالا تو: ماتریس یک قانون را بساز</h3>
-    <p>قانون: «اگر x برابر A است، آنگاه y برابر B است.» <span class="m">A</span> بخش «اگر» است و <span class="m">B</span> بخش «آنگاه». جدول را پر کن؛ هر خانه = کوچک‌ترِ درجه سطر و درجه ستون.</p>
-    <div class="mb">A = {0.6/1 , 1/2}        B = {0.5/10 , 1/20 , 0.4/30}</div>
-    <table class="t"><tr><th></th><th>y=10 (0.5)</th><th>y=20 (1)</th><th>y=30 (0.4)</th></tr>
-      <tr><th>x=1 (0.6)</th><td><input type="text" data-k="0.5" aria-label="x1 y10"></td><td><input type="text" data-k="0.6" aria-label="x1 y20"></td><td><input type="text" data-k="0.4" aria-label="x1 y30"></td></tr>
-      <tr><th>x=2 (1)</th><td><input type="text" data-k="0.5" aria-label="x2 y10"></td><td><input type="text" data-k="1" aria-label="x2 y20"></td><td><input type="text" data-k="0.4" aria-label="x2 y30"></td></tr></table>
-    <button class="check">بررسی</button>
-    <details class="sol"><summary>راه‌حل</summary><div class="mb pre">x=1 (0.6):  min(0.6,0.5)=0.5   min(0.6,1)=0.6   min(0.6,0.4)=0.4
-x=2 (1):    min(1,0.5)=0.5     min(1,1)=1       min(1,0.4)=0.4</div></details><div class="fb"></div>
-  </div>
-</div></section>
-
-<!-- ===== 4. PRACTICE ===== -->
-<section class="sec"><p class="lab">۴. نوبت توست</p>
-<div class="card">
-  <div class="q practice" data-hint="برای هر b_j فقط ستون j را نگاه کن: سه min بگیر و بعد بزرگ‌ترینشان را بنویس." data-yes="عالی! B = (0.5, 0.6, 0.8). دقت کن برنده هر ستون یک سطر متفاوت بود.">
-    <p>۱) <span class="m">B = A ∘ M</span> را با روش max-min حساب کن.</p>
-    <div class="mb">A = (0.3 , 0.9 , 0.5)</div>
-    <div class="matw"><span>M =</span><table class="mat"><tr><td>0.7</td><td>0.2</td><td>0.4</td></tr><tr><td>0.1</td><td>0.6</td><td>0.8</td></tr><tr><td>0.5</td><td>1.0</td><td>0.3</td></tr></table></div>
-    <table class="t"><tr><th>b1</th><th>b2</th><th>b3</th></tr>
-      <tr><td><input type="text" data-k="0.5" aria-label="b1"></td><td><input type="text" data-k="0.6" aria-label="b2"></td><td><input type="text" data-k="0.8" aria-label="b3"></td></tr></table>
-    <button class="check">بررسی</button>
-    <details class="sol"><summary>راه‌حل</summary>
-      <p>برای هر <span class="m">b_j</span> ستون j ماتریس را با A جفت کن، از هر جفت min بگیر و بعد بزرگ‌ترینِ minها را بردار.</p><div class="mb pre">b1 = max( min(0.3,0.7), min(0.9,0.1), min(0.5,0.5) ) = max(0.3, 0.1, 0.5) = 0.5
-b2 = max( min(0.3,0.2), min(0.9,0.6), min(0.5,1.0) ) = max(0.2, 0.6, 0.5) = 0.6
-b3 = max( min(0.3,0.4), min(0.9,0.8), min(0.5,0.3) ) = max(0.3, 0.8, 0.3) = 0.8</div>
-    </details><div class="fb"></div>
-  </div>
-
-  <div class="q mcq" data-yes="درست! تعداد عناصر A (۵) باید با تعداد سطرهای ماتریس برابر باشد و خروجی به تعداد ستون‌ها (۴) عدد دارد." data-no="نه. مثل ضرب معمولی: (1×n) ∘ (n×p) = (1×p). اینجا n=5 و p=4.">
-    <p>۲) اگر <span class="m">A′</span> یک بردار <span class="m">1×5</span> و ماتریس قانون <span class="m">5×4</span> باشد، اندازه <span class="m">B′ = A′ ∘ M</span> چیست؟</p>
-    <div class="opts">
-      <button><span class="m">5×1</span></button>
-      <button><span class="m">4×5</span></button>
-      <button data-ok><span class="m">1×4</span></button>
-      <button><span class="m">1×5</span></button>
-    </div><div class="fb"></div>
-  </div>
-
-  <div class="q practice" id="pq3" data-hint="هر خانه = min(عضویت سطر، عضویت ستون). سطری که عضویتش ۱ است، خود B را کپی می‌کند." data-yes="عالی! ماتریس قانون درست ساخته شد. ستون آخر همه 0.2 است چون b3=0.2 از همه aها کوچک‌تر است.">
-    <p>۳) قانون «اگر x برابر A است آنگاه y برابر B است» را در نظر بگیر. ماتریس قانون <span class="m">R</span> را با <span class="m">r_ij = min(a_i , b_j)</span> پر کن.</p>
-    <div class="mb">A = {0.4/1 , 1/2 , 0.7/3}        B = {0.5/10 , 1/20 , 0.2/30}</div>
-    <table class="t"><tr><th></th><th>y=10</th><th>y=20</th><th>y=30</th></tr>
-      <tr><th>x=1</th><td><input type="text" data-k="0.4" aria-label="r11"></td><td><input type="text" data-k="0.4" aria-label="r12"></td><td><input type="text" data-k="0.2" aria-label="r13"></td></tr>
-      <tr><th>x=2</th><td><input type="text" data-k="0.5" aria-label="r21"></td><td><input type="text" data-k="1" aria-label="r22"></td><td><input type="text" data-k="0.2" aria-label="r23"></td></tr>
-      <tr><th>x=3</th><td><input type="text" data-k="0.5" aria-label="r31"></td><td><input type="text" data-k="0.7" aria-label="r32"></td><td><input type="text" data-k="0.2" aria-label="r33"></td></tr></table>
-    <button class="check">بررسی</button>
-    <details class="sol"><summary>راه‌حل</summary>
-      <p>هر خانه = <span class="m">min(a_i, b_j)</span>؛ عضویت سطر را با عضویت ستون مقایسه کن و کوچک‌تر را بنویس:</p><div class="mb pre">             y=10 (0.5)   y=20 (1)   y=30 (0.2)
-x=1 (0.4)    0.4          0.4        0.2
-x=2 (1)      0.5          1          0.2
-x=3 (0.7)    0.5          0.7        0.2</div><p>مثلاً خانه x=3، y=20: <span class="m">min(0.7, 1) = 0.7</span>. سطر x=2 چون عضویتش ۱ است، خودِ B را کپی می‌کند.</p>
-    </details><div class="fb"></div>
-  </div>
-
-  <div class="q mcq" data-yes="درست! min یعنی «و» (اشتراک) و max یعنی «یا» (اجتماع)." data-no="نه. در درس ۴ دیدیم کدام عملگر با min ساخته می‌شود: μ_A∩B(x) = min(μ_A(x), μ_B(x)).">
-    <p>۴) قدم <span class="m">min(a_i , m_ij)</span> در زبان درس ۴ کدام عمل روی مجموعه‌هاست؟</p>
-    <div class="opts">
-      <button data-ok>اشتراک <span class="m">(∩)</span></button>
-      <button>اجتماع <span class="m">(∪)</span></button>
-      <button>مکمل <span class="m">(¬)</span></button>
-      <button>تفاضل <span class="m">(−)</span></button>
-    </div><div class="fb"></div>
-  </div>
-
-  <div class="q practice" data-hint="اول مکمل را حساب کن: 1 − a. بعد برای هر ستون R سه min بگیر و max را بنویس. یادت باشد min(0, هر چیز) = 0." data-yes="عالی! B′ = (0.4, 0.4, 0.2). «نه A» تقریباً چیزی درباره B نمی‌گوید، پس عضویت‌ها پایین ماندند.">
-    <p>۵) (ترکیب با درس ۴) ورودی این بار «نه A» است: <span class="m">A′ = ¬A</span> برای همان A سؤال ۳. اول <span class="m">A′</span> را بنویس، بعد <span class="m">B′ = A′ ∘ R</span> را با ماتریس سؤال ۳ حساب کن.</p>
-    <div class="given"><b>سؤال ۳ چه بود؟</b> <span class="m">A = {0.4/1 , 1/2 , 0.7/3}</span> و <span class="m">B = {0.5/10 , 1/20 , 0.2/30}</span>؛ ماتریس <span class="m">R</span> را با <span class="m">r_ij = min(a_i , b_j)</span> ساختی. سطرهای <span class="m">R</span> (x = 1، 2، 3): <span class="m">(0.4, 0.4, 0.2)</span>، <span class="m">(0.5, 1, 0.2)</span>، <span class="m">(0.5, 0.7, 0.2)</span>. <a href="#pq3">↑ سؤال ۳</a></div>
-    <table class="t"><tr><th></th><th>1</th><th>2</th><th>3</th></tr>
-      <tr><th>A′ = ¬A</th><td><input type="text" data-k="0.6" aria-label="A' در 1"></td><td><input type="text" data-k="0" aria-label="A' در 2"></td><td><input type="text" data-k="0.3" aria-label="A' در 3"></td></tr></table>
-    <table class="t"><tr><th></th><th>y=10</th><th>y=20</th><th>y=30</th></tr>
-      <tr><th>B′</th><td><input type="text" data-k="0.4" aria-label="B' در 10"></td><td><input type="text" data-k="0.4" aria-label="B' در 20"></td><td><input type="text" data-k="0.2" aria-label="B' در 30"></td></tr></table>
-    <button class="check">بررسی</button>
-    <details class="sol"><summary>راه‌حل</summary>
-      <p><b>قدم ۱ — مکمل:</b> <span class="m">A′ = (1 − 0.4, 1 − 1, 1 − 0.7) = (0.6, 0, 0.3)</span>.</p><p><b>قدم ۲ — ترکیب با ماتریس سؤال ۳:</b> برای هر ستون سه min بگیر و max را بنویس.</p><div class="mb pre">b′(10) = max( min(0.6,0.4), min(0,0.5), min(0.3,0.5) ) = max(0.4, 0, 0.3) = 0.4
-b′(20) = max( min(0.6,0.4), min(0,1),   min(0.3,0.7) ) = max(0.4, 0, 0.3) = 0.4
-b′(30) = max( min(0.6,0.2), min(0,0.2), min(0.3,0.2) ) = max(0.2, 0, 0.2) = 0.2</div>
-    </details><div class="fb"></div>
-  </div>
-
-  <div class="q mcq" data-yes="درست! وقتی A′ = A و A یک عضویت ۱ دارد، همان سطر B را کپی می‌کند و بقیه سطرها از B کوچک‌ترند؛ پس B′ = B. قانون «همان چیزی را که گفتی» برمی‌گرداند." data-no="نه. سطری از R که a_i = 1 دارد خود B است، و هیچ خانه R از b_j بزرگ‌تر نیست. پس max دقیقاً b_j می‌شود.">
-    <p>۶) فرض کن ورودی دقیقاً خود A باشد (<span class="m">A′ = A</span>) و A حداقل یک عضویت برابر ۱ داشته باشد (مثل A <a href="#pq3">سؤال ۳</a>: <span class="m">{0.4/1 , 1/2 , 0.7/3}</span>). حاصل <span class="m">A ∘ R</span> چیست؟</p>
-    <div class="opts">
-      <button><span class="m">B′ = A</span></button>
-      <button><span class="m">B′ = 0</span></button>
-      <button><span class="m">B′ = 1</span></button>
-      <button data-ok><span class="m">B′ = B</span></button>
-    </div><div class="fb"></div>
-  </div>
-
-  <div class="q mcq" data-yes="درست! ضرب به min و جمع به max تبدیل می‌شود (اسلاید ۷۰)." data-no="نه. اسلاید ۷۰: «ضرب دوبه‌دو را با مینیمم و حاصل‌جمع را با ماکزیمم جایگزین کنیم».">
-    <p>۷) در ترکیب max-min، «جمع» در فرمول معمولی <span class="m">y_j = Σ x_i a_ij</span> با چه چیزی جایگزین می‌شود؟</p>
-    <div class="opts">
-      <button>کمینه <span class="m">(min)</span></button>
-      <button data-ok>بیشینه <span class="m">(max)</span></button>
-      <button>ضرب <span class="m">(×)</span></button>
-      <button>میانگین <span class="m">(avg)</span></button>
-    </div><div class="fb"></div>
-  </div>
-</div></section>
-
-<!-- ===== 5. SUMMARY ===== -->
-<section class="sec"><p class="lab">۵. جمع‌بندی — همین را به خاطر بسپار</p>
-<div class="soft"><ul>
-  <li>قانون <span class="m">If x is A then y is B</span> به صورت یک ماتریس ذخیره می‌شود: <span class="m">m_ij = min(a_i , b_j)</span> — سطر = نقطه x، ستون = نقطه y.</li>
-  <li>ترکیب max-min: <span class="m">b_j = max_i { min(a_i , m_ij) }</span>؛ مثل ضرب بردار در ماتریس، با «ضرب ← min» و «جمع ← max».</li>
-  <li>اندازه‌ها: <span class="m">(1×n) ∘ (n×p) = (1×p)</span>.</li>
-  <li>قاعده ترکیبی استنتاج زاده: <span class="m">B′ = A′ ∘ μ_AB</span> — از اطلاعات تازه درباره A، اطلاعات درباره B به دست می‌آید.</li>
-  <li>سطری از ماتریس که <span class="m">a_i = 1</span> دارد، خود B است؛ سطر با <span class="m">a_i = 0</span> تمام صفر است.</li>
-  <li><a href="#ex72">مثال اسلاید ۷۲</a>: <span class="m">A=(0.2,0.4,0.6,1) → B=(0.6,0.6,0.5)</span>.</li>
-</ul></div></section>
-
-<!-- ===== 6. SOURCE + ASK ===== -->
-<section class="sec"><p class="lab">منبع اصلی</p>
-<p>جزوه درس، اسلایدهای ۶۹ تا ۷۶ (شماره صفحه PDF؛ روی خود اسلاید ۲۲ تا ۲۹) · <a href="https://www.wiley.com/en-us/Fuzzy+Logic+with+Engineering+Applications%2C+4th+Edition-p-9781119235866">Timothy J. Ross, Fuzzy Logic with Engineering Applications</a> — بخش رابطه‌های فازی و ترکیب max-min.</p>
-<p><a href="../reference/cheatsheet.html">برگه فرمول‌ها</a> · <a href="../reference/glossary.html">واژه‌نامه</a></p>
-</section>
-
-<div class="nav"><a href="0006-fuzzy-expert-system.html">← درس قبل: ساخت یک سیستم خبره فازی</a><a href="0008-max-product-defuzzify.html">درس بعد: استنتاج max-product و غیرفازی‌سازی →</a></div>
-</main>
-
+<main id="app"></main>
+<script src="../assets/teacher.js"></script>
+<script src="../assets/graph.js"></script>
 <script>
-/* ===== SHARED JS — copy verbatim into every lesson ===== */
-(function(){
-function norm(s){return s.trim().replace(/[۰-۹]/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)}).replace(/[٠-٩]/g,function(d){return '٠١٢٣٤٥٦٧٨٩'.indexOf(d)}).replace(/[٫,]/g,'.').replace(/\s+/g,'')}
-function val(s){s=norm(s);if(/^-?\d*\.?\d+\/-?\d*\.?\d+$/.test(s)){var p=s.split('/');return +p[0]/+p[1]}return s===''?NaN:+s}
-document.querySelectorAll('.practice').forEach(function(q){
-  var ins=q.querySelectorAll('input[data-k]'),fb=q.querySelector('.fb'),btn=q.querySelector('.check');
-  ins.forEach(function(i){i.addEventListener('input',function(){i.parentNode.classList.remove('ok','no');fb.textContent='';fb.className='fb'})});
-  btn.addEventListener('click',function(){
-    var empty=0,ok=0;
-    ins.forEach(function(i){var c=i.parentNode;c.classList.remove('ok','no');if(!i.value.trim()){empty++;return}
-      var v=val(i.value),k=+i.dataset.k,tol=i.dataset.tol?+i.dataset.tol:0.01;
-      if(!isNaN(v)&&Math.abs(v-k)<=tol+1e-9){ok++;c.classList.add('ok')}else c.classList.add('no')});
-    if(empty){fb.className='fb bad';fb.textContent='اول همه خانه‌ها را پر کن ('+empty+' خانه خالی است).';return}
-    if(ok===ins.length){fb.className='fb good';fb.textContent=q.dataset.yes||('عالی! همه '+ins.length+' جواب درست است.')}
-    else{fb.className='fb bad';fb.textContent=ok+' از '+ins.length+' درست. '+(q.dataset.hint||'خانه‌های قرمز را دوباره حساب کن.')}
-  });
-});
-document.querySelectorAll('.mcq').forEach(function(q){
-  var fb=q.querySelector('.fb');
-  q.querySelectorAll('.opts button').forEach(function(b){b.addEventListener('click',function(){
-    q.querySelectorAll('.opts button').forEach(function(x){x.classList.remove('ok','no')});
-    if(b.hasAttribute('data-ok')){b.classList.add('ok');fb.className='fb good';fb.textContent=q.dataset.yes||'درست!'}
-    else{b.classList.add('no');fb.className='fb bad';fb.textContent=q.dataset.no||'نه، دوباره فکر کن.'}
-  })});
-});
-document.querySelectorAll('.stepper').forEach(function(s){
-  var st=s.querySelectorAll('.st'),n=0,nx=s.querySelector('.next'),al=s.querySelector('.all');
-  function upd(){st.forEach(function(e,i){e.classList.toggle('show',i<n)});if(nx)nx.textContent=n>=st.length?'از اول':'قدم بعدی ('+n+'/'+st.length+')'}
-  if(nx)nx.addEventListener('click',function(){n=n>=st.length?0:n+1;upd()});
-  if(al)al.addEventListener('click',function(){n=st.length;upd()});
-  upd();
-});
-window.addEventListener('beforeprint',function(){document.querySelectorAll('details.sol').forEach(function(d){d.open=true})});
-})();
-/* ===== END SHARED JS ===== */
-</script>
-<script>
-/* ===== lesson 7: interactive matrices ===== */
-(function(){
-var NS='http://www.w3.org/2000/svg';
-function f(v){return String(Math.round(v*1000)/1000)}
-function el(svg,tag,attrs,txt){var e=document.createElementNS(NS,tag);for(var k in attrs)e.setAttribute(k,attrs[k]);if(txt!==undefined)e.textContent=txt;svg.appendChild(e);return e}
-function clear(svg){Array.prototype.slice.call(svg.childNodes).forEach(function(n){if(n.nodeName!=='title')svg.removeChild(n)})}
+// Lesson 7 — slides 69–76 (Part 2: fuzzy operations and inference).
+// Explanations are Persian; numbers, math and technical terms stay in English.
+// Every matrix cell and every max-min result below is computed in code, not typed by hand.
 
-/* ---- A) max-min composition ---- */
-var MU=[[0,0,0,0,0],[0,0.5,0.5,0.5,0],[0,0.6,1,0.6,0],[0,0.5,0.5,0.5,0],[0,0,0,0,0]];
-var presets=[
-  {a:[0.2,0.4,0.6,1],M:[[0.1,0.6,0.8],[0.6,0.8,0.6],[0.8,0.6,0.5],[0.0,0.5,0.5]],rl:['x1','x2','x3','x4'],cl:['b1','b2','b3'],an:'a'},
-  {a:[0,0.5,0,0,0],M:MU,rl:['100','125','150','175','200'],cl:['10','20','30','40','50'],an:"a′"}
-];
-var CTX=[
-  '<b>سؤال (اسلاید ۷۲):</b> بردار A و ماتریس M داده شده‌اند. <span class="m">B = A ∘ M</span> را حساب کن. (M از هیچ قانونی ساخته نشده؛ فقط چند عدد داده‌شده است تا عملگر ∘ را تمرین کنیم.)',
-  '<p style="margin:0 0 6px"><b>سؤال:</b> قانون می‌گوید «اگر دما نرمال است، سرعت متوسط است». دما ۱۲۵ است؛ سرعت چقدر است؟</p>'+
-  '<ul style="margin:0;padding-right:22px"><li><b>بردار ورودی <span class="m">A′</span> از کجا آمد؟</b> عضویت ۱۲۵ در «دمای نرمال» 0.5 است. پس در سطر ۱۲۵ عدد 0.5 می‌گذاریم و بقیه سطرها صفر: <span class="m">A′ = (0, 0.5, 0, 0, 0)</span> (جزئیاتش در درس ۸).</li>'+
-  '<li><b>ماتریس از کجا آمد؟</b> همان ماتریس قانون است که در بخش «ب» پایین خانه به خانه ساخته می‌شود.</li></ul>'
-];
-var P=0,A=presets[0].a.slice(),J=0,S=0,steps=[];
-var mainSvg=document.getElementById('cmpSvg'),out=document.getElementById('cmpOut'),pick=document.getElementById('cmpPick'),sl=document.getElementById('cmpSliders');
-var cw=62,ch=36,xA=56,xM=140,y0=46;
-function comp(){var p=presets[P],res=[];for(var j=0;j<p.M[0].length;j++){var m=0;for(var i=0;i<A.length;i++)m=Math.max(m,Math.min(A[i],p.M[i][j]));res.push(m)}return res}
-function makeSteps(){var q=presets[P].M[0].length;steps=[{k:'q'},{k:'sym'}];for(var j=0;j<q;j++){steps.push({k:'col',j:j},{k:'min',j:j},{k:'max',j:j})}steps.push({k:'done'})}
-function rowName(i){var p=presets[P];return P?'x='+p.rl[i]:p.rl[i]}
-function narrate(st,B,mins,best){
-  var p=presets[P],n=A.length,q=p.M[0].length,an=P?"a′":'a',bn=P?"b′":'b',Bn=P?"B′":'B',An=P?"A′":'A',j=st.j;
-  var col=function(jj){return '('+A.map(function(a,i){return f(p.M[i][jj])}).join(', ')+')'};
-  var vec=function(v){return '('+v.map(f).join(', ')+')'};
-  var M='<span class="m">',E='</span>';
-  if(st.k==='q')return '<b>سؤال را ببین.</b> چیزهای داده‌شده: '+M+An+' = '+vec(A)+E+' و جدول M (شکل زیر). خواسته: ردیف پایین، یعنی '+M+Bn+E+'. فعلاً همه خانه‌هایش «؟» است. قدم‌ها را از بالا به پایین دنبال کن.';
-  if(st.k==='sym')return '<b>هر چیز چیست؟</b><br>• <b>ستون بنفش سمت چپ</b> = '+M+An+E+'، ورودی. برای هر سطر جدول یک عدد دارد: '+M+A.map(function(a,i){return an+(i+1)+' = '+f(a)}).join(', ')+E+'.<br>• <b>جدول وسط</b> = M، با '+n+' سطر و '+q+' ستون. سطر i جدول همیشه با عدد i ام بردار ورودی جفت می‌شود.<br>• <b>ردیف پایین</b> = '+M+Bn+E+'، جواب. به تعداد <b>ستون‌های</b> M عدد دارد، یعنی '+q+' عدد. <b>هر ستون M دقیقاً یک عدد جواب را می‌سازد.</b> از ستون ۱ شروع می‌کنیم.';
-  var head='<b>'+bn+(j+1)+(P?' (سرعت '+p.cl[j]+')':'')+' — ';
-  if(st.k==='col')return head+'قدم الف: ستون '+(j+1)+' را جدا کن.</b> ستون رنگی: '+M+col(j)+E+'. حالا هر عدد این ستون را کنار عدد بنفشِ <b>همان سطر</b> بگذار: '+M+A.map(function(a,i){return '('+f(a)+', '+f(p.M[i][j])+')'}).join('  ')+E+'. ستون min سمت راست هنوز خالی است.';
-  if(st.k==='min')return head+'قدم ب: از هر جفت، کوچک‌تر را بردار (min).</b><br>'+A.map(function(a,i){return M+'min('+f(a)+', '+f(p.M[i][j])+') = '+f(mins[i])+E}).join('<br>')+'<br> این عددها در ستون min سمت راست نوشته شدند.';
-  if(st.k==='max'){var w=A.map(function(a,i){return mins[i]===best?rowName(i):null}).filter(Boolean).join(' و ');
-    return head+'قدم ج: از ستون min، بزرگ‌ترین را بردار (max).</b> '+M+'max{'+mins.map(f).join(', ')+'} = '+f(best)+E+'. پس '+M+bn+(j+1)+' = '+f(best)+E+' (سطر برنده: '+w+'، خانه سبز). این عدد در ردیف پایین زیر ستون '+(j+1)+' نوشته شد.'+(j<q-1?' حالا همین سه کار را برای ستون '+(j+2)+' تکرار می‌کنیم.':' همه خانه‌های '+Bn+' پر شد: '+M+Bn+' = '+vec(B)+E+'.')}
-  return '<b>تمام شد.</b> جواب: '+M+Bn+' = '+vec(B)+E+'. خلاصه کار: برای هر ستون (۱) جفت کن، (۲) از هر جفت min، (۳) از minها max.'+(P?' سطر ۱۲۵ همیشه برنده است چون بقیه ورودی‌ها صفرند؛ پس '+M+Bn+E+' همان سطر ۱۲۵ ماتریس است. معنی: «سرعت متوسط است، ولی فقط تا درجه 0.5».':'');
-}
-function draw(svgT,si){
-  var main=!svgT,svg=svgT||mainSvg,p=presets[P],n=A.length,q=p.M[0].length,B=comp(),st=steps[main?steps.length-1:si],k=st.k,free=k==='done';clear(svg);
-  if(!free&&st.j!==undefined)J=st.j;
-  var hl=k!=='q'&&k!=='sym',showMin=k==='min'||k==='max'||free,showWin=k==='max'||free;
-  var known=function(jj){return free||(st.j!==undefined&&(jj<st.j||(jj===st.j&&k==='max')))};
-  var mins=A.map(function(a,i){return Math.min(a,p.M[i][J])}),best=Math.max.apply(null,mins);
-  var xMin=xM+q*cw+34;
-  el(svg,'text',{x:xA+28,y:30,'text-anchor':'middle'},p.an+'_i');
-  if(hl)el(svg,'text',{x:xMin+28,y:30,'text-anchor':'middle'},'min');
-  for(var j=0;j<q;j++)el(svg,'text',{x:xM+j*cw+cw/2,y:30,'text-anchor':'middle',style:hl&&j===J?'fill:var(--accent);font-weight:700':''},P?'y='+p.cl[j]:'ستون '+(j+1));
-  var pickCol=function(jj){return function(){if(free){J=jj;draw()}}};
-  for(var i=0;i<n;i++){
-    var y=y0+i*ch;
-    el(svg,'text',{x:26,y:y+22,'text-anchor':'middle'},P?'x='+p.rl[i]:p.rl[i]);
-    el(svg,'rect',{x:xA,y:y,width:56,height:ch-4,rx:6,style:'fill:var(--surface-1);stroke:var(--c1);stroke-width:1.5'});
-    el(svg,'text',{x:xA+28,y:y+21,'text-anchor':'middle',style:'fill:var(--text)'},f(A[i]));
-    for(var j2=0;j2<q;j2++){
-      var on=hl&&j2===J;
-      var r=el(svg,'rect',{x:xM+j2*cw+3,y:y,width:cw-6,height:ch-4,rx:6,'class':free?'cell':'',style:on?'fill:var(--accent-bg);stroke:var(--accent);stroke-width:1.5':'fill:var(--surface);stroke:var(--border)'});
-      r.addEventListener('click',pickCol(j2));
-      var t=el(svg,'text',{x:xM+j2*cw+cw/2,y:y+21,'text-anchor':'middle','class':free?'cell':'',style:on?'fill:var(--text)':''},f(p.M[i][j2]));
-      t.addEventListener('click',pickCol(j2));
-    }
-    if(hl){
-      var win=showWin&&mins[i]===best;
-      el(svg,'rect',{x:xMin,y:y,width:56,height:ch-4,rx:6,style:win?'fill:var(--ok-bg);stroke:var(--c2);stroke-width:2':'fill:var(--surface);stroke:var(--border)'});
-      el(svg,'text',{x:xMin+28,y:y+21,'text-anchor':'middle',style:win?'fill:var(--ok);font-weight:700':''},showMin?f(mins[i]):'؟');
-      el(svg,'line',{x1:xM+q*cw+4,y1:y+ch/2-2,x2:xMin-4,y2:y+ch/2-2,style:'stroke:var(--grid);stroke-dasharray:3 3'});
-    }
-  }
-  var yB=y0+n*ch+14;
-  el(svg,'text',{x:xA+28,y:yB+22,'text-anchor':'middle'},P?"B′":'B');
-  for(var j3=0;j3<q;j3++){
-    var on3=hl&&j3===J&&known(j3);
-    var rb=el(svg,'rect',{x:xM+j3*cw+3,y:yB,width:cw-6,height:ch-4,rx:6,'class':free?'cell':'',style:on3?'fill:var(--ok-bg);stroke:var(--c2);stroke-width:2':'fill:var(--surface-1);stroke:var(--c2)'});
-    rb.addEventListener('click',pickCol(j3));
-    el(svg,'text',{x:xM+j3*cw+cw/2,y:yB+21,'text-anchor':'middle',style:on3?'fill:var(--ok);font-weight:700':'fill:var(--text)'},known(j3)?f(B[j3]):'؟');
-  }
-  if(showWin){
-    el(svg,'text',{x:xMin+28,y:yB+21,'text-anchor':'middle',style:'fill:var(--ok)'},'max ↑');
-    el(svg,'text',{x:300,y:yB+ch+20,'text-anchor':'middle'},'هر b_j = بزرگ‌ترینِ ستون min — خانه سبز پررنگ، سطر برنده است');
-  }
-  if(!main)return narrate(st,B,mins,best);
-  var bn=P?"b′":'b',Bn=P?"B′":'B';
-  out.innerHTML='<span class="m">'+bn+(J+1)+' = max{'+A.map(function(a,i){return 'min('+f(a)+', '+f(p.M[i][J])+')'}).join(', ')+'} = max{'+mins.map(f).join(', ')+'} = '+f(best)+'</span><br>سطر برنده: '+A.map(function(a,i){return mins[i]===best?rowName(i):null}).filter(Boolean).join(' و ')+' · کل جواب: <span class="m">'+Bn+' = ('+B.map(f).join(', ')+')</span>';
-  Array.prototype.forEach.call(pick.children,function(b,kk){b.classList.toggle('on',kk===J)});
-}
-function buildWalk(){
-  var w=document.getElementById('cmpWalk');w.innerHTML='';
-  for(var i=0;i<steps.length-1;i++){
-    var d=document.createElement('div');d.className='wstep';
-    var t=document.createElement('div');d.appendChild(t);
-    if(steps[i].k!=='sym'){
-      var sv=document.createElementNS(NS,'svg');sv.setAttribute('viewBox','0 0 600 320');sv.setAttribute('role','img');sv.setAttribute('aria-label','قدم '+(i+1));
-      d.appendChild(sv);t.innerHTML='<span class="num">'+(i+1)+'</span>'+draw(sv,i);
-    }else t.innerHTML='<span class="num">'+(i+1)+'</span>'+narrate(steps[i]);
-    w.appendChild(d);
-  }
-}
-function build(){
-  var p=presets[P];A=p.a.slice();J=0;makeSteps();buildWalk();J=0;
-  document.getElementById('cmpCtx').innerHTML=CTX[P];
-  pick.innerHTML='';sl.innerHTML='';
-  for(var j=0;j<p.M[0].length;j++){var b=document.createElement('button');b.textContent=(P?"b′":'b')+(j+1)+(P?' (y='+p.cl[j]+')':'');b.addEventListener('click',(function(jj){return function(){J=jj;draw()}})(j));pick.appendChild(b)}
-  A.forEach(function(v,i){
-    var d=document.createElement('div');d.className='sl';
-    var lab=document.createElement('label');lab.textContent=(P?"a′ x=":'a'+(i+1)+' ')+(P?p.rl[i]:'');lab.setAttribute('for','cmpA'+i);
-    var r=document.createElement('input');r.type='range';r.min=0;r.max=1;r.step=0.1;r.value=v;r.id='cmpA'+i;
-    var s=document.createElement('span');s.textContent=f(v);
-    r.addEventListener('input',function(){A[i]=+r.value;s.textContent=f(A[i]);draw()});
-    d.appendChild(lab);d.appendChild(r);d.appendChild(s);sl.appendChild(d);
-  });
-  draw();
-}
-Array.prototype.forEach.call(document.querySelectorAll('#cmpPreset button'),function(b){b.addEventListener('click',function(){
-  P=+b.dataset.p;Array.prototype.forEach.call(document.querySelectorAll('#cmpPreset button'),function(x){x.classList.toggle('on',x===b)});build()})});
-build();
+const f = v => String(+v.toFixed(4));
+const all = list => Promise.all(list);
+const LTR = s => `⁦${s}⁩`; // keeps a left-to-right run intact inside Persian board text
 
-/* ---- B) build the rule matrix ---- */
-var ra=[0,0.5,1,0.5,0],rb=[0,0.6,1,0.6,0],rx=['100','125','150','175','200'],ry=['10','20','30','40','50'];
-var rs=document.getElementById('relSvg'),ro=document.getElementById('relOut');
-var filled={},cur=-1,gx=150,gy=84,gw=62,gh=36;
-/* o: {has(i,j) -> bool, row: highlighted row, cur: highlighted cell, click: bool} */
-function rgrid(svg,o){
-  clear(svg);
-  var hr=[].concat(o.row),ci=o.cur>=0?Math.floor(o.cur/5):-1,cj=o.cur>=0?o.cur%5:-1,isHR=function(i){return o.cur<0&&hr.indexOf(i)>=0&&i>=0},anyHR=o.cur<0&&hr.some(function(i){return i>=0});
-  el(svg,'text',{x:88,y:20,'text-anchor':'middle'},'a_i');
-  for(var j=0;j<5;j++){
-    el(svg,'text',{x:gx+j*gw+gw/2,y:20,'text-anchor':'middle'},'y='+ry[j]);
-    el(svg,'rect',{x:gx+j*gw+3,y:30,width:gw-6,height:gh-4,rx:6,style:j===cj||anyHR?'fill:var(--warn-bg);stroke:var(--c3);stroke-width:2':'fill:var(--surface-1);stroke:var(--c3)'});
-    el(svg,'text',{x:gx+j*gw+gw/2,y:51,'text-anchor':'middle',style:'fill:var(--text)'},f(rb[j]));
+// ------------------------------------------------------------------ A ∘ M boards
+// A is written as a column beside M, so a_i sits next to row i of M.
+function AM(n, p) {
+  const RY = Array.from({ length: n }, (_, i) => 180 + i * 62);
+  const MX = Array.from({ length: p }, (_, j) => 410 + j * 105);
+  const bot = RY[n - 1] + 22;
+  return { RY, MX, AX: 255, top: RY[0] - 40, bot, BL: bot + 40, BY: bot + 85, MXL: bot + 135 };
+}
+function bracket(b, id, x, top, bot, side) {
+  const t = side === 'left' ? 12 : -12;
+  return b.wire(id, [[x + t, top], [x, top], [x, bot], [x + t, bot]], { color: 'soft', dur: 250 });
+}
+// Draws A (column), M (matrix) and an empty answer row B = ( ? ? ? ).
+async function drawAM(b, A, M, o = {}) {
+  const Ly = AM(A.length, M[0].length);
+  const { RY, MX, AX, top, bot } = Ly;
+  await all([
+    b.write('an', AX, 80, o.aName ?? 'A', { size: 32, color: 'purple', bold: true }),
+    b.write('mname', (MX[0] + MX[MX.length - 1]) / 2, 80, o.mName ?? 'M', { size: 32, bold: true }),
+    bracket(b, 'abl', AX - 38, top, bot, 'left'), bracket(b, 'abr', AX + 38, top, bot, 'right'),
+    bracket(b, 'mbl', MX[0] - 55, top, bot, 'left'), bracket(b, 'mbr', MX[MX.length - 1] + 55, top, bot, 'right'),
+    b.write('circ', (AX + MX[0] - 55 + 38) / 2, (top + bot) / 2 + 12, '∘', { size: 40 }),
+  ]);
+  if (o.cols) await all(o.cols.map((c, j) => b.write(`ch-${j}`, MX[j], 118, c, { size: 20, color: 'soft', dur: 150 })));
+  for (const [i, a] of A.entries()) {
+    await all([
+      b.write(`a-${i}`, AX, RY[i], f(a), { size: 30, color: 'purple', dur: 200 }),
+      ...M[i].map((m, j) => b.write(`m-${i}-${j}`, MX[j], RY[i], f(m), { size: 30, dur: 200 })),
+    ]);
   }
-  el(svg,'text',{x:120,y:51,'text-anchor':'end'},'b_j');
-  for(var i=0;i<5;i++){
-    var y=gy+i*gh;
-    el(svg,'text',{x:30,y:y+21,'text-anchor':'middle'},'x='+rx[i]);
-    el(svg,'rect',{x:62,y:y,width:52,height:gh-4,rx:6,style:i===ci||isHR(i)?'fill:var(--accent-bg);stroke:var(--c1);stroke-width:2':'fill:var(--surface-1);stroke:var(--c1)'});
-    el(svg,'text',{x:88,y:y+21,'text-anchor':'middle',style:'fill:var(--text)'},f(ra[i]));
-    for(var j2=0;j2<5;j2++){
-      var k=i*5+j2,has=o.has(i,j2),on=k===o.cur||isHR(i);
-      var r=el(svg,'rect',{x:gx+j2*gw+3,y:y,width:gw-6,height:gh-4,rx:6,'class':o.click?'cell':'',style:on?'fill:var(--ok-bg);stroke:var(--c2);stroke-width:2':(has?'fill:var(--surface);stroke:var(--c2)':'fill:var(--surface);stroke:var(--border);stroke-dasharray:3 3')});
-      var t=el(svg,'text',{x:gx+j2*gw+gw/2,y:y+21,'text-anchor':'middle','class':o.click?'cell':'',style:on?'fill:var(--ok);font-weight:700':(has?'fill:var(--text)':'')},has?f(Math.min(ra[i],rb[j2])):'؟');
-      if(o.click){r.addEventListener('click',(function(kk){return function(){show(kk)}})(k));t.addEventListener('click',(function(kk){return function(){show(kk)}})(k))}
+  const bn = o.bName ?? 'b';
+  await b.write('bn', AX, Ly.BY, `${o.bName === 'b′' ? 'B′' : 'B'} =`, { size: 30, bold: true });
+  await all(MX.map((x, j) => all([
+    b.write(`bl-${j}`, x, Ly.BL, `${bn}_${j + 1}`, { size: 22, color: 'soft', dur: 150 }),
+    b.write(`bv-${j}`, x, Ly.BY, '?', { size: 32, color: 'soft', dur: 150 }),
+  ])));
+  return Ly;
+}
+// Column j: pair each a_i with m_ij and keep the smaller one.
+async function colMins(b, A, M, j) {
+  const Ly = AM(A.length, M[0].length);
+  await b.erase(['cb', 'mn-*', 'mr-*', 'win-*', 'mx']);
+  await all([
+    b.box('cb', Ly.MX[j] - 46, Ly.top + 2, 92, Ly.bot - Ly.top - 4, { color: 'orange' }),
+    b.write('mh', 800, 118, 'min', { size: 24, color: 'soft' }),
+  ]);
+  for (const [i, a] of A.entries()) {
+    const m = M[i][j];
+    await all([
+      b.pulse([`a-${i}`, `m-${i}-${j}`], 450),
+      b.write(`mn-${i}`, 850, Ly.RY[i], `min(${f(a)}, ${f(m)}) =`, { size: 22, anchor: 'end', dur: 350 }),
+    ]);
+    await b.write(`mr-${i}`, 905, Ly.RY[i], f(Math.min(a, m)), { size: 28, color: 'blue', dur: 200 });
+  }
+}
+// Then the biggest of those mins is b_j.
+async function colMax(b, A, M, j, bn = 'b') {
+  const Ly = AM(A.length, M[0].length);
+  const mins = A.map((a, i) => Math.min(a, M[i][j]));
+  const best = Math.max(...mins);
+  await all(mins.map((v, i) => (v === best ? b.ring(`win-${i}`, 905, Ly.RY[i] - 9, 34, 22, { color: 'green' }) : null)));
+  await b.write('mx', 500, Ly.MXL, `${bn}_${j + 1} = max{${mins.map(f).join(', ')}} = ${f(best)}`, { size: 24, color: 'green' });
+  await b.write(`bv-${j}`, Ly.MX[j], Ly.BY, f(best), { size: 32, color: 'green', bold: true });
+}
+const compose = (A, M) => M[0].map((_, j) => Math.max(...A.map((a, i) => Math.min(a, M[i][j]))));
+
+// ------------------------------------------------------------------ slide 72 data
+const A72 = [0.2, 0.4, 0.6, 1];
+const M72 = [[0.1, 0.6, 0.8], [0.6, 0.8, 0.6], [0.8, 0.6, 0.5], [0.0, 0.5, 0.5]];
+
+// ------------------------------------------------------------------ slide 74–75: the rule matrix
+const T = [100, 125, 150, 175, 200], TA = [0, 0.5, 1, 0.5, 0];   // Normal temperature (A)
+const V = [10, 20, 30, 40, 50], VB = [0, 0.6, 1, 0.6, 0];         // Medium velocity (B)
+const MU = TA.map(a => VB.map(v => Math.min(a, v)));
+const RG = { CX: [390, 490, 590, 690, 790], RY: [212, 268, 324, 380, 436], XV: 165, XA: 250, HY: 110, HB: 148, L: 340, R: 840, top: 180, bot: 452 };
+
+async function ruleFrame(b) {
+  await b.write('rt', 500, 56, 'If temperature is Normal then speed is Medium', { size: 24, color: 'blue' });
+  await all([
+    b.write('hx', RG.XV, RG.HB, 'x', { size: 22, color: 'soft' }),
+    b.write('ha', RG.XA, RG.HB, 'a_i', { size: 22, color: 'purple' }),
+    b.write('hy', 315, RG.HY, 'y', { size: 22, color: 'soft' }),
+    b.write('hb', 315, RG.HB, 'b_j', { size: 22, color: 'orange' }),
+  ]);
+  await all(V.map((v, j) => all([
+    b.write(`sv-${j}`, RG.CX[j], RG.HY, String(v), { size: 26, dur: 200 }),
+    b.write(`sb-${j}`, RG.CX[j], RG.HB, f(VB[j]), { size: 24, color: 'orange', dur: 200 }),
+  ])));
+  await all(T.map((t, i) => all([
+    b.write(`tv-${i}`, RG.XV, RG.RY[i], String(t), { size: 26, dur: 200 }),
+    b.write(`ta-${i}`, RG.XA, RG.RY[i], f(TA[i]), { size: 26, color: 'purple', dur: 200 }),
+  ])));
+  await all([
+    bracket(b, 'rbl', RG.L, RG.top, RG.bot, 'left'), bracket(b, 'rbr', RG.R, RG.top, RG.bot, 'right'),
+  ]);
+  await all(T.flatMap((_, i) => V.map((__, j) => b.write(`r-${i}-${j}`, RG.CX[j], RG.RY[i], '?', { size: 22, color: 'soft', dur: 100 }))));
+}
+const rowBox = (b, i) => b.box('rb', RG.L + 6, RG.RY[i] - 34, RG.R - RG.L - 12, 46, { color: 'orange' });
+async function fillRow(b, i, color = 'blue', show = true) {
+  for (let j = 0; j < 5; j++) {
+    if (show) {
+      await all([
+        b.pulse([`ta-${i}`, `sb-${j}`], 350),
+        b.write('calc', 500, 515, `m = min(${f(TA[i])}, ${f(VB[j])}) = ${f(MU[i][j])}`, { size: 26, dur: 250 }),
+      ]);
     }
+    await b.write(`r-${i}-${j}`, RG.CX[j], RG.RY[i], f(MU[i][j]), { size: 26, color, dur: 200 });
   }
 }
-function rowCalc(i){return rb.map(function(v,j){return '<span class="m">min('+f(ra[i])+', '+f(v)+') = '+f(Math.min(ra[i],v))+'</span>'}).join('<br>')}
-function rowVec(i){return '<span class="m">('+rb.map(function(v){return f(Math.min(ra[i],v))}).join(', ')+')</span>'}
-(function relWalk(){
-  var M='<span class="m">',E='</span>',done={};
-  var steps=[
-    {t:'<b>سؤال را ببین.</b> قانون: «اگر دما نرمال است، سرعت متوسط است». این قانون را به یک جدول ۵×۵ تبدیل کن. داده‌ها: ستون بنفش سمت چپ = '+M+'A = (0, 0.5, 1, 0.5, 0)'+E+' (دمای نرمال)، ردیف نارنجی بالا = '+M+'B = (0, 0.6, 1, 0.6, 0)'+E+' (سرعت متوسط). همه خانه‌های جدول فعلاً «؟» است.',rows:[],row:-1},
-    {t:'<b>هر چیز چیست؟</b><br>• <b>ستون بنفش سمت چپ</b> = عضویت هر دما در «دمای نرمال». هر سطر یک دماست: ۱۰۰، ۱۲۵، ۱۵۰، ۱۷۵، ۲۰۰.<br>• <b>ردیف نارنجی بالا</b> = عضویت هر سرعت در «سرعت متوسط». هر ستون یک سرعت است: ۱۰، ۲۰، ۳۰، ۴۰، ۵۰.<br>• <b>هر خانه</b> = کوچک‌ترِ دو عدد: عدد بنفشِ سطرش و عدد نارنجیِ ستونش ('+M+'m_ij = min(a_i, b_j)'+E+'). معنی: «این دما و این سرعت تا چه حد با هم با قانون جور درمی‌آیند». سطر به سطر پر می‌کنیم.',rows:null},
-    {t:'<b>سطر دمای ۱۰۰ (عدد بنفش 0).</b> عدد بنفش این سطر را با هر عدد نارنجی مقایسه کن و کوچک‌تر را بنویس:<br>'+rowCalc(0)+'<br>کوچک‌ترِ صفر و هر عددی صفر است، پس کل سطر صفر می‌شود: '+rowVec(0)+'.',rows:[0],row:0},
-    {t:'<b>سطر دمای ۱۲۵ (عدد بنفش 0.5).</b><br>'+rowCalc(1)+'<br>سطر: '+rowVec(1)+'. هرجا عدد نارنجی از 0.5 بزرگ‌تر بود، 0.5 نوشته شد؛ یعنی B از ارتفاع 0.5 «بریده» شد.',rows:[0,1],row:1},
-    {t:'<b>سطر دمای ۱۵۰ (عدد بنفش 1).</b><br>'+rowCalc(2)+'<br>سطر: '+rowVec(2)+'. کوچک‌ترِ ۱ و هر عدد، خود آن عدد است؛ پس این سطر <b>دقیقاً خود B</b> است.',rows:[0,1,2],row:2},
-    {t:'<b>سطرهای ۱۷۵ و ۲۰۰.</b> عدد بنفش ۱۷۵ همان 0.5 است و عدد بنفش ۲۰۰ همان 0؛ پس سطر ۱۷۵ مثل سطر ۱۲۵ می‌شود و سطر ۲۰۰ مثل سطر ۱۰۰:<br>سطر ۱۷۵: '+rowVec(3)+'<br>سطر ۲۰۰: '+rowVec(4),rows:[0,1,2,3,4],row:[3,4]},
-    {t:'<b>تمام شد.</b> این همان ماتریس اسلاید ۷۵ است. الگو: <b>هر سطر همان B است که از ارتفاع عدد بنفشِ آن سطر بریده شده.</b> سطر با عدد بنفش 1 خود B است و سطر با عدد بنفش 0 تمام صفر.',rows:[0,1,2,3,4],row:-1}
-  ];
-  var w=document.getElementById('relWalk');
-  steps.forEach(function(st,n){
-    var d=document.createElement('div');d.className='wstep';
-    var t=document.createElement('div');t.innerHTML='<span class="num">'+(n+1)+'</span>'+st.t;d.appendChild(t);
-    if(st.rows){var sv=document.createElementNS(NS,'svg');sv.setAttribute('viewBox','0 0 480 280');sv.setAttribute('role','img');sv.setAttribute('aria-label','قدم '+(n+1));d.appendChild(sv);
-      var rows=st.rows;rgrid(sv,{has:function(i){return rows.indexOf(i)>=0},row:st.row,cur:-1,click:false});
+
+// ------------------------------------------------------------------ quiz data
+const QA1 = [0.3, 0.9, 0.5];
+const QM1 = [[0.7, 0.2, 0.4], [0.1, 0.6, 0.8], [0.5, 1.0, 0.3]];
+const QA3 = [0.4, 1, 0.7], QB3 = [0.5, 1, 0.2];
+const QR3 = QA3.map(a => QB3.map(v => Math.min(a, v)));
+const NOT3 = QA3.map(a => +(1 - a).toFixed(4));
+
+function quizHead(b, n) {
+  return b.write('q-n', 500, 45, `سؤال ${n} از 6`, { size: 22, color: 'soft', fa: true });
 }
-    w.appendChild(d);
-  });
-})();
-function rdraw(){rgrid(rs,{has:function(i,j){return !!filled[i*5+j]},row:-1,cur:cur,click:true})}
-var HINT='روی «خانه بعدی» یا روی هر خانه جدول کلیک کن.';
-function show(k){cur=k;filled[k]=1;var i=Math.floor(k/5),j=k%5;
-  ro.innerHTML='دمای '+rx[i]+' و سرعت '+ry[j]+': <span class="m">m_'+(i+1)+(j+1)+' = min(a_'+(i+1)+', b_'+(j+1)+') = min('+f(ra[i])+', '+f(rb[j])+') = '+f(Math.min(ra[i],rb[j]))+'</span>';
-  rdraw()}
-document.getElementById('relNext').addEventListener('click',function(){var k=0;while(filled[k]&&k<25)k++;if(k>=25){ro.textContent='ماتریس کامل شد. هر سطر = B بریده‌شده در ارتفاع a_i.';cur=-1;rdraw();return}show(k)});
-document.getElementById('relAll').addEventListener('click',function(){for(var k=0;k<25;k++)filled[k]=1;cur=-1;ro.textContent='ماتریس کامل (همان اسلاید ۷۵). سطر دمای ۱۵۰ (عدد بنفش 1) خود B است.';rdraw()});
-document.getElementById('relReset').addEventListener('click',function(){filled={};cur=-1;ro.textContent=HINT;rdraw()});
-ro.textContent=HINT;rdraw();
-})();
+function quizBoard(n, question, o = { size: 50 }) {
+  return async b => {
+    await b.clear();
+    await quizHead(b, n);
+    await b.write('q-q', 500, 160, question, o);
+  };
+}
+
+Teacher.start({
+  id: 'L07',
+  number: 7,
+  title: 'استنتاج max-min',
+  chapter: 'بخش 2 · عملیات و استنتاج فازی',
+  slides: '69–76',
+  intro: 'یک قانون «اگر … آنگاه …» را به ماتریس تبدیل می‌کنیم و با ترکیب max-min از آن خروجی می‌گیریم.',
+  next: { href: '0008-max-product-defuzzify.html', title: 'استنتاج max-product و غیرفازی‌سازی' },
+  steps: [
+    // ---------------------------------------------------------- 1. the rule
+    {
+      say: 'سلام! تا اینجا مجموعه‌های فازی و عملگرهایشان را دیدیم. حالا می‌رسیم به قلب سیستم: *Fuzzy* inference یا استنتاج فازی. دانش سیستم به شکل قانون نوشته می‌شود: If x is A then y is B — و A و B هر دو مجموعه‌ی فازی‌اند (اسلاید 69).',
+      term: ['Fuzzy inference', 'استنتاج فازی'],
+      draw: async b => {
+        await b.write('t1', 500, 105, 'استنتاج فازی', { size: 54, color: 'blue', bold: true, fa: true });
+        await b.write('t2', 500, 170, 'Fuzzy inference', { size: 38, color: 'orange' });
+        await b.box('rbx', 200, 235, 600, 100, { color: 'blue' });
+        await b.write('rule', 500, 300, 'If  x is A  then  y is B', { size: 46 });
+        await all([
+          b.write('la', 330, 400, `${LTR('A')} = مجموعه‌ی فازی روی ${LTR('x')}`, { size: 24, color: 'purple', fa: true }),
+          b.write('lb', 680, 400, `${LTR('B')} = مجموعه‌ی فازی روی ${LTR('y')}`, { size: 24, color: 'orange', fa: true }),
+        ]);
+        await b.write('fa', 500, 475, 'اگر x برابر A باشد، آنگاه y برابر B است', { size: 26, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 2. stored as a matrix
+    {
+      say: 'سیستم خبره‌ی فازی جفت (A,B) را در قالب یک *ماتریس* به نام M ذخیره می‌کند. کار M این است که مجموعه‌ی A را به مجموعه‌ی B *نگاشت* کند، یعنی از A به B برساند. اسلاید دو روش برای این کار می‌آورد: Max-Min inference که موضوع همین درس است، و Max-product inference که درس بعد می‌بینیم.',
+      term: ['Max-Min inference', 'استنتاج max-min'],
+      draw: async b => {
+        await b.clear();
+        await b.write('a', 200, 215, 'A', { size: 60, color: 'purple', bold: true });
+        await b.arrow('a1', 245, 195, 400, 195, { color: 'soft' });
+        await b.box('mb', 410, 140, 180, 110, { color: 'ink' });
+        await b.write('m', 500, 215, 'M', { size: 60, bold: true });
+        await b.arrow('a2', 600, 195, 755, 195, { color: 'soft' });
+        await b.write('b', 800, 215, 'B', { size: 60, color: 'orange', bold: true });
+        await b.write('ml', 500, 290, 'ماتریس قانون: A را به B نگاشت می‌کند', { size: 22, color: 'soft', fa: true });
+        await b.write('h', 500, 370, 'دو روش استنتاج', { size: 28, color: 'blue', fa: true });
+        await all([
+          b.write('m1', 360, 430, 'Max-Min inference', { size: 32, color: 'orange' }),
+          b.write('m1f', 690, 430, 'همین درس', { size: 24, color: 'orange', fa: true }),
+        ]);
+        await all([
+          b.write('m2', 360, 490, 'Max-product inference', { size: 32, color: 'soft' }),
+          b.write('m2f', 690, 490, 'درس بعد', { size: 24, color: 'soft', fa: true }),
+        ]);
+      },
+    },
+    // ---------------------------------------------------------- 3. ordinary vector × matrix
+    {
+      say: 'اول یک یادآوری از ضرب معمولی بردار در ماتریس (اسلاید 70): X(1×n) · A(n×p) = Y(1×p) — یک ردیف n تایی ضرب در جدولی با n سطر و p ستون، یک ردیف p تایی می‌دهد. فرمول y_j = Σ x_i a_ij یعنی: ستون j را بردار، هر عددش را در عدد هم‌ردیفش در X *ضرب* کن و حاصل‌ها را *جمع* کن. مثال: ردیف [1 2] و ستون [3 4] می‌شود 1×3 + 2×4 = 11.',
+      term: ['vector-matrix multiplication', 'ضرب بردار در ماتریس'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'ضرب معمولی بردار در ماتریس', { size: 30, color: 'blue', fa: true });
+        await b.write('f1', 500, 140, 'X_{1×n} · A_{n×p} = Y_{1×p}', { size: 38 });
+        await b.write('f2', 500, 205, 'y_j = Σ_{i=1..n} x_i · a_{ij}', { size: 36, color: 'blue' });
+        await all([
+          b.write('vl', 180, 352, '[', { size: 48, color: 'soft' }),
+          b.write('v0', 225, 345, '1', { size: 36, color: 'purple' }),
+          b.write('v1', 300, 345, '2', { size: 36, color: 'purple' }),
+          b.write('vr', 345, 352, ']', { size: 48, color: 'soft' }),
+          bracket(b, 'cl', 435, 282, 392, 'left'), bracket(b, 'cr', 505, 282, 392, 'right'),
+          b.write('c0', 470, 320, '3', { size: 36 }),
+          b.write('c1', 470, 378, '4', { size: 36 }),
+        ]);
+        await all([b.pulse(['v0', 'c0']), b.write('p0', 690, 320, '1 × 3 = 3', { size: 30 })]);
+        await all([b.pulse(['v1', 'c1']), b.write('p1', 690, 378, '2 × 4 = 8', { size: 30 })]);
+        await b.write('pl', 900, 350, 'ضرب دوبه‌دو', { size: 20, color: 'soft', fa: true });
+        await b.line('sl', 590, 400, 790, 400, { color: 'soft' });
+        await b.write('s', 690, 450, '3 + 8 = 11', { size: 34, color: 'green', bold: true });
+        await b.write('sll', 900, 450, 'جمع', { size: 20, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 4. the fuzzy version
+    {
+      say: 'نسخه‌ی فازی اسمش max-min composition یا *ترکیب* max-min است و با علامت ∘ نشانش می‌دهیم. همان کار را می‌کند، فقط با دو جابه‌جایی: به جای ضرب دوبه‌دو، min دوبه‌دو؛ و به جای جمع، max. همان مثال را فازی کنیم: ردیف [0.2 0.4] و ستون [0.1 0.6]. minها: min(0.2,0.1) = 0.1 و min(0.4,0.6) = 0.4. بزرگ‌ترینشان: 0.4.',
+      term: ['max-min composition (∘)', 'ترکیب max-min'],
+      draw: async b => {
+        await b.erase(['v0', 'v1', 'c0', 'c1', 'p0', 'p1', 's', 'pl', 'sll']);
+        await b.write('h', 500, 70, 'نسخه‌ی فازی: ترکیب max-min با علامت ∘', { size: 30, color: 'orange', fa: true });
+        await b.write('f1', 500, 140, 'A_{1×n} ∘ M_{n×p} = B_{1×p}', { size: 38 });
+        await b.write('f2', 500, 205, 'b_j = max_i  min(a_i , m_{ij})', { size: 36, color: 'orange' });
+        await all([
+          b.write('v0', 225, 345, '0.2', { size: 34, color: 'purple' }),
+          b.write('v1', 300, 345, '0.4', { size: 34, color: 'purple' }),
+          b.write('c0', 470, 320, '0.1', { size: 32 }),
+          b.write('c1', 470, 378, '0.6', { size: 32 }),
+        ]);
+        await all([b.pulse(['v0', 'c0']), b.write('p0', 690, 320, 'min(0.2, 0.1) = 0.1', { size: 28 })]);
+        await all([b.pulse(['v1', 'c1']), b.write('p1', 690, 378, 'min(0.4, 0.6) = 0.4', { size: 28 })]);
+        await b.write('pl', 900, 350, 'min دوبه‌دو', { size: 20, color: 'orange', fa: true });
+        await b.write('s', 690, 450, 'max(0.1, 0.4) = 0.4', { size: 32, color: 'green', bold: true });
+        await b.write('sll', 900, 450, 'max', { size: 22, color: 'orange' });
+      },
+    },
+    // ---------------------------------------------------------- 5. the formula, sizes, min = AND
+    {
+      say: 'اسلاید 71 همین را رسمی می‌نویسد: A(1×n) ∘ M(n×p) = B(1×p) و b_j = max{min(a_i,m_ij)} برای i از 1 تا n. اندازه‌ها درست مثل ضرب معمولی است: عدد وسط، یعنی n، در هر دو یکی است و حذف می‌شود؛ جواب به تعداد *ستون‌های* M عدد دارد. یک یادآوری از درس 4: min همان اشتراک یا AND است و max همان اجتماع یا OR. پس b_j یعنی: «یا a_1 و m_1j، یا a_2 و m_2j، یا …».',
+      draw: async b => {
+        await b.clear();
+        await b.box('bx', 120, 80, 760, 170, { color: 'orange' });
+        await b.write('f1', 500, 140, 'A_{1×n} ∘ M_{n×p} = B_{1×p}', { size: 40 });
+        await b.write('f2', 500, 215, 'b_j = max_{1≤i≤n} { min(a_i , m_{ij}) }', { size: 38, color: 'orange' });
+        await b.write('sz', 500, 320, '(1 × n) ∘ (n × p)  →  (1 × p)', { size: 36, color: 'purple' });
+        await b.write('szf', 500, 365, 'دو n وسط یکی‌اند و حذف می‌شوند؛ جواب به تعداد ستون‌های M عدد دارد', { size: 21, color: 'soft', fa: true });
+        await all([
+          b.write('and', 300, 450, 'min = ∩ = AND', { size: 34, color: 'green' }),
+          b.write('or', 700, 450, 'max = ∪ = OR', { size: 34, color: 'blue' }),
+        ]);
+        await all([
+          b.write('andf', 300, 500, 'اشتراک (درس 4)', { size: 22, color: 'soft', fa: true }),
+          b.write('orf', 700, 500, 'اجتماع (درس 4)', { size: 22, color: 'soft', fa: true }),
+        ]);
+      },
+    },
+    // ---------------------------------------------------------- 6. slide 72 setup
+    {
+      say: 'مثال اسلاید 72: A = [0.2 0.4 0.6 1] و ماتریس M با 4 سطر و 3 ستون داده شده؛ B را حساب کنید. حواست باشد: اینجا M از هیچ قانونی ساخته نشده — فقط چند عدد داده‌شده است تا عملگر ∘ را تمرین کنیم، و B فقط اسم جواب است. A چهار عدد دارد و M چهار سطر: عدد i ام A کنار سطر i ام M می‌نشیند. M سه ستون دارد، پس B سه عدد دارد و هر *ستون* M دقیقاً یک عدد B را می‌سازد.',
+      draw: async b => {
+        await b.clear();
+        await drawAM(b, A72, M72);
+        await b.write('src', 830, 80, 'مثال اسلاید 72', { size: 22, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 7. column 1: the mins
+    {
+      say: 'b_1 از ستون 1 ساخته می‌شود. ستون 1 را کنار A بگذار و در هر سطر کوچک‌تر را بردار: min(0.2,0.1) = 0.1، min(0.4,0.6) = 0.4، min(0.6,0.8) = 0.6 و min(1,0) = 0. این‌ها جای «ضرب»های ضرب معمولی‌اند.',
+      draw: async b => {
+        await b.erase('src');
+        await colMins(b, A72, M72, 0);
+      },
+    },
+    // ---------------------------------------------------------- 8. column 1: the max
+    {
+      say: 'حالا به جای «جمع»، بزرگ‌ترین را برمی‌داریم: max{0.1,0.4,0.6,0} = 0.6. پس b_1 = 0.6. دقت کن برنده سطر 3 است، نه سطر 4 که بزرگ‌ترین عدد A یعنی 1 را داشت — چون عدد ستون در آن سطر 0 بود و min همه‌چیز را پایین کشید.',
+      draw: b => colMax(b, A72, M72, 0),
+    },
+    // ---------------------------------------------------------- 9. column 2
+    {
+      say: 'همین کار با ستون 2: minها 0.2، 0.4، 0.6 و 0.5 هستند و بزرگ‌ترینشان 0.6. پس b_2 = 0.6.',
+      draw: async b => {
+        await colMins(b, A72, M72, 1);
+        await colMax(b, A72, M72, 1);
+      },
+    },
+    // ---------------------------------------------------------- 10. column 3 and the answer
+    {
+      say: 'ستون 3: minها 0.2، 0.4، 0.5 و 0.5 و بزرگ‌ترین 0.5 — این بار دو سطر با هم برنده‌اند، اشکالی ندارد. جواب: B = [0.6 0.6 0.5]، درست همان جواب اسلاید 72. خلاصه در یک جمله: برای هر ستون، در هر سطر کوچک‌تر را بردار، بعد بزرگ‌ترینِ آن‌ها را.',
+      draw: async b => {
+        await colMins(b, A72, M72, 2);
+        await colMax(b, A72, M72, 2);
+        await b.erase('cb');
+        await b.write('ans', 955, AM(4, 3).BY, `B = (${compose(A72, M72).map(f).join(', ')})`, { size: 26, color: 'green', bold: true, anchor: 'end' });
+      },
+    },
+    // ---------------------------------------------------------- 11. building M from a rule
+    {
+      say: 'در مثال قبل M داده شده بود. ولی وقتی یک قانون واقعی داریم، M را خودمان از روی A و B می‌سازیم (اسلاید 71). اگر a_i عضویت نقطه‌ی x_i در A و b_j عضویت نقطه‌ی y_j در B باشد، هر خانه m_ij = min(a_i,b_j) است. معنی‌اش: «چقدر درست است که *هم* x برابر x_i باشد و هم y برابر y_j» — و «و» در فازی یعنی min. یک غلط تایپی کوچک: اسلاید نوشته b_i = B(y_i)؛ درستش b_j = B(y_j) است.',
+      term: ['Rule matrix (fuzzy relation)', 'ماتریس قانون'],
+      draw: async b => {
+        await b.clear();
+        await all([
+          b.write('ai', 300, 110, 'a_i = μ_A(x_i)', { size: 34, color: 'purple' }),
+          b.write('bj', 700, 110, 'b_j = μ_B(y_j)', { size: 34, color: 'orange' }),
+        ]);
+        await b.box('bx', 230, 160, 540, 100, { color: 'orange' });
+        await b.write('m', 500, 228, 'm_{ij} = min(a_i , b_j)', { size: 48, color: 'orange', bold: true });
+        await b.write('rc', 500, 320, `هر سطر = یک نقطه‌ی ${LTR('x')}   ·   هر ستون = یک نقطه‌ی ${LTR('y')}`, { size: 24, fa: true });
+        await b.write('and', 500, 370, '«هم x این مقدار است و هم y آن مقدار» — «و» یعنی min', { size: 22, color: 'soft', fa: true });
+        await b.write('ty', 380, 450, 'b_i = B(y_i)', { size: 32, color: 'red' });
+        await b.line('tyx', 300, 440, 460, 432, { color: 'red' });
+        await b.arrow('tya', 485, 440, 545, 440, { color: 'soft' });
+        await b.write('tyok', 640, 450, 'b_j = B(y_j)', { size: 32, color: 'green' });
+        await b.write('tyl', 500, 510, 'غلط تایپی اسلاید 71', { size: 22, color: 'red', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 12. slide 74 sets and μ/x
+    {
+      say: 'مثال اسلاید 74: قانون «اگر دما نرمال باشد، آنگاه سرعت متوسط است». A = دمای نرمال = {0/100,0.5/125,1/150,0.5/175,0/200} و B = سرعت متوسط = {0/10,0.6/20,1/30,0.6/40,0/50}. یادت باشد در نوشتن μ/x عدد *بالا* درجه است و عدد پایین خود عضو: 0.5/125 یعنی «دمای 125 با درجه‌ی 0.5 نرمال است» — خط کج تقسیم نیست.',
+      draw: async b => {
+        await b.clear();
+        await b.write('rule', 500, 70, 'اگر دما نرمال باشد، آنگاه سرعت متوسط است', { size: 30, color: 'blue', fa: true });
+        await b.write('A', 500, 165, 'A = {0/100, 0.5/125, 1/150, 0.5/175, 0/200}', { size: 30, color: 'purple' });
+        await b.write('B', 500, 230, 'B = {0/10, 0.6/20, 1/30, 0.6/40, 0/50}', { size: 30, color: 'orange' });
+        await all([
+          b.write('z0', 430, 370, '0.5', { size: 64, color: 'blue', bold: true }),
+          b.write('z1', 500, 370, '/', { size: 64, color: 'soft' }),
+          b.write('z2', 570, 370, '125', { size: 64, bold: true }),
+        ]);
+        await all([
+          b.write('z0l', 420, 425, 'درجه‌ی عضویت', { size: 22, color: 'blue', fa: true }),
+          b.write('z2l', 590, 425, 'خود عضو (دما)', { size: 22, fa: true }),
+        ]);
+        await b.write('warn', 500, 500, 'خط کج تقسیم نیست!', { size: 26, color: 'red', bold: true, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 13. the empty 5×5 table
+    {
+      say: 'جدول را بکشیم. سطرها = دماها، یعنی هر سطر یک نقطه‌ی x؛ ستون‌ها = سرعت‌ها، یعنی هر ستون یک نقطه‌ی y. کنار هر دما درجه‌اش در A را بنفش می‌نویسیم و بالای هر سرعت درجه‌اش در B را نارنجی. پنج دما و پنج سرعت، پس جدول 5×5 است و فعلاً همه‌ی خانه‌ها علامت سؤال‌اند.',
+      draw: async b => {
+        await b.clear();
+        await ruleFrame(b);
+      },
+    },
+    // ---------------------------------------------------------- 14. the first cell
+    {
+      say: 'قانون پر کردن: هر خانه = کوچک‌ترِ عدد بنفش سطرش و عدد نارنجی ستونش. اولین خانه: سطر 125 با درجه‌ی 0.5 و ستون 30 با درجه‌ی 1. پس min(0.5,1) = 0.5. به زبان ساده: «دما 125 نرمال است *و* سرعت 30 متوسط است» حداکثر به اندازه‌ی ضعیف‌ترینِ این دو درست است.',
+      draw: async b => {
+        await all([b.ring('rc1', RG.XA, RG.RY[1] - 9, 30, 22, { color: 'purple' }), b.ring('rc2', RG.CX[2], RG.HB - 8, 30, 20, { color: 'orange' })]);
+        await b.write('calc', 500, 515, `m = min(${f(TA[1])}, ${f(VB[2])}) = ${f(MU[1][2])}`, { size: 26 });
+        await b.write('r-1-2', RG.CX[2], RG.RY[1], f(MU[1][2]), { size: 26, color: 'orange', bold: true });
+        await b.ring('rc', RG.CX[2], RG.RY[1] - 9, 36, 22, { color: 'orange' });
+      },
+    },
+    // ---------------------------------------------------------- 15. row 125
+    {
+      say: 'حالا کل سطر 125. عدد بنفش 0.5 را با تک‌تک عددهای نارنجی مقایسه کن: min(0.5,0) = 0، min(0.5,0.6) = 0.5، min(0.5,1) = 0.5، min(0.5,0.6) = 0.5 و min(0.5,0) = 0. پس سطر 125 = [0 0.5 0.5 0.5 0]. ببین: هرجا B از 0.5 بلندتر بود، 0.5 نوشته شد — یعنی B از ارتفاع 0.5 *بریده* شد.',
+      draw: async b => {
+        await b.erase(['rc', 'rc1', 'rc2']);
+        await rowBox(b, 1);
+        await fillRow(b, 1);
+        await b.write('an-1', 905, RG.RY[1], `سقف ${LTR('0.5')}`, { size: 20, color: 'orange', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 16. row 150
+    {
+      say: 'سطر 150 درجه‌ی 1 دارد. کوچک‌ترِ 1 و هر عددی، خود آن عدد است: min(1,b) = b. پس این سطر بدون هیچ حسابی خودِ B است: [0 0.6 1 0.6 0].',
+      draw: async b => {
+        await rowBox(b, 2);
+        await fillRow(b, 2);
+        await b.write('calc', 500, 515, 'min(1, b) = b', { size: 26, color: 'green' });
+        await b.write('an-2', 905, RG.RY[2], '= B', { size: 24, color: 'green', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 17. rows 100, 200, 175
+    {
+      say: 'دماهای 100 و 200 درجه‌ی 0 دارند و کوچک‌ترِ 0 و هر عددی 0 است؛ پس این دو سطر تماماً صفرند. دمای 175 هم مثل 125 درجه‌ی 0.5 دارد، پس سطرش عیناً همان سطر 125 است.',
+      draw: async b => {
+        await b.erase('rb');
+        await b.write('calc', 500, 515, 'min(0, b) = 0', { size: 26, color: 'blue' });
+        await all([fillRow(b, 0, 'blue', false), fillRow(b, 4, 'blue', false)]);
+        await all([
+          b.write('an-0', 905, RG.RY[0], '= 0', { size: 24, color: 'soft' }),
+          b.write('an-4', 905, RG.RY[4], '= 0', { size: 24, color: 'soft' }),
+        ]);
+        await fillRow(b, 3, 'blue', false);
+        await b.write('an-3', 905, RG.RY[3], `مثل ${LTR('125')}`, { size: 20, color: 'orange', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 18. the full matrix + slide typo
+    {
+      say: 'ماتریس کامل شد — همان ماتریس اسلاید 75 (اسلاید 76 تکرار همان صفحه است). الگو را ببین: هر سطر همان B است که از ارتفاع عدد بنفشِ آن سطر بریده شده. یک غلط تایپی: در اسلاید، خانه‌ی آخر (سطر 200 و ستون 50) به شکل min(0,0.6) نوشته شده، ولی عضویت سرعت 50 در B صفر است، پس درستش min(0,0) است. جواب هر دو 0 است، پس ماتریس عوض نمی‌شود.',
+      draw: async b => {
+        await b.erase(['calc', 'an-*']);
+        await b.recolor('r-*', 'ink');
+        await b.write('mu', 905, RG.RY[2], 'μ_{AB}', { size: 34, color: 'green', bold: true });
+        await b.ring('typo-r', RG.CX[4], RG.RY[4] - 9, 30, 22, { color: 'red' });
+        await b.write('typo', 500, 515, `اسلاید 75: ${LTR('min(0, 0.6)')} ✗     درست: ${LTR('min(0, 0) = 0')}`, { size: 24, color: 'red', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 19. Zadeh's compositional rule
+    {
+      say: 'این ماتریس به چه درد می‌خورد؟ پروفسور لطفی‌زاده گفت (اسلاید 73): اگر اطلاعات تازه‌ای درباره‌ی A داشته باشیم — اسمش A′ — با ماتریس قانون می‌توانیم اطلاعاتی درباره‌ی B به دست آوریم — اسمش B′: یعنی B′ = A′ ∘ μ_AB. به این compositional rule of inference یا قاعده‌ی ترکیبی استنتاج می‌گویند. پریم یعنی «نسخه‌ی تازه»: A بخش «اگر» قانون است و A′ چیزی که الان واقعاً دیده‌ایم. اسم ماتریس هم در اسلایدها عوض می‌شود: M، μ_AB و μ_ij هر سه همین ماتریس‌اند. درس بعد با همین فرمول سرعت را برای دمای 125 حساب می‌کنیم.',
+      term: ['Compositional rule of inference', 'قاعده‌ی ترکیبی استنتاج'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'قاعده‌ی ترکیبی استنتاج زاده', { size: 30, color: 'blue', fa: true });
+        const P = [[260, 'B′', 'green'], [350, '=', 'ink'], [440, 'A′', 'purple'], [530, '∘', 'ink'], [640, 'μ_{AB}', 'orange']];
+        for (const [x, s, c] of P) await b.write(`z-${s}`, x, 190, s, { size: 64, color: c, bold: true, dur: 250 });
+        await all([
+          b.arrow('ab', 260, 290, 260, 215, { color: 'green' }),
+          b.arrow('aa', 440, 290, 440, 215, { color: 'purple' }),
+          b.arrow('am', 640, 290, 640, 215, { color: 'orange' }),
+        ]);
+        await all([
+          b.write('lb', 230, 325, 'نتیجه درباره‌ی خروجی', { size: 20, color: 'green', fa: true }),
+          b.write('la', 440, 325, 'آنچه الان دیده‌ایم', { size: 20, color: 'purple', fa: true }),
+          b.write('lm', 660, 325, 'ماتریس قانون', { size: 20, color: 'orange', fa: true }),
+        ]);
+        await b.write('names', 500, 410, 'M  =  μ_{AB}  =  μ_{ij}', { size: 36 });
+        await b.write('namesf', 500, 450, 'سه اسم برای یک ماتریس', { size: 22, color: 'soft', fa: true });
+        await b.write('next', 500, 515, `درس بعد: ${LTR('125 → A′ → B′ → ?')}`, { size: 24, color: 'blue', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 20. exam shortcuts
+    {
+      say: 'چند میان‌بر برای امتحان. یک: سطری که عدد بنفشش 1 است، خودِ B است. دو: سطری که عدد بنفشش 0 است، تماماً صفر است. سه: اندازه‌ها (1×n) ∘ (n×p) = (1×p) هستند — جواب به تعداد ستون‌های ماتریس عدد دارد. چهار: در b_j حتماً *اول* min و *بعد* max؛ جابه‌جا کنی جواب غلط می‌شود.',
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        await b.box('bx', 110, 60, 780, 450, { color: 'orange' });
+        await b.write('h', 500, 120, 'میان‌برهای امتحان', { size: 40, color: 'orange', bold: true, fa: true });
+        const L = [
+          'سطر با درجه‌ی 1  ←  خودِ B',
+          'سطر با درجه‌ی 0  ←  تماماً صفر',
+          `اندازه: ${LTR('(1×n) ∘ (n×p) = (1×p)')}`,
+          'اول min در هر سطر، بعد max روی ستون',
+        ];
+        for (const [k, l] of L.entries()) await b.write(`l${k}`, 830, 200 + k * 75, '•  ' + l, { size: 28, anchor: 'start', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 21. summary
+    {
+      say: 'جمع‌بندی: این شش نکته را به خاطر بسپار، بعد برویم سراغ سؤال‌ها.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'یادت باشد', { size: 46, color: 'orange', bold: true, fa: true });
+        const L = [
+          ['قانون به ماتریس تبدیل می‌شود', 'm_{ij} = min(a_i , b_j)'],
+          ['ترکیب max-min', 'b_j = max_i min(a_i , m_{ij})'],
+          ['مثل ضرب بردار در ماتریس با', '×  →  min ,   Σ  →  max'],
+          ['اندازه‌ها', '(1×n) ∘ (n×p) = (1×p)'],
+          ['قاعده‌ی زاده', 'B′ = A′ ∘ μ_{AB}'],
+          ['مثال اسلاید 72', 'B = (0.6, 0.6, 0.5)'],
+        ];
+        for (const [k, [fa, m]] of L.entries()) {
+          const y = 145 + k * 66;
+          await all([
+            b.write(`f${k}`, 930, y, '•  ' + fa, { size: 24, anchor: 'start', fa: true }),
+            b.write(`m${k}`, 80, y, m, { size: 28, anchor: 'start', color: 'blue' }),
+          ]);
+        }
+      },
+    },
+    // ---------------------------------------------------------- quizzes
+    {
+      say: 'نوبت شماست! A = [0.3 0.9 0.5] و ماتریس M روی تخته است. با روش max-min عدد اول جواب، یعنی b_1، را حساب کنید.',
+      draw: async b => {
+        await b.clear();
+        await quizHead(b, 1);
+        await drawAM(b, QA1, QM1);
+        await b.write('q', 820, 80, 'b_1 = ?', { size: 32, color: 'orange', bold: true });
+      },
+      quiz: { answer: ['0.5'], hint: 'ستون 1 = [0.7 0.1 0.5]. در هر سطر min بگیر، بعد بزرگ‌ترین را بردار.', explain: 'minها 0.3، 0.1 و 0.5 هستند و بزرگ‌ترینشان 0.5. سطر 2 با بزرگ‌ترین ورودی (0.9) برنده نشد، چون عدد ستونش 0.1 بود.' },
+      solve: async b => {
+        await b.erase('q');
+        await colMins(b, QA1, QM1, 0);
+        await colMax(b, QA1, QM1, 0);
+      },
+    },
+    {
+      say: 'اگر A′ یک بردار 1×5 و ماتریس قانون 5×4 باشد، اندازه‌ی B′ = A′ ∘ M چیست؟',
+      draw: quizBoard(2, 'A′_{1×5} ∘ M_{5×4} = B′_{?}'),
+      quiz: {
+        choices: ['5×1', '4×5', '1×4', '1×5'], correct: 2,
+        hint: 'مثل ضرب معمولی: عدد وسط حذف می‌شود.',
+        explain: 'دو 5 وسط حذف می‌شوند و 1×4 می‌ماند: B′ به تعداد ستون‌های ماتریس، یعنی 4، عدد دارد.',
+      },
+      solve: async b => {
+        await b.write('s1', 500, 290, '(1 × 5) ∘ (5 × 4)', { size: 44, color: 'purple' });
+        await b.write('s2', 500, 350, 'دو 5 وسط یکی‌اند و حذف می‌شوند', { size: 26, color: 'soft', fa: true });
+        await b.write('s3', 500, 440, '= (1 × 4)', { size: 50, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'ماتریس یک قانون را بسازید: A = {0.4/1,1/2,0.7/3} و B = {0.5/10,1/20,0.2/30} با r_ij = min(a_i,b_j). خانه‌ی قاب‌دار، یعنی سطر x=3 و ستون y=20، چند است؟',
+      draw: async b => {
+        await b.clear();
+        await quizHead(b, 3);
+        await b.write('A', 500, 105, 'A = {0.4/1, 1/2, 0.7/3}', { size: 30, color: 'purple' });
+        await b.write('B', 500, 155, 'B = {0.5/10, 1/20, 0.2/30}', { size: 30, color: 'orange' });
+        const CX = [480, 590, 700], RY = [340, 400, 460];
+        await all(QB3.map((v, j) => all([
+          b.write(`qy-${j}`, CX[j], 225, `y=${[10, 20, 30][j]}`, { size: 24, dur: 150 }),
+          b.write(`qb-${j}`, CX[j], 265, f(v), { size: 24, color: 'orange', dur: 150 }),
+        ])));
+        await all(QA3.map((a, i) => all([
+          b.write(`qx-${i}`, 270, RY[i], `x=${i + 1}`, { size: 24, dur: 150 }),
+          b.write(`qa-${i}`, 360, RY[i], f(a), { size: 24, color: 'purple', dur: 150 }),
+          ...QB3.map((_, j) => b.write(`qr-${i}-${j}`, CX[j], RY[i], '?', { size: 24, color: 'soft', dur: 100 })),
+        ])));
+        await all([bracket(b, 'qbl', 420, 300, 478, 'left'), bracket(b, 'qbr', 760, 300, 478, 'right')]);
+        await b.box('qt', CX[1] - 40, RY[2] - 34, 80, 46, { color: 'orange' });
+      },
+      quiz: { answer: ['0.7'], hint: 'عدد بنفش سطر x=3 و عدد نارنجی ستون y=20 را با هم مقایسه کن.', explain: 'min(0.7,1) = 0.7. سطر x=2 هم چون درجه‌اش 1 است، خودِ B را کپی می‌کند.' },
+      solve: async b => {
+        const CX = [480, 590, 700], RY = [340, 400, 460];
+        for (const [i] of QA3.entries()) {
+          await all(QB3.map((_, j) => b.write(`qr-${i}-${j}`, CX[j], RY[i], f(QR3[i][j]), { size: 24, color: i === 2 && j === 1 ? 'green' : 'blue', bold: i === 2 && j === 1, dur: 250 })));
+        }
+        await b.write('qs', 870, 460, 'min(0.7, 1) = 0.7', { size: 22, color: 'green' });
+      },
+    },
+    {
+      say: 'قدم min(a_i,m_ij) در زبان درس 4 کدام عمل روی مجموعه‌هاست؟',
+      draw: quizBoard(4, 'min(a_i , m_{ij})  ↔  ?'),
+      quiz: {
+        choices: ['A ∩ B', 'A ∪ B', '¬A', 'A − B'], correct: 0,
+        hint: 'AND کدام است و OR کدام؟',
+        explain: 'min همان اشتراک (AND) است و max همان اجتماع (OR). پس max-min یعنی «یا … یا …» روی «و»ها.',
+      },
+      solve: async b => {
+        await b.write('s1', 300, 330, 'min = ∩ = AND', { size: 40, color: 'green', bold: true });
+        await b.write('s2', 700, 330, 'max = ∪ = OR', { size: 40, color: 'blue' });
+        await b.write('s3', 500, 430, 'هر min یک «و» است، و max روی آن‌ها یک «یا»', { size: 26, color: 'soft', fa: true });
+      },
+    },
+    {
+      say: 'ترکیب با درس 4: ورودی این بار «نه A» است، یعنی A′ = ¬A، برای همان A و ماتریس R سؤال 3. اول A′ را بسازید، بعد اولین عدد B′ = A′ ∘ R را، یعنی ستون y=10، حساب کنید.',
+      draw: async b => {
+        await b.clear();
+        await quizHead(b, 5);
+        await drawAM(b, QA3, QR3, { mName: 'R', bName: 'b′', cols: ['y=10', 'y=20', 'y=30'] });
+        await b.write('q', 820, 80, 'A′ = ¬A ,  b′_1 = ?', { size: 28, color: 'orange', bold: true });
+      },
+      quiz: { answer: ['0.4'], hint: 'مکمل: هر عدد A را از 1 کم کن. بعد با ستون اول R، max-min بگیر.', explain: 'A′ = [0.6 0 0.3]. minها با ستون اول R: 0.4، 0 و 0.3؛ بزرگ‌ترین 0.4.' },
+      solve: async b => {
+        await b.erase('q');
+        await b.write('an', AM(3, 3).AX, 80, 'A′ = 1 − A', { size: 28, color: 'orange', bold: true });
+        for (const [i, a] of NOT3.entries()) await b.write(`a-${i}`, AM(3, 3).AX, AM(3, 3).RY[i], f(a), { size: 30, color: 'orange', dur: 300 });
+        await colMins(b, NOT3, QR3, 0);
+        await colMax(b, NOT3, QR3, 0, 'b′');
+      },
+    },
+    {
+      say: 'سؤال آخر: فرض کنید ورودی دقیقاً خود A باشد (A′ = A) و A دست‌کم یک عضویت برابر 1 داشته باشد، مثل A سؤال 3. حاصل A ∘ R چیست؟',
+      draw: quizBoard(6, `اگر ${LTR('A′ = A')} و یکی از عضویت‌های A برابر 1 باشد:  ${LTR('A ∘ R = ?')}`, { size: 30, fa: true }),
+      quiz: {
+        choices: ['B′ = A', 'B′ = 0', 'B′ = 1', 'B′ = B'], correct: 3,
+        hint: 'سطری از R که درجه‌اش 1 است چه شکلی دارد؟',
+        explain: 'سطر با درجه‌ی 1 خودِ B است و هیچ سطر دیگری از B بلندتر نیست؛ پس max روی ستون‌ها دقیقاً B را برمی‌گرداند. اینجا: (0.5, 1, 0.2) = B.',
+      },
+      solve: async b => {
+        await b.erase('q-q');
+        await drawAM(b, QA3, QR3, { mName: 'R', bName: 'b′', cols: ['y=10', 'y=20', 'y=30'] });
+        for (let j = 0; j < 3; j++) { await colMins(b, QA3, QR3, j); await colMax(b, QA3, QR3, j, 'b′'); }
+        await b.erase('cb');
+        await b.write('eqB', 860, AM(3, 3).BY, '= B  ✓', { size: 32, color: 'green', bold: true });
+      },
+    },
+  ],
+});
 </script>
 </body>
 </html>

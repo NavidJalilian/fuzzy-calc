@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>یادگیری ماشین چیست</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Vazirmatn:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="../assets/teacher.css">
+</head>
+<body>
+<main id="app"></main>
+<script src="../assets/teacher.js"></script>
+<script src="../assets/graph.js"></script>
+<script>
+// Lesson 18 — slides 143–167 (part 6: machine learning). What ML is, data, features, labels, kinds of data.
+
+const all = list => Promise.all(list);
+const LTR = s => `⁦${s}⁩`; // keeps a left-to-right run intact inside Persian board text
+const FA = /[؀-ۿ]/;
+
+// A rounded box with a centred label.
+async function node(b, id, x, y, w, h, label, o = {}) {
+  await b.box(id, x, y, w, h, { color: o.color || 'blue', fill: o.fill ?? (o.color || 'blue'), dur: o.dur ?? 350 });
+  const size = o.size || 24;
+  await b.write(id + '-t', x + w / 2, y + h / 2 + size / 3, label, { size, fa: FA.test(label), color: o.text || 'ink', bold: o.bold, dur: 250 });
+}
+
+// A small "handwritten digit" picture: a dark frame with the digit inside.
+function digit(b, id, x, y, d, s = 34) {
+  return all([
+    b.box(id, x - s / 2, y - s / 2, s, s, { color: 'ink', fill: 'ink', r: 4, dur: 150 }),
+    b.write(id + '-d', x, y + s * 0.3, String(d), { size: s * 0.8, dur: 150 }),
+  ]);
+}
+
+function quizBoard(n, question, o = { size: 34, fa: true }) {
+  return async b => {
+    await b.clear();
+    await b.write('q-n', 500, 60, `سؤال ${n} از 5`, { size: 24, color: 'soft', fa: true });
+    await b.write('q-q', 500, 140, question, o);
+  };
+}
+
+// The diabetes table the slides show (slides 152, 158, 189–192).
+const PIMA_HEAD = ['Case', 'preg', 'plas', 'pres', 'skin', 'insu', 'mass', 'pedi', 'age', 'class'];
+const PIMA = [
+  [1, 6, 148, 72, 35, 0, 33.6, 0.627, 50, 'Positive'],
+  [2, 1, 85, 66, 29, 0, 26.6, 0.351, 31, 'Negative'],
+  [3, 8, 183, 64, 0, 0, 23.3, 0.672, 32, 'Positive'],
+  [4, 1, 89, 66, 23, 94, 28.1, 0.167, 21, 'Negative'],
+  [5, 0, 137, 40, 35, 168, 43.1, 2.288, 33, 'Positive'],
+  [6, 5, 116, 74, 0, 0, 25.6, 0.201, 30, 'Negative'],
+];
+const PX = [95, 175, 250, 325, 400, 475, 555, 640, 720, 820]; // column centres
+const PW = [70, 75, 75, 75, 75, 75, 85, 85, 75, 120];         // column widths
+const PY = r => 175 + r * 46;                                  // row r baseline (0 = header)
+
+// The bank-loan table (slide 161). Columns right to left as on the slide.
+const LOAN_HEAD = ['#', 'خانه دارد', 'تعداد فرزندان', 'اتومبیل دارد', 'حقوق دریافتی', 'وام را پس داده؟'];
+const LOAN = [
+  ['#1', 1, 2, 1, 800, 'بلی'],
+  ['#2', 0, 1, 0, 750, 'بلی'],
+  ['#3', 0, 2, 1, 700, 'بلی'],
+  ['#4', 1, 0, 1, 650, 'خیر'],
+];
+const LX = [110, 240, 390, 540, 690, 850];
+const LY = r => 150 + r * 62;
+
+Teacher.start({
+  id: 'L18',
+  number: 18,
+  title: 'یادگیری ماشین چیست',
+  chapter: 'یادگیری ماشین',
+  slides: '143–167',
+  intro: 'ماشینی که خودش از داده یاد می‌گیرد — داده، ویژگی، برچسب و انواع داده.',
+  next: { href: '0019-learning-types.html', title: 'انواع یادگیری' },
+  steps: [
+    // ---------------------------------------------------------- 1. intro
+    {
+      say: 'سلام! به بخش 6 خوش آمدید: *Machine learning* یا یادگیری ماشین. فهرست این بخش در اسلاید 144 آمده: مقدمه، تعریف یادگیری ماشین، داده، انواع یادگیری، و در آخر آموزش و ارزیابی. این درس سه مورد اول را پوشش می‌دهد.',
+      term: ['Machine learning', 'یادگیری ماشین'],
+      draw: async b => {
+        await b.write('t0', 500, 50, 'بخش 6', { size: 28, color: 'soft', bold: true, fa: true });
+        await b.write('t1', 500, 105, 'یادگیری ماشین', { size: 50, color: 'blue', bold: true, fa: true });
+        await b.write('t2', 500, 165, 'Machine learning', { size: 40, color: 'orange' });
+        const L = ['مقدمه', 'تعریف یادگیری ماشین', 'داده در یادگیری ماشین', 'انواع یادگیری در یادگیری ماشین', 'آموزش و ارزیابی'];
+        for (const [k, l] of L.entries()) {
+          await b.write(`c${k}`, 680, 245 + k * 58, '◂  ' + l, { size: 28, anchor: 'start', fa: true, color: k < 3 ? 'ink' : 'soft', dur: 300 });
+        }
+        await b.box('cb', 300, 215, 420, 155, { color: 'orange', dur: 400 });
+        await b.write('cn', 220, 300, 'این درس', { size: 24, color: 'orange', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 2. AI
+    {
+      say: 'اول یک قدم عقب‌تر: *Artificial Intelligence* یا هوش مصنوعی. اسلاید 145 تعریفش را این‌طور می‌دهد: هر تکنیکی که کامپیوترها یا ماشین‌ها را قادر می‌سازد تا *مانند انسان‌ها* رفتار کنند. مثل ماشین خودران یا ربات.',
+      term: ['Artificial Intelligence (AI)', 'هوش مصنوعی'],
+      draw: async b => {
+        await b.clear();
+        await b.box('ai', 120, 80, 760, 400, { color: 'blue', fill: 'blue' });
+        await b.write('ai-t', 500, 140, 'هوش مصنوعی (AI)', { size: 40, color: 'blue', bold: true, fa: true });
+        await b.write('ai-d1', 500, 250, 'هر تکنیکی که کامپیوترها یا ماشین‌ها را', { size: 32, fa: true });
+        await b.write('ai-d2', 500, 305, 'قادر می‌سازد تا مانند انسان‌ها رفتار کنند', { size: 32, fa: true });
+        await b.write('ai-e', 500, 410, 'مثال: ماشین خودران، ربات', { size: 24, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 3. ML inside AI
+    {
+      say: 'یادگیری ماشین *یک زیرشاخه‌ی* هوش مصنوعی است. تعریف اسلاید 146 و 148: دادن قابلیت یادگیری به کامپیوتر *بدون نیاز به برنامه‌ریزی مستقیم و دستی*. یعنی ما قانون تشخیص رقم را دستی نمی‌نویسیم؛ ماشین با دیدن مثال‌ها خودش یاد می‌گیرد که تصویر این رقم یعنی zero. هدف، ماشینی است که خودش یاد بگیرد و بر اساس آموخته‌هایش تصمیم بگیرد.',
+      draw: async b => {
+        await b.clear();
+        await b.box('ai', 90, 60, 820, 460, { color: 'blue', fill: 'blue' });
+        await b.write('ai-t', 500, 110, 'هوش مصنوعی (AI)', { size: 32, color: 'blue', bold: true, fa: true });
+        await b.box('ml', 190, 140, 620, 350, { color: 'green', fill: 'green' });
+        await b.write('ml-t', 500, 195, 'یادگیری ماشین (ML)', { size: 34, color: 'green', bold: true, fa: true });
+        await b.write('ml-d', 500, 265, 'قابلیت یادگیری بدون نیاز به برنامه‌ریزی مستقیم و دستی', { size: 26, fa: true });
+        await b.write('f1', 405, 390, 'f(', { size: 48, anchor: 'end' });
+        await digit(b, 'f0', 435, 375, 0, 52);
+        await b.write('f2', 465, 390, ') = "zero"', { size: 48, anchor: 'start', color: 'green' });
+        await b.write('fc', 500, 455, 'ورودی: تصویر دست‌نویس  ←  خروجی: نام رقم', { size: 22, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 4. applications
+    {
+      say: 'کاربردها، از اسلاید 147: *natural language processing* یا پردازش زبان طبیعی، مثل ترجمه‌ی ماشینی؛ پردازش گفتار، مثل الکسای آمازون؛ *computer vision* یا بینایی کامپیوتر، مثل سیستم حضور و غیاب با چهره؛ کاربردهای بیولوژیکی مثل تشخیص سرطان؛ و تشخیص تقلب در تراکنش‌های بانکی.',
+      term: ['Computer vision', 'بینایی کامپیوتر'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 80, 'کاربردها', { size: 44, color: 'orange', bold: true, fa: true });
+        const R = [
+          ['پردازش زبان طبیعی', 'ترجمه‌ی ماشینی'],
+          ['پردازش گفتار', 'الکسای آمازون'],
+          ['بینایی کامپیوتر', 'سیستم حضور و غیاب'],
+          ['کاربردهای بیولوژیکی', 'تشخیص سرطان'],
+          ['تشخیص تقلب', 'تراکنش‌های بانکی'],
+        ];
+        for (const [k, [f, e]] of R.entries()) {
+          const y = 160 + k * 72;
+          await b.write(`f${k}`, 860, y, f, { size: 28, anchor: 'start', fa: true, color: 'blue', bold: true, dur: 300 });
+          await b.arrow(`a${k}`, 560, y - 9, 450, y - 9, { color: 'soft', head: 10, dur: 200 });
+          await b.write(`e${k}`, 420, y, e, { size: 26, anchor: 'start', fa: true, dur: 300 });
+        }
+      },
+    },
+    // ---------------------------------------------------------- 5. fruit sorting
+    {
+      say: 'مثال اسلاید 149: جداسازی میوه با یادگیری ماشین. روی نوار نقاله سیب و موز قاطی می‌آیند. ماشین با دیدن تعداد زیادی تصویرِ سیب و موز یاد گرفته که این دو را از هم تشخیص بدهد، و هر میوه را در سبد خودش می‌اندازد.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'جداسازی میوه با یادگیری ماشین', { size: 36, color: 'orange', bold: true, fa: true });
+        await b.line('belt', 60, 330, 420, 330, { color: 'soft', width: 6 });
+        const mix = ['red', 'orange', 'orange', 'red', 'orange', 'red'];
+        await all(mix.map((c, k) => b.dot(`m${k}`, 90 + k * 58, 305, { color: c, r: 18 })));
+        await b.write('ml', 240, 395, 'سیب = قرمز   موز = نارنجی', { size: 20, color: 'soft', fa: true });
+        await node(b, 'mach', 440, 250, 180, 110, 'ماشین', { color: 'green', size: 30, bold: true });
+        await b.arrow('a1', 625, 280, 760, 180, { color: 'ink' });
+        await b.arrow('a2', 625, 330, 760, 420, { color: 'ink' });
+        await b.box('bin1', 770, 130, 180, 100, { color: 'red' });
+        await b.box('bin2', 770, 370, 180, 100, { color: 'orange' });
+        await all([0, 1, 2].map(k => b.dot(`r${k}`, 815 + k * 45, 170, { color: 'red', r: 16 })));
+        await all([0, 1, 2].map(k => b.dot(`o${k}`, 815 + k * 45, 410, { color: 'orange', r: 16 })));
+        await b.write('bl1', 860, 218, 'سیب‌ها', { size: 22, fa: true, color: 'red' });
+        await b.write('bl2', 860, 458, 'موزها', { size: 22, fa: true, color: 'orange' });
+      },
+    },
+    // ---------------------------------------------------------- 6. direct programming
+    {
+      say: 'فرقش با برنامه‌نویسی معمولی چیست؟ اسلاید 150 بلوک دیاگرام *برنامه‌ریزی مستقیم* را نشان می‌دهد: داده و الگوریتم را به کامپیوتر می‌دهیم و خروجی می‌گیریم. اینجا الگوریتم را *برنامه‌نویس* دستی نوشته است.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'برنامه‌ریزی مستقیم', { size: 40, color: 'orange', bold: true, fa: true });
+        await node(b, 'alg', 290, 120, 190, 60, 'الگوریتم', { color: 'orange' });
+        await node(b, 'dat', 520, 120, 190, 60, 'داده', { color: 'red' });
+        await all([b.arrow('a1', 385, 185, 440, 240, { color: 'green' }), b.arrow('a2', 615, 185, 560, 240, { color: 'green' })]);
+        await node(b, 'cpu', 340, 245, 320, 66, 'کامپیوتر', { color: 'purple', fill: 'soft', size: 28, bold: true });
+        await b.arrow('a3', 500, 315, 500, 370, { color: 'green' });
+        await node(b, 'out', 380, 375, 240, 60, 'داده‌ی خروجی', { color: 'blue' });
+        await b.write('n', 500, 490, 'الگوریتم را برنامه‌نویس دستی می‌نویسد', { size: 24, color: 'soft', fa: true });
+        await b.ring('r', 385, 150, 120, 45, { color: 'orange' });
+      },
+    },
+    // ---------------------------------------------------------- 7. ML block diagram
+    {
+      say: 'حالا یادگیری ماشین، اسلاید 151. دو مرحله دارد. مرحله‌ی *learning* یا یادگیری: داده و *خروجی مطلوب* را به کامپیوتر می‌دهیم و خروجی، خودِ *الگوریتم* است! بعد مرحله‌ی *inference* یا استنتاج: داده‌ی جدید و همان الگوریتمِ یادگرفته‌شده را می‌دهیم و *پیش‌بینی* می‌گیریم. پس در ML الگوریتم را ماشین از روی مثال‌ها می‌سازد.',
+      term: ['Inference', 'استنتاج'],
+      draw: async b => {
+        await b.clear();
+        await b.line('div', 500, 60, 500, 450, { color: 'soft', width: 2 });
+        // learning (right)
+        await b.write('hl', 730, 80, 'یادگیری (Learning)', { size: 28, color: 'red', bold: true, fa: true });
+        await node(b, 'l-d', 545, 125, 170, 55, 'داده', { color: 'red', size: 22 });
+        await node(b, 'l-y', 745, 125, 190, 55, 'خروجی مطلوب', { color: 'blue', size: 22 });
+        await all([b.arrow('la1', 630, 185, 690, 235, { color: 'green' }), b.arrow('la2', 840, 185, 780, 235, { color: 'green' })]);
+        await node(b, 'l-c', 590, 240, 280, 60, 'کامپیوتر', { color: 'purple', fill: 'soft', size: 26, bold: true });
+        await b.arrow('la3', 730, 305, 730, 355, { color: 'green' });
+        await node(b, 'l-a', 640, 360, 180, 55, 'الگوریتم', { color: 'orange', size: 24, bold: true });
+        // inference (left)
+        await b.write('hi', 270, 80, 'استنتاج (Inference)', { size: 28, color: 'red', bold: true, fa: true });
+        await node(b, 'i-a', 65, 125, 170, 55, 'الگوریتم', { color: 'orange', size: 22 });
+        await node(b, 'i-d', 265, 125, 190, 55, 'داده‌ی جدید', { color: 'red', size: 22 });
+        await all([b.arrow('ia1', 150, 185, 210, 235, { color: 'green' }), b.arrow('ia2', 360, 185, 300, 235, { color: 'green' })]);
+        await node(b, 'i-c', 110, 240, 280, 60, 'کامپیوتر', { color: 'purple', fill: 'soft', size: 26, bold: true });
+        await b.arrow('ia3', 250, 305, 250, 355, { color: 'green' });
+        await node(b, 'i-p', 160, 360, 180, 55, 'پیش‌بینی', { color: 'blue', size: 24, bold: true });
+        await b.ring('ra', 730, 387, 110, 40, { color: 'orange' });
+        await b.write('n', 500, 500, 'خروجیِ یادگیری = همان الگوریتمی که در استنتاج به کار می‌رود', { size: 24, color: 'orange', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 8. dataset
+    {
+      say: 'ماشین از چه چیزی یاد می‌گیرد؟ از *dataset* یا دیتاست. تعریف اسلاید 152: مجموعه داده‌های جمع‌آوری‌شده برای *آموزش* و *ارزیابی* مدل. اسلاید 154 هم همین را می‌گوید: هر سیستمی داده لازم دارد که با آن آموزش ببیند، و داده‌ای که با آن ارزیابی‌اش کنیم که آیا درست جواب می‌دهد یا نه. دیتاست می‌تواند تصویر باشد، مثل این رقم‌های دست‌نویس، یا یک جدول.',
+      term: ['Dataset', 'دیتاست — مجموعه داده'],
+      draw: async b => {
+        await b.clear();
+        await b.box('def', 130, 60, 740, 80, { color: 'purple' });
+        await b.write('d', 500, 112, 'مجموعه داده‌های جمع‌آوری‌شده برای آموزش و ارزیابی مدل', { size: 28, fa: true });
+        const D = [[6, 140, 210], [0, 200, 250], [2, 260, 220], [6, 320, 265], [1, 150, 300], [0, 230, 320], [0, 300, 330], [1, 360, 300], [2, 130, 370], [6, 200, 390], [4, 270, 400], [0, 340, 380], [0, 170, 450], [6, 250, 465], [1, 330, 455]];
+        await all(D.map(([d, x, y], k) => digit(b, `dg${k}`, x, y, d)));
+        await b.arrow('a1', 600, 260, 700, 220, { color: 'green' });
+        await b.arrow('a2', 600, 360, 700, 400, { color: 'blue' });
+        await b.write('w1', 720, 228, 'آموزش', { size: 34, color: 'green', bold: true, fa: true, anchor: 'end' });
+        await b.write('w2', 720, 412, 'ارزیابی', { size: 34, color: 'blue', bold: true, fa: true, anchor: 'end' });
+        await b.write('w3', 500, 318, 'دیتاست', { size: 30, color: 'purple', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 9. data + label
+    {
+      say: 'اسلاید 153: دو مؤلفه‌ی مهم دیتاست، *داده* و *label* یا برچسب داده. داده مثلاً تصویر یک میوه است، و برچسب، جوابِ درستِ آن: Kiwi، Mango، Blueberry، Carrot. برچسب همان چیزی است که می‌خواهیم مدل یاد بگیرد بگوید.',
+      term: ['Label', 'برچسب'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'دو مؤلفه‌ی مهم دیتاست', { size: 38, color: 'orange', bold: true, fa: true });
+        await b.write('hd', 760, 140, 'داده', { size: 30, color: 'red', bold: true, fa: true });
+        await b.write('hl', 260, 140, 'برچسب داده', { size: 30, color: 'red', bold: true, fa: true });
+        const F = [['Kiwi', 'green'], ['Mango', 'orange'], ['Blueberry', 'blue'], ['Carrot', 'red']];
+        for (const [k, [name, c]] of F.entries()) {
+          const y = 210 + k * 85;
+          await b.box(`img${k}`, 715, y - 35, 90, 70, { color: 'ink', r: 6, dur: 200 });
+          await b.dot(`fr${k}`, 760, y, { color: c, r: 22 });
+          await b.line(`ln${k}`, 700, y, 340, y, { color: 'soft', width: 2, dur: 250 });
+          await b.write(`lb${k}`, 260, y + 10, name, { size: 30, bold: true, dur: 250 });
+        }
+        await b.write('ni', 760, 540, 'تصویر', { size: 20, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 10. Pima table
+    {
+      say: 'یک دیتاست جدولی، همان جدولی که اسلاید 152 و 158 نشان می‌دهند. این جدول داده‌ی دیابت است: هر *سطر* یک بیمار است، یعنی یک نمونه یا *sample*. شش سطر اینجا هست، یعنی شش نمونه.',
+      term: ['Sample', 'نمونه — یک سطر از داده'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'دیتاست جدولی', { size: 36, color: 'orange', bold: true, fa: true });
+        await all(PIMA_HEAD.map((h, c) => b.write(`p-0-${c}`, PX[c], PY(0), h, { size: 22, color: 'blue', bold: true, dur: 150 })));
+        await b.line('p-hl', 55, PY(0) + 14, 885, PY(0) + 14, { color: 'soft', width: 2, dur: 250 });
+        for (const [r, row] of PIMA.entries()) {
+          await all(row.map((v, c) => b.write(`p-${r + 1}-${c}`, PX[c], PY(r + 1), String(v), { size: 21, color: c === 9 ? (v === 'Positive' ? 'red' : 'green') : 'ink', dur: 120 })));
+        }
+        await b.box('p-row', 52, PY(1) - 30, 836, 42, { color: 'orange', r: 8 });
+        await b.write('p-rl', 500, 520, 'هر سطر = یک نمونه (sample)', { size: 26, color: 'orange', fa: true, bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 11. features vs label
+    {
+      say: 'هر *ستون* یک *feature* یا ویژگی است: preg تعداد بارداری، plas قند خون، pres فشار خون، skin ضخامت پوست، insu انسولین، mass شاخص توده‌ی بدن، pedi سابقه‌ی خانوادگی و age سن. هشت ویژگی. ستون آخر، class، *برچسب* است: Positive یعنی دیابت دارد، Negative یعنی ندارد. مدل باید از هشت ویژگی، برچسب را حدس بزند. ستون Case فقط شماره‌ی ردیف است، ویژگی نیست.',
+      term: ['Feature', 'ویژگی — یک ستون از داده'],
+      draw: async b => {
+        await b.erase(['p-row', 'p-rl']);
+        await b.box('fbox', 140, PY(0) - 32, 620, 330, { color: 'blue', r: 10 });
+        await b.box('lbox', 765, PY(0) - 32, 115, 330, { color: 'red', r: 10 });
+        await b.write('fl', 450, 520, '8 ستون ویژگی (features)', { size: 26, color: 'blue', bold: true, fa: true });
+        await b.write('ll', 822, 520, 'برچسب', { size: 26, color: 'red', bold: true, fa: true });
+        await b.dim([0, 1, 2, 3, 4, 5, 6].map(r => `p-${r}-0`), 0.35);
+      },
+    },
+    // ---------------------------------------------------------- 12. kinds of data
+    {
+      say: 'داده چند نوع دارد؟ اسلاید 154 تا 158 یکی‌یکی اضافه می‌کنند: *تصویر*، *متن* — مثلاً پست‌هایی که احساسشان مثبت، منفی یا خنثی برچسب خورده — *صوت*، *سری زمانی* — مثل نمودار قیمت در طول زمان — و *داده‌های جدولی*.',
+      term: ['Time series', 'سری زمانی'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'انواع داده', { size: 40, color: 'orange', bold: true, fa: true });
+        const X = [850, 670, 490, 310, 130], L = ['تصویر', 'متن', 'صوت', 'سری زمانی', 'داده‌های جدولی'];
+        for (const [k, x] of X.entries()) await b.box(`ic${k}`, x - 70, 170, 140, 120, { color: 'blue', fill: 'blue', dur: 250 });
+        // picture: mountain + sun
+        await b.path('i0', `M${X[0] - 55} 275 L${X[0] - 15} 215 L${X[0] + 10} 250 L${X[0] + 30} 225 L${X[0] + 55} 275`, { color: 'green' });
+        await b.dot('i0s', X[0] - 35, 195, { color: 'orange', r: 10 });
+        // text: lines
+        await all([0, 1, 2, 3].map(k => b.line(`i1-${k}`, X[1] - 50, 195 + k * 24, X[1] + (k === 3 ? 10 : 50), 195 + k * 24, { color: 'ink', width: 3, dur: 150 })));
+        // audio: wave
+        await b.path('i2', `M${X[2] - 55} 230` + [...Array(11)].map((_, k) => ` L${X[2] - 50 + k * 10} ${230 + (k % 2 ? -1 : 1) * [10, 30, 45, 25, 40, 15, 35, 45, 20, 30, 10][k]}`).join(''), { color: 'purple' });
+        // time series
+        await b.path('i3', `M${X[3] - 55} 260 L${X[3] - 35} 240 L${X[3] - 20} 250 L${X[3]} 210 L${X[3] + 15} 230 L${X[3] + 35} 195 L${X[3] + 55} 205`, { color: 'red' });
+        // table grid
+        await all([0, 1, 2, 3].map(k => b.line(`i4h${k}`, X[4] - 50, 190 + k * 27, X[4] + 50, 190 + k * 27, { color: 'ink', width: 2, dur: 150 })));
+        await all([0, 1, 2, 3].map(k => b.line(`i4v${k}`, X[4] - 50 + k * 33.3, 190, X[4] - 50 + k * 33.3, 271, { color: 'ink', width: 2, dur: 150 })));
+        await all(L.map((l, k) => b.write(`l${k}`, X[k], 335, l, { size: 26, fa: true, bold: true, dur: 250 })));
+      },
+    },
+    // ---------------------------------------------------------- 13. structured vs unstructured
+    {
+      say: 'این پنج نوع در دو دسته جا می‌گیرند — اسلاید 159 و 162. *Structured data* یا داده‌ی ساخت‌یافته: داده‌های عددی که در سطر و ستون جدول ذخیره می‌شوند؛ تحلیلش ساده‌تر است و فضای کمتری می‌خواهد. *Unstructured data* یا غیرساخت‌یافته: داده‌های کیفی مثل تصویر، متن، صوت و ویدئو؛ تحلیلش مشکل‌تر است و فضای ذخیره‌سازی بیشتری می‌خواهد.',
+      term: ['Structured / Unstructured data', 'ساخت‌یافته / غیرساخت‌یافته'],
+      draw: async b => {
+        await b.clear();
+        await b.box('sb', 520, 60, 430, 420, { color: 'green', fill: 'green' });
+        await b.box('ub', 50, 60, 430, 420, { color: 'red', fill: 'red' });
+        await b.write('st', 735, 115, 'ساخت‌یافته', { size: 34, color: 'green', bold: true, fa: true });
+        await b.write('se', 735, 160, 'Structured Data', { size: 24, color: 'green' });
+        await b.write('ut', 265, 115, 'غیرساخت‌یافته', { size: 34, color: 'red', bold: true, fa: true });
+        await b.write('ue', 265, 160, 'Unstructured Data', { size: 24, color: 'red' });
+        const S = ['داده‌های عددی', 'ذخیره در سطر و ستون جدول', 'تحلیل ساده‌تر', 'فضای ذخیره‌سازی کمتر'];
+        const U = ['داده‌های کیفی', 'تصویر، متن، صوت و ویدئو', 'تحلیل مشکل‌تر', 'فضای ذخیره‌سازی بیشتر'];
+        for (let k = 0; k < 4; k++) {
+          await all([
+            b.write(`s${k}`, 920, 230 + k * 62, '◂ ' + S[k], { size: 25, fa: true, anchor: 'start', dur: 300 }),
+            b.write(`u${k}`, 450, 230 + k * 62, '◂ ' + U[k], { size: 25, fa: true, anchor: 'start', dur: 300 }),
+          ]);
+        }
+        await b.write('ex', 500, 530, `مثال ساخت‌یافته: جدول ${LTR('Excel')} یا ${LTR('SQL Server')}`, { size: 22, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 14. the test: fast processing
+    {
+      say: 'معیار ساده‌ی اسلاید 160 برای تشخیص: اگر کامپیوتر بتواند با الگوریتم‌های از پیش تعیین‌شده داده را *سریع* پردازش کند، داده ساخت‌یافته است. ولی ویدئو، تصویر یا متن — مثل اخبار روزانه یا ویدئوهای شبکه‌های اجتماعی — پردازش اضافه‌تری لازم دارند و زمان بیشتری می‌گیرند. برای همین در یادگیری ماشین معمولاً سعی می‌کنیم داده‌ی غیرساخت‌یافته را *به ساخت‌یافته تبدیل کنیم* تا برای ماشین قابل فهم شود.',
+      draw: async b => {
+        await b.erase([0, 1, 2, 3].flatMap(k => [`s${k}`, `u${k}`]).concat('ex'));
+        await b.write('sq1', 735, 250, 'کامپیوتر سریع و با', { size: 26, fa: true, color: 'green' });
+        await b.write('sq2', 735, 292, 'الگوریتم آماده پردازشش می‌کند', { size: 26, fa: true, color: 'green' });
+        await b.write('uq1', 265, 250, 'پردازش اضافه لازم دارد', { size: 26, fa: true, color: 'red' });
+        await b.write('uq2', 265, 292, 'و زمان بیشتری می‌گیرد', { size: 26, fa: true, color: 'red' });
+        await b.write('un', 265, 350, 'مثل اخبار روزانه یا ویدئوها', { size: 20, fa: true, color: 'soft' });
+        await b.arrow('conv', 370, 425, 630, 425, { color: 'orange' });
+        await b.write('cv', 500, 395, 'تبدیل', { size: 26, fa: true, color: 'orange', bold: true });
+        await b.write('cv2', 500, 530, 'هدف: داده را برای ماشین قابل فهم کنیم', { size: 24, fa: true, color: 'soft' });
+      },
+    },
+    // ---------------------------------------------------------- 15. bank loan table
+    {
+      say: 'مثال اسلاید 161: یک بانک‌دار می‌خواهد از روی ویژگی‌های مشتری‌های گذشته یاد بگیرد که کدام مشتری وامش را پس می‌دهد و کدام نمی‌دهد. داده‌ها را در یک جدول نوشته: خانه دارد؟ تعداد فرزندان، اتومبیل دارد؟ حقوق دریافتی، و ستون آخر: وام را پس داده؟',
+      draw: async b => {
+        await b.clear();
+        await all(LOAN_HEAD.map((h, c) => b.write(`L-0-${c}`, LX[c], LY(0), h, { size: 22, color: 'blue', bold: true, fa: FA.test(h), dur: 200 })));
+        await b.line('L-hl', 60, LY(0) + 20, 940, LY(0) + 20, { color: 'soft', width: 2, dur: 250 });
+        await all([175, 315, 465, 615, 770].map((x, k) => b.line(`L-v${k}`, x, LY(0) - 35, x, LY(4) + 25, { color: 'soft', width: 2, dur: 250 })));
+        for (const [r, row] of LOAN.entries()) {
+          await all(row.map((v, c) => b.write(`L-${r + 1}-${c}`, LX[c], LY(r + 1), String(v), { size: 26, fa: FA.test(String(v)), color: c === 0 ? 'purple' : c === 5 ? (v === 'بلی' ? 'green' : 'red') : 'ink', dur: 150 })));
+        }
+      },
+    },
+    // ---------------------------------------------------------- 16. why structured + features/label
+    {
+      say: 'این دیتاست *ساخت‌یافته* است، چون راحت در سطر و ستون، مثلاً در Excel یا SQL Server، ذخیره می‌شود. حالا با واژه‌های جدید: چهار ستونِ وسط *ویژگی*‌اند، ستون «وام را پس داده؟» *برچسب* است، و هر سطر یک مشتری، یعنی یک *نمونه*. ستون # فقط شماره است. اگر مشتری تازه‌ای بیاید، مدل از چهار ویژگی‌اش حدس می‌زند که برچسبش بلی است یا خیر.',
+      draw: async b => {
+        await b.box('Lf', 180, LY(0) - 40, 585, 320, { color: 'blue', r: 10 });
+        await b.box('Ll', 775, LY(0) - 40, 165, 320, { color: 'red', r: 10 });
+        await b.write('Lfl', 472, 485, '4 ستون ویژگی', { size: 26, color: 'blue', bold: true, fa: true });
+        await b.write('Lll', 858, 485, 'برچسب', { size: 26, color: 'red', bold: true, fa: true });
+        await b.write('Lnew', 500, 535, `مشتری تازه: ${LTR('1, 1, 1, 720')}؛ برچسبش چیست؟`, { size: 24, color: 'orange', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 17. suitable methods
+    {
+      say: 'اسلاید 163: روش مناسب برای هر نوع داده. داده‌ی *جدولی* مستقیم می‌رود به *feature extraction* یا استخراج ویژگی، بعد دسته‌بندی، بعد پیش‌بینی. ولی تصویر، متن یا صوت اول یک مرحله‌ی اضافه دارند: *preprocessing* یا پیش‌پردازش — پردازش تصویر، متن یا صوت. این همان «پردازش اضافه» است که داده‌ی غیرساخت‌یافته لازم دارد.',
+      term: ['Feature extraction / Preprocessing', 'استخراج ویژگی / پیش‌پردازش'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'روش‌های مناسب برای داده‌ها', { size: 36, color: 'orange', bold: true, fa: true });
+        const X = [850, 670, 490, 310, 130];
+        const box = (id, k, y, label, color) => node(b, id, X[k] - 75, y - 30, 150, 60, label, { color, size: 21 });
+        const arr = (id, k1, k2, y) => b.arrow(id, X[k1] - 80, y, X[k2] + 80, y, { color: 'ink', head: 10, dur: 250 });
+        await box('r1-0', 0, 180, 'داده‌ی جدولی', 'blue');
+        await arr('r1-a0', 0, 2, 180);
+        await box('r1-2', 2, 180, 'استخراج ویژگی', 'red');
+        await arr('r1-a1', 2, 3, 180);
+        await box('r1-3', 3, 180, 'دسته‌بندی', 'purple');
+        await arr('r1-a2', 3, 4, 180);
+        await b.write('r1-4', X[4], 188, 'پیش‌بینی', { size: 24, fa: true, bold: true });
+        await node(b, 'r2-0', X[0] - 85, 310, 170, 60, 'تصویر · متن · صوت', { color: 'blue', size: 18 });
+        await arr('r2-a0', 0, 1, 340);
+        await box('r2-1', 1, 340, 'پیش‌پردازش', 'orange');
+        await arr('r2-a1', 1, 2, 340);
+        await box('r2-2', 2, 340, 'استخراج ویژگی', 'red');
+        await arr('r2-a2', 2, 3, 340);
+        await box('r2-3', 3, 340, 'دسته‌بندی', 'purple');
+        await arr('r2-a3', 3, 4, 340);
+        await b.write('r2-4', X[4], 348, 'پیش‌بینی', { size: 24, fa: true, bold: true });
+        await b.write('pp', X[1], 410, 'پردازش تصویر', { size: 20, fa: true, color: 'soft' });
+        await b.write('pp2', X[1], 440, 'پردازش متن', { size: 20, fa: true, color: 'soft' });
+        await b.write('pp3', X[1], 470, 'پردازش صوت', { size: 20, fa: true, color: 'soft' });
+        await b.ring('rpp', X[1], 340, 95, 45, { color: 'orange' });
+      },
+    },
+    // ---------------------------------------------------------- 18. project cycle
+    {
+      say: 'مفاهیم اولیه، اسلاید 164: چرخه‌ی کار. اول *بررسی مسئله*: شامل چه تصاویری است؟ اندازه، ویژگی‌ها، تعداد کلاس‌ها، هدف مسئله. بعد *برنامه‌ریزی*: استفاده از الگوریتم مناسب بر اساس مسئله. بعد *ارزیابی*. اگر نتیجه خوب بود، *اجرا*. اگر بد بود، *تحلیل خطاها* و برگشت به بررسی مسئله.',
+      draw: async b => {
+        await b.clear();
+        await node(b, 'cy-p', 720, 230, 210, 70, 'بررسی مسئله', { color: 'blue', size: 26, bold: true });
+        await node(b, 'cy-g', 420, 230, 210, 70, 'برنامه‌ریزی', { color: 'blue', size: 26, bold: true });
+        await b.arrow('cy-a1', 715, 265, 635, 265, { color: 'red' });
+        await b.path('cy-e', 'M230 195 L320 265 L230 335 L140 265 Z', { color: 'blue', fill: 'blue' });
+        await b.write('cy-et', 230, 274, 'ارزیابی', { size: 24, fa: true, bold: true });
+        await b.arrow('cy-a2', 415, 265, 325, 265, { color: 'red' });
+        await node(b, 'cy-r', 160, 70, 140, 60, 'اجرا', { color: 'green', size: 26, bold: true });
+        await b.arrow('cy-a3', 230, 190, 230, 135, { color: 'green' });
+        await b.write('cy-ok', 275, 170, '☺ خوب', { size: 22, fa: true, color: 'green', anchor: 'end' });
+        await node(b, 'cy-x', 420, 420, 210, 66, 'تحلیل خطاها', { color: 'red', size: 26, bold: true });
+        await b.wire('cy-a4', [[230, 340], [230, 453], [415, 453]], { color: 'red' });
+        await b.write('cy-bad', 245, 400, '☹ بد', { size: 22, fa: true, color: 'red', anchor: 'end' });
+        await b.wire('cy-a5', [[635, 453], [825, 453], [825, 305]], { color: 'red' });
+        await b.arrow('cy-a5h', 825, 330, 825, 305, { color: 'red', head: 12, dur: 100 });
+        await b.write('cy-n1', 825, 150, 'شامل چه تصاویری است؟', { size: 19, fa: true, color: 'soft' });
+        await b.write('cy-n2', 825, 180, 'اندازه، ویژگی‌ها، تعداد کلاس‌ها، هدف', { size: 19, fa: true, color: 'soft' });
+        await b.write('cy-n3', 525, 340, 'الگوریتم مناسب مسئله', { size: 19, fa: true, color: 'soft' });
+      },
+    },
+    // ---------------------------------------------------------- 19. data strengthens
+    {
+      say: 'اسلاید 165 یک چیز به این چرخه اضافه می‌کند: *داده*. از داده‌ها برای قوی‌تر کردن الگوریتم استفاده می‌کنیم؛ داده وارد برنامه‌ریزی می‌شود، و هر بار که سیستم اجرا می‌شود، داده‌های تازه هم به آن برمی‌گردد. خروجی این برنامه‌ریزی همان تابع f است که تصویر را می‌گیرد و می‌گوید zero.',
+      draw: async b => {
+        await b.path('cy-d', 'M450 70 L630 70 L600 140 L420 140 Z', { color: 'purple', fill: 'blue' });
+        await b.write('cy-dt', 525, 115, 'داده', { size: 26, fa: true, bold: true, color: 'purple' });
+        await b.arrow('cy-a6', 525, 145, 525, 225, { color: 'purple' });
+        await b.arrow('cy-a7', 305, 100, 440, 100, { color: 'purple' });
+        await b.write('cy-f', 650, 80, 'f(0) = "zero"', { size: 26, color: 'green', anchor: 'start' });
+      },
+    },
+    // ---------------------------------------------------------- 20. MNIST
+    {
+      say: 'مثال اسلاید 166: دسته‌بندی داده‌ها با پایگاه داده‌ی *MNIST*. این دیتاست 70 هزار تصویر کوچک دست‌نویس از رقم‌های 0 تا 9 دارد. هدف: سیستمی طراحی کنیم که بتواند این تصاویر را دسته‌بندی کند. چون رقم‌ها 0 تا 9 هستند، ده *class* یا دسته داریم.',
+      term: ['Class', 'کلاس — دسته'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 700, 90, 'MNIST', { size: 50, color: 'blue', bold: true });
+        await b.write('l1', 700, 160, `${LTR('70000')} تصویر دست‌نویس`, { size: 28, fa: true });
+        await b.write('l2', 700, 210, `رقم‌های ${LTR('0')} تا ${LTR('9')}`, { size: 28, fa: true });
+        await b.write('l3', 700, 290, 'هدف: دسته‌بندی تصاویر', { size: 28, fa: true, color: 'orange', bold: true });
+        await b.write('l4', 700, 350, `${LTR('10')} کلاس`, { size: 36, fa: true, color: 'green', bold: true });
+        const D = [[0, 90, 120], [2, 160, 100], [6, 240, 130], [6, 320, 95], [2, 390, 120], [1, 110, 190], [0, 190, 210], [7, 270, 190], [0, 350, 205], [1, 420, 180], [6, 80, 270], [0, 150, 290], [9, 230, 270], [0, 300, 300], [5, 380, 280], [0, 120, 360], [3, 200, 380], [0, 280, 360], [1, 350, 380], [2, 420, 360], [8, 100, 450], [6, 180, 460], [2, 260, 440], [4, 340, 460], [0, 410, 440]];
+        await all(D.map(([d, x, y], k) => digit(b, `dg${k}`, x, y, d)));
+      },
+    },
+    // ---------------------------------------------------------- 21. F
+    {
+      say: 'و پیام اصلی اسلاید 167: به طور کلی دنبال این هستیم که *F* را خوب و دقیق برنامه‌ریزی کنیم تا خودش یاد بگیرد که بر اساس داده‌های ورودی، خروجی مطلوب را به ما بدهد. ورودی تصویر است، خروجی برچسب. بقیه‌ی این بخش درباره‌ی این است که *چطور* F را یاد بدهیم و *چطور* بسنجیم که خوب یاد گرفته.',
+      draw: async b => {
+        await b.erase(['l1', 'l2', 'l3', 'l4', 'h']);
+        await b.box('fb', 520, 120, 420, 300, { color: 'green', fill: 'green' });
+        await b.write('f1', 610, 250, 'F(', { size: 50, anchor: 'end' });
+        await digit(b, 'f0', 640, 234, 0, 50);
+        await b.write('f2', 670, 250, ') = "zero"', { size: 50, anchor: 'start', color: 'green' });
+        await b.write('fi', 640, 330, 'ورودی', { size: 22, fa: true, color: 'blue' });
+        await b.write('fo', 830, 330, 'خروجی مطلوب', { size: 22, fa: true, color: 'green' });
+        await b.write('fd', 730, 390, 'F خودش از داده یاد می‌گیرد', { size: 24, fa: true, color: 'orange', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 22. summary
+    {
+      say: 'جمع‌بندی برای امتحان. این شش نکته را یک بار دیگر بخوانید، بعد برویم سراغ سؤال‌ها.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'یادت باشد', { size: 46, color: 'orange', bold: true, fa: true });
+        const L = [
+          'ML یعنی یادگیری بدون برنامه‌ریزی مستقیم و دستی؛ زیرشاخه‌ی AI',
+          'یادگیری: داده + خروجی مطلوب ← الگوریتم   ·   استنتاج: داده‌ی جدید ← پیش‌بینی',
+          'دیتاست = داده برای آموزش و ارزیابی؛ دو مؤلفه: داده و برچسب',
+          'سطر = نمونه   ·   ستون = ویژگی   ·   ستون جواب = برچسب',
+          'ساخت‌یافته: عددی، جدولی، تحلیل ساده   ·   غیرساخت‌یافته: تصویر، متن، صوت، ویدئو',
+          `${LTR('MNIST')}: ${LTR('70000')} رقم دست‌نویس، ${LTR('10')} کلاس`,
+        ];
+        for (const [k, l] of L.entries()) {
+          await b.dot(`mb${k}`, 950, 142 + k * 66, { color: 'orange', r: 5 });
+          await b.write(`m${k}`, 932, 150 + k * 66, l, { size: 23, anchor: 'start', fa: true });
+        }
+      },
+    },
+    // ---------------------------------------------------------- quizzes
+    {
+      say: 'نوبت شماست! کدام‌یک از این داده‌ها *غیرساخت‌یافته* است؟',
+      draw: quizBoard(1, 'کدام داده غیرساخت‌یافته است؟'),
+      quiz: {
+        choices: ['جدول نمره‌های دانشجویان در Excel', 'متن پست‌های یک شبکه‌ی اجتماعی', 'جدول حقوق کارمندان در SQL Server'],
+        correct: 1,
+        hint: 'کدام یکی را نمی‌شود مستقیم در سطر و ستون ریخت و پردازش اضافه می‌خواهد؟',
+        explain: 'متن، تصویر، صوت و ویدئو غیرساخت‌یافته‌اند. دو گزینه‌ی دیگر جدول عددی‌اند، پس ساخت‌یافته.',
+      },
+      solve: async b => {
+        await b.write('c0', 750, 260, 'جدول Excel  ←  ساخت‌یافته', { size: 28, fa: true, color: 'green' });
+        await b.write('c1', 750, 330, 'متن پست‌ها  ←  غیرساخت‌یافته', { size: 28, fa: true, color: 'red', bold: true });
+        await b.write('c2', 750, 400, 'جدول SQL Server  ←  ساخت‌یافته', { size: 28, fa: true, color: 'green' });
+        await b.ring('r', 750, 320, 215, 34, { color: 'red' });
+      },
+    },
+    {
+      say: 'به جدول بانک‌دار در اسلاید 161 برگردیم. اگر ستون شماره‌ی ردیف (#) را حساب نکنیم، این دیتاست چند *ویژگی* دارد؟',
+      draw: quizBoard(2, 'جدول وام: تعداد ویژگی‌ها = ؟'),
+      quiz: {
+        answer: ['4'],
+        hint: 'ستون‌ها: خانه، فرزندان، اتومبیل، حقوق، و «وام را پس داده؟». کدام برچسب است؟',
+        explain: 'خانه دارد، تعداد فرزندان، اتومبیل دارد، حقوق دریافتی: 4 ویژگی. «وام را پس داده؟» برچسب است، نه ویژگی.',
+      },
+      solve: async b => {
+        const H = ['خانه دارد', 'تعداد فرزندان', 'اتومبیل دارد', 'حقوق دریافتی', 'وام را پس داده؟'];
+        const X = [840, 670, 500, 330, 150];
+        await all(H.map((h, k) => b.write(`s${k}`, X[k], 260, h, { size: 24, fa: true, color: k < 4 ? 'blue' : 'red', bold: true })));
+        await b.box('sf', 250, 220, 670, 60, { color: 'blue' });
+        await b.write('sn', 585, 340, 'ویژگی: 4', { size: 34, fa: true, color: 'blue', bold: true });
+        await b.write('sl', 150, 340, 'برچسب', { size: 30, fa: true, color: 'red' });
+      },
+    },
+    {
+      say: 'دیتاست MNIST در اسلاید 166 را در نظر بگیرید. سیستمی که این تصاویر را دسته‌بندی می‌کند باید بین چند *کلاس* انتخاب کند؟',
+      draw: quizBoard(3, 'MNIST: تعداد کلاس‌ها = ؟'),
+      quiz: {
+        answer: ['10'],
+        hint: 'تصاویر رقم‌های دست‌نویس از 0 تا 9 هستند.',
+        explain: 'رقم‌های 0، 1، … ، 9 یعنی 10 کلاس. عدد 70 هزار، تعداد تصاویر است، نه تعداد کلاس‌ها.',
+      },
+      solve: async b => {
+        await all([...Array(10)].map((_, d) => digit(b, `sd${d}`, 140 + d * 80, 280, d, 50)));
+        await b.write('sn', 500, 390, `${LTR('0, 1, …, 9')}  ←  ${LTR('10')} کلاس`, { size: 34, fa: true, color: 'green', bold: true });
+        await b.write('st', 500, 450, `${LTR('70000')} تعداد تصاویر است، نه کلاس‌ها`, { size: 24, fa: true, color: 'red' });
+      },
+    },
+    {
+      say: 'در بلوک دیاگرام یادگیری ماشین (اسلاید 151)، *خروجیِ مرحله‌ی یادگیری* چیست؟',
+      draw: quizBoard(4, 'خروجیِ مرحله‌ی یادگیری چیست؟'),
+      quiz: {
+        choices: ['پیش‌بینی برای داده‌ی جدید', 'الگوریتم (مدل یادگرفته‌شده)', 'داده‌ی خروجی که برنامه‌نویس نوشته'],
+        correct: 1,
+        hint: 'در یادگیری، داده و خروجی مطلوب را می‌دهیم. چیزی که بیرون می‌آید بعداً در استنتاج استفاده می‌شود.',
+        explain: 'یادگیری: داده + خروجی مطلوب ← کامپیوتر ← الگوریتم. پیش‌بینی خروجیِ مرحله‌ی استنتاج است.',
+      },
+      solve: async b => {
+        await b.write('s1', 500, 260, 'یادگیری: داده + خروجی مطلوب  ←  الگوریتم', { size: 30, fa: true, color: 'green', bold: true });
+        await b.write('s2', 500, 340, 'استنتاج: داده‌ی جدید + الگوریتم  ←  پیش‌بینی', { size: 30, fa: true, color: 'blue' });
+        await b.write('s3', 500, 420, 'برنامه‌نویسی مستقیم: الگوریتم را برنامه‌نویس می‌نویسد', { size: 24, fa: true, color: 'soft' });
+      },
+    },
+    {
+      say: 'سؤال آخر: جدول دیابت در اسلاید 152 ستون‌های Case، preg، plas، pres، skin، insu، mass، pedi، age و class دارد. چند ستونش *ویژگی* است؟',
+      draw: quizBoard(5, 'جدول دیابت: تعداد ویژگی‌ها = ؟'),
+      quiz: {
+        answer: ['8'],
+        hint: 'Case فقط شماره‌ی ردیف است و class جوابی است که باید حدس زده شود.',
+        explain: 'preg، plas، pres، skin، insu، mass، pedi، age: 8 ویژگی. Case شماره است و class برچسب.',
+      },
+      solve: async b => {
+        await all(PIMA_HEAD.map((h, c) => b.write(`s-${c}`, PX[c], 280, h, { size: 24, bold: true, color: c === 0 ? 'soft' : c === 9 ? 'red' : 'blue' })));
+        await b.box('sf', 140, 245, 620, 50, { color: 'blue' });
+        await b.write('sn', 450, 360, 'ویژگی: 8', { size: 34, fa: true, color: 'blue', bold: true });
+        await b.write('sl', 822, 360, 'برچسب', { size: 28, fa: true, color: 'red' });
+        await b.write('sc', 95, 360, 'شماره', { size: 24, fa: true, color: 'soft' });
+      },
+    },
+  ],
+});
+</script>
+</body>
+</html>

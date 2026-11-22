@@ -1,0 +1,557 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Artificial Neuron</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Vazirmatn:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="../assets/teacher.css">
+</head>
+<body>
+<main id="app"></main>
+<script src="../assets/teacher.js"></script>
+<script src="../assets/graph.js"></script>
+<script>
+// Lesson 22 — slides 204–216 (Part 7: neural networks).
+// Explanations are Persian; numbers, math and technical terms stay as written in English.
+
+const all = list => Promise.all(list);
+const LTR = s => `⁦${s}⁩`; // keeps a left-to-right run (numbers, math) intact inside Persian board text
+const num = v => String(+v.toFixed(6));
+const QUIZZES = 6;
+
+// A neuron: a filled circle with a label inside.
+async function node(b, id, x, y, r, label, o = {}) {
+  const size = o.size || 26;
+  await b.ring(id, x, y, r, r, { color: o.color || 'blue', fill: o.fill || o.color || 'blue', tilt: 0, dur: o.dur ?? 300 });
+  await b.write(id + '-t', x, y + size * 0.35, label, { size, bold: true, dur: 150 });
+}
+// An arrow from the edge of circle a to the edge of circle b; a, b = [x, y, r].
+function edge(b, id, [x1, y1, r1], [x2, y2, r2], o = {}) {
+  const a = Math.atan2(y2 - y1, x2 - x1);
+  return b.arrow(id, x1 + r1 * Math.cos(a), y1 + r1 * Math.sin(a), x2 - r2 * Math.cos(a), y2 - r2 * Math.sin(a), { head: 11, dur: 300, ...o });
+}
+// A weight label sitting a little above an edge, at fraction t of its length.
+function wlabel(b, id, [x1, y1], [x2, y2], text, t = 0.45) {
+  return b.write(id, x1 + (x2 - x1) * t, y1 + (y2 - y1) * t - 12, text, { size: 22, color: 'purple', dur: 150 });
+}
+
+// ---- the neuron of slides 206–208 (inputs x1, x2, xm → Σ → y)
+const IN = [['x_1', 110, 150], ['x_2', 110, 250], ['x_m', 110, 370]];
+const SUM = [330, 250, 42];
+const OUT = [540, 250, 36];
+async function drawNeuron(b) {
+  for (const [k, [lab, x, y]] of IN.entries()) await node(b, `in${k}`, x, y, 32, lab);
+  await b.write('dots', 110, 322, '⋮', { size: 30, color: 'soft' });
+  await node(b, 'sum', SUM[0], SUM[1], SUM[2], 'Σ', { color: 'red', size: 34 });
+  await node(b, 'out', OUT[0], OUT[1], OUT[2], 'y', { color: 'ink', size: 30 });
+  for (const [k, [, x, y]] of IN.entries()) {
+    await edge(b, `e${k}`, [x, y, 32], SUM);
+    await wlabel(b, `w${k}`, [x, y], SUM, ['w_1', 'w_2', 'w_m'][k]);
+  }
+  await edge(b, 'eo', SUM, OUT);
+  await all(['ورودی', 'وزن', 'جمع', 'خروجی'].map((t, k) => b.write(`lab${k}`, [110, 215, 330, 540][k], 450, t, { size: 22, color: 'soft', fa: true, dur: 150 })));
+}
+
+// ---- the neuron with an activation function (slide 211)
+const IN2 = [['1', 100, 100], ['x_1', 100, 190], ['x_2', 100, 280], ['x_m', 100, 400]];
+const SUM2 = [300, 250, 40];
+const F2 = [460, 250, 34];
+const OUT2 = [610, 250, 32];
+
+// ---- activation-function graphs (slides 212–213)
+async function actGraph(b, { title, from = -4, to = 4, min, max, ticks, yTicks }) {
+  await b.clear();
+  await b.write('title', 500, 68, title, { size: 34, color: 'orange', bold: true });
+  const g = Graph({ x: 120, y: 140, w: 400, h: 300, from, to, min, max });
+  await g.axes(b, 'ax', { ticks, yTicks, label: 'z', yLabel: 'f(z)' });
+  return g;
+}
+async function props(b, lines) {
+  for (const [k, l] of lines.entries()) {
+    if (l.math) await b.write(`p${k}`, 940, 190 + k * 58, l.text + '  •', { size: 26, anchor: 'end', color: l.color || 'ink' });
+    else await b.write(`p${k}`, 940, 190 + k * 58, '•  ' + l.text, { size: 26, fa: true, anchor: 'start', color: l.color || 'ink' });
+  }
+}
+
+// ---- slide 216 exercise
+const W6 = [1, -1, 0.1, -0.3, 0.5, 0.01];
+const B6 = 0.25;
+const ROWS6 = [[-1, 0.5, -2, 1, 0.25, 2], [0, 0.2, -1, 1, 0, 1], [0, 0, 0, 0, 0, 3], [1, 1, 1, 0.5, 0.5, 1], [3, 1, 2, 0.5, 0.5, 3]];
+const paren = v => (v < 0 ? `(${v})` : String(v));
+const sumText = ts => ts.map((t, k) => (k === 0 ? num(t) : t < 0 ? `- ${num(-t)}` : `+ ${num(t)}`)).join(' ');
+function work(x) {
+  const terms = x.map((v, i) => +(v * W6[i]).toFixed(6));
+  const y = +(B6 + terms.reduce((s, t) => s + t, 0)).toFixed(6);
+  return {
+    prod: x.map((v, i) => `${paren(v)}×${paren(W6[i])}`).join(' + ') + ` + ${B6}`,
+    sum: `= ${sumText([...terms, B6])} = ${num(y)}`,
+    y,
+  };
+}
+const X6 = [170, 270, 370, 470, 570, 670, 800];
+async function table6(b) {
+  await all(['x_1', 'x_2', 'x_3', 'x_4', 'x_5', 'x_6', 'y'].map((h, k) => b.write(`h${k}`, X6[k], 205, h, { size: 26, color: k === 6 ? 'green' : 'blue', bold: true, dur: 150 })));
+  await b.line('hl', 120, 220, 860, 220, { color: 'soft', width: 2, dur: 250 });
+  await b.line('vl', 735, 180, 735, 420, { color: 'soft', width: 2, dur: 250 });
+  for (const [r, row] of ROWS6.entries()) {
+    await all(row.map((v, k) => b.write(`c${r}-${k}`, X6[k], 255 + r * 38, String(v), { size: 24, dur: 100 })));
+  }
+}
+
+// ---- softmax (slide 214)
+const SM_IN = [2.0, 1.0, 0.1];
+const SM_E = SM_IN.map(Math.exp);
+const SM_SUM = SM_E.reduce((s, v) => s + v, 0);
+const SM_OUT = SM_E.map(v => v / SM_SUM);
+
+// ---- step neuron table (slide 215): w1 = w2 = 1, b = 0
+const STEP_ROWS = [[-1, -1], [0, 0], [1, 0], [1, 1], [3, 3]];
+const stepSlide = z => (z > 0 ? 1 : 0); // what the table on slide 215 uses
+
+function quizBoard(n, lines) {
+  return async b => {
+    await b.clear();
+    await b.write('q-n', 500, 60, `سؤال ${n} از ${QUIZZES}`, { size: 24, color: 'soft', fa: true });
+    for (const [k, l] of lines.entries()) await b.write(`q-l${k}`, 500, 130 + k * 52, l.text, { size: l.size || 34, fa: l.fa, color: l.color || 'ink' });
+  };
+}
+async function solveLines(b, lines, y0 = 320) {
+  for (const [k, l] of lines.entries()) await b.write(`s-l${k}`, 500, y0 + k * 52, l.text, { size: l.size || 30, fa: l.fa, color: l.color || 'ink', bold: l.bold });
+}
+
+Teacher.start({
+  id: 'L22',
+  number: 22,
+  title: 'نورون مصنوعی',
+  chapter: 'بخش 7 · شبکه‌ی عصبی',
+  slides: '204–216',
+  intro: 'از نورون مغز تا نورون مصنوعی: ورودی، وزن، بایاس، جمع وزن‌دار و توابع فعال‌سازی.',
+  next: { href: '0023-multilayer-networks.html', title: 'لایه‌ها و شبکه‌های چندلایه' },
+  steps: [
+    // ---------------------------------------------------------- 1. intro
+    {
+      say: 'به بخش 7 خوش آمدید: *neural network* یا شبکه‌ی عصبی. در این درس کوچک‌ترین قطعه‌ی آن را می‌سازیم: یک نورون مصنوعی. همه‌ی شبکه‌های بزرگ از کنار هم گذاشتن همین قطعه ساخته می‌شوند.',
+      term: ['Neural network', 'شبکه‌ی عصبی'],
+      draw: async b => {
+        await b.write('t1', 500, 180, 'بخش 7', { size: 66, color: 'blue', bold: true, fa: true });
+        await b.write('t2', 500, 270, 'شبکه‌ی عصبی', { size: 48, fa: true });
+        await b.write('t3', 500, 350, 'Neural networks', { size: 42, color: 'orange' });
+        await b.write('t4', 500, 430, 'درس 22: نورون مصنوعی', { size: 30, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 2. biological neuron
+    {
+      say: 'ایده از مغز آمده. مغز حدود 100 میلیارد سلول کوچک به نام *neuron* یا نورون دارد؛ اسلاید می‌گوید کسی دقیق نمی‌داند و تخمین بین 50 تا 500 میلیارد است. هر نورون چهار قسمت دارد: *هسته* در وسط، *دندریت*‌ها که اطلاعات را به داخل سلول می‌آورند، *آکسون* که اطلاعات را به بیرون می‌برد، و *سیناپس* که خروجی سلول است و نورون بعدی را برمی‌انگیزد.',
+      term: ['Neuron', 'نورون'],
+      draw: async b => {
+        await b.clear();
+        const C = [250, 270];
+        await b.ring('body', C[0], C[1], 62, 62, { color: 'blue', fill: 'blue', tilt: 0 });
+        await b.ring('nuc', C[0], C[1], 26, 26, { color: 'red', fill: 'red', tilt: 0 });
+        await b.write('nuc-t', C[0], C[1] + 7, 'هسته', { size: 18, bold: true, fa: true });
+        const rad = d => (d * Math.PI) / 180;
+        const pt = (a, r) => [C[0] + r * Math.cos(rad(a)), C[1] + r * Math.sin(rad(a))].map(v => +v.toFixed(1));
+        await all([110, 150, 190, 230, 270, 310].map((a, k) => {
+          const [sx, sy] = pt(a, 62), [mx, my] = pt(a, 120);
+          const f1 = [mx + 35 * Math.cos(rad(a - 22)), my + 35 * Math.sin(rad(a - 22))].map(v => +v.toFixed(1));
+          const f2 = [mx + 35 * Math.cos(rad(a + 22)), my + 35 * Math.sin(rad(a + 22))].map(v => +v.toFixed(1));
+          return b.path(`den${k}`, `M${sx} ${sy}L${mx} ${my}L${f1[0]} ${f1[1]}M${mx} ${my}L${f2[0]} ${f2[1]}`, { color: 'blue', width: 3, dur: 400 });
+        }));
+        await b.write('den-l', 130, 95, 'دندریت (ورودی)', { size: 24, color: 'blue', fa: true });
+        await b.line('axon', 312, 270, 700, 270, { width: 4, dur: 500 });
+        await all([360, 440, 520, 600].map((x, k) => b.box(`my${k}`, x, 258, 56, 24, { color: 'orange', fill: 'orange', r: 8, dur: 250 })));
+        await b.write('axon-l', 530, 235, 'آکسون (به بیرون)', { size: 24, color: 'orange', fa: true });
+        await all([[770, 210], [790, 270], [770, 330]].map(([x, y], k) => b.line(`syn${k}`, 700, 270, x, y, { color: 'blue', width: 3, dur: 300 })));
+        await all([[770, 210], [790, 270], [770, 330]].map(([x, y], k) => b.dot(`synd${k}`, x, y, { color: 'blue', r: 6 })));
+        await b.write('syn-l', 810, 390, 'سیناپس (خروجی)', { size: 24, color: 'blue', fa: true });
+        await b.write('count', 500, 485, `حدود ${LTR('100')} میلیارد نورون در مغز (تخمین: ${LTR('50')} تا ${LTR('500')} میلیارد)`, { size: 26, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 3. mapping
+    {
+      say: 'حالا هر قسمت را به یک قطعه‌ی ریاضی تبدیل می‌کنیم. دندریت‌ها می‌شوند *ورودی*‌ها x. قدرت هر اتصال می‌شود یک *وزن* w. هسته که همه چیز را جمع می‌کند می‌شود *جمع* Σ. و آکسون می‌شود *خروجی* y.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'از مغز تا ماشین', { size: 40, color: 'orange', bold: true, fa: true });
+        await all([b.write('hb', 780, 125, 'مغز', { size: 24, color: 'soft', fa: true }), b.write('ha', 320, 125, 'نورون مصنوعی', { size: 24, color: 'soft', fa: true })]);
+        const R = [
+          ['دندریت', 'ورودی', 'x_1, …, x_m', 'blue'],
+          ['قدرت اتصال', 'وزن', 'w_1, …, w_m', 'purple'],
+          ['هسته', 'جمع', 'Σ', 'red'],
+          ['آکسون', 'خروجی', 'y', 'ink'],
+        ];
+        for (const [k, [bio, fa, m, c]] of R.entries()) {
+          const y = 190 + k * 85;
+          await b.write(`bio${k}`, 780, y, bio, { size: 30, fa: true });
+          await b.arrow(`ar${k}`, 660, y - 10, 500, y - 10, { color: 'soft', head: 12, dur: 300 });
+          await all([b.write(`fa${k}`, 420, y, fa, { size: 30, fa: true, color: c }), b.write(`m${k}`, 250, y, m, { size: 30, color: c })]);
+        }
+      },
+    },
+    // ---------------------------------------------------------- 4. perceptron picture
+    {
+      say: 'این شکل اسلاید است: *perceptron* یا پرسپترون. سمت چپ ورودی‌ها x_1 تا x_m. هر ورودی روی یک یال با وزن خودش به یک جمع‌کننده می‌رسد و نتیجه، خروجی y است.',
+      term: ['Perceptron', 'پرسپترون'],
+      draw: async b => {
+        await b.clear();
+        await drawNeuron(b);
+      },
+    },
+    // ---------------------------------------------------------- 5. weighted sum
+    {
+      say: 'جمع‌کننده چه می‌کند؟ هر ورودی را در وزن خودش ضرب می‌کند و همه را جمع می‌کند: y = x_{1}w_1 + x_{2}w_2 + … + x_{m}w_m. کوتاه‌تر: y برابر Σ x_{i}w_i از i = 1 تا m. به این می‌گوییم *weighted sum* یا جمع وزن‌دار. وزن بزرگ یعنی آن ورودی مهم‌تر است، و وزن منفی یعنی آن ورودی خروجی را پایین می‌کشد.',
+      term: ['Weight · weighted sum', 'وزن · جمع وزن‌دار'],
+      draw: async b => {
+        await b.pulse(['w0', 'w1', 'w2']);
+        await b.write('f-sum', 790, 170, 'y = Σ_{i=1}^{m} x_i w_i', { size: 34, color: 'red' });
+        await b.write('f-exp', 500, 515, 'y = x_{1}w_1 + x_{2}w_2 + … + x_{m}w_m', { size: 32 });
+      },
+    },
+    // ---------------------------------------------------------- 6. vector form
+    {
+      say: 'اسلاید همین را به شکل بردار هم نوشته: یک سطر از ورودی‌ها ضرب در یک ستون از وزن‌ها. سطر ضرب در ستون یعنی دقیقاً همان ضرب‌ها و جمع. یک مثال کوچک از خودم: ورودی‌ها 2 و 1، وزن‌ها 3 و -1. حاصل: 2×3 + 1×(-1) = 6 - 1 = 5.',
+      draw: async b => {
+        await b.write('f-vec', 790, 260, '[x_1 x_2 … x_m] · [w_1 w_2 … w_m]^T', { size: 22, color: 'purple' });
+        await b.write('ex1', 790, 330, 'x = [2, 1]    w = [3, -1]', { size: 24, color: 'blue' });
+        await b.write('ex2', 790, 380, '2×3 + 1×(-1) = 6 - 1 = 5', { size: 26, color: 'green', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 7. bias
+    {
+      say: 'یک مشکل: اگر همه‌ی ورودی‌ها صفر باشند، هر وزنی که بگذاری جمع صفر می‌شود؛ نورون نمی‌تواند چیز دیگری بگوید. راه‌حل اسلاید: یک عدد ثابت به نام *bias* یا بایاس، B، به جمع اضافه می‌کنیم: y = B + Σ x_{i}w_i. به قول اسلاید، بایاس از صفر شدن خروجی جلوگیری می‌کند. مثل عرض از مبدأ در خط y = ax + b: بدون b، خط مجبور است از مبدأ رد شود.',
+      term: ['Bias', 'بایاس'],
+      draw: async b => {
+        await b.erase(['f-*', 'ex1', 'ex2']);
+        await node(b, 'bias', 330, 92, 28, 'B');
+        await b.arrow('eb', 330, 120, 330, 206, { head: 11, dur: 300 });
+        await b.write('wb', 346, 172, '1', { size: 22, color: 'purple', anchor: 'start' });
+        await b.write('bias-l', 255, 100, 'بایاس', { size: 22, color: 'blue', fa: true });
+        await b.write('f-b', 790, 150, 'y = B + Σ_{i=1}^{m} x_i w_i', { size: 32, color: 'red' });
+        await b.write('z1', 790, 240, '0, 0, …, 0  →  Σ x_{i}w_i = 0', { size: 24, color: 'red' });
+        await b.write('z2', 790, 290, '+ B  →  y = B', { size: 26, color: 'green' });
+        await b.write('z3', 790, 345, 'بایاس از صفر شدن خروجی جلوگیری می‌کند', { size: 20, color: 'soft', fa: true });
+        await b.write('f-exp', 500, 515, 'y = B + x_{1}w_1 + x_{2}w_2 + … + x_{m}w_m', { size: 32 });
+      },
+    },
+    // ---------------------------------------------------------- 8. bias as w0
+    {
+      say: 'ترفند اسلایدهای بعد: بایاس را هم یک وزن حساب می‌کنیم. یک ورودی ثابت که همیشه 1 است اضافه می‌کنیم و وزنش را w_0 می‌نامیم. 1 × w_0 همان بایاس است. حالا فرمول یکدست می‌شود: y = Σ x_{i}w_i که این بار از i = 0 شروع می‌شود و x_0 = 1.',
+      draw: async b => {
+        await b.erase(['z1', 'z2', 'z3', 'f-b']);
+        await b.write('bias-t', 330, 92 + 9, '1', { size: 26, bold: true, dur: 150 });
+        await b.write('wb', 346, 172, 'w_0', { size: 22, color: 'purple', anchor: 'start', dur: 150 });
+        await b.pulse(['bias-t', 'wb']);
+        await b.write('f-b0', 790, 150, 'y = 1·w_0 + Σ_{i=1}^{m} x_i w_i', { size: 28, color: 'red' });
+        await b.write('f-b1', 790, 215, '= Σ_{i=0}^{m} x_i w_i', { size: 34, color: 'red', bold: true });
+        await b.write('f-b2', 790, 275, 'x_0 = 1', { size: 26, color: 'blue' });
+        await b.write('f-exp', 500, 515, 'y = [1 x_1 … x_m] · [w_0 w_1 … w_m]^T', { size: 30 });
+      },
+    },
+    // ---------------------------------------------------------- 9. activation function
+    {
+      say: 'آخرین قطعه: نتیجه‌ی جمع را از یک تابع f رد می‌کنیم. اسم آن *activation function* یا تابع فعال‌سازی است؛ اسلاید کوتاه نوشته a.f. پس نورون دو کار پشت سر هم می‌کند: اول جمع وزن‌دار z = Σ x_{i}w_i، بعد خروجی y = f(z). این f است که تعیین می‌کند خروجی چه شکلی باشد.',
+      term: ['Activation function (a.f.)', 'تابع فعال‌سازی'],
+      draw: async b => {
+        await b.clear();
+        for (const [k, [lab, x, y]] of IN2.entries()) await node(b, `in${k}`, x, y, 30, lab, { size: 24 });
+        await b.write('dots', 100, 350, '⋮', { size: 30, color: 'soft' });
+        await node(b, 'sum', SUM2[0], SUM2[1], SUM2[2], 'Σ', { color: 'red', size: 32 });
+        for (const [k, [, x, y]] of IN2.entries()) {
+          await edge(b, `e${k}`, [x, y, 30], SUM2);
+          await wlabel(b, `w${k}`, [x, y], SUM2, ['w_0', 'w_1', 'w_2', 'w_m'][k]);
+        }
+        await node(b, 'f', F2[0], F2[1], F2[2], 'f', { color: 'orange', size: 30 });
+        await edge(b, 'esf', SUM2, F2);
+        await node(b, 'out', OUT2[0], OUT2[1], OUT2[2], 'y', { color: 'ink', size: 28 });
+        await edge(b, 'efo', F2, OUT2);
+        await all(['ورودی', 'وزن', 'جمع', 'تابع', 'خروجی'].map((t, k) => b.write(`lab${k}`, [100, 195, 300, 460, 610][k], 470, t, { size: 22, color: 'soft', fa: true, dur: 150 })));
+        await b.write('af1', 820, 160, 'a.f.', { size: 36, color: 'orange', bold: true });
+        await b.write('af2', 820, 205, 'activation function', { size: 24, color: 'orange' });
+        await b.write('af3', 820, 245, 'تابع فعال‌سازی', { size: 24, color: 'soft', fa: true });
+        await b.write('af4', 820, 320, 'z = Σ_{i=0}^{m} x_i w_i', { size: 28, color: 'red' });
+        await b.write('af5', 820, 375, 'y = f(z)', { size: 34, color: 'green', bold: true });
+        await b.write('f-exp', 500, 530, 'y = f(1·w_0 + x_{1}w_1 + x_{2}w_2 + … + x_{m}w_m)', { size: 30 });
+      },
+    },
+    // ---------------------------------------------------------- 10. linear
+    {
+      say: 'حالا انواع f که اسلاید نشان داده. اولی ساده‌ترین است: *linear* یا خطی، f(z) = z. خروجی دقیقاً همان ورودی است، یعنی در واقع هیچ کاری نمی‌کند. کران هم ندارد: هر عددی می‌تواند بیرون بیاید.',
+      draw: async b => {
+        const g = await actGraph(b, { title: 'Linear:  f(z) = z', min: -4, max: 4, ticks: [-4, -2, 0, 2, 4], yTicks: [-4, -2, 2, 4] });
+        await g.curve(b, 'lin', z => z, { color: 'red' });
+        await props(b, [
+          { text: 'خروجی = همان ورودی' },
+          { text: 'کران ندارد' },
+          { text: 'خاصیت غیرخطی نمی‌دهد', color: 'red' },
+        ]);
+      },
+    },
+    // ---------------------------------------------------------- 11. ReLU
+    {
+      say: 'دومی *ReLU*: f(z) = max(0, z). اگر z منفی باشد خروجی 0 است، اگر مثبت باشد خود z بیرون می‌آید. یعنی منفی‌ها را می‌بُرد. همین شکستگی در صفر کافی است تا تابع *غیرخطی* شود.',
+      term: ['ReLU', 'max(0, z)'],
+      draw: async b => {
+        const g = await actGraph(b, { title: 'ReLU:  f(z) = max(0, z)', min: -1, max: 4, ticks: [-4, -2, 0, 2, 4], yTicks: [2, 4] });
+        await g.poly(b, 'relu', [[-4, 0], [0, 0], [4, 4]], { color: 'red' });
+        await g.guide(b, 'g2', 2, 2);
+        await props(b, [
+          { text: 'ورودی منفی: خروجی 0' },
+          { text: 'ورودی مثبت: خروجی همان z' },
+          { text: 'ReLU(-3) = 0,   ReLU(2) = 2', color: 'orange', math: true },
+        ]);
+      },
+    },
+    // ---------------------------------------------------------- 12. step
+    {
+      say: 'سومی *step function* یا تابع پله: تعریف اسلاید این است که برای z < 0 خروجی 0، و برای z ≥ 0 خروجی 1. فقط دو جواب دارد، مثل یک کلید روشن و خاموش. به نقطه‌ی پُر در بالا و نقطه‌ی توخالی در پایین دقت کن: طبق این تعریف خود صفر به 1 می‌رود.',
+      term: ['Step function', 'تابع پله'],
+      draw: async b => {
+        const g = await actGraph(b, { title: 'Step:  0 if z < 0,  1 if z ≥ 0', min: -0.5, max: 1.25, ticks: [-4, -2, 0, 2, 4], yTicks: [0.5, 1] });
+        await g.poly(b, 'st0', [[-4, 0], [0, 0]], { color: 'red' });
+        await b.line('stj', g.X(0), g.Y(0), g.X(0), g.Y(1), { color: 'soft', width: 2, dur: 250 });
+        await g.poly(b, 'st1', [[0, 1], [4, 1]], { color: 'red' });
+        await b.dot('stdot', g.X(0), g.Y(1), { color: 'red', r: 7 });
+        await b.ring('stopen', g.X(0), g.Y(0), 7, 7, { color: 'red', tilt: 0, dur: 200 });
+        await props(b, [
+          { text: `فقط دو خروجی: ${LTR('0')} یا ${LTR('1')}` },
+          { text: `در اسلاید 212: ${LTR('step(0) = 1')}`, color: 'orange' },
+        ]);
+      },
+    },
+    // ---------------------------------------------------------- 13. sigmoid
+    {
+      say: '*sigmoid*: f(z) = 1 / (1 + e^{-z}). اسلاید سه ویژگی برایش نوشته: یک، از هر دو طرف کران‌دار است، یعنی همیشه بین 0 و 1 می‌ماند. دو، خاصیت غیرخطی ایجاد می‌کند. سه، همیشه مثبت است. در وسط، f(0) = 0.5.',
+      term: ['Sigmoid', '1 / (1 + e^{-z})'],
+      draw: async b => {
+        const g = await actGraph(b, { title: 'Sigmoid:  f(z) = 1 / (1 + e^{-z})', from: -6, to: 6, min: 0, max: 1, ticks: [-6, -3, 0, 3, 6], yTicks: [0.5, 1] });
+        await b.line('asym', g.X(-6), g.Y(1), g.X(6), g.Y(1), { color: 'soft', width: 1.5, dur: 250 });
+        await g.curve(b, 'sig', z => 1 / (1 + Math.exp(-z)), { color: 'red' });
+        await g.guide(b, 'g0', 0, 0.5);
+        await props(b, [
+          { text: 'از هر دو طرف کران‌دار: بین 0 و 1' },
+          { text: 'ایجاد خواص غیرخطی' },
+          { text: 'همواره مثبت', color: 'green' },
+          { text: 'f(0) = 0.5', color: 'orange', math: true },
+        ]);
+      },
+    },
+    // ---------------------------------------------------------- 14. tanh
+    {
+      say: '*tanh* یا tangent: f(z) = (e^z - e^{-z}) / (e^z + e^{-z}). شکلش مثل sigmoid است ولی بین -1 و 1. ویژگی‌های اسلاید: از هر دو طرف کران‌دار، ایجاد خواص غیرخطی، و این بار *مثبت و منفی*. در وسط f(0) = 0. فرق امتحانی sigmoid و tanh همین است: sigmoid همیشه مثبت، tanh مثبت و منفی.',
+      term: ['tanh', '(e^z - e^{-z}) / (e^z + e^{-z})'],
+      draw: async b => {
+        const g = await actGraph(b, { title: 'tanh:  (e^z - e^{-z}) / (e^z + e^{-z})', min: -1, max: 1, ticks: [-4, -2, 0, 2, 4], yTicks: [-1, 1] });
+        await all([1, -1].map((m, k) => b.line(`asym${k}`, g.X(-4), g.Y(m), g.X(4), g.Y(m), { color: 'soft', width: 1.5, dur: 250 })));
+        await g.curve(b, 'tanh', Math.tanh, { color: 'red' });
+        await b.dot('t0', g.X(0), g.Y(0), { color: 'orange' });
+        await props(b, [
+          { text: 'از هر دو طرف کران‌دار: بین منفی 1 و 1' },
+          { text: 'ایجاد خواص غیرخطی' },
+          { text: 'مثبت و منفی', color: 'green' },
+          { text: 'f(0) = 0', color: 'orange', math: true },
+        ]);
+      },
+    },
+    // ---------------------------------------------------------- 15. softmax
+    {
+      say: `*softmax* فرق دارد: روی یک دسته عدد با هم کار می‌کند. هر عدد را به توان e می‌رساند و بر جمع همه تقسیم می‌کند. مثال اسلاید: 2.0، 1.0 و 0.1. داریم e^2 = ${SM_E[0].toFixed(2)}، e^1 = ${SM_E[1].toFixed(2)} و e^{0.1} = ${SM_E[2].toFixed(2)} با جمع ${SM_SUM.toFixed(2)}. تقسیم کنیم: ${SM_OUT.map(v => v.toFixed(2)).join('، ')}. اسلاید این‌ها را گرد کرده و نوشته 0.7، 0.2، 0.1. ویژگی اصلی، به قول اسلاید: جمع مقادیر خروجی یک می‌شود. برای همین خروجی softmax را مثل احتمال می‌خوانیم.`,
+      term: ['Softmax', 'جمع خروجی‌ها = 1'],
+      draw: async b => {
+        await b.clear();
+        await b.write('title', 410, 120, 'Softmax', { size: 30, color: 'orange', bold: true });
+        const Y = [195, 290, 385];
+        await b.path('brk', 'M135 160 L120 160 L120 415 L135 415', { color: 'red', width: 3 });
+        await b.write('yv', 85, 300, 'y', { size: 46, color: 'red' });
+        await all(SM_IN.map((v, k) => b.write(`in${k}`, 175, Y[k] + 9, v.toFixed(1), { size: 30, color: 'red' })));
+        await all(Y.map((y, k) => b.line(`li${k}`, 215, y, 260, y, { dur: 200 })));
+        await b.box('bx', 260, 150, 300, 270, { r: 4 });
+        await b.write('S', 330, 295, 'S(y_i) =', { size: 26 });
+        await b.write('num', 470, 268, 'exp(y_i)', { size: 26 });
+        await b.line('bar', 400, 282, 540, 282, { width: 2.5, dur: 200 });
+        await b.write('den', 470, 322, 'Σ_j exp(y_j)', { size: 24 });
+        await all(Y.map((y, k) => b.arrow(`lo${k}`, 560, y, 610, y, { head: 10, dur: 200 })));
+        for (const [k, v] of SM_OUT.entries()) {
+          await b.write(`o${k}`, 660, Y[k] + 10, v.toFixed(2), { size: 30, color: 'green', bold: true });
+          await b.write(`os${k}`, 770, Y[k] + 10, `(≈ ${['0.7', '0.2', '0.1'][k]})`, { size: 22, color: 'soft' });
+        }
+        await b.write('ev', 500, 470, `e^{2.0} = ${SM_E[0].toFixed(2)}   e^{1.0} = ${SM_E[1].toFixed(2)}   e^{0.1} = ${SM_E[2].toFixed(2)}   sum = ${SM_SUM.toFixed(2)}`, { size: 22, color: 'blue' });
+        await b.write('one', 690, 525, 'جمع مقادیر خروجی یک می‌شود:', { size: 26, color: 'green', fa: true });
+        await b.write('one-m', 330, 525, SM_OUT.map(v => v.toFixed(2)).join(' + ') + ' = 1', { size: 28, color: 'green', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 16. step neuron table
+    {
+      say: 'یک نورون کامل با تابع پله، مثال اسلاید 215. دو ورودی، w_1 = w_2 = 1، و بایاس 0. پس z = x_1 + x_2 و y = step(z). ردیف‌ها را حساب کنیم: -1 و -1 می‌دهد z = -2 و y = 0. یک و صفر می‌دهد z = 1 و y = 1. یک و یک می‌دهد 2، و سه و سه می‌دهد 6؛ هر دو y = 1.',
+      draw: async b => {
+        await b.clear();
+        await b.write('p1', 500, 75, 'w_1 = w_2 = 1,   b = 0', { size: 30, color: 'blue' });
+        await b.write('p2', 500, 130, 'z = x_1 + x_2   →   y = step(z)', { size: 30 });
+        const X = [320, 440, 560, 680];
+        await all(['x_1', 'x_2', 'z', 'y'].map((h, k) => b.write(`h${k}`, X[k], 200, h, { size: 28, color: k === 3 ? 'green' : 'blue', bold: true, dur: 150 })));
+        await b.line('hl', 260, 215, 740, 215, { color: 'soft', width: 2, dur: 250 });
+        await all([380, 500, 620].map((x, k) => b.line(`vl${k}`, x, 170, x, 470, { color: 'soft', width: 2, dur: 250 })));
+        for (const [r, [x1, x2]] of STEP_ROWS.entries()) {
+          const z = x1 + x2, y = 255 + r * 50;
+          await all([b.write(`c${r}-0`, X[0], y, String(x1), { size: 28, dur: 120 }), b.write(`c${r}-1`, X[1], y, String(x2), { size: 28, dur: 120 })]);
+          await b.write(`c${r}-2`, X[2], y, String(z), { size: 28, color: 'orange', dur: 150 });
+          await b.write(`c${r}-3`, X[3], y, String(stepSlide(z)), { size: 28, color: 'green', bold: true, dur: 150 });
+        }
+      },
+    },
+    // ---------------------------------------------------------- 17. the z = 0 conflict
+    {
+      say: 'دقت کن! در ردیف دوم z = 0 است و جدول اسلاید y = 0 نوشته. ولی تعریف تابع پله در اسلاید 212 می‌گوید برای z ≥ 0 خروجی 1 است، پس طبق آن تعریف باید y = 1 باشد. یعنی اسلاید 215 با تعریف خود جزوه جور نیست. مقدار درست در خودِ صفر فقط یک قرارداد است؛ در امتحان اگر سؤال تعریف را داده همان را به کار ببر، و اگر نداده بنویس کدام قرارداد را استفاده کرده‌ای.',
+      tip: true,
+      draw: async b => {
+        await b.ring('r0', 620, 291, 95, 24, { color: 'red' });
+        await b.recolor(['c1-2', 'c1-3'], 'red');
+        await b.write('n1', 860, 230, 'اسلاید 212:', { size: 22, color: 'soft', fa: true });
+        await b.write('n2', 860, 265, 'step(0) = 1', { size: 24, color: 'orange' });
+        await b.write('n3', 860, 330, 'جدول اسلاید 215:', { size: 22, color: 'soft', fa: true });
+        await b.write('n4', 860, 365, 'step(0) = 0', { size: 24, color: 'red' });
+        await b.write('n5', 860, 430, 'قرارداد را بنویس!', { size: 22, color: 'red', bold: true, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 18. slide 216 exercise, row 1
+    {
+      say: 'تمرین اسلاید 216: «بایاس و یک عالمه ورودی». شش ورودی، وزن‌ها w = [1, -1, 0.1, -0.3, 0.5, 0.01] و b = 0.25. اینجا تابع فعال‌سازی نداریم، پس y همان جمع وزن‌دار به‌علاوه‌ی بایاس است. ردیف اول را با هم حساب کنیم: هر x را در وزن هم‌شماره‌اش ضرب کن، جمع کن، و 0.25 را اضافه کن.',
+      draw: async b => {
+        await b.clear();
+        await b.write('t', 500, 55, 'تمرین اسلاید 216: بایاس و یک عالمه ورودی', { size: 28, color: 'orange', bold: true, fa: true });
+        await b.write('f', 500, 105, 'y = b + Σ_{i=1}^{6} x_i w_i', { size: 28 });
+        await b.write('wv', 500, 150, `w = [${W6.join(', ')}]      b = ${B6}`, { size: 26, color: 'blue' });
+        await table6(b);
+        const r = work(ROWS6[0]);
+        await b.pulse('c0-*');
+        await b.write('wk1', 500, 470, r.prod, { size: 21 });
+        await b.write('wk2', 500, 520, r.sum, { size: 24, color: 'green' });
+        await b.write('c0-6', X6[6], 255, num(r.y), { size: 24, color: 'green', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 19. row 2
+    {
+      say: `ردیف دوم: صفرها هیچ سهمی ندارند. می‌ماند 0.2 × (-1) = -0.2، (-1) × 0.1 = -0.1، 1 × (-0.3) = -0.3 و 1 × 0.01 = 0.01. با بایاس 0.25 جمعشان می‌شود ${num(work(ROWS6[1]).y)}. سه ردیف آخر را خودتان در سؤال‌ها حساب می‌کنید.`,
+      draw: async b => {
+        await b.erase(['wk1', 'wk2']);
+        const r = work(ROWS6[1]);
+        await b.pulse('c1-*');
+        await b.write('wk1', 500, 470, r.prod, { size: 21 });
+        await b.write('wk2', 500, 520, r.sum, { size: 24, color: 'green' });
+        await b.write('c1-6', X6[6], 255 + 38, num(r.y), { size: 24, color: 'green', bold: true });
+        await all([2, 3, 4].map(k => b.write(`c${k}-6`, X6[6], 255 + k * 38, '?', { size: 24, color: 'orange', bold: true })));
+      },
+    },
+    // ---------------------------------------------------------- 20. summary
+    {
+      say: 'جمع‌بندی کنیم. این شش نکته را یک بار دیگر بخوانید، بعد برویم سراغ سؤال‌ها.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'یادت باشد', { size: 46, color: 'orange', bold: true, fa: true });
+        const L = [
+          'نورون: جمع وزن‌دار ورودی‌ها + بایاس، بعد تابع فعال‌سازی',
+          'فرمول: y = f(1·w₀ + x₁w₁ + … + xₘwₘ)',
+          `بایاس = وزن ${LTR('w₀')} روی ورودی ثابت ${LTR('1')}؛ نمی‌گذارد خروجی همیشه صفر شود`,
+          'تابع sigmoid بین 0 و 1 و همیشه مثبت؛ تابع tanh بین منفی 1 و 1، مثبت و منفی',
+          'تابع ReLU = max(0, z)؛ تابع step فقط 0 یا 1؛ تابع linear: f(z) = z',
+          'تابع softmax خروجی‌ها را طوری می‌سازد که جمعشان 1 شود',
+        ];
+        for (const [k, l] of L.entries()) await b.write(`m${k}`, 920, 150 + k * 68, '•  ' + l, { size: 25, anchor: 'start', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- quizzes
+    {
+      say: 'نوبت شماست! ردیف سوم تمرین اسلاید 216: ورودی‌ها 0، 0، 0، 0، 0 و 3. خروجی y چند است؟',
+      draw: quizBoard(1, [
+        { text: `w = [${W6.join(', ')}]    b = ${B6}`, size: 28, color: 'blue' },
+        { text: `x = [${ROWS6[2].join(', ')}]` },
+        { text: 'y = b + Σ x_i w_i = ?', color: 'orange' },
+      ]),
+      quiz: { answer: [num(work(ROWS6[2]).y)], hint: 'فقط x_6 صفر نیست. 3 را در w_6 = 0.01 ضرب کن و بایاس را اضافه کن.', explain: `فقط x_6 سهم دارد: 3 × 0.01 = 0.03. با بایاس: 0.03 + 0.25 = ${num(work(ROWS6[2]).y)}. این همان کاری است که بایاس می‌کند: حتی با ورودی‌های تقریباً صفر، خروجی صفر نمی‌شود.` },
+      solve: b => solveLines(b, [
+        { text: work(ROWS6[2]).prod, size: 22 },
+        { text: work(ROWS6[2]).sum, size: 28, color: 'green', bold: true },
+      ], 330),
+    },
+    {
+      say: 'ردیف چهارم: ورودی‌ها 1، 1، 1، 0.5، 0.5 و 1. خروجی y چند است؟',
+      draw: quizBoard(2, [
+        { text: `w = [${W6.join(', ')}]    b = ${B6}`, size: 28, color: 'blue' },
+        { text: `x = [${ROWS6[3].join(', ')}]` },
+        { text: 'y = b + Σ x_i w_i = ?', color: 'orange' },
+      ]),
+      quiz: { answer: [num(work(ROWS6[3]).y)], hint: 'ضرب‌ها: 1، -1، 0.1، -0.15، 0.25، 0.01؛ بعد بایاس 0.25.', explain: `ضرب‌ها: 1 - 1 + 0.1 - 0.15 + 0.25 + 0.01 = 0.21. با بایاس: 0.21 + 0.25 = ${num(work(ROWS6[3]).y)}.` },
+      solve: b => solveLines(b, [
+        { text: work(ROWS6[3]).prod, size: 22 },
+        { text: work(ROWS6[3]).sum, size: 28, color: 'green', bold: true },
+      ], 330),
+    },
+    {
+      say: 'کدام تابع فعال‌سازی از هر دو طرف کران‌دار است و خروجی‌اش هم مثبت می‌شود هم منفی؟',
+      draw: quizBoard(3, [
+        { text: 'از هر دو طرف کران‌دار، مثبت و منفی؟', fa: true, size: 38 },
+      ]),
+      quiz: {
+        choices: ['sigmoid', 'tanh', 'ReLU', 'step'], correct: 1,
+        explain: 'tanh بین -1 و 1 است، پس هم کران‌دار است هم منفی می‌شود. sigmoid هم کران‌دار است ولی همیشه مثبت. ReLU از بالا کران ندارد. step فقط 0 و 1 می‌دهد و منفی نمی‌شود.',
+      },
+      solve: async b => {
+        const Y = [260, 320, 380, 440];
+        const R = [
+          ['sigmoid', `بین ${LTR('0')} و ${LTR('1')}: همیشه مثبت`, 'soft'],
+          ['tanh', 'بین منفی 1 و 1: مثبت و منفی ✓', 'green'],
+          ['ReLU', 'از بالا کران ندارد', 'soft'],
+          ['step', `فقط ${LTR('0')} یا ${LTR('1')}`, 'soft'],
+        ];
+        for (const [k, [n, d, c]] of R.entries()) {
+          await all([b.write(`s-n${k}`, 330, Y[k], n, { size: 30, color: c === 'green' ? 'green' : 'ink', bold: c === 'green' }), b.write(`s-d${k}`, 760, Y[k], d, { size: 26, color: c, fa: true })]);
+        }
+      },
+    },
+    {
+      say: 'یک نورون با ReLU: w_0 = -1، w_1 = 2، w_2 = -1. ورودی‌ها x_1 = 1 و x_2 = 4. خروجی y چند است؟',
+      draw: quizBoard(4, [
+        { text: 'w_0 = -1,   w_1 = 2,   w_2 = -1', color: 'blue' },
+        { text: 'x_1 = 1,   x_2 = 4' },
+        { text: 'y = ReLU(z) = ?', color: 'orange' },
+      ]),
+      quiz: { answer: ['0'], hint: 'اول z = w_0 + x_{1}w_1 + x_{2}w_2 را حساب کن، بعد ReLU: اگر منفی بود 0.', explain: 'z = -1 + 1×2 + 4×(-1) = -1 + 2 - 4 = -3. چون منفی است، ReLU آن را صفر می‌کند: y = max(0, -3) = 0.' },
+      solve: b => solveLines(b, [
+        { text: 'z = -1 + 1×2 + 4×(-1) = -1 + 2 - 4 = -3' },
+        { text: 'y = max(0, -3) = 0', color: 'green', bold: true, size: 36 },
+      ], 340),
+    },
+    {
+      say: 'یک لایه‌ی softmax سه خروجی دارد. دو تای اول 0.5 و 0.3 شده‌اند. خروجی سوم چند است؟',
+      draw: quizBoard(5, [
+        { text: 'softmax:   0.5,   0.3,   ?', size: 40 },
+      ]),
+      quiz: { answer: ['0.2'], hint: 'جمع خروجی‌های softmax همیشه چقدر است؟', explain: 'جمع خروجی‌های softmax همیشه 1 است، پس سومی 1 - 0.5 - 0.3 = 0.2.' },
+      solve: b => solveLines(b, [
+        { text: `جمع خروجی‌های softmax = ${LTR('1')}`, fa: true, color: 'blue' },
+        { text: '? = 1 - 0.5 - 0.3 = 0.2', color: 'green', bold: true, size: 36 },
+      ], 280),
+    },
+    {
+      say: 'سؤال آخر، درباره‌ی بایاس: نورونی بدون بایاس داریم و همه‌ی ورودی‌هایش صفر هستند. جمع وزن‌دار Σ x_{i}w_i چه می‌شود؟',
+      draw: quizBoard(6, [
+        { text: 'بدون بایاس، همه‌ی ورودی‌ها صفر', fa: true, size: 36 },
+        { text: 'Σ x_i w_i = ?', color: 'orange' },
+      ]),
+      quiz: {
+        choices: ['همیشه 0، هر وزنی که باشد', 'برابر w_1', 'همیشه 1'], correct: 0,
+        explain: 'هر ضرب x_i × w_i با x_i = 0 صفر است، پس جمع هم صفر است و وزن‌ها هیچ اثری ندارند. برای همین بایاس اضافه می‌کنیم: با بایاس، خروجی برابر B می‌شود و دیگر به صفر قفل نیست.',
+      },
+      solve: b => solveLines(b, [
+        { text: '0×w_1 + 0×w_2 + … + 0×w_m = 0', color: 'red' },
+        { text: 'B + 0 = B', color: 'green', bold: true, size: 36 },
+        { text: 'بایاس از صفر شدن خروجی جلوگیری می‌کند', fa: true, color: 'soft', size: 26 },
+      ], 300),
+    },
+  ],
+});
+</script>
+</body>
+</html>

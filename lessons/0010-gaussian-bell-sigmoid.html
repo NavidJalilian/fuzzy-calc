@@ -3,745 +3,572 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>درس ۱۰ — توابع گاوسی، زنگوله‌ای، سیگموئید و چندجمله‌ای</title>
-<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
-<style>
-/* ===== SHARED STYLE — copy verbatim into every lesson, do not edit per lesson ===== */
-:root{--bg:#fbfaf7;--surface:#ffffff;--surface-1:#f3f1ec;--text:#1f1e1c;--text-2:#5f5e5a;--text-3:#888780;--border:#e3e0d8;--border-strong:#c9c6bc;
---accent:#534AB7;--accent-bg:#EEEDFE;--ok:#3B6D11;--ok-bg:#EAF3DE;--bad:#A32D2D;--bad-bg:#FCEBEB;--warn:#854F0B;--warn-bg:#FAEEDA;
---c1:#7F77DD;--c2:#1D9E75;--c3:#EF9F27;--c4:#D4537E;--grid:#e3e0d8}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1a1a19;--surface:#232322;--surface-1:#2c2c2a;--text:#ecebe6;--text-2:#b4b2a9;--text-3:#888780;--border:#3a3a37;--border-strong:#55554f;
---accent:#AFA9EC;--accent-bg:#26215C;--ok:#97C459;--ok-bg:#173404;--bad:#F09595;--bad-bg:#501313;--warn:#FAC775;--warn-bg:#412402;--grid:#3a3a37}}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:Vazirmatn,Tahoma,sans-serif;font-size:16px;line-height:1.95}
-main{max-width:760px;margin:0 auto;padding:24px 16px 64px}
-a{color:var(--accent)}
-h1{font-size:26px;font-weight:700;line-height:1.5;margin:6px 0 6px}
-h2{font-size:19px;font-weight:500;margin:0 0 8px}
-h3{font-size:16px;font-weight:500;margin:12px 0 4px}
-p{margin:0 0 10px}
-.top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:13px;color:var(--text-2)}
-.goal{color:var(--text-2);margin-bottom:22px}
-.sec{margin:0 0 28px}
-.lab{font-size:13px;color:var(--text-3);margin:0 0 4px;letter-spacing:0}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
-.soft{background:var(--surface-1);border-radius:12px;padding:12px 14px}
-.m{direction:ltr;unicode-bidi:isolate;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14.5px;white-space:nowrap}
-@media (max-width:700px){.m{white-space:normal;display:inline-block;max-width:100%}}
-.mb{direction:ltr;text-align:left;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14.5px;background:var(--surface-1);border-radius:8px;padding:8px 12px;margin:6px 0;overflow-x:auto;line-height:1.8}
-.en{direction:ltr;unicode-bidi:isolate;font-size:13px;color:var(--text-2)}
-b,strong{font-weight:500}
-.key{background:var(--warn-bg);color:var(--warn);border-radius:6px;padding:0 6px}
-.tip{border-right:3px solid var(--accent);background:var(--accent-bg);padding:8px 12px;border-radius:0;margin:8px 0}
-.trap{border-right:3px solid var(--bad);background:var(--bad-bg);padding:8px 12px;border-radius:0;margin:8px 0}
-button{font-family:inherit;font-size:14px;background:var(--surface);color:var(--text);border:1px solid var(--border-strong);border-radius:8px;padding:5px 14px;cursor:pointer}
-button:hover{background:var(--surface-1)}
-button.on{background:var(--accent-bg);border-color:var(--accent);color:var(--accent)}
-input[type=text]{font-family:inherit;font-size:15px;direction:ltr;text-align:center;width:72px;height:34px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text)}
-input[type=range]{width:100%;accent-color:var(--accent);direction:ltr}
-table.t{border-collapse:collapse;direction:ltr;font-size:14.5px;margin:6px 0;display:block;max-width:100%;overflow-x:auto}
-table.t>tbody,table.t>thead{display:table;width:100%}
-table.t th,table.t td{border:1px solid var(--border);padding:5px 6px;text-align:center;font-weight:400}
-table.t th{background:var(--surface-1)}
-.ok{background:var(--ok-bg)!important}.no{background:var(--bad-bg)!important}
-.fb{font-size:14px;margin-top:8px;min-height:1em}.fb.good{color:var(--ok)}.fb.bad{color:var(--bad)}
-.q{margin:0 0 18px}
-.mcq .opts{display:grid;gap:6px;margin-top:6px}
-.mcq .opts button{text-align:right;padding:7px 12px}
-.stepper .st{display:none;padding:6px 0;border-bottom:1px dashed var(--border)}
-.stepper .st.show{display:block}
-.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-svg{max-width:100%;height:auto;direction:ltr}
-svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12px}
-.nav{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:14px;border-top:1px solid var(--border);padding-top:14px;margin-top:28px}
-.ask{font-size:14px;color:var(--text-2)}
-@media print{body{background:#fff}.card,.soft{break-inside:avoid}.stepper .st{display:block}button{display:none}}
-.given{font-size:14px;color:var(--text-2);background:var(--surface-1);border-right:3px solid var(--border-strong);border-radius:0 8px 8px 0;padding:6px 12px;margin:2px 0 10px}
-.given b{color:var(--text)}
-[id]{scroll-margin-top:16px}
-h3:target,.card:target{outline:2px solid var(--accent);outline-offset:6px;border-radius:8px}
-details.sol{margin-top:10px;border:1px dashed var(--border-strong);border-radius:10px;padding:6px 12px;background:var(--surface)}
-details.sol summary{cursor:pointer;color:var(--accent);font-weight:500}
-details.sol[open] summary{margin-bottom:6px}
-.q>details.sol:not([open]){display:inline-block;vertical-align:middle;margin:0;padding:0;border:0;background:none}
-.q>details.sol summary{list-style:none;display:inline-block;font-size:14px;border:1px solid var(--border-strong);border-radius:8px;padding:5px 14px;background:var(--surface)}
-.q>details.sol summary::-webkit-details-marker{display:none}
-.q>details.sol summary:hover{background:var(--surface-1)}
-@media print{details.sol{border-style:solid}}
-/* ===== END SHARED STYLE ===== */
-</style>
-<style>
-/* lesson 10 only */
-.ctl{display:grid;grid-template-columns:auto 1fr auto;gap:2px 10px;align-items:center;margin-top:8px}
-.ctl label{font-size:14px;color:var(--text-2);direction:ltr;font-family:"SF Mono",Menlo,Consolas,monospace}
-.ctl output{direction:ltr;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14px;min-width:38px;text-align:left}
-.mb.pre{white-space:pre}
-.shapes{display:flex;flex-wrap:wrap;gap:6px;direction:ltr}
-.shapes button{font-family:"SF Mono",Menlo,Consolas,monospace;font-size:13.5px}
-/* animated walk-through */
-.anim:focus{outline:none}
-.an-head{display:flex;gap:10px;align-items:stretch}
-.an-cap{flex:1;background:var(--surface-1);border-radius:10px;padding:8px 14px;min-height:8.2em;font-size:15px;line-height:1.85}
-.an-btns{display:flex;flex-direction:column;gap:6px;justify-content:center;min-width:104px}
-#anNext{font-size:16px;font-weight:500;padding:12px 14px}
-.an-btns .cnt{font-size:12.5px;color:var(--text-3);text-align:center}
-.an-f{direction:ltr;text-align:left;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14px;background:var(--surface);border-radius:6px;padding:3px 10px;margin:5px 0;white-space:pre-wrap;line-height:1.7}
-.an-new{margin-top:6px;font-size:13.5px;line-height:1.8;border-right:3px solid var(--warn);background:var(--warn-bg);padding:3px 10px}
-.an-new .an-from{color:var(--text-2)}
-.an-prog{height:4px;background:var(--border);border-radius:2px;margin:8px 0 4px;overflow:hidden}
-.an-prog>i{display:block;height:100%;background:var(--accent);transition:width .4s}
-.an-stage{overflow-x:auto;margin:0 -4px;direction:ltr}
-#anSvg{display:block;width:100%;min-width:500px}
-#anSvg text{font-size:13px}
-#anSvg .mono{font-family:"SF Mono",Menlo,Consolas,monospace;font-size:13px}
-#anSvg .an-ttl{font-size:14px;font-weight:700;fill:var(--text)}
-#anSvg .an-val{font-size:12px;fill:var(--text)}
-#anSvg .an-ax{font-size:11px;fill:var(--text-3)}
-#anSvg .cellt{font-size:13px;fill:var(--text)}
-#anSvg .fly{font-size:15px;font-weight:700}
-#anSvg .flash{animation:anFlash .8s ease-out}
-@keyframes anFlash{from{fill:var(--accent);font-size:17px}to{fill:var(--text)}}
-#anSvg .fd,#anSvg .fd *{transition:opacity .45s}
-#anSvg .an-bar{transition:fill .45s,opacity .45s}
-#anSvg .an-ghost{fill:none;stroke:var(--text-3);stroke-dasharray:4 3}
-#anSvg .an-hl{fill:none;stroke:var(--accent);stroke-width:2.5}
-#anSvg .an-band{fill:var(--accent-bg)}
-.an-swipe{display:none;font-size:12px;color:var(--text-3);margin:2px 0 0}
-button:disabled{opacity:.45;cursor:default}
-details.an-gld{margin-top:10px}
-details.an-gld summary{cursor:pointer;color:var(--accent);font-size:14px}
-table.an-gl{direction:rtl;font-size:14px}
-table.an-gl td,table.an-gl th{text-align:right;vertical-align:top}
-table.an-gl td:first-child{white-space:nowrap}
-@media (max-width:540px){.an-head{flex-direction:column}.an-btns{flex-direction:row;align-items:center}.an-btns #anNext{flex:1}.an-swipe{display:block}}
-@media (prefers-reduced-motion:reduce){#anSvg .fd,#anSvg .fd *,#anSvg .an-bar,.an-prog>i{transition:none}#anSvg .flash{animation:none}}
-@media print{.an-btns{display:none}}
-</style>
+<title>Gaussian, Bell, Sigmoid</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Vazirmatn:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="../assets/teacher.css">
 </head>
 <body>
-<main>
-<div class="top"><a href="../index.html">← فهرست درس‌ها</a><span>درس ۱۰ از ۱۱ · فصل ۳ · حدود ۱۵ دقیقه</span></div>
-<h1>توابع گاوسی، زنگوله‌ای، سیگموئید و چندجمله‌ای</h1>
-<p class="goal">هدف: بعد از این درس می‌توانی μ(x) را برای تابع گاوسی، زنگوله‌ای و سیگموئید با ماشین‌حساب حساب کنی، و برای هر شکل نام دستور متلب و فهرست پارامترهایش را به‌ترتیب درست بگویی.</p>
-
-<!-- ===== 0. ANIMATED WALK-THROUGH ===== -->
-<section class="sec" id="anim"><p class="lab">از اینجا شروع کن: کل درس در یک انیمیشن قدم به قدم</p>
-<div class="card anim" id="anBox" tabindex="0" aria-label="انیمیشن قدم به قدم حساب μ برای گاوسی، زنگوله‌ای و سیگموئید">
-  <div class="an-head">
-    <div class="an-cap" id="anCap" aria-live="polite"></div>
-    <div class="an-btns">
-      <button id="anNext" class="on">بعدی ←</button>
-      <button id="anPrev">→ قبلی</button>
-      <button id="anAgain">↻ دوباره ببین</button>
-      <span class="cnt" id="anCnt"></span>
-    </div>
-  </div>
-  <div class="an-prog"><i id="anBar"></i></div>
-  <div class="an-stage"><svg id="anSvg" viewBox="0 0 640 336" role="img" aria-labelledby="anT"><title id="anT">حل قدم به قدم: μ(x) برای gaussmf، gbellmf و سیگموئید</title></svg></div>
-  <p class="an-swipe">روی گوشی: اگر تصویر جا نشد، آن را به چپ و راست بکش.</p>
-  <details class="an-gld"><summary>همه نمادها: هر کدام چیست و از کجا آمد</summary>
-    <table class="t an-gl"><tbody id="anGl"></tbody></table>
-  </details>
-</div></section>
-
-<!-- ===== 1. IDEA ===== -->
-<section class="sec"><p class="lab">۱. ایده (همان انیمیشن بالا، به صورت متن)</p>
-<div class="card">
-  <p>مثلث و ذوزنقه (درس ۹) گوشه تیز دارند. این درس توابعی است که <b>هموار</b> <span class="en">(smooth)</span> هستند: منحنی نرم، بدون شکستگی.</p>
-
-  <h3 id="gauss">۳) گاوسی <span class="en">(Gaussian)</span> — <span class="m">gaussmf</span> (اسلاید ۸۷–۸۸)</h3>
-  <p>از منحنی توزیع گاوسی ساخته می‌شود و دو پارامتر دارد: میانگین <span class="m">c</span> (مرکز قله) و انحراف معیار <span class="m">σ</span> <span class="en">(sigma)</span> که پهنای منحنی را تعیین می‌کند.</p>
-  <div class="mb">f(x; σ, c) = e^( −(x−c)² / (2σ²) )      MATLAB:  y = gaussmf(x,[sigma c])</div>
-  <div class="given"><b>به زبان ساده:</b> «فاصله x از مرکز را حساب کن، به توان ۲ برسان، تقسیم بر <span class="m">2σ²</span> کن، منفی‌اش کن، و e را به آن توان برسان».<br>• <span class="m">e</span> فقط یک عدد ثابت است (حدود <span class="m">2.718</span>)؛ روی ماشین‌حساب دکمه <span class="m">eˣ</span> را بزن.<br>• <span class="m">(x−c)²</span> = فاصله از مرکز، به توان ۲. علامت منفی یعنی هرچه دورتر، جواب کوچک‌تر.<br>• در خود مرکز (<span class="m">x=c</span>) فاصله صفر است، پس <span class="m">e⁰ = 1</span>: قله همیشه ۱ است.<br>• <span class="m">σ</span> پهناست: σ بزرگ‌تر ← تقسیم بر عدد بزرگ‌تر ← جواب کندتر کم می‌شود ← منحنی پهن‌تر.<br>مثال با <span class="m">σ=2, c=5</span>: <span class="m">x=7 → (7−5)²/(2·4) = 4/8 = 0.5 → e^(−0.5) ≈ 0.607</span>. <span class="m">x=9 → 16/8 = 2 → e^(−2) ≈ 0.135</span>.</div>
-  <div class="trap"><b>دام ۱ — ترتیب پارامترها:</b> در متلب اول <span class="m">sigma</span> می‌آید، بعد <span class="m">c</span>. پس <span class="m">gaussmf(x,[2 5])</span> یعنی σ=2 و مرکز c=5 (اسلاید ۸۸)، نه برعکس.</div>
-  <div class="trap"><b>دام ۲ — دو فرمول در اسلاید ۸۷:</b> اسلاید فرمول <span class="m">f(x) = 1/(√(2π)σ) · e^(−(x−μ)²/(2σ²))</span> را هم کنار شکل آورده. این فرمول «چگالی احتمال» است، نه تابع عضویت: قله‌اش <span class="m">1/(√(2π)σ)</span> است، مثلاً برای σ=2 حدود <span class="m">0.199</span>، نه ۱. برای حساب μ همیشه فرمول اول (بدون ضریب) را به کار ببر که قله‌اش دقیقاً ۱ است. همچنین در متن اسلاید ۸۷ نام دستور «guassmf» تایپ شده؛ درستش <span class="m">gaussmf</span> است (همان که اسلاید ۸۸ استفاده می‌کند).</div>
-
-  <h3>گاوسی دوطرفه — <span class="m">gauss2mf</span> (اسلاید ۸۹)</h3>
-  <p>از دو تابع گاوسی ساخته می‌شود: اولی <span class="m">(σ1, c1)</span> شکل سمت چپ و دومی <span class="m">(σ2, c2)</span> شکل سمت راست را می‌سازد. اگر <span class="m">c1 &lt; c2</span> باشد، تابع به بیشینه ۱ می‌رسد (بین c1 و c2 یک سقف صاف دارد)؛ در غیر این صورت بیشینه‌اش کمتر از ۱ است.</p>
-  <div class="mb pre">         ⎧ e^(−(x−c1)²/(2σ1²)),   x ≤ c1
-f(x)  =  ⎨ 1,                      c1 ≤ x ≤ c2
-         ⎩ e^(−(x−c2)²/(2σ2²)),   c2 ≤ x      MATLAB:  y = gauss2mf(x,[sig1 c1 sig2 c2])</div>
-  <div class="given"><b>به زبان ساده:</b> «سمت چپ c1 از گاوسی اول استفاده کن، بین c1 و c2 جواب ۱ است، و سمت راست c2 از گاوسی دوم». هر طرف پهنای خودش را دارد، پس شکل می‌تواند نامتقارن باشد.<br>مثال با <span class="m">[sig1 c1 sig2 c2] = [1 3 2 6]</span>: <span class="m">x=2</span> (چپ c1) ← <span class="m">(2−3)²/(2·1) = 0.5 → e^(−0.5) ≈ 0.607</span>. <span class="m">x=4</span> (بین ۳ و ۶) ← <span class="m">1</span>. <span class="m">x=8</span> (راست c2) ← <span class="m">(8−6)²/(2·4) = 0.5 → 0.607</span>.</div>
-  <div class="tip">اسلاید ۸۹ به جای σ از علامت <span class="m">∂</span> استفاده کرده (<span class="m">(∂1,c1)</span> و <span class="m">(∂2,c2)</span>)؛ منظور همان σ است. فرمول تکه‌ای بالا در اسلاید نیامده و از مستندات MathWorks است (برای حالت <span class="m">c1 ≤ c2</span>). اگر <span class="m">c1 &gt; c2</span>، متلب دو تکه را در هم ضرب می‌کند و هیچ نقطه‌ای به ۱ نمی‌رسد.</div>
-
-  <h3>زنگوله‌ای تعمیم‌یافته <span class="en">(generalized bell)</span> — <span class="m">gbellmf</span> (اسلاید ۹۰)</h3>
-  <div class="mb">f(x; a, b, c) = 1 / ( 1 + |(x−c)/a|^(2b) )      MATLAB:  y = gbellmf(x,[a b c])</div>
-  <div class="given"><b>به زبان ساده:</b> «فاصله x از مرکز را بر حسب a بشمار (چند تا a دوری؟)، قدرمطلقش را به توان 2b برسان، یکی به آن اضافه کن، و ۱ را بر حاصل تقسیم کن».<br>• <span class="m">| |</span> قدرمطلق است: منفی را مثبت می‌کند، پس چپ و راست مرکز یکسان‌اند.<br>• در مرکز فاصله صفر است ← <span class="m">1/(1+0) = 1</span>.<br>مثال با <span class="m">a=2, b=1, c=5</span>: <span class="m">x=7 → |2/2| = 1 → 1² = 1 → 1/(1+1) = 0.5</span>. <span class="m">x=9 → |4/2| = 2 → 2² = 4 → 1/5 = 0.2</span>. همین x=9 با <span class="m">b=2</span>: <span class="m">2⁴ = 16 → 1/17 ≈ 0.059</span> (b بزرگ‌تر، افت تندتر).</div>
-  <p>سه پارامتر: <span class="m">c</span> = مرکز؛ <span class="m">a</span> = نیم‌پهنا: همیشه در <span class="m">x = c ± a</span> مقدار دقیقاً <span class="m">0.5</span> است (چون <span class="m">|±1|^(2b) = 1</span>)؛ <span class="m">b</span> = <span class="key">شیب دو طرف</span>: هرچه b بزرگ‌تر، دیواره‌ها عمودتر و سقف صاف‌تر (مثل شکل اسلاید ۹۰). نقش a، b، c را اسلاید نگفته؛ از MathWorks است.</p>
-
-  <h3>چندجمله‌ای‌ها: Z، S، Pi (اسلاید ۹۱–۹۲)</h3>
-  <ul>
-    <li><span class="m">zmf(x,[a b])</span>: منحنی نامتقارن «باز از سمت چپ» — یعنی سمت چپ مقدارش ۱ است و بین a و b نرم به ۰ می‌رسد.</li>
-    <li><span class="m">smf(x,[a b])</span>: قرینه آینه‌ای Z، «باز از سمت راست» — چپ ۰، بین a و b بالا می‌رود، راست ۱.</li>
-    <li><span class="m">pimf(x,[a b c d])</span>: در دو انتها ۰ و در وسط ۱؛ از a تا b بالا می‌رود، از b تا c برابر ۱، از c تا d پایین می‌آید (مثل ذوزنقهٔ نرم).</li>
-  </ul>
-  <div class="tip">اسلایدها برای Z/S/Pi فرمول نداده‌اند. نکته کلیدی (از MathWorks): S و Z از دو تکه سهمی ساخته می‌شوند و درست وسط، در <span class="m">x = (a+b)/2</span>، مقدارشان <span class="m">0.5</span> است. فرمول کامل smf چهار حالت دارد:<table class="t" style="direction:rtl;margin:4px auto"><tr><th>حالت</th><th>وقتی</th><th>فرمول</th></tr><tr><td>۱</td><td><span class="m" style="white-space:nowrap">x ≤ a</span></td><td><span class="m" style="white-space:nowrap">0</span></td></tr><tr><td>۲</td><td><span class="m" style="white-space:nowrap">a ≤ x ≤ (a+b)/2</span></td><td><span class="m" style="white-space:nowrap">2((x−a)/(b−a))²</span></td></tr><tr><td>۳</td><td><span class="m" style="white-space:nowrap">(a+b)/2 ≤ x ≤ b</span></td><td><span class="m" style="white-space:nowrap">1 − 2((x−b)/(b−a))²</span></td></tr><tr><td>۴</td><td><span class="m" style="white-space:nowrap">x ≥ b</span></td><td><span class="m" style="white-space:nowrap">1</span></td></tr></table>و <span class="m">zmf = 1 − smf</span> با همان a و b.</div>
-  <div class="given"><b>به زبان ساده:</b> اول ببین x در کدام ردیف جدول است، بعد فقط فرمول همان ردیف را حساب کن. نیمه اول منحنی آرام بالا می‌رود (ردیف ۲) و نیمه دوم آرام به ۱ می‌رسد (ردیف ۳).<br>مثال با <span class="m">a=0, b=10</span> (وسط = ۵): <span class="m">x=2.5</span> ردیف ۲ ← <span class="m">2·(2.5/10)² = 2·0.0625 = 0.125</span>. <span class="m">x=7.5</span> ردیف ۳ ← <span class="m">1 − 2·(−2.5/10)² = 1 − 0.125 = 0.875</span>. zmf همین نقطه‌ها: <span class="m">0.875</span> و <span class="m">0.125</span>.</div>
-
-  <h3 id="sig">سیگموئید <span class="en">(Sigmoid function)</span> (اسلاید ۹۳)</h3>
-  <p>تابعی حقیقی، <b>یکنوا</b> <span class="en">(monotonic)</span> (فقط بالا می‌رود)، <b>کران‌دار</b> (بین ۰ و ۱ می‌ماند) و مشتق‌پذیر که برای همه اعداد حقیقی تعریف شده و مشتقش همه‌جا نامنفی است.</p>
-  <div class="mb">S(x) = 1/(1 + e^(−x)) = e^x/(e^x + 1) = 1 − S(−x)          S(0) = 0.5</div>
-  <div class="given"><b>به زبان ساده:</b> «<span class="m">e^(−x)</span> را حساب کن، یکی به آن اضافه کن، و ۱ را بر حاصل تقسیم کن». سه شکل نوشته‌شده یک چیزند؛ اولی را به کار ببر.<br>• x خیلی بزرگ ← <span class="m">e^(−x)</span> تقریباً صفر ← <span class="m">S ≈ 1/1 = 1</span>. x خیلی منفی ← <span class="m">e^(−x)</span> خیلی بزرگ ← <span class="m">S ≈ 0</span>. در <span class="m">x=0 → 1/(1+1) = 0.5</span>.<br>• <span class="m">1 − S(−x)</span> یعنی منحنی دور نقطه وسط قرینه است: مقدار در −x و +x با هم ۱ می‌شوند.<br>مثال: <span class="m">x=2 → e^(−2) ≈ 0.135 → 1/1.135 ≈ 0.881</span>. و <span class="m">S(−2) = 1 − 0.881 = 0.119</span>.</div>
-  <div class="trap"><b>دام ۳ — اسلاید بدون پارامتر است:</b> اسلاید ۹۳ فقط شکل پایه <span class="m">S(x)</span> را می‌دهد و نام دستور متلب را نمی‌گوید. در متلب دستور <span class="m">sigmf(x,[a c])</span> است با فرمول <span class="m">1/(1+e^(−a(x−c)))</span>: <span class="m">c</span> نقطه‌ای است که <span class="m">μ = 0.5</span>، و <span class="m">a</span> شیب است (a مثبت: باز از راست/بالارونده، a منفی: باز از چپ/پایین‌رونده). S(x) اسلاید همان <span class="m">sigmf(x,[1 0])</span> است.</div>
-
-  <h3>چرا گاوسی و زنگوله‌ای محبوب‌اند؟ (اسلاید ۹۴)</h3>
-  <p>به دلیل <b>هموار بودن</b>، روش‌های مرسوم تعیین مجموعه فازی هستند. مزیتشان: <span class="key">هموار (یکنواخت) بودن و غیرصفر بودن در تمام نقاط</span> — یعنی برخلاف مثلث، هیچ جا دقیقاً صفر نمی‌شوند.</p>
-  <div class="tip">کمبودشان (اسلاید نگفته؛ مستندات MathWorks): با وجود همواری <b>نمی‌توانند نامتقارن باشند</b> — دو طرف قله همیشه آینه هم است. برای شکل‌های نامتقارن سراغ سیگموئید (باز از یک طرف) یا گاوسی دوطرفه می‌رویم.</div>
-</div></section>
-
-<!-- ===== 2. SEE IT ===== -->
-<section class="sec"><p class="lab">۲. ببین چه اتفاقی می‌افتد</p>
-<div class="card">
-  <p>یک شکل انتخاب کن، پارامترهایش را تغییر بده و x را حرکت بده. زیر نمودار، فرمول با عددها پر می‌شود.</p>
-  <div class="shapes" id="shapes" role="group" aria-label="shape"></div>
-  <svg id="plot" viewBox="0 0 560 250" role="img" aria-labelledby="plot-t">
-    <title id="plot-t">نمودار تابع عضویت انتخاب‌شده روی بازه ۰ تا ۱۰ با نقطه x و مقدار μ(x)</title>
-    <g id="grid"></g>
-    <line id="half" stroke="var(--c4)" stroke-dasharray="2 4" stroke-width="1.2"></line>
-    <path id="curve" fill="none" stroke="var(--c1)" stroke-width="2.5"></path>
-    <line id="vx" stroke="var(--c2)" stroke-dasharray="4 3" stroke-width="1.5"></line>
-    <line id="hx" stroke="var(--c2)" stroke-dasharray="4 3" stroke-width="1.5"></line>
-    <circle id="pt" r="6" fill="var(--c2)"></circle>
-    <text id="mulab" font-size="13" style="fill:var(--c2)"></text>
-  </svg>
-  <p style="font-size:13px;color:var(--text-2);margin:0">خط‌چین صورتی = سطح <span class="m">μ = 0.5</span></p>
-  <div class="ctl" id="ctl"></div>
-  <div class="ctl"><label for="s-x">x</label><input type="range" id="s-x" min="0" max="10" step="0.1" value="7"><output id="o-x"></output></div>
-  <div class="mb" id="cmd"></div>
-  <div class="mb" id="readout" aria-live="polite"></div>
-  <p id="note" style="font-size:14px;color:var(--text-2)"></p>
-</div></section>
-
-<!-- ===== 3. WORKED EXAMPLE ===== -->
-<section class="sec"><p class="lab">۳. مثال حل‌شده، قدم به قدم (اسلاید ۸۸، ۹۰ و ۹۳)</p>
-<div class="card stepper">
-  <div class="mb pre">c=5;
-sigma=2
-x= 0:0.1:10;
-y = gaussmf(x,[sigma c]);</div>
-  <div class="st">قدم ۱ — پارامترها (اسلاید ۸۸): <span class="m">gaussmf(x,[2 5])</span> یعنی <span class="m">σ = 2</span> و <span class="m">c = 5</span>. پس <span class="m">2σ² = 2·4 = 8</span>.</div>
-  <div class="st">قدم ۲ — <span class="m">x = 7</span>: <span class="m">(7−5)² = 4</span>، پس <span class="m">μ = e^(−4/8) = e^(−0.5) ≈ 0.607</span>.</div>
-  <div class="st">قدم ۳ — <span class="m">x = 3</span>: <span class="m">(3−5)² = 4</span>، همان عدد: <span class="m">μ ≈ 0.607</span>. گاوسی متقارن است. و <span class="m">x = 0</span>: <span class="m">e^(−25/8) = e^(−3.125) ≈ 0.044</span> — دقیقاً همان مقدار کوچکی که نمودار اسلاید ۸۸ در لبه‌ها نشان می‌دهد (صفر نمی‌شود!).</div>
-  <div class="st">قدم ۴ — زنگوله‌ای <span class="m">gbellmf(x,[2 4 6])</span> در <span class="m">x = 8</span>: <span class="m">|(8−6)/2| = 1</span>، و <span class="m">1^(2·4) = 1</span>، پس <span class="m">μ = 1/(1+1) = 0.5</span>. (در <span class="m">c ± a</span> همیشه ۰٫۵.)</div>
-  <div class="st">قدم ۵ — همان تابع در <span class="m">x = 7</span>: <span class="m">|0.5|^8 ≈ 0.0039</span>، پس <span class="m">μ = 1/1.0039 ≈ 0.996</span>. با b=4 سقف تقریباً صاف است.</div>
-  <div class="st">قدم ۶ — سیگموئید اسلاید ۹۳: <span class="m">S(0) = 1/(1+e⁰) = 1/2 = 0.5</span>؛ <span class="m">S(2) = 1/(1+e^(−2)) = 1/(1+0.135) ≈ 0.881</span>؛ و با اتحاد <span class="m">S(−2) = 1 − S(2) ≈ 0.119</span>.</div>
-  <div class="row" style="margin-top:8px"><button class="next" type="button">قدم بعدی</button><button class="all" type="button">نمایش همه</button></div>
-</div></section>
-
-<!-- ===== 4. PRACTICE ===== -->
-<section class="sec"><p class="lab">۴. نوبت توست</p>
-<div class="card">
-  <p style="font-size:14px;color:var(--text-2)">ماشین‌حساب مجاز است. جواب تا دو رقم اعشار کافی است (خطای ۰٫۰۱ قبول است).</p>
-
-  <div class="q practice" data-hint="σ=2، c=5، پس μ = e^(−(x−5)²/8). مثلاً x=9: (9−5)²=16، 16/8=2، e^(−2)." data-yes="عالی! دیدی که در x=0 هنوز μ صفر نیست — همان «غیرصفر در همه نقاط» اسلاید ۹۴.">
-    <p><b>سؤال ۱ (گاوسی اسلاید ۸۸).</b> برای <span class="m">gaussmf(x,[2 5])</span> مقدار μ را حساب کن.</p>
-    <div class="given"><b>اسلاید ۸۸ چه می‌گوید؟</b> دستور متلب <span class="m">gaussmf(x,[σ c])</span> است: اول پهنا <span class="m">σ</span>، بعد مرکز <span class="m">c</span>. فرمول: <span class="m">μ(x) = e^(−(x−c)² / (2σ²))</span>. <a href="#gauss">↑ بخش ۱، «گاوسی»</a></div>
-    <table class="t"><tr><th>x</th><th>5</th><th>6</th><th>7</th><th>9</th><th>0</th></tr>
-      <tr><th>μ(x)</th><td><input type="text" data-k="1" data-tol="0.01" aria-label="mu at 5"></td><td><input type="text" data-k="0.8825" data-tol="0.01" aria-label="mu at 6"></td><td><input type="text" data-k="0.6065" data-tol="0.01" aria-label="mu at 7"></td><td><input type="text" data-k="0.1353" data-tol="0.01" aria-label="mu at 9"></td><td><input type="text" data-k="0.0439" data-tol="0.01" aria-label="mu at 0"></td></tr></table>
-    <button class="check" type="button">بررسی</button>
-    <details class="sol"><summary>راه‌حل</summary>
-      <p>σ=2 و c=5، پس <span class="m">μ(x) = e^(−(x−5)²/8)</span>. اول توان را حساب کن، بعد e را:</p><div class="mb pre">x=5: (5−5)²/8 = 0       →  e^0      = 1
-x=6: (6−5)²/8 = 0.125   →  e^−0.125 ≈ 0.8825
-x=7: (7−5)²/8 = 0.5     →  e^−0.5   ≈ 0.6065
-x=9: (9−5)²/8 = 2       →  e^−2     ≈ 0.1353
-x=0: (0−5)²/8 = 3.125   →  e^−3.125 ≈ 0.0439</div>
-    </details><div class="fb"></div>
-  </div>
-
-  <div class="q practice" data-hint="a=2، b=2، c=6، پس توان 2b = 4: μ = 1/(1+|(x−6)/2|⁴). مثلاً x=9: |3/2|⁴ = 5.0625." data-yes="عالی! دقت کن x=4 و x=8 هر دو 0.5 شدند: همان c ± a.">
-    <p><b>سؤال ۲ (زنگوله‌ای).</b> برای <span class="m">gbellmf(x,[2 2 6])</span> مقدار μ را حساب کن.</p>
-    <table class="t"><tr><th>x</th><th>6</th><th>8</th><th>4</th><th>9</th><th>10</th></tr>
-      <tr><th>μ(x)</th><td><input type="text" data-k="1" data-tol="0.01" aria-label="mu at 6"></td><td><input type="text" data-k="0.5" data-tol="0.01" aria-label="mu at 8"></td><td><input type="text" data-k="0.5" data-tol="0.01" aria-label="mu at 4"></td><td><input type="text" data-k="0.1649" data-tol="0.01" aria-label="mu at 9"></td><td><input type="text" data-k="0.0588" data-tol="0.01" aria-label="mu at 10"></td></tr></table>
-    <button class="check" type="button">بررسی</button>
-    <details class="sol"><summary>راه‌حل</summary>
-      <p>a=2، b=2، c=6، پس <span class="m">μ = 1/(1 + |(x−6)/2|⁴)</span>:</p><div class="mb pre">x=6:  |0|⁴   = 0        →  1/1      = 1
-x=8:  |1|⁴   = 1        →  1/2      = 0.5
-x=4:  |−1|⁴  = 1        →  1/2      = 0.5
-x=9:  |1.5|⁴ = 5.0625   →  1/6.0625 ≈ 0.1649
-x=10: |2|⁴   = 16       →  1/17     ≈ 0.0588</div>
-    </details><div class="fb"></div>
-  </div>
-
-  <div class="q practice" data-hint="e^(−2) ≈ 0.1353 و e^(2) ≈ 7.389. برای sigmf(x,[2 4]) توان برابر −2·(x−4) است. از S(−x) = 1 − S(x) هم کمک بگیر." data-yes="عالی! sigmf در x=c همیشه 0.5 است، درست مثل S(0) = 0.5.">
-    <p><b>سؤال ۳ (سیگموئید).</b> اول سیگموئید پایه اسلاید ۹۳، <span class="m">S(x) = 1/(1+e^(−x))</span>، بعد نسخه متلب <span class="m">sigmf(x,[2 4]) = 1/(1+e^(−2(x−4)))</span>.</p>
-    <div class="given"><b>اسلاید ۹۳ چه می‌گوید؟</b> فقط شکل پایه <span class="m">S(x)</span> را می‌دهد که فرمولش در صورت سؤال آمده. دستور <span class="m">sigmf</span> متلب در اسلاید نیست؛ فرمولش را هم در سؤال نوشته‌ایم. <a href="#sig">↑ بخش ۱، «سیگموئید»</a></div>
-    <table class="t"><tr><th>S(0)</th><th>S(2)</th><th>S(−2)</th><th>sigmf(4,[2 4])</th><th>sigmf(5,[2 4])</th></tr>
-      <tr><td><input type="text" data-k="0.5" data-tol="0.01" aria-label="S0"></td><td><input type="text" data-k="0.8808" data-tol="0.01" aria-label="S2"></td><td><input type="text" data-k="0.1192" data-tol="0.01" aria-label="S-2"></td><td><input type="text" data-k="0.5" data-tol="0.01" aria-label="sigmf 4"></td><td><input type="text" data-k="0.8808" data-tol="0.01" aria-label="sigmf 5"></td></tr></table>
-    <button class="check" type="button">بررسی</button>
-    <details class="sol"><summary>راه‌حل</summary>
-      <div class="mb pre">S(0)  = 1/(1 + e^0)       = 1/2      = 0.5
-S(2)  = 1/(1 + e^−2)      = 1/1.1353 ≈ 0.8808
-S(−2) = 1 − S(2)          ≈ 0.1192
-sigmf(4,[2 4]) = 1/(1 + e^(−2·0)) = 0.5
-sigmf(5,[2 4]) = 1/(1 + e^(−2·1)) = S(2) ≈ 0.8808</div><p><b>نکته:</b> sigmf در <span class="m">x = c</span> همیشه 0.5 است.</p>
-    </details><div class="fb"></div>
-  </div>
-
-  <div class="q mcq" data-yes="درست! در متلب اول sigma و بعد c می‌آید: σ = 2 و مرکز c = 5." data-no="نه. ترتیب در gaussmf(x,[sigma c]) است — اول sigma. اسلاید ۸۸: c=5 و sigma=2.">
-    <p><b>سؤال ۴.</b> در دستور <span class="m">gaussmf(x,[2 5])</span> کدام درست است؟</p>
-    <div class="opts">
-      <button type="button" data-ok><span class="m">σ = 2 , c = 5</span></button>
-      <button type="button"><span class="m">σ = 5 , c = 2</span></button>
-      <button type="button"><span class="m">σ = 2 , c = 2</span></button>
-      <button type="button"><span class="m">σ = 5 , c = 5</span></button>
-    </div><div class="fb"></div>
-  </div>
-
-  <div class="q mcq" data-yes="درست! b شیب دیواره‌ها را تعیین می‌کند؛ b بزرگ‌تر = دیواره تندتر و سقف صاف‌تر. c مرکز است و a نیم‌پهنا." data-no="نه. در gbellmf(x,[a b c])، c مرکز است و a نیم‌پهنا (در c±a همیشه μ=0.5). پارامتر b چیز دیگری را کنترل می‌کند.">
-    <p><b>سؤال ۵.</b> در زنگوله‌ای <span class="m">gbellmf(x,[a b c])</span>، پارامتر <span class="m">b</span> چه چیزی را کنترل می‌کند؟</p>
-    <div class="opts">
-      <button type="button">مکان مرکز منحنی</button>
-      <button type="button">ارتفاع قله منحنی</button>
-      <button type="button">پهنای کل منحنی</button>
-      <button type="button" data-ok>شیب دیواره‌های منحنی</button>
-    </div><div class="fb"></div>
-  </div>
-
-  <div class="q mcq" data-yes="درست! وقتی x = c، توان e صفر است: 1/(1+1) = 0.5." data-no="نه. در sigmf(x,[a c]) = 1/(1+e^(−a(x−c))) به ازای x = c توان e صفر می‌شود و μ = 1/2.">
-    <p><b>سؤال ۶.</b> سیگموئید متلب <span class="m">sigmf(x,[a c])</span> در کجا مقدار <span class="m">0.5</span> دارد؟</p>
-    <div class="opts">
-      <button type="button"><span class="m">x = a</span></button>
-      <button type="button" data-ok><span class="m">x = c</span></button>
-      <button type="button"><span class="m">x = 0</span></button>
-      <button type="button"><span class="m">x = 1</span></button>
-    </div><div class="fb"></div>
-  </div>
-
-  <div class="q mcq" data-yes="درست! اسلاید ۸۹: فقط اگر c1 < c2 باشد تابع به ۱ می‌رسد. اینجا c1=6 > c2=4، پس بیشینه کمتر از ۱ است (در واقع حدود 0.37)." data-no="نه. اسلاید ۸۹: اگر c1 < c2 بیشینه ۱ است، وگرنه کمتر از ۱. اینجا c1=6 و c2=4.">
-    <p><b>سؤال ۷.</b> بیشینه <span class="m">gauss2mf(x,[1 6 1 4])</span> چقدر است؟ (یادت باشد ترتیب: <span class="m">[sig1 c1 sig2 c2]</span>)</p>
-    <div class="opts">
-      <button type="button">برابر با ۱</button>
-      <button type="button">بیشتر از ۱</button>
-      <button type="button" data-ok>کمتر از ۱</button>
-      <button type="button">برابر با ۰</button>
-    </div><div class="fb"></div>
-  </div>
-
-  <div class="q practice" data-tol="0" data-hint="نام‌ها را با فهرست پارامترها جفت کن: gaussmf [sigma c]، gauss2mf [sig1 c1 sig2 c2]، gbellmf [a b c]، zmf [a b]، pimf [a b c d]، trapmf [a b c d]." data-yes="عالی! نام شکل ↔ دستور ↔ تعداد پارامتر را بلدی.">
-    <p><b>سؤال ۸ (جور کردن).</b> هر دستور متلب چند پارامتر در کروشه می‌گیرد؟</p>
-    <table class="t"><tr><th>گاوسی gaussmf</th><th>گاوسی دوطرفه gauss2mf</th><th>زنگوله‌ای gbellmf</th><th>Z: zmf</th><th>Pi: pimf</th><th>ذوزنقه trapmf</th></tr>
-      <tr><td><input type="text" data-k="2" data-tol="0" aria-label="gaussmf"></td><td><input type="text" data-k="4" data-tol="0" aria-label="gauss2mf"></td><td><input type="text" data-k="3" data-tol="0" aria-label="gbellmf"></td><td><input type="text" data-k="2" data-tol="0" aria-label="zmf"></td><td><input type="text" data-k="4" data-tol="0" aria-label="pimf"></td><td><input type="text" data-k="4" data-tol="0" aria-label="trapmf"></td></tr></table>
-    <button class="check" type="button">بررسی</button>
-    <details class="sol"><summary>راه‌حل</summary>
-      <p>تعداد اسم‌های داخل کروشه را بشمار:</p><div class="mb pre">gaussmf   [sigma c]            → 2
-gauss2mf  [sig1 c1 sig2 c2]    → 4
-gbellmf   [a b c]              → 3
-zmf       [a b]                → 2
-pimf      [a b c d]            → 4
-trapmf    [a b c d]            → 4</div>
-    </details><div class="fb"></div>
-  </div>
-
-  <div class="q mcq" data-yes="درست! S درست وسط بازه، در (2+8)/2 = 5، از نیمه رد می‌شود: μ = 0.5." data-no="نه. smf از a=2 تا b=8 از ۰ به ۱ می‌رسد و درست وسط، یعنی x = (a+b)/2 = 5، مقدارش 0.5 است.">
-    <p><b>سؤال ۹.</b> مقدار <span class="m">smf(5,[2 8])</span> چقدر است؟</p>
-    <div class="opts">
-      <button type="button"><span class="m">0.0</span></button>
-      <button type="button"><span class="m">0.2</span></button>
-      <button type="button"><span class="m">1.0</span></button>
-      <button type="button" data-ok><span class="m">0.5</span></button>
-    </div><div class="fb"></div>
-  </div>
-
-  <div class="q mcq" data-yes="درست! گاوسی و زنگوله‌ای همیشه نسبت به c متقارن‌اند. برای شکل نامتقارن از سیگموئید یا gauss2mf استفاده می‌شود." data-no="نه. هر دو به ۱ می‌رسند، همه‌جا مشتق‌پذیرند و (اسلاید ۹۴) همه‌جا غیرصفرند. کمبودشان چیز دیگری است: به قرینگی دو طرف قله فکر کن.">
-    <p><b>سؤال ۱۰.</b> گاوسی <span class="m">gaussmf</span> و زنگوله‌ای <span class="m">gbellmf</span> با وجود هموار بودن، کدام کار را <b>نمی‌توانند</b> بکنند؟</p>
-    <div class="opts">
-      <button type="button">در قله به مقدار ۱ برسند</button>
-      <button type="button" data-ok>شکل نامتقارن داشته باشند</button>
-      <button type="button">در همه‌جا مشتق‌پذیر باشند</button>
-      <button type="button">در همه نقاط غیرصفر باشند</button>
-    </div><div class="fb"></div>
-  </div>
-
-  <div class="q practice" data-hint="مثلث: 7 بین b=5 و c=9 است، پس (9−7)/(9−5). گاوسی: e^(−(7−5)²/8). AND = min، OR = max (درس ۴)." data-yes="عالی! مرور درس ۹ و ۴ هم انجام شد.">
-    <p><b>سؤال ۱۱ (مرور درس ۹ و ۴).</b> دو مجموعه فازی روی یک محور: <span class="m">A = trimf(x,[2 5 9])</span> و <span class="m">B = gaussmf(x,[2 5])</span>. در <span class="m">x = 7</span>:</p>
-    <table class="t"><tr><th>μ_A(7)</th><th>μ_B(7)</th><th>μ_A∩B(7)</th><th>μ_A∪B(7)</th></tr>
-      <tr><td><input type="text" data-k="0.5" data-tol="0.01" aria-label="A"></td><td><input type="text" data-k="0.6065" data-tol="0.01" aria-label="B"></td><td><input type="text" data-k="0.5" data-tol="0.01" aria-label="A and B"></td><td><input type="text" data-k="0.6065" data-tol="0.01" aria-label="A or B"></td></tr></table>
-    <button class="check" type="button">بررسی</button>
-    <details class="sol"><summary>راه‌حل</summary>
-      <div class="mb pre">μ_A(7) = (9 − 7)/(9 − 5) = 2/4 = 0.5     (falling side of the triangle)
-μ_B(7) = e^(−(7−5)²/8) = e^−0.5 ≈ 0.6065
-A∩B = min(0.5, 0.6065) = 0.5
-A∪B = max(0.5, 0.6065) ≈ 0.6065</div>
-    </details><div class="fb"></div>
-  </div>
-</div></section>
-
-<!-- ===== 5. SUMMARY ===== -->
-<section class="sec"><p class="lab">۵. جمع‌بندی — همین را به خاطر بسپار</p>
-<div class="soft"><ul>
-  <li>گاوسی: <span class="m">e^(−(x−c)²/(2σ²))</span>، متلب <span class="m">gaussmf(x,[sigma c])</span> — اول sigma! مثال اسلاید: <span class="m">[2 5]</span>.</li>
-  <li>گاوسی دوطرفه: <span class="m">gauss2mf(x,[sig1 c1 sig2 c2])</span>؛ چپ با (σ1,c1)، راست با (σ2,c2)؛ اگر <span class="m">c1 &lt; c2</span> بیشینه ۱، وگرنه کمتر از ۱.</li>
-  <li>زنگوله‌ای: <span class="m">1/(1+|(x−c)/a|^(2b))</span>، متلب <span class="m">gbellmf(x,[a b c])</span>؛ c مرکز، a نیم‌پهنا (μ(c±a)=0.5)، b شیب.</li>
-  <li>چندجمله‌ای: <span class="m">zmf(x,[a b])</span> باز از چپ، <span class="m">smf(x,[a b])</span> باز از راست، <span class="m">pimf(x,[a b c d])</span> دو سر ۰ و وسط ۱. وسط بازه S و Z: <span class="m">μ = 0.5</span>.</li>
-  <li>سیگموئید: <span class="m">S(x) = 1/(1+e^(−x)) = 1 − S(−x)</span>؛ یکنوا، کران‌دار، مشتق‌پذیر؛ <span class="m">S(0)=0.5</span>. متلب: <span class="m">sigmf(x,[a c])</span>، در x=c مقدار 0.5.</li>
-  <li>اسلاید ۹۴: گاوسی و زنگوله‌ای چون هموارند مرسوم‌اند؛ مزیت: هموار و همه‌جا غیرصفر. کمبود (MathWorks): نامتقارن نمی‌شوند.</li>
-  <li>۱۱ تابع عضویت متلب: <span class="m" style="white-space:normal">trimf, trapmf, gaussmf, gauss2mf, gbellmf, sigmf, dsigmf, psigmf, zmf, smf, pimf</span> (dsigmf و psigmf — تفاضل و حاصل‌ضرب دو سیگموئید — در اسلایدها نیامده‌اند).</li>
-</ul></div></section>
-
-<!-- ===== 6. SOURCE + ASK ===== -->
-<section class="sec"><p class="lab">منبع اصلی</p>
-<p>جزوه درس، اسلایدهای ۸۷ تا ۹۴ (فصل ۳) · <a href="https://www.mathworks.com/help/fuzzy/membership-functions.html">MathWorks Fuzzy Logic Toolbox — Membership Functions</a> (فرمول‌های gauss2mf، smf/zmf، sigmf و نقش پارامترهای gbellmf)</p>
-<p><a href="../reference/cheatsheet.html">برگه فرمول‌ها</a> · <a href="../reference/glossary.html">واژه‌نامه</a></p>
-</section>
-
-<div class="nav"><a href="0009-triangle-trapezoid.html">← درس قبل: توابع عضویت مثلثی و ذوزنقه‌ای</a><a href="0011-mock-exam.html">درس بعد: آزمون جامع فصل ۱ تا ۳ →</a></div>
-</main>
-
+<main id="app"></main>
+<script src="../assets/teacher.js"></script>
+<script src="../assets/graph.js"></script>
 <script>
-/* ===== SHARED JS — copy verbatim into every lesson ===== */
-(function(){
-function norm(s){return s.trim().replace(/[۰-۹]/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)}).replace(/[٠-٩]/g,function(d){return '٠١٢٣٤٥٦٧٨٩'.indexOf(d)}).replace(/[٫,]/g,'.').replace(/\s+/g,'')}
-function val(s){s=norm(s);if(/^-?\d*\.?\d+\/-?\d*\.?\d+$/.test(s)){var p=s.split('/');return +p[0]/+p[1]}return s===''?NaN:+s}
-document.querySelectorAll('.practice').forEach(function(q){
-  var ins=q.querySelectorAll('input[data-k]'),fb=q.querySelector('.fb'),btn=q.querySelector('.check');
-  ins.forEach(function(i){i.addEventListener('input',function(){i.parentNode.classList.remove('ok','no');fb.textContent='';fb.className='fb'})});
-  btn.addEventListener('click',function(){
-    var empty=0,ok=0;
-    ins.forEach(function(i){var c=i.parentNode;c.classList.remove('ok','no');if(!i.value.trim()){empty++;return}
-      var v=val(i.value),k=+i.dataset.k,tol=i.dataset.tol?+i.dataset.tol:0.01;
-      if(!isNaN(v)&&Math.abs(v-k)<=tol+1e-9){ok++;c.classList.add('ok')}else c.classList.add('no')});
-    if(empty){fb.className='fb bad';fb.textContent='اول همه خانه‌ها را پر کن ('+empty+' خانه خالی است).';return}
-    if(ok===ins.length){fb.className='fb good';fb.textContent=q.dataset.yes||('عالی! همه '+ins.length+' جواب درست است.')}
-    else{fb.className='fb bad';fb.textContent=ok+' از '+ins.length+' درست. '+(q.dataset.hint||'خانه‌های قرمز را دوباره حساب کن.')}
-  });
+// Lesson 10 — slides 87–94 (Part 3: membership function shapes — gaussmf, gauss2mf, gbellmf, zmf/smf/pimf, sigmoid).
+// Explanations are Persian; numbers, math and technical terms stay in English.
+// Formulas not on the slides (gauss2mf pieces, smf/zmf, sigmf, roles of a/b/c in gbellmf) are from the MathWorks docs.
+
+const all = list => Promise.all(list);
+const LTR = s => `⁦${s}⁩`; // keeps a left-to-right run intact inside Persian board text
+const r = (v, d = 3) => String(+v.toFixed(d));
+
+// MATLAB membership functions.
+const gauss = (s, c) => x => Math.exp(-((x - c) ** 2) / (2 * s * s));
+const pdf = (s, c) => x => gauss(s, c)(x) / (Math.sqrt(2 * Math.PI) * s); // slide 87's second formula (probability density)
+const gauss2 = (s1, c1, s2, c2) => x => (x <= c1 ? gauss(s1, c1)(x) : 1) * (x >= c2 ? gauss(s2, c2)(x) : 1);
+const bell = (a, bb, c) => x => 1 / (1 + Math.abs((x - c) / a) ** (2 * bb));
+const sig = (a, c) => x => 1 / (1 + Math.exp(-a * (x - c)));
+const smf = (a, b) => x => (x <= a ? 0 : x >= b ? 1 : x <= (a + b) / 2 ? 2 * ((x - a) / (b - a)) ** 2 : 1 - 2 * ((x - b) / (b - a)) ** 2);
+const zmf = (a, b) => x => 1 - smf(a, b)(x);
+const pimf = (a, b, c, d) => x => smf(a, b)(x) * zmf(c, d)(x);
+const S = sig(1, 0); // slide 93's S(x)
+
+// Big graph on the left, working in the right column (x 600–960).
+const GL = (from = 0, to = 10) => Graph({ x: 110, y: 120, w: 420, h: 270, from, to });
+
+// A chain of operations: items at xs, arrows between given gaps, captions below.
+async function chain(b, id, y, items, xs, gaps, caps) {
+  for (const [k, it] of items.entries()) {
+    await b.write(`${id}${k}`, xs[k], y, it, { size: 30, color: k === items.length - 1 ? 'green' : 'ink', dur: 350 });
+    await b.write(`${id}c${k}`, xs[k], y + 48, caps[k], { size: 20, color: 'soft', fa: true, dur: 200 });
+    if (k < items.length - 1) await b.arrow(`${id}a${k}`, gaps[k][0], y - 10, gaps[k][1], y - 10, { color: 'orange', head: 10, dur: 250 });
+  }
+}
+
+const QN = 6;
+function quizBoard(n, question, o = {}) {
+  return async b => {
+    await b.clear();
+    await b.write('q-n', 500, 52, `سؤال ${n} از ${QN}`, { size: 22, color: 'soft', fa: true });
+    await b.write('q-q', 500, 110, question, { size: 32, ...o });
+  };
+}
+const GQ = (from = 0, to = 10) => Graph({ x: 120, y: 200, w: 440, h: 250, from, to });
+
+Teacher.start({
+  id: 'L10',
+  number: 10,
+  title: 'گاوسی، زنگوله‌ای، سیگموئید و چندجمله‌ای',
+  chapter: 'بخش 3 · شکل توابع عضویت',
+  slides: '87–94',
+  intro: 'توابع عضویت هموار: هر پارامتر شکل را چطور عوض می‌کند و μ(x) را با ماشین‌حساب چطور حساب کنیم.',
+  next: { href: '0011-mock-exam.html', title: 'آزمون جامع بخش 1 تا 3' },
+  steps: [
+    // ---------------------------------------------------------- 1. intro: corners vs smooth
+    {
+      say: 'در درس 9 مثلث و ذوزنقه دیدیم که *گوشه‌ی تیز* دارند: شیب یک‌باره عوض می‌شود. این درس توابع *هموار* یا smooth است: منحنی نرم، بدون شکستگی. به ترتیب اسلایدها: گاوسی، گاوسی دوطرفه، زنگوله‌ای، چندجمله‌ای‌های Z و S و Pi، و سیگموئید.',
+      term: ['smooth', 'هموار'],
+      draw: async b => {
+        await b.write('h', 500, 80, 'گوشه‌ی تیز در برابر منحنی هموار', { size: 40, color: 'orange', bold: true, fa: true });
+        const g = Graph({ x: 200, y: 200, w: 600, h: 240, from: 0, to: 10 });
+        await g.axes(b, 'ax', { yTicks: [0, 1] });
+        await g.poly(b, 'tri', [[0, 0], [2, 0], [5, 1], [8, 0], [10, 0]], { color: 'soft' });
+        await all([b.ring('k1', g.X(2), g.Y(0), 18, 18, { color: 'red' }), b.ring('k2', g.X(8), g.Y(0), 18, 18, { color: 'red' })]);
+        await b.write('kt', g.X(2), g.Y(0) + 45, 'گوشه‌ی تیز', { size: 22, color: 'red', fa: true });
+        await g.curve(b, 'gs', gauss(1.4, 5), { color: 'blue', width: 5 });
+        await b.write('st', g.X(7.6), g.Y(0.75), 'هموار', { size: 26, color: 'blue', bold: true, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 2. slide 87: Gaussian formula
+    {
+      say: 'شکل 3: *گاوسی* یا Gaussian، که از منحنی توزیع گاوسی ساخته می‌شود. دو پارامتر دارد: c یعنی میانگین، که جای قله است، و σ یعنی انحراف معیار یا sigma، که پهنای منحنی را تعیین می‌کند. فرمول اسلاید 87: f(x; σ, c) = e^{-(x-c)²/(2σ²)}.',
+      term: ['Gaussian — gaussmf', 'گاوسی'],
+      draw: async b => {
+        await b.clear();
+        await b.write('f', 500, 105, 'f(x; σ, c) = e^{-(x-c)²/(2σ²)}', { size: 46, bold: true });
+        const g = Graph({ x: 150, y: 200, w: 480, h: 230, from: 0, to: 10 });
+        await g.axes(b, 'ax', { yTicks: [0, 1] });
+        await g.curve(b, 'gs', gauss(2, 5), { color: 'blue' });
+        await b.line('cl', g.X(5), g.Y(1), g.X(5), g.Y(0), { color: 'purple', width: 2 });
+        await b.write('cx', g.X(5), g.Y(0) + 26, 'c', { size: 26, color: 'purple', bold: true });
+        await b.arrow('sa', g.X(5), g.Y(gauss(2, 5)(7)), g.X(7), g.Y(gauss(2, 5)(7)), { color: 'orange', head: 10 });
+        await b.write('st', g.X(6), g.Y(gauss(2, 5)(7)) - 10, 'σ', { size: 28, color: 'orange', bold: true });
+        await b.write('l1', 820, 270, 'c = میانگین ← جای قله', { size: 24, color: 'purple', fa: true });
+        await b.write('l2', 820, 330, 'σ = انحراف معیار ← پهنا', { size: 24, color: 'orange', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 3. reading the formula
+    {
+      say: 'فرمول را قدم‌به‌قدم بخوانیم: فاصله‌ی x از مرکز را حساب کن، به توان 2 برسان، تقسیم بر 2σ² کن، منفی‌اش کن، و e را به آن توان برسان. e فقط یک عدد ثابت است، حدود 2.718؛ روی ماشین‌حساب دکمه‌ی e^x را بزن. در خود مرکز فاصله صفر است، پس e^0 = 1: قله‌ی گاوسی *همیشه* 1 است. هرچه دورتر شوی، توان منفی‌تر و جواب کوچک‌تر.',
+      draw: async b => {
+        await b.erase(['ax*', 'gs', 'cl', 'cx', 'sa', 'st', 'l1', 'l2']);
+        await chain(b, 'ch', 230, ['x - c', '(x - c)²', '÷ 2σ²', '× (-1)', 'e^{…}'], [110, 300, 490, 680, 870],
+          [[158, 228], [372, 442], [538, 624], [736, 844]], ['فاصله از مرکز', 'به توان 2', 'تقسیم بر 2σ²', 'منفی کن', 'e به این توان']);
+        await b.write('pk', 500, 375, 'x = c   →   e^0 = 1', { size: 40, color: 'green', bold: true });
+        await b.write('pkf', 500, 430, 'قله همیشه 1 است · دورتر ← کوچک‌تر', { size: 26, fa: true });
+        await b.write('e', 500, 500, 'e ≈ 2.718', { size: 26, color: 'soft' });
+      },
+    },
+    // ---------------------------------------------------------- 4. slide 88: parameter order
+    {
+      say: 'مثال اسلاید 88 در متلب: c=5، sigma=2، و بعد gaussmf(x,[sigma c]). دقت کنید: در کروشه *اول sigma* می‌آید، *بعد* c. پس gaussmf(x,[2 5]) یعنی σ = 2 و مرکز c = 5، نه برعکس. این پرتکرارترین تله‌ی امتحان در این درس است.',
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        await b.box('cb', 50, 70, 420, 230, { color: 'soft' });
+        const code = ['c=5;', 'sigma=2', 'x= 0:0.1:10;', 'y = gaussmf(x,[sigma c]);', 'plot(x,y)', "xlabel('gaussmf, P=[2 5]')"];
+        for (const [k, l] of code.entries()) await b.write(`cb${k}`, 70, 105 + k * 37, l, { size: 22, anchor: 'start', dur: 220 });
+        await all([
+          b.write('br1', 650, 150, '[', { size: 64, color: 'soft' }), b.write('n2', 695, 150, '2', { size: 64, color: 'orange', bold: true }),
+          b.write('n5', 755, 150, '5', { size: 64, color: 'purple', bold: true }), b.write('br2', 800, 150, ']', { size: 64, color: 'soft' }),
+        ]);
+        await b.arrow('a2', 690, 170, 650, 225, { color: 'orange', head: 10 });
+        await b.write('s2', 630, 262, 'σ = 2', { size: 32, color: 'orange', bold: true });
+        await b.arrow('a5', 760, 170, 805, 225, { color: 'purple', head: 10 });
+        await b.write('c5', 825, 262, 'c = 5', { size: 32, color: 'purple', bold: true });
+        await b.write('trap', 725, 340, 'اول σ، بعد c', { size: 36, color: 'red', bold: true, fa: true });
+        await b.write('ne', 500, 440, 'gaussmf(x,[5 2])  ≠  gaussmf(x,[2 5])', { size: 30, color: 'red' });
+      },
+    },
+    // ---------------------------------------------------------- 5. slide 88 graph: x = 7 and x = 3
+    {
+      say: 'نمودار اسلاید 88 را بکشیم. 2σ² = 2 × 4 = 8. در x = 7: (7-5)² = 4، پس μ = e^{-4/8} = e^{-0.5} ≈ 0.607. در x = 3 هم (3-5)² = 4 است، پس دوباره 0.607. گاوسی دور مرکزش *متقارن* است.',
+      draw: async b => {
+        await b.clear();
+        const g = GL(), f = gauss(2, 5);
+        await g.axes(b, 'ax', { ticks: [0, 3, 5, 7, 10] });
+        await g.curve(b, 'gs', f, { color: 'blue' });
+        await b.write('r1', 780, 140, 'gaussmf(x,[2 5])', { size: 30, color: 'blue', bold: true });
+        await b.write('r2', 780, 195, '2σ² = 2 · 4 = 8', { size: 26 });
+        await g.guide(b, 'g7', 7, f(7));
+        await b.write('r3', 780, 255, 'x = 7:  (7 - 5)² = 4', { size: 24 });
+        await b.write('r4', 780, 305, 'μ = e^{-4/8} = e^{-0.5}', { size: 26 });
+        await b.write('r5', 780, 355, `≈ ${r(f(7))}`, { size: 32, color: 'green', bold: true });
+        await g.guide(b, 'g3', 3, f(3), { color: 'purple' });
+        await b.write('r6', 780, 420, `x = 3:  (3 - 5)² = 4  →  ${r(f(3))}`, { size: 20, color: 'purple' });
+        await b.write('r7', 780, 465, 'متقارن دور c', { size: 24, color: 'purple', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 6. x = 0: never zero
+    {
+      say: 'و x = 0، لبه‌ی نمودار: (0-5)² = 25، پس μ = e^{-25/8} = e^{-3.125} ≈ 0.044. خیلی کوچک است ولی *صفر نیست*؛ دقیقاً همان مقدار کوچکی که نمودار اسلاید 88 در دو لبه نشان می‌دهد. گاوسی هیچ‌جا دقیقاً صفر نمی‌شود.',
+      draw: async b => {
+        const g = GL(), f = gauss(2, 5);
+        await b.erase(['r3', 'r4', 'r5', 'r6', 'r7']);
+        await b.dim(['g7-*', 'g3-*'], 0.3);
+        await all([b.ring('e0', g.X(0), g.Y(f(0)), 16, 16, { color: 'red' }), b.ring('e10', g.X(10), g.Y(f(10)), 16, 16, { color: 'red' })]);
+        await b.write('r3', 780, 255, 'x = 0:  (0 - 5)² = 25', { size: 24 });
+        await b.write('r4', 780, 305, 'μ = e^{-25/8} = e^{-3.125}', { size: 26 });
+        await b.write('r5', 780, 355, `≈ ${r(f(0))}`, { size: 32, color: 'green', bold: true });
+        await b.write('r6', 780, 420, 'کوچک، ولی صفر نیست', { size: 28, color: 'red', bold: true, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 7. what sigma and c do
+    {
+      say: 'حالا پارامترها را تکان بدهیم. c را عوض کنی، کل منحنی سُر می‌خورد و قله جابه‌جا می‌شود. σ را عوض کنی، پهنا عوض می‌شود: σ = 1 باریک، σ = 2 متوسط، σ = 3 پهن؛ چون تقسیم بر عدد بزرگ‌تر یعنی جواب کندتر کم می‌شود. یک نکته‌ی جالب: در x = c ± σ مقدار همیشه e^{-0.5} ≈ 0.607 است، برای هر σ.',
+      draw: async b => {
+        await b.clear();
+        const g = GL();
+        await g.axes(b, 'ax', { ticks: [0, 2, 3, 4, 5, 6, 7, 8, 10] });
+        await b.line('h', g.X(0), g.Y(Math.exp(-0.5)), g.X(10), g.Y(Math.exp(-0.5)), { color: 'soft', width: 2 });
+        const L = [[1, 'orange', 'باریک'], [2, 'blue', 'متوسط'], [3, 'green', 'پهن']];
+        for (const [k, [s, color, word]] of L.entries()) {
+          const y = 165 + k * 55;
+          await g.curve(b, `c${s}`, gauss(s, 5), { color });
+          await all([b.dot(`dl${s}`, g.X(5 - s), g.Y(Math.exp(-0.5)), { color }), b.dot(`dr${s}`, g.X(5 + s), g.Y(Math.exp(-0.5)), { color })]);
+          await b.line(`lg${k}`, 610, y - 8, 650, y - 8, { color, width: 5, dur: 200 });
+          await b.write(`lg${k}t`, 665, y, `σ = ${s}`, { size: 26, color, anchor: 'start', dur: 200 });
+          await b.write(`lg${k}w`, 880, y, word, { size: 24, color, fa: true, dur: 200 });
+        }
+        await b.write('m', 780, 355, `μ(c ± σ) = e^{-0.5} ≈ ${r(Math.exp(-0.5))}`, { size: 24, color: 'purple' });
+        await b.write('mf', 780, 400, 'برای هر σ', { size: 22, color: 'purple', fa: true });
+        await b.write('cf', 780, 465, 'c ← کل منحنی را جابه‌جا می‌کند', { size: 22, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 8. slide 87 mistakes
+    {
+      say: 'دو اشکال در اسلاید 87. یک: کنار شکل فرمول دیگری هم آمده که ضریب 1/(√(2π)σ) دارد. این «چگالی احتمال» است، *نه* تابع عضویت: قله‌اش خود همین ضریب است، مثلاً برای σ = 2 حدود 0.199، نه 1. برای μ همیشه فرمول بدون ضریب را به کار ببر. دو: در متن اسلاید نام دستور guassmf تایپ شده؛ اشتباه تایپی است و درستش gaussmf است، همان که اسلاید 88 به کار می‌برد.',
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'دو اشکال در اسلاید 87 ⚠', { size: 34, color: 'red', bold: true, fa: true });
+        const g = Graph({ x: 110, y: 150, w: 420, h: 250, from: 0, to: 10 });
+        await g.axes(b, 'ax', { ticks: [0, 5, 10] });
+        await g.curve(b, 'gm', gauss(2, 5), { color: 'green' });
+        await g.curve(b, 'pd', pdf(2, 5), { color: 'red' });
+        await b.write('pk', g.X(5) + 30, g.Y(pdf(2, 5)(5)) - 10, r(pdf(2, 5)(5)), { size: 20, color: 'red', anchor: 'start' });
+        await b.write('ok', 780, 190, '✓  e^{-(x-c)²/(2σ²)}', { size: 28, color: 'green' });
+        await b.write('bad', 780, 250, '✗  1/(√(2π)σ) · e^{…}', { size: 28, color: 'red' });
+        await b.write('badf', 780, 295, 'چگالی احتمال است، نه تابع عضویت', { size: 20, color: 'soft', fa: true });
+        await b.write('badp', 780, 335, `قله برای ${LTR('σ = 2')}: ${LTR(r(pdf(2, 5)(5)))} ، نه 1`, { size: 22, color: 'red', fa: true });
+        await b.write('ty1', 700, 430, 'guassmf', { size: 30, color: 'red' });
+        await b.line('tyx', 642, 420, 758, 420, { color: 'red' });
+        await b.write('ty2', 870, 430, 'gaussmf ✓', { size: 30, color: 'green', bold: true });
+        await b.write('tyf', 780, 480, 'اشتباه تایپی اسلاید', { size: 20, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 9. slide 89: gauss2mf
+    {
+      say: 'گاوسی دوطرفه، اسلاید 89، با دستور gauss2mf(x,[sig1 c1 sig2 c2]). از دو گاوسی ساخته می‌شود: گاوسی اول با (σ_1, c_1) سمت چپ را می‌سازد و گاوسی دوم با (σ_2, c_2) سمت راست را. اگر c_1 < c_2 باشد، بین این دو یک سقف صاف با مقدار 1 دارد. اسلاید به جای σ علامت ∂ گذاشته؛ منظور همان σ است.',
+      term: ['two-sided Gaussian — gauss2mf', 'گاوسی دوطرفه'],
+      draw: async b => {
+        await b.clear();
+        const g = GL();
+        await g.axes(b, 'ax', { ticks: [0, 3, 6, 10] });
+        await g.curve(b, 'pl', gauss(1, 3), { color: 'orange', lo: 0, hi: 3, steps: 40, width: 5 });
+        await g.poly(b, 'pm', [[3, 1], [6, 1]], { color: 'purple', width: 5 });
+        await g.curve(b, 'pr', gauss(2, 6), { color: 'green', lo: 6, hi: 10, steps: 40, width: 5 });
+        await all([b.write('c1', g.X(3), g.Y(1) - 14, 'c_1', { size: 24, color: 'purple' }), b.write('c2', g.X(6), g.Y(1) - 14, 'c_2', { size: 24, color: 'purple' })]);
+        await b.write('r1', 780, 140, 'gauss2mf(x,[sig1 c1 sig2 c2])', { size: 20, color: 'blue', bold: true });
+        await b.write('r2', 780, 185, `مثال: ${LTR('[1 3 2 6]')}`, { size: 24, fa: true });
+        await b.write('r3', 780, 240, 'x ≤ 3:  e^{-(x-3)²/2}', { size: 24, color: 'orange' });
+        await b.write('r4', 780, 290, '3 ≤ x ≤ 6:  1', { size: 24, color: 'purple' });
+        await b.write('r5', 780, 340, 'x ≥ 6:  e^{-(x-6)²/8}', { size: 24, color: 'green' });
+        await b.write('r6', 780, 385, '∂ در اسلاید = σ', { size: 20, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 10. gauss2mf worked
+    {
+      say: 'سه نقطه از همین مثال. x = 2 سمت چپ c_1 است: (2-3)²/(2·1) = 0.5، پس e^{-0.5} ≈ 0.607. x = 4 بین 3 و 6 است، پس 1. x = 8 سمت راست c_2 است: (8-6)²/(2·4) = 0.5، باز 0.607. هر طرف پهنای خودش را دارد، پس شکل می‌تواند *نامتقارن* باشد. این فرمول تکه‌ای در اسلاید نیامده و از مستندات MathWorks است.',
+      draw: async b => {
+        const g = GL(), f = gauss2(1, 3, 2, 6);
+        await g.guide(b, 'g2', 2, f(2), { color: 'orange' });
+        await b.write('w1', 780, 435, `μ(2) = e^{-1/2} ≈ ${r(f(2))}`, { size: 22, color: 'orange' });
+        await g.guide(b, 'g4', 4, f(4), { color: 'purple' });
+        await b.write('w2', 780, 475, `μ(4) = ${r(f(4))}`, { size: 22, color: 'purple' });
+        await g.guide(b, 'g8', 8, f(8), { color: 'green' });
+        await b.write('w3', 780, 515, `μ(8) = e^{-4/8} ≈ ${r(f(8))}`, { size: 22, color: 'green' });
+      },
+    },
+    // ---------------------------------------------------------- 11. c1 > c2
+    {
+      say: 'اسلاید 89 یک جمله‌ی مهم دیگر هم دارد: اگر c_1 < c_2 *نباشد*، بیشینه‌ی تابع کمتر از 1 است. چرا؟ متلب دو تکه را در هم *ضرب* می‌کند. با gauss2mf(x,[1 6 1 4]) در x = 5 هر دو تکه e^{-0.5} هستند، پس حاصل e^{-0.5} × e^{-0.5} = e^{-1} ≈ 0.37. هیچ نقطه‌ای به 1 نمی‌رسد.',
+      draw: async b => {
+        await b.clear();
+        const g = GL(), f = gauss2(1, 6, 1, 4);
+        await g.axes(b, 'ax', { ticks: [0, 4, 5, 6, 10] });
+        await b.line('one', g.X(0), g.Y(1), g.X(10), g.Y(1), { color: 'soft', width: 2 });
+        await g.curve(b, 'p', f, { color: 'red', steps: 200 });
+        await g.guide(b, 'g5', 5, f(5), { color: 'purple' });
+        await b.write('r1', 780, 150, 'gauss2mf(x,[1 6 1 4])', { size: 24, color: 'blue', bold: true });
+        await b.write('r2', 780, 205, 'c_1 = 6  >  c_2 = 4', { size: 26, color: 'red' });
+        await b.write('r3', 780, 270, 'μ(5) = e^{-0.5} · e^{-0.5}', { size: 26 });
+        await b.write('r4', 780, 320, `= e^{-1} ≈ ${r(f(5), 2)}`, { size: 30, color: 'green', bold: true });
+        await b.write('r5', 780, 385, 'بیشینه کمتر از 1', { size: 28, color: 'red', bold: true, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 12. slide 90: gbellmf formula
+    {
+      say: 'شکل بعدی، اسلاید 90: *زنگوله‌ای* یا generalized bell، با دستور gbellmf(x,[a b c]). فرمول: 1/(1+|(x-c)/a|^{2b}). به زبان ساده: ببین x چند تا a از مرکز c دور است، قدرمطلقش را به توان 2b برسان، یکی اضافه کن، و 1 را بر حاصل تقسیم کن. در مرکز فاصله صفر است، پس 1/(1+0) = 1.',
+      term: ['generalized bell — gbellmf', 'زنگوله‌ای'],
+      draw: async b => {
+        await b.clear();
+        await b.write('f', 500, 100, 'f(x; a, b, c) = 1 / (1 + |(x - c)/a|^{2b})', { size: 40, bold: true });
+        await chain(b, 'ch', 230, ['(x - c)/a', '| … |', '( … )^{2b}', '1 + …', '1 / …'], [120, 300, 480, 660, 850],
+          [[202, 258], [342, 420], [540, 613], [707, 803]], ['چند تا a دوری؟', 'قدرمطلق', 'به توان 2b', 'یکی اضافه کن', '1 تقسیم بر آن']);
+        await b.write('pk', 500, 370, 'x = c   →   1/(1 + 0) = 1', { size: 38, color: 'green', bold: true });
+        await b.write('trap', 500, 450, `توان ${LTR('2b')} است، نه b`, { size: 30, color: 'red', bold: true, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 13. a is the half-width
+    {
+      say: 'نقش پارامترها را اسلاید نگفته؛ از MathWorks است. c مرکز است. a *نیم‌پهنا* است: در x = c ± a فاصله دقیقاً یک a است و |±1|^{2b} = 1، پس μ = 1/(1+1) = 0.5، برای هر b. مثال با a = 2، b = 1، c = 5: در x = 7 مقدار 0.5 است، و در x = 9 فاصله دو تا a است: 2² = 4، پس 1/5 = 0.2.',
+      draw: async b => {
+        await b.clear();
+        const g = GL(), f = bell(2, 1, 5);
+        await g.axes(b, 'ax', { ticks: [0, 3, 5, 7, 9, 10] });
+        await g.curve(b, 'bl', f, { color: 'blue' });
+        await b.write('r1', 780, 140, 'gbellmf(x,[2 1 5])', { size: 28, color: 'blue', bold: true });
+        await b.write('r2', 780, 190, 'a = 2,  b = 1,  c = 5', { size: 22 });
+        await all([g.guide(b, 'g7', 7, f(7), { color: 'purple' }), g.guide(b, 'g3', 3, f(3), { color: 'purple' })]);
+        await b.arrow('aa', g.X(5), g.Y(0) - 18, g.X(7) - 3, g.Y(0) - 18, { color: 'purple', head: 8 });
+        await b.write('at', g.X(6), g.Y(0) - 28, 'a', { size: 22, color: 'purple', bold: true });
+        await b.write('r3', 780, 250, 'x = 7:  |(7 - 5)/2|² = 1', { size: 22 });
+        await b.write('r4', 780, 290, `→ 1/(1 + 1) = ${r(f(7))}`, { size: 24, color: 'purple', bold: true });
+        await g.guide(b, 'g9', 9, f(9), { color: 'orange' });
+        await b.write('r5', 780, 350, 'x = 9:  |(9 - 5)/2|² = 4', { size: 22 });
+        await b.write('r6', 780, 390, `→ 1/(1 + 4) = ${r(f(9))}`, { size: 24, color: 'orange', bold: true });
+        await b.write('r7', 780, 460, `در ${LTR('c ± a')} همیشه ${LTR('0.5')}`, { size: 26, color: 'purple', bold: true, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 14. b is the steepness
+    {
+      say: 'و b *شیب دیواره‌ها* است. با a = 2 و c = 5 سه منحنی می‌کشیم: b = 1، b = 2 و b = 4. هر سه در x = 3 و x = 7 از 0.5 رد می‌شوند، چون آنجا c ± a است. ولی هرچه b بزرگ‌تر، دیواره‌ها عمودتر و سقف صاف‌تر؛ درست مثل شکل اسلاید 90. مثلاً با b = 4 در x = 6 مقدار 1/(1+0.5^8) ≈ 0.996 است: تقریباً سقف.',
+      draw: async b => {
+        await b.clear();
+        const g = GL();
+        await g.axes(b, 'ax', { ticks: [0, 3, 5, 6, 7, 10] });
+        await b.line('h', g.X(0), g.Y(0.5), g.X(10), g.Y(0.5), { color: 'soft', width: 2 });
+        const L = [[1, 'orange', 'ملایم'], [2, 'blue', 'تندتر'], [4, 'green', 'تقریباً عمود']];
+        for (const [k, [bb, color, word]] of L.entries()) {
+          const y = 165 + k * 55;
+          await g.curve(b, `c${bb}`, bell(2, bb, 5), { color, steps: 200 });
+          await b.line(`lg${k}`, 610, y - 8, 650, y - 8, { color, width: 5, dur: 200 });
+          await b.write(`lg${k}t`, 665, y, `b = ${bb}`, { size: 26, color, anchor: 'start', dur: 200 });
+          await b.write(`lg${k}w`, 880, y, word, { size: 24, color, fa: true, dur: 200 });
+        }
+        await all([b.dot('d3', g.X(3), g.Y(0.5), { color: 'purple', r: 7 }), b.dot('d7', g.X(7), g.Y(0.5), { color: 'purple', r: 7 })]);
+        await g.guide(b, 'g6', 6, bell(2, 4, 5)(6), { color: 'green' });
+        await b.write('r1', 780, 345, 'b = 4,  x = 6:', { size: 22, color: 'green' });
+        await b.write('r2', 780, 385, `1/(1 + 0.5^8) ≈ ${r(bell(2, 4, 5)(6))}`, { size: 24, color: 'green', bold: true });
+        await b.write('r3', 780, 450, 'b بزرگ‌تر ← دیواره‌ی عمودتر، سقف صاف‌تر', { size: 20, color: 'purple', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 15. slides 91–92: Z, S, Pi
+    {
+      say: 'اسلایدهای 91 و 92: سه منحنی *چندجمله‌ای*. zmf(x,[a b]) نامتقارن است و *از سمت چپ باز است*: سمت چپ 1 است و بین a و b نرم به 0 می‌رسد. smf(x,[a b]) قرینه‌ی آینه‌ای Z است و از سمت راست باز است. pimf(x,[a b c d]) در دو انتها 0 و در وسط 1 است: از a تا b بالا می‌رود، تا c روی 1 می‌ماند و تا d پایین می‌آید؛ مثل یک ذوزنقه‌ی نرم.',
+      term: ['polynomial MFs: Z, S, Pi', 'توابع عضویت چندجمله‌ای'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, `اسلاید ${LTR('91–92')}: منحنی‌های چندجمله‌ای`, { size: 34, color: 'orange', bold: true, fa: true });
+        const P = [
+          [80, 'zmf', zmf(3, 7), [[3, 'a'], [7, 'b']], 'zmf(x,[a b])', 'باز از چپ'],
+          [390, 'pimf', pimf(1, 4, 6, 9), [[1, 'a'], [4, 'b'], [6, 'c'], [9, 'd']], 'pimf(x,[a b c d])', 'دو سر 0، وسط 1'],
+          [690, 'smf', smf(3, 7), [[3, 'a'], [7, 'b']], 'smf(x,[a b])', 'باز از راست'],
+        ];
+        for (const [x0, id, f, ticks, title, word] of P) {
+          const g = Graph({ x: x0, y: 150, w: 220, h: 190, from: 0, to: 10 });
+          await g.axes(b, `${id}x`, { yTicks: [0, 1] });
+          await all(ticks.map(([v, l]) => b.write(`${id}k${l}`, g.X(v), g.Y(0) + 26, l, { size: 22, color: 'purple', dur: 120 })));
+          await g.curve(b, `${id}c`, f, { color: 'blue' });
+          await b.write(`${id}t`, x0 + 110, 420, title, { size: 22, color: 'blue', bold: true });
+          await b.write(`${id}w`, x0 + 110, 460, word, { size: 22, fa: true });
+        }
+        await b.write('mat', 500, 520, 'zmf(x,[a b])    smf(x,[a b])    pimf(x,[a b c d])', { size: 20, color: 'soft' });
+      },
+    },
+    // ---------------------------------------------------------- 16. S formula (MathWorks)
+    {
+      say: 'اسلایدها برای Z و S فرمول نداده‌اند. نکته‌ی کلیدی از MathWorks: S از دو تکه سهمی ساخته می‌شود و درست وسط، در x = (a+b)/2، مقدارش 0.5 است. نیمه‌ی اول 2((x-a)/(b-a))² و نیمه‌ی دوم 1 - 2((x-b)/(b-a))². مثال با a = 0 و b = 10: در x = 2.5 مقدار 2 × 0.25² = 0.125 و در x = 7.5 مقدار 1 - 0.125 = 0.875. و zmf همیشه 1 منهای smf است.',
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        const g = GL(), f = smf(0, 10);
+        await g.axes(b, 'ax', { ticks: [0, 2.5, 5, 7.5, 10] });
+        await g.curve(b, 's', f, { color: 'blue' });
+        await g.curve(b, 'z', zmf(0, 10), { color: 'purple' });
+        await all([b.write('sl', g.X(9.3), g.Y(0.9), 'S', { size: 24, color: 'blue', bold: true }), b.write('zl', g.X(0.7), g.Y(0.9), 'Z', { size: 24, color: 'purple', bold: true })]);
+        await b.write('h', 780, 140, 'smf(x,[a b])', { size: 28, color: 'blue', bold: true });
+        const rows = [['0', 'x ≤ a'], ['2((x-a)/(b-a))²', 'a ≤ x ≤ m'], ['1 - 2((x-b)/(b-a))²', 'm ≤ x ≤ b'], ['1', 'x ≥ b']];
+        for (const [k, [fx, c]] of rows.entries()) {
+          await all([b.write(`f${k}`, 600, 190 + k * 40, fx, { size: 22, anchor: 'start', dur: 250 }), b.write(`f${k}c`, 958, 190 + k * 40, c, { size: 18, color: 'soft', anchor: 'end', dur: 200 })]);
+        }
+        await g.guide(b, 'g5', 5, f(5), { color: 'purple' });
+        await b.write('m', 780, 365, 'm = (a + b)/2   →   μ = 0.5', { size: 22, color: 'purple', bold: true });
+        await g.guide(b, 'g25', 2.5, f(2.5));
+        await b.write('e1', 780, 410, `x = 2.5:  2 × 0.25² = ${r(f(2.5))}`, { size: 22, color: 'orange' });
+        await g.guide(b, 'g75', 7.5, f(7.5), { color: 'green' });
+        await b.write('e2', 780, 450, `x = 7.5:  1 - 0.125 = ${r(f(7.5))}`, { size: 22, color: 'green' });
+        await b.write('zz', 780, 510, 'zmf = 1 - smf', { size: 28, color: 'purple', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 17. slide 93: sigmoid
+    {
+      say: 'اسلاید 93: *تابع سیگموئید* یا Sigmoid function. تعریف اسلاید: تابعی حقیقی، *یکنوا* یعنی همیشه یک جهت می‌رود، *کران‌دار* یعنی بین 0 و 1 می‌ماند، و *مشتق‌پذیر*؛ برای همه‌ی اعداد حقیقی تعریف شده و مشتقش همه‌جا نامنفی است. فرمول: S(x) = 1/(1+e^{-x}) = e^x/(e^x+1) = 1 - S(-x).',
+      term: ['Sigmoid function', 'تابع سیگموئید'],
+      draw: async b => {
+        await b.clear();
+        await b.write('f', 500, 85, 'S(x) = 1/(1 + e^{-x}) = e^x/(e^x + 1) = 1 - S(-x)', { size: 32, bold: true });
+        const g = Graph({ x: 110, y: 170, w: 420, h: 240, from: -6, to: 6 });
+        await g.axes(b, 'ax', { ticks: [-6, -4, -2, 0, 2, 4, 6] });
+        await b.line('v0', g.X(0), g.Y(0), g.X(0), g.Y(1), { color: 'soft', width: 2 });
+        await g.curve(b, 's', S, { color: 'blue' });
+        const P = ['حقیقی', 'یکنوا (monotonic)', 'کران‌دار (bounded)', 'مشتق‌پذیر (differentiable)', 'مشتق همه‌جا نامنفی'];
+        for (const [k, p] of P.entries()) await b.write(`p${k}`, 780, 200 + k * 50, '•  ' + p, { size: 24, fa: true, dur: 300 });
+      },
+    },
+    // ---------------------------------------------------------- 18. sigmoid values
+    {
+      say: 'حساب کنیم. S(0) = 1/(1+e^0) = 1/2 = 0.5: وسط منحنی. S(2) = 1/(1+e^{-2}) = 1/(1+0.135) ≈ 0.881. و برای S(-2) لازم نیست دوباره حساب کنی: اتحاد 1 - S(-x) یعنی منحنی دور نقطه‌ی وسط قرینه است، پس S(-2) = 1 - 0.881 = 0.119.',
+      draw: async b => {
+        const g = Graph({ x: 110, y: 170, w: 420, h: 240, from: -6, to: 6 });
+        await b.erase('p*');
+        await g.guide(b, 'g0', 0, S(0), { color: 'purple' });
+        await b.write('w1', 780, 210, 'S(0) = 1/(1 + e^0) = 0.5', { size: 24, color: 'purple' });
+        await g.guide(b, 'g2', 2, S(2), { color: 'green' });
+        await b.write('w2', 780, 270, 'S(2) = 1/(1 + e^{-2})', { size: 24 });
+        await b.write('w3', 780, 315, `= 1/${r(1 + Math.exp(-2))} ≈ ${r(S(2))}`, { size: 26, color: 'green', bold: true });
+        await g.guide(b, 'gm2', -2, S(-2), { color: 'orange' });
+        await b.write('w4', 780, 385, `S(-2) = 1 - S(2) ≈ ${r(1 - S(2))}`, { size: 24, color: 'orange', bold: true });
+        await b.write('w5', 780, 435, 'قرینه دور نقطه‌ی وسط', { size: 22, color: 'orange', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 19. sigmf in MATLAB
+    {
+      say: 'اسلاید 93 فقط شکل پایه را می‌دهد و نام دستور متلب را نمی‌گوید. در متلب دستورش sigmf(x,[a c]) است با فرمول 1/(1+e^{-a(x-c)}). c نقطه‌ای است که μ = 0.5، و a شیب است: a مثبت یعنی بالارونده، باز از راست؛ a منفی یعنی پایین‌رونده، باز از چپ. S(x) اسلاید همان sigmf(x,[1 0]) است.',
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        await b.write('f', 500, 85, 'sigmf(x,[a c]) = 1/(1 + e^{-a(x-c)})', { size: 36, bold: true });
+        const g = Graph({ x: 110, y: 160, w: 420, h: 240, from: 0, to: 10 });
+        await g.axes(b, 'ax', { ticks: [0, 2, 4, 6, 8, 10] });
+        await g.curve(b, 'up', sig(2, 4), { color: 'green' });
+        await b.write('r1', 780, 200, `${LTR('a = 2')} ← بالارونده (باز از راست)`, { size: 22, color: 'green', fa: true });
+        await g.curve(b, 'dn', sig(-2, 4), { color: 'red' });
+        await b.write('r2', 780, 250, `${LTR('a = -2')} ← پایین‌رونده (باز از چپ)`, { size: 22, color: 'red', fa: true });
+        await b.dot('mid', g.X(4), g.Y(0.5), { color: 'purple', r: 7 });
+        await b.write('r3', 780, 310, `${LTR('x = c = 4')} ← ${LTR('μ = 0.5')}`, { size: 24, color: 'purple', bold: true, fa: true });
+        await b.write('r4', 780, 380, 'S(x) = sigmf(x,[1 0])', { size: 24 });
+        await b.write('r5', 780, 440, 'دستور متلب در اسلاید نیست (MathWorks)', { size: 20, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 20. slide 94
+    {
+      say: 'اسلاید 94 می‌گوید چرا گاوسی و زنگوله‌ای محبوب‌اند: به دلیل *هموار بودن*، روش‌های مرسومی برای تعیین مجموعه‌های فازی هستند. مزیتشان: هموار بودن و *غیرصفر بودن در تمام نقاط*؛ یعنی برخلاف مثلث، هیچ‌جا دقیقاً صفر نمی‌شوند. یک کمبود هم دارند که اسلاید نگفته و از MathWorks است: نمی‌توانند نامتقارن باشند. برای شکل نامتقارن سراغ سیگموئید یا گاوسی دوطرفه می‌رویم.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 75, 'چرا گاوسی و زنگوله‌ای محبوب‌اند؟', { size: 34, color: 'orange', bold: true, fa: true });
+        await b.box('b1', 70, 120, 410, 250, { color: 'green', fill: 'green' });
+        await b.write('b1h', 275, 175, 'مزیت (اسلاید 94)', { size: 30, color: 'green', bold: true, fa: true });
+        await b.write('b1a', 275, 250, 'هموار (smooth)', { size: 28, fa: true });
+        await b.write('b1b', 275, 315, 'همه‌جا غیرصفر', { size: 28, fa: true });
+        await b.box('b2', 520, 120, 410, 250, { color: 'red', fill: 'red' });
+        await b.write('b2h', 725, 175, 'کمبود (MathWorks)', { size: 30, color: 'red', bold: true, fa: true });
+        await b.write('b2a', 725, 250, 'همیشه متقارن', { size: 28, fa: true });
+        await b.write('b2b', 725, 315, 'نامتقارن نمی‌شوند', { size: 28, fa: true });
+        await b.write('fix', 500, 450, `شکل نامتقارن؟ ← ${LTR('sigmf')} یا ${LTR('gauss2mf')}`, { size: 30, color: 'orange', bold: true, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 21. the 11 MATLAB functions
+    {
+      say: 'و حالا کل خانواده‌ی 11 تایی متلب با فهرست پارامترهایشان. در امتحان اسم دستور و *ترتیب* پارامترها را می‌پرسند؛ مخصوصاً gaussmf که اول σ را می‌گیرد. dsigmf و psigmf، یعنی تفاضل و حاصل‌ضرب دو سیگموئید، در اسلایدها نیامده‌اند؛ فقط اسمشان را بدان.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'MATLAB: 11 membership functions', { size: 34, color: 'orange', bold: true });
+        const C1 = [['trimf', '[a b c]'], ['trapmf', '[a b c d]'], ['gaussmf', '[σ c]'], ['gauss2mf', '[σ_1 c_1 σ_2 c_2]'], ['gbellmf', '[a b c]'], ['sigmf', '[a c]']];
+        const C2 = [['zmf', '[a b]'], ['smf', '[a b]'], ['pimf', '[a b c d]'], ['dsigmf', '[a_1 c_1 a_2 c_2]'], ['psigmf', '[a_1 c_1 a_2 c_2]']];
+        for (const [col, list, x0] of [[1, C1, 90], [2, C2, 540]]) {
+          for (const [k, [n, p]] of list.entries()) {
+            const y = 135 + k * 62, extra = n === 'dsigmf' || n === 'psigmf';
+            await b.write(`n${col}${k}`, x0, y, n, { size: 28, color: extra ? 'soft' : 'blue', bold: !extra, anchor: 'start', dur: 200 });
+            await b.write(`p${col}${k}`, x0 + 150, y, p, { size: 28, color: extra ? 'soft' : 'ink', anchor: 'start', dur: 200 });
+          }
+        }
+        await b.ring('rg', 255, 250, 150, 30, { color: 'red' });
+        await b.write('ns', 700, 460, 'dsigmf, psigmf: در اسلایدها نیستند', { size: 20, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 22. summary
+    {
+      say: 'جمع‌بندی کنیم: شش نکته برای امتحان. یک بار دیگر بخوانیدشان، بعد برویم سراغ سؤال‌ها.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 75, 'یادت باشد', { size: 48, color: 'orange', bold: true, fa: true });
+        const L = [
+          `گاوسی: ${LTR('gaussmf(x,[σ c])')} — اول σ، بعد c · قله 1 · ${LTR('μ(c ± σ) ≈ 0.607')}`,
+          `دوطرفه: ${LTR('gauss2mf(x,[σ1 c1 σ2 c2])')} — اگر ${LTR('c1 < c2')} بیشینه 1، وگرنه کمتر`,
+          `زنگوله‌ای: ${LTR('gbellmf(x,[a b c])')} — c مرکز، a نیم‌پهنا (${LTR('μ = 0.5')})، b شیب`,
+          `${LTR('zmf')} باز از چپ · ${LTR('smf')} باز از راست · ${LTR('pimf')} وسط 1 · وسط S و Z: ${LTR('0.5')}`,
+          `سیگموئید: ${LTR('S(x) = 1/(1+e⁻ˣ) = 1 - S(-x)')} · ${LTR('sigmf(x,[a c])')} در c برابر 0.5`,
+          'اسلاید 94: گاوسی و زنگوله‌ای هموار و همه‌جا غیرصفرند؛ ولی متقارن',
+        ];
+        for (const [k, l] of L.entries()) await b.write(`m${k}`, 945, 150 + k * 64, '•  ' + l, { size: 23, anchor: 'start', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- quizzes
+    {
+      say: 'نوبت شماست! ماشین‌حساب مجاز است. گاوسی اسلاید 88: برای gaussmf(x,[2 5]) مقدار μ را در x = 9 حساب کنید. تا سه رقم اعشار.',
+      draw: async b => {
+        await quizBoard(1, 'gaussmf(x,[2 5])   x = 9   →   μ = ?')(b);
+        const g = GQ();
+        await g.axes(b, 'qa', { ticks: [0, 5, 9, 10] });
+        await g.curve(b, 'qc', gauss(2, 5), { color: 'blue' });
+      },
+      quiz: { answer: ['0.135', '0.1353', '0.14', '0.13534'], hint: 'σ = 2 و c = 5، پس 2σ² = 8. توان می‌شود -(9-5)²/8.', explain: '(9 - 5)² = 16 و 16/8 = 2، پس μ = e^{-2} ≈ 0.135.' },
+      solve: async b => {
+        const g = GQ(), f = gauss(2, 5);
+        await g.guide(b, 'sg', 9, f(9), { color: 'green' });
+        await b.write('s1', 780, 240, 'σ = 2,  c = 5   →   2σ² = 8', { size: 22 });
+        await b.write('s2', 780, 295, '(9 - 5)² = 16,   16/8 = 2', { size: 24 });
+        await b.write('s3', 780, 360, `μ = e^{-2} ≈ ${r(f(9))}`, { size: 34, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'زنگوله‌ای: برای gbellmf(x,[2 2 6]) مقدار μ را در x = 10 حساب کنید. حواستان به توان 2b باشد.',
+      draw: async b => {
+        await quizBoard(2, 'gbellmf(x,[2 2 6])   x = 10   →   μ = ?')(b);
+        const g = GQ();
+        await g.axes(b, 'qa', { ticks: [0, 4, 6, 8, 10] });
+        await g.curve(b, 'qc', bell(2, 2, 6), { color: 'blue' });
+      },
+      quiz: { answer: ['0.0588', '0.059', '0.06', '1/17', '0.05882'], hint: 'a = 2، b = 2، c = 6. اول |(10-6)/2| را حساب کن، بعد به توان 2b = 4 برسان.', explain: '|(10 - 6)/2| = 2 و 2^4 = 16، پس μ = 1/(1 + 16) = 1/17 ≈ 0.059.' },
+      solve: async b => {
+        const g = GQ(), f = bell(2, 2, 6);
+        await g.guide(b, 'sg', 10, f(10), { color: 'green' });
+        await b.write('s1', 780, 240, 'a = 2,  b = 2,  c = 6', { size: 22 });
+        await b.write('s2', 780, 290, '|(10 - 6)/2| = 2', { size: 24 });
+        await b.write('s3', 780, 335, '2^{2b} = 2^4 = 16', { size: 24, color: 'orange' });
+        await b.write('s4', 780, 400, `1/(1 + 16) = 1/17 ≈ ${r(f(10), 4)}`, { size: 28, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'سیگموئید متلب: sigmf(x,[2 4]) = 1/(1+e^{-2(x-4)}). مقدارش را در x = 5 حساب کنید.',
+      draw: async b => {
+        await quizBoard(3, 'sigmf(5,[2 4]) = ?')(b);
+        await b.write('q2', 500, 170, 'sigmf(x,[a c]) = 1/(1 + e^{-a(x-c)})', { size: 28, color: 'soft' });
+      },
+      quiz: { answer: ['0.881', '0.88', '0.8808', '0.88080'], hint: 'a = 2 و c = 4. توان را حساب کن: -2 × (5 - 4).', explain: '-2 × (5 - 4) = -2، پس 1/(1 + e^{-2}) = 1/1.135 ≈ 0.881؛ همان S(2).' },
+      solve: async b => {
+        const g = Graph({ x: 120, y: 230, w: 440, h: 230, from: 0, to: 10 }), f = sig(2, 4);
+        await g.axes(b, 'qa', { ticks: [0, 4, 5, 10] });
+        await g.curve(b, 'qc', f, { color: 'blue' });
+        await g.guide(b, 'sg', 5, f(5), { color: 'green' });
+        await b.write('s1', 780, 280, '-a(x - c) = -2 × (5 - 4) = -2', { size: 22 });
+        await b.write('s2', 780, 335, '1/(1 + e^{-2})', { size: 26 });
+        await b.write('s3', 780, 395, `= 1/${r(1 + Math.exp(-2))} ≈ ${r(f(5))}`, { size: 28, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'سؤال تله‌ای! در دستور y = gaussmf(x,[2 5]) پارامترها چه هستند؟',
+      draw: quizBoard(4, 'y = gaussmf(x,[2 5])'),
+      quiz: {
+        choices: ['σ = 5,  c = 2', 'σ = 2,  c = 5', 'a = 2,  c = 5', 'c = 2,  b = 5'], correct: 1,
+        hint: 'اسلاید 88: gaussmf(x,[sigma c]).',
+        explain: 'در gaussmf اول sigma می‌آید، بعد c. پس σ = 2 و مرکز c = 5.',
+      },
+      solve: async b => {
+        await all([b.write('s2', 440, 260, '2', { size: 70, color: 'orange', bold: true }), b.write('s5', 560, 260, '5', { size: 70, color: 'purple', bold: true })]);
+        await b.write('sa', 440, 340, 'σ', { size: 40, color: 'orange', bold: true });
+        await b.write('sb', 560, 340, 'c', { size: 40, color: 'purple', bold: true });
+        await b.write('sc', 500, 430, 'gaussmf(x,[sigma c])', { size: 32, color: 'green' });
+      },
+    },
+    {
+      say: 'در زنگوله‌ای gbellmf(x,[a b c])، پارامتر b چه چیزی را کنترل می‌کند؟',
+      draw: quizBoard(5, 'gbellmf(x,[a b c]):   b = ?', { size: 34 }),
+      quiz: {
+        choices: ['جای مرکز', 'ارتفاع قله', 'شیب دیواره‌ها', 'نیم‌پهنا (جای 0.5)'], correct: 2,
+        hint: 'c مرکز است و a نیم‌پهنا. قله همیشه 1 است.',
+        explain: 'b شیب دیواره‌هاست: هرچه بزرگ‌تر، دیواره‌ها عمودتر و سقف صاف‌تر. c مرکز و a نیم‌پهناست.',
+      },
+      solve: async b => {
+        const g = GQ();
+        await g.axes(b, 'qa', { ticks: [0, 3, 5, 7, 10] });
+        for (const [bb, color] of [[1, 'orange'], [2, 'blue'], [4, 'green']]) await g.curve(b, `q${bb}`, bell(2, bb, 5), { color, steps: 200 });
+        await b.write('s1', 780, 260, 'b = 1  →  2  →  4', { size: 28 });
+        await b.write('s2', 780, 320, 'دیواره‌ها عمودتر', { size: 28, color: 'green', bold: true, fa: true });
+      },
+    },
+    {
+      say: 'سؤال آخر: بیشینه‌ی gauss2mf(x,[1 6 1 4]) چقدر است؟ یادتان باشد ترتیب [sig1 c1 sig2 c2] است.',
+      draw: quizBoard(6, 'max  gauss2mf(x,[1 6 1 4]) = ?'),
+      quiz: {
+        choices: ['برابر 1', 'بیشتر از 1', 'کمتر از 1', 'برابر 0'], correct: 2,
+        hint: 'c1 و c2 را بخوان. شرط اسلاید 89: اگر c1 < c2، بیشینه 1 است.',
+        explain: 'c1 = 6 و c2 = 4، پس c1 < c2 برقرار نیست و بیشینه کمتر از 1 است: e^{-1} ≈ 0.37 در x = 5.',
+      },
+      solve: async b => {
+        const g = GQ(), f = gauss2(1, 6, 1, 4);
+        await g.axes(b, 'qa', { ticks: [0, 4, 5, 6, 10] });
+        await b.line('one', g.X(0), g.Y(1), g.X(10), g.Y(1), { color: 'soft', width: 2 });
+        await g.curve(b, 'qc', f, { color: 'red', steps: 200 });
+        await g.guide(b, 'sg', 5, f(5), { color: 'green' });
+        await b.write('s1', 780, 260, 'c_1 = 6  >  c_2 = 4', { size: 26, color: 'red' });
+        await b.write('s2', 780, 330, `max = e^{-1} ≈ ${r(f(5), 2)}`, { size: 28, color: 'green', bold: true });
+      },
+    },
+  ],
 });
-document.querySelectorAll('.mcq').forEach(function(q){
-  var fb=q.querySelector('.fb');
-  q.querySelectorAll('.opts button').forEach(function(b){b.addEventListener('click',function(){
-    q.querySelectorAll('.opts button').forEach(function(x){x.classList.remove('ok','no')});
-    if(b.hasAttribute('data-ok')){b.classList.add('ok');fb.className='fb good';fb.textContent=q.dataset.yes||'درست!'}
-    else{b.classList.add('no');fb.className='fb bad';fb.textContent=q.dataset.no||'نه، دوباره فکر کن.'}
-  })});
-});
-document.querySelectorAll('.stepper').forEach(function(s){
-  var st=s.querySelectorAll('.st'),n=0,nx=s.querySelector('.next'),al=s.querySelector('.all');
-  function upd(){st.forEach(function(e,i){e.classList.toggle('show',i<n)});if(nx)nx.textContent=n>=st.length?'از اول':'قدم بعدی ('+n+'/'+st.length+')'}
-  if(nx)nx.addEventListener('click',function(){n=n>=st.length?0:n+1;upd()});
-  if(al)al.addEventListener('click',function(){n=st.length;upd()});
-  upd();
-});
-window.addEventListener('beforeprint',function(){document.querySelectorAll('details.sol').forEach(function(d){d.open=true})});
-})();
-/* ===== END SHARED JS ===== */
-</script>
-<script>
-/* ===== lesson 10: interactive smooth membership functions ===== */
-(function(){
-var NS='http://www.w3.org/2000/svg';
-function X(x){return 40+50*x}
-function Y(m){return 220-190*m}
-function el(tag,attrs,txt){var e=document.createElementNS(NS,tag);for(var k in attrs)e.setAttribute(k,attrs[k]);if(txt!=null)e.textContent=txt;return e}
-function f(n){return String(+(+n).toFixed(3))}
-function p(n){return n<0?'('+f(n)+')':f(n)}
-var g=document.getElementById('grid');
-for(var i=0;i<=10;i++){g.appendChild(el('line',{x1:X(i),x2:X(i),y1:Y(0),y2:Y(1),stroke:'var(--grid)'}));g.appendChild(el('text',{x:X(i),y:238,'text-anchor':'middle'},i))}
-[0,0.25,0.5,0.75,1].forEach(function(m){g.appendChild(el('line',{x1:X(0),x2:X(10),y1:Y(m),y2:Y(m),stroke:'var(--grid)'}));g.appendChild(el('text',{x:34,y:Y(m)+4,'text-anchor':'end'},m))});
-g.appendChild(el('line',{x1:X(0),x2:X(10),y1:Y(0),y2:Y(0),stroke:'var(--border-strong)','stroke-width':1.5}));
-var half=document.getElementById('half');half.setAttribute('x1',X(0));half.setAttribute('x2',X(10));half.setAttribute('y1',Y(0.5));half.setAttribute('y2',Y(0.5));
-
-function gs(x,s,c){return Math.exp(-(x-c)*(x-c)/(2*s*s))}
-function smf(x,a,b){if(a>=b)return x>=(a+b)/2?1:0;var m=(a+b)/2;if(x<=a)return 0;if(x<=m)return 2*Math.pow((x-a)/(b-a),2);if(x<=b)return 1-2*Math.pow((x-b)/(b-a),2);return 1}
-function smfT(x,a,b,name,la,lb){
-  var m=(a+b)/2,A=la||'a',B=lb||'b';
-  if(a>=b)return name+': '+A+' ≥ '+B+' → پله در ('+A+'+'+B+')/2';
-  if(x<=a)return 'x ≤ '+A+' → smf = 0';
-  if(x<=m)return A+' ≤ x ≤ ('+A+'+'+B+')/2 → smf = 2((x−'+A+')/('+B+'−'+A+'))² = 2(('+f(x)+'−'+f(a)+')/'+f(b-a)+')² = '+f(smf(x,a,b));
-  if(x<=b)return '('+A+'+'+B+')/2 ≤ x ≤ '+B+' → smf = 1 − 2((x−'+B+')/('+B+'−'+A+'))² = 1 − 2(('+f(x)+'−'+f(b)+')/'+f(b-a)+')² = '+f(smf(x,a,b));
-  return 'x ≥ '+B+' → smf = 1';
-}
-var SH={
- gaussmf:{ps:[['sigma',0.3,4,0.1,2],['c',0,10,0.1,5]],
-  mu:function(x,q){return gs(x,q.sigma,q.c)},
-  txt:function(x,q){var e=(x-q.c)*(x-q.c)/(2*q.sigma*q.sigma);return 'μ = e^(−(x−c)²/(2σ²)) = e^(−('+f(x)+'−'+f(q.c)+')²/(2·'+f(q.sigma)+'²)) = e^(−'+f(e)+') = '+f(Math.exp(-e))},
-  note:'متقارن حول c؛ σ بزرگ‌تر = پهن‌تر. در هیچ نقطه‌ای دقیقاً صفر نمی‌شود.'},
- gauss2mf:{ps:[['sig1',0.3,4,0.1,1],['c1',0,10,0.1,4],['sig2',0.3,4,0.1,2],['c2',0,10,0.1,6]],
-  mu:function(x,q){return (x<=q.c1?gs(x,q.sig1,q.c1):1)*(x>=q.c2?gs(x,q.sig2,q.c2):1)},
-  txt:function(x,q){var f1=x<=q.c1?gs(x,q.sig1,q.c1):1,f2=x>=q.c2?gs(x,q.sig2,q.c2):1;
-    var t1=x<=q.c1?'x ≤ c1 → گاوسی چپ = e^(−('+f(x)+'−'+f(q.c1)+')²/(2·'+f(q.sig1)+'²)) = '+f(f1):'x > c1 → تکه چپ = 1';
-    var t2=x>=q.c2?'x ≥ c2 → گاوسی راست = e^(−('+f(x)+'−'+f(q.c2)+')²/(2·'+f(q.sig2)+'²)) = '+f(f2):'x < c2 → تکه راست = 1';
-    return t1+'\n'+t2+'\nμ = '+f(f1)+' × '+f(f2)+' = '+f(f1*f2)},
-  note:'c1 را از c2 بزرگ‌تر کن: سقف ۱ ناپدید می‌شود و بیشینه کمتر از ۱ می‌شود (اسلاید ۸۹).'},
- gbellmf:{ps:[['a',0.3,5,0.1,2],['b',0.5,8,0.5,4],['c',0,10,0.1,6]],
-  mu:function(x,q){return 1/(1+Math.pow(Math.abs((x-q.c)/q.a),2*q.b))},
-  txt:function(x,q){var u=Math.abs((x-q.c)/q.a),w=Math.pow(u,2*q.b);return 'μ = 1/(1+|(x−c)/a|^(2b)) = 1/(1+|('+f(x)+'−'+f(q.c)+')/'+f(q.a)+'|^'+f(2*q.b)+') = 1/(1+'+f(u)+'^'+f(2*q.b)+') = 1/(1+'+f(w)+') = '+f(1/(1+w))},
-  note:'b را زیاد کن: دیواره‌ها عمودتر و سقف صاف‌تر می‌شود. در x = c ± a همیشه μ = 0.5 (روی خط‌چین صورتی).'},
- sigmf:{ps:[['a',-5,5,0.5,2],['c',0,10,0.1,4]],
-  mu:function(x,q){return 1/(1+Math.exp(-q.a*(x-q.c)))},
-  txt:function(x,q){var e=-q.a*(x-q.c),v=Math.exp(e);return 'μ = 1/(1+e^(−a(x−c))) = 1/(1+e^(−'+p(q.a)+'·('+f(x)+'−'+f(q.c)+'))) = 1/(1+e^('+f(e)+')) = 1/(1+'+f(v)+') = '+f(1/(1+v))},
-  note:'در x = c همیشه μ = 0.5. a مثبت: باز از راست (بالارونده)؛ a منفی: باز از چپ. a را صفر کن: خط صاف 0.5.'},
- zmf:{ps:[['a',0,10,0.1,2],['b',0,10,0.1,8]],
-  mu:function(x,q){return 1-smf(x,q.a,q.b)},
-  txt:function(x,q){return smfT(x,q.a,q.b,'zmf')+'\nzmf = 1 − smf = '+f(1-smf(x,q.a,q.b))},
-  note:'باز از سمت چپ: چپ ۱، راست ۰. وسط بازه، x = (a+b)/2، مقدار 0.5.'},
- smf:{ps:[['a',0,10,0.1,2],['b',0,10,0.1,8]],
-  mu:function(x,q){return smf(x,q.a,q.b)},
-  txt:function(x,q){return smfT(x,q.a,q.b,'smf')},
-  note:'قرینه Z، باز از سمت راست. وسط بازه، x = (a+b)/2، مقدار 0.5.'},
- pimf:{ps:[['a',0,10,0.1,1],['b',0,10,0.1,4],['c',0,10,0.1,6],['d',0,10,0.1,9]],
-  mu:function(x,q){return x<=q.b?smf(x,q.a,q.b):(x>=q.c?1-smf(x,q.c,q.d):1)},
-  txt:function(x,q){if(x<=q.b)return 'x ≤ b → نیمه S با [a b]:\n'+smfT(x,q.a,q.b,'smf');if(x>=q.c)return 'x ≥ c → نیمه Z با [c d]:\n'+smfT(x,q.c,q.d,'smf','c','d')+'\nμ = 1 − smf = '+f(1-smf(x,q.c,q.d));return 'b ≤ x ≤ c → μ = 1 (سقف)'},
-  note:'دو سر ۰، وسط ۱ — مثل ذوزنقه‌ای که گوشه‌هایش نرم شده.'}
-};
-var cur='gaussmf',Q={},x=7;
-var sh=document.getElementById('shapes');
-Object.keys(SH).forEach(function(k){var b=document.createElement('button');b.type='button';b.textContent=k;b.dataset.k=k;b.addEventListener('click',function(){setShape(k)});sh.appendChild(b)});
-function setShape(k){
-  cur=k;Q={};
-  sh.querySelectorAll('button').forEach(function(b){b.classList.toggle('on',b.dataset.k===k)});
-  var ctl=document.getElementById('ctl');ctl.innerHTML='';
-  SH[k].ps.forEach(function(d){
-    Q[d[0]]=d[4];
-    var lab=document.createElement('label');lab.htmlFor='p-'+d[0];lab.textContent=d[0];
-    var r=document.createElement('input');r.type='range';r.id='p-'+d[0];r.min=d[1];r.max=d[2];r.step=d[3];r.value=d[4];
-    var o=document.createElement('output');o.id='po-'+d[0];
-    r.addEventListener('input',function(){Q[d[0]]=+r.value;draw()});
-    ctl.appendChild(lab);ctl.appendChild(r);ctl.appendChild(o);
-  });
-  document.getElementById('note').textContent=SH[k].note;
-  draw();
-}
-function draw(){
-  var S=SH[cur],d='';
-  for(var j=0;j<=400;j++){var xx=j/40,m=S.mu(xx,Q);d+=(j?'L':'M')+X(xx).toFixed(1)+' '+Y(m).toFixed(1)}
-  document.getElementById('curve').setAttribute('d',d);
-  var mu=S.mu(x,Q),px=X(x),py=Y(mu);
-  var vx=document.getElementById('vx'),hx=document.getElementById('hx'),pt=document.getElementById('pt'),lb=document.getElementById('mulab');
-  vx.setAttribute('x1',px);vx.setAttribute('x2',px);vx.setAttribute('y1',Y(0));vx.setAttribute('y2',py);
-  hx.setAttribute('x1',X(0));hx.setAttribute('x2',px);hx.setAttribute('y1',py);hx.setAttribute('y2',py);
-  pt.setAttribute('cx',px);pt.setAttribute('cy',py);
-  lb.setAttribute('x',Math.min(px+8,460));lb.setAttribute('y',Math.max(py-10,16));lb.textContent='μ('+f(x)+') = '+f(mu);
-  S.ps.forEach(function(p0){document.getElementById('po-'+p0[0]).textContent=f(Q[p0[0]])});
-  document.getElementById('o-x').textContent=f(x);
-  document.getElementById('cmd').textContent=cur+'(x,['+S.ps.map(function(p0){return f(Q[p0[0]])}).join(' ')+'])      % ['+S.ps.map(function(p0){return p0[0]}).join(' ')+']';
-  var ro=document.getElementById('readout');ro.textContent='';
-  S.txt(x,Q).split('\n').forEach(function(line,i){if(i)ro.appendChild(document.createElement('br'));ro.appendChild(document.createTextNode(line))});
-}
-document.getElementById('s-x').addEventListener('input',function(e){x=+e.target.value;draw()});
-setShape('gaussmf');
-})();
-</script>
-<script>
-/* ===== SHARED CURVE PLAYER — same text in lessons 9 and 10 ===== */
-function anM(s){return '<span class="m">'+s+'</span>'}
-function anF(s){return '<div class="an-f">'+s+'</div>'}
-function anPlayer(FN,GL,RAW){
-var NS='http://www.w3.org/2000/svg',svg=document.getElementById('anSvg'),box=document.getElementById('anBox');
-var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
-function f(v){return String(Math.round(v*1000)/1000)}
-function el(p,tag,a,txt){var e=document.createElementNS(NS,tag);for(var k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;p.appendChild(e);return e}
-function op(e,v){e.style.opacity=v}
-function ease(p){return p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2}
-function flash(t){t.classList.remove('flash');void t.getBBox();t.classList.add('flash')}
-function clear(g){while(g.firstChild)g.removeChild(g.firstChild)}
-
-/* ---- plot geometry: x axis AX[0]..AX[1], μ from 0 (PB) to 1 (PT) ---- */
-var PX0=70,PX1=600,PB=232,PT=72,AX=null,CMDY=30;
-function px(x){return PX0+(x-AX[0])/(AX[1]-AX[0])*(PX1-PX0)}
-function py(m){return PB-m*(PB-PT)}
-var gAxis=el(svg,'g',{});
-var halfL=el(svg,'line',{x1:PX0,x2:PX1,y1:py(.5),y2:py(.5),'class':'fd',style:'opacity:0;stroke:var(--c4);stroke-dasharray:2 4'});
-var gMark=el(svg,'g',{}),gBrk=el(svg,'g',{});
-var pieceP=el(svg,'path',{'class':'fd',style:'opacity:0;fill:none;stroke:var(--c3);stroke-width:9;stroke-linecap:round;stroke-opacity:.5'});
-var curveP=el(svg,'path',{style:'fill:none;stroke:var(--c1);stroke-width:2.5;stroke-linejoin:round'});
-var xg=el(svg,'g',{'class':'fd',style:'opacity:0'});
-var xLine=el(xg,'line',{y1:PT-8,y2:PB,style:'stroke:var(--c4);stroke-width:1.5;stroke-dasharray:4 3'});
-var xArr=el(xg,'polygon',{style:'fill:var(--c4)'});
-var xTxt=el(xg,'text',{y:PT-14,'text-anchor':'middle','class':'mono',style:'fill:var(--c4);font-weight:700;font-size:14px'},'');
-var mg=el(svg,'g',{'class':'fd',style:'opacity:0'});
-var mH=el(mg,'line',{x1:PX0,style:'stroke:var(--c2);stroke-width:1.5;stroke-dasharray:4 3'});
-var mDot=el(mg,'circle',{r:6,style:'fill:var(--c2)'});
-var mTxt=el(mg,'text',{'class':'mono',style:'fill:var(--c2);font-weight:700;font-size:15px'},'');
-var cmdG=el(svg,'g',{}),cmdT=[];
-var BX=335,BYC=124,BUB=el(svg,'g',{'class':'fd',style:'opacity:0'});
-var bubR=el(BUB,'rect',{rx:12,style:'fill:var(--surface);stroke:var(--accent);stroke-width:2.5'});
-var bubT=el(BUB,'text',{x:BX,y:BYC+9,'text-anchor':'middle','class':'mono',style:'font-size:24px;font-weight:700;fill:var(--text)'},'');
-var FL=el(svg,'g',{});
-
-function drawAxis(){clear(gAxis);
-  [0,.5,1].forEach(function(m){el(gAxis,'line',{x1:PX0,x2:PX1,y1:py(m),y2:py(m),style:'stroke:var(--grid)'});el(gAxis,'text',{x:PX0-8,y:py(m)+4,'text-anchor':'end'},String(m))});
-  for(var v=AX[0];v<=AX[1];v++){el(gAxis,'line',{x1:px(v),x2:px(v),y1:PB,y2:PB+4,style:'stroke:var(--text-3)'});el(gAxis,'text',{x:px(v),y:PB+17,'text-anchor':'middle'},String(v))}
-  el(gAxis,'line',{x1:PX0,x2:PX1,y1:PB,y2:PB,style:'stroke:var(--text-3)'});
-  el(gAxis,'text',{x:PX1+12,y:PB+4,'class':'mono'},'x');
-  el(gAxis,'text',{x:PX0-8,y:PT-14,'text-anchor':'end','class':'mono'},'μ');
-}
-function pathFor(key,r){var F=FN[key],a=r?r[0]:AX[0],b=r?r[1]:AX[1],xs=[];
-  for(var i=0;i<=300;i++)xs.push(a+(b-a)*i/300);(F.k||[]).forEach(function(k){if(k>a&&k<b)xs.push(k)});
-  xs.sort(function(p,q){return p-q});return xs.map(function(x,i){return (i?'L':'M')+px(x).toFixed(1)+' '+py(F.f(x)).toFixed(1)}).join('')}
-
-/* marks (corner labels on the axis, or free labels) and brackets (measured distances) */
-var MK={},BK={};
-function key(o){return JSON.stringify(o)}
-function makeMark(m){var g=el(gMark,'g',{'class':'fd'}),lx,ly;
-  if(m.tx==null){lx=px(m.x);ly=PB+34;el(g,'line',{x1:lx,x2:lx,y1:PT,y2:PB+20,style:'stroke:var(--c2);stroke-opacity:.45;stroke-dasharray:3 4'})}
-  else{lx=m.tx;ly=m.ty}
-  var lab=el(g,'text',{x:lx,y:ly,'text-anchor':'middle','class':'mono',style:'fill:var(--c2);font-weight:700;font-size:14px'},m.t);
-  return {g:g,lab:lab,lx:lx,ly:ly}}
-function makeBrk(b){var g=el(gBrk,'g',{'class':'fd'}),y=PB+52+b.lv*26,x1=px(b.a),x2=px(b.b),c=b.col||'var(--c3)';
-  el(g,'path',{d:'M'+x1+' '+(y-5)+'V'+(y+5)+'M'+x1+' '+y+'H'+x2+'M'+x2+' '+(y-5)+'V'+(y+5),style:'fill:none;stroke-width:2;stroke:'+c});
-  var lab=el(g,'text',{x:(x1+x2)/2,y:y+15,'text-anchor':'middle','class':'mono',style:'font-size:12.5px;font-weight:700;fill:'+c},b.t);
-  return {g:g,lab:lab,lx:(x1+x2)/2,ly:y+15}}
-function sync(g,map,list,make){var want={};
-  list.forEach(function(it){var k=key(it);want[k]=1;if(!map[k])map[k]=make(it)});
-  Object.keys(map).forEach(function(k){if(!want[k]){g.removeChild(map[k].g);delete map[k]}})}
-
-/* command line at the top, one text piece per token so numbers can fly out of it */
-var cmdKey=null;
-function buildCmd(tokens){clear(cmdG);cmdT=[];if(!tokens)return;var x=0;
-  tokens.forEach(function(t,i){var isP=i%2===1&&tokens.length>1;
-    var e=el(cmdG,'text',{x:x,y:CMDY,'class':'mono',style:'font-size:19px;font-weight:700;fill:'+(isP?'var(--accent)':'var(--text)')},t.replace(/ /g,'\u00a0'));
-    var w=e.getComputedTextLength();cmdT.push({e:e,x:x,w:w});x+=w});
-  var sh=BX-x/2;cmdT.forEach(function(c){c.e.setAttribute('x',c.x+sh);c.cx=c.x+sh+c.w/2})}
-
-/* x marker and μ point */
-function setX(x){var X=px(x);xLine.setAttribute('x1',X);xLine.setAttribute('x2',X);
-  xArr.setAttribute('points',(X-6)+','+(PB+9)+' '+(X+6)+','+(PB+9)+' '+X+','+(PB+1));
-  xTxt.setAttribute('x',X);xTxt.textContent='x = '+f(x)}
-var curKey=null;
-function muPos(x){var m=FN[curKey].f(x),X=px(x),Y=py(m),right=X>PX1-120;return {X:X,Y:Y,m:m,lx:right?X-10:X+10,ly:Y-10,anchor:right?'end':'start'}}
-function setMu(x,mt){var p=muPos(x);mH.setAttribute('x2',p.X);mH.setAttribute('y1',p.Y);mH.setAttribute('y2',p.Y);
-  mDot.setAttribute('cx',p.X);mDot.setAttribute('cy',p.Y);
-  mTxt.setAttribute('x',p.lx);mTxt.setAttribute('y',p.ly);mTxt.setAttribute('text-anchor',p.anchor);mTxt.textContent='μ = '+(mt||f(p.m));return p}
-
-/* ---- steps ---- */
-var base={ax:[0,10],cmd:null,fn:null,marks:[],brk:[],piece:null,x:null,mu:0,mt:null,half:0};
-var S=[],prev=base;
-RAW.forEach(function(r){var s=Object.assign({},prev,r[0]);prev=s;S.push({s:s,gl:r[1],cap:r[2],anim:r[3]||[]})});
-var glBody=document.getElementById('anGl');
-var hr=document.createElement('tr');hr.innerHTML='<th>نماد</th><th>یعنی</th><th>از کجا آمد</th>';glBody.appendChild(hr);
-Object.keys(GL).forEach(function(g){var tr=document.createElement('tr');tr.innerHTML='<td>'+GL[g][0]+'</td><td>'+GL[g][1]+'</td><td>'+GL[g][2]+'</td>';glBody.appendChild(tr)});
-
-function snap(s){
-  if(!AX||AX[0]!==s.ax[0]||AX[1]!==s.ax[1]){AX=s.ax.slice();drawAxis();clear(gMark);clear(gBrk);MK={};BK={};curKey=null}
-  var ck=s.cmd?s.cmd.join('|'):'';if(ck!==cmdKey){cmdKey=ck;buildCmd(s.cmd)}
-  if(s.fn!==curKey){curKey=s.fn;if(s.fn)curveP.setAttribute('d',pathFor(s.fn))}
-  curveP.style.strokeDasharray='none';curveP.style.strokeDashoffset=0;op(curveP,s.fn?1:0);
-  if(s.piece&&s.fn){pieceP.setAttribute('d',pathFor(s.fn,s.piece));op(pieceP,1)}else op(pieceP,0);
-  sync(gMark,MK,s.marks,makeMark);sync(gBrk,BK,s.brk,makeBrk);
-  Object.keys(MK).forEach(function(k){op(MK[k].lab,1)});Object.keys(BK).forEach(function(k){op(BK[k].g,1)});
-  op(halfL,s.half);
-  if(s.x!=null){setX(s.x);op(xg,1)}else op(xg,0);
-  if(s.mu&&s.x!=null&&s.fn){setMu(s.x,s.mt);op(mg,1)}else op(mg,0);
-}
-
-/* ---- motions: each hides what it introduces now, reveals it from time t, returns its end time ---- */
-var T=[],FD=1100,GAP=500,RAF=[];
-function later(ms,fn){T.push(setTimeout(fn,ms))}
-function cancelAnim(){T.forEach(clearTimeout);T=[];RAF.forEach(cancelAnimationFrame);RAF=[];clear(FL);op(BUB,0)}
-function tw(dur,step,done){var t0=null;function fr(now){if(t0===null)t0=now;var p=Math.min(1,(now-t0)/dur);step(ease(p));if(p<1)RAF.push(requestAnimationFrame(fr));else if(done)done()}RAF.push(requestAnimationFrame(fr))}
-function fly(txt,x1,y1,x2,y2,at,color,done,fs0){later(at,function(){
-  var t=el(FL,'text',{x:x1,y:y1,'text-anchor':'middle','class':'mono fly',style:'fill:'+color},txt);
-  tw(FD,function(e){t.setAttribute('x',x1+(x2-x1)*e);t.setAttribute('y',y1+(y2-y1)*e-Math.sin(e*Math.PI)*28);if(fs0)t.style.fontSize=(fs0+(15-fs0)*e)+'px'},
-    function(){if(t.parentNode)FL.removeChild(t);if(done)done()})})}
-function bubbleShow(txt){bubT.textContent=txt;var w=bubT.getBBox().width+40;
-  bubR.setAttribute('x',BX-w/2);bubR.setAttribute('y',BYC-24);bubR.setAttribute('width',w);bubR.setAttribute('height',46);op(BUB,1)}
-var ANIM={
- params:function(s,p,arg,t){arg.forEach(function(a,n){var it=a[1]==='b'?BK[key(s.brk[a[2]])]:MK[key(s.marks[a[2]])],c=cmdT[a[0]];
-     op(it.lab,0);fly(c.e.textContent,c.cx,CMDY-6,it.lx,it.ly-4,t+n*GAP,'var(--accent)',function(){op(it.lab,1);flash(it.lab)})});
-   return t+(arg.length-1)*GAP+FD},
- draw:function(s,p,arg,t){var len=curveP.getTotalLength();curveP.style.strokeDasharray=len;curveP.style.strokeDashoffset=len;
-   later(t,function(){tw(1800,function(e){curveP.style.strokeDashoffset=len*(1-e)},function(){curveP.style.strokeDasharray='none'})});return t+1800},
- xin:function(s,p,arg,t){var from=(p&&p.x!=null&&p.ax[0]===s.ax[0])?p.x:AX[0];op(mg,0);op(pieceP,0);setX(from);op(xg,1);
-   later(t,function(){tw(1100,function(e){setX(from+(s.x-from)*e)},function(){if(s.piece)op(pieceP,1)})});return t+1300},
- brk:function(s,p,arg,t){var old={};(p?p.brk:[]).forEach(function(b){old[key(b)]=1});var n=0;
-   s.brk.forEach(function(b){var k=key(b);if(old[k])return;var g=BK[k].g;op(g,0);later(t+n*700,function(){op(g,1)});n++});return t+n*700+300},
- calc:function(s,p,arg,t){op(mg,0);var L=arg.l;
-   L.forEach(function(line,i){later(t+i*1900,function(){bubbleShow(line)})});
-   var end=t+L.length*1900;later(end-200,function(){op(BUB,0)});
-   var pos=setMu(s.x,s.mt);fly(arg.r,BX,BYC+9,pos.lx+(pos.anchor==='start'?30:-30),pos.ly-4,end-200,'var(--c2)',function(){op(mg,1);flash(mTxt)},26);
-   return end+FD}
-};
-
-/* ---- controls ---- */
-var k=0;
-var cap=document.getElementById('anCap'),cnt=document.getElementById('anCnt'),bar=document.getElementById('anBar');
-var bPrev=document.getElementById('anPrev'),bNext=document.getElementById('anNext'),bAgain=document.getElementById('anAgain');
-function show(n,animate){
-  cancelAnim();k=n;var st=S[k],p=k?S[k-1].s:null;snap(st.s);
-  if(animate&&!reduce){var t=250;st.anim.forEach(function(a){t=ANIM[a[0]](st.s,p,a[1],t)+300})}
-  cap.innerHTML='<b style="color:var(--accent)">قدم '+(k+1)+'.</b> '+st.cap+st.gl.map(function(g){
-    return '<div class="an-new"><b>نماد تازه:</b> '+GL[g][0]+' — '+GL[g][1]+' <span class="an-from">· از کجا آمد: '+GL[g][2]+'</span></div>'}).join('');
-  cnt.textContent=(k+1)+' از '+S.length;bar.style.width=((k+1)/S.length*100)+'%';
-  bPrev.disabled=k===0;bAgain.disabled=!st.anim.length||reduce;bNext.textContent=k===S.length-1?'از اول ↺':'بعدی ←';
-}
-function keepInView(){var r=box.getBoundingClientRect(),sb=svg.getBoundingClientRect();
-  if(r.top<-8||(sb.bottom>innerHeight&&r.top>8))box.scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'})}
-bNext.addEventListener('click',function(){if(k===S.length-1)show(0,false);else show(k+1,true);keepInView()});
-bAgain.addEventListener('click',function(){if(S[k].anim.length)show(k,true)});
-bPrev.addEventListener('click',function(){if(k>0)show(k-1,false);keepInView()});
-box.addEventListener('keydown',function(e){if(e.key==='ArrowLeft'&&k<S.length-1){show(k+1,true);e.preventDefault()}else if(e.key==='ArrowRight'&&k>0){show(k-1,false);e.preventDefault()}});
-show(0,false);
-}
-/* ===== END SHARED CURVE PLAYER ===== */
-</script>
-<script>
-/* ===== lesson 10: animated walk-through (slides 88, 90 and 93) ===== */
-(function(){
-var M=anM,F=anF;
-var FN={
- gauss:{f:function(x){return Math.exp(-(x-5)*(x-5)/8)}},
- bell:{f:function(x){return 1/(1+Math.pow(Math.abs((x-6)/2),8))}},
- sig:{f:function(x){return 1/(1+Math.exp(-x))}}
-};
-var GL={
- gcmd:[M('gaussmf(x,[σ c])'),'دستور متلب گاوسی. <b>اول σ، بعد c</b> — برعکس نخوان.','اسلاید ۸۸'],
- sigma:[M('σ'),'«سیگما» = پهنای منحنی. σ بزرگ‌تر ← منحنی پهن‌تر.','اولین عدد کروشه'],
- c:[M('c'),'مرکز قله؛ آنجا μ = 1.','دومین عدد کروشه'],
- gf:[M('e^( −(x − c)² / (2σ²) )'),'فرمول گاوسی: هرچه x از c دورتر، توان منفی‌تر، جواب کوچک‌تر.','اسلاید ۸۷'],
- e:[M('e ≈ 2.718'),'یک عدد ثابت. روی ماشین‌حساب دکمه '+M('eˣ')+' را بزن.','فرمول گاوسی (اسلاید ۸۷)'],
- bcmd:[M('gbellmf(x,[a b c])'),'زنگوله‌ای: a = نیم‌پهنا، b = شیب دیواره‌ها، c = مرکز.','ترتیب: اسلاید ۹۰؛ معنی هر عدد: مستندات متلب'],
- bf:[M('1 / (1 + |(x − c)/a|^(2b))'),'فرمول زنگوله‌ای. '+M('|…|')+' = قدرمطلق (منفی را مثبت می‌کند).','اسلاید ۹۰'],
- S:[M('S(x) = 1 / (1 + e^(−x))'),'سیگموئید: فقط بالا می‌رود، از نزدیک ۰ تا نزدیک ۱؛ پارامتر ندارد.','اسلاید ۹۳'],
- Sm:[M('S(−x) = 1 − S(x)'),'قرینه: مقدار در −x و +x با هم ۱ می‌شوند.','اسلاید ۹۳']
-};
-var P='var(--c4)',W='var(--c1)';
-var SG={a:5,b:7,t:'σ = 2',lv:1,col:W},BA={a:6,b:8,t:'a = 2',lv:1,col:W};
-var RAW=[
- [{cmd:['gaussmf(x,[','2',' ','5','])']},[],
-  '<b>سؤال (اسلاید ۸۸):</b> برای '+M('gaussmf(x,[2 5])')+' مقدار μ در x = 7 چقدر است؟<br><b>هدف:</b> مثل درس ۹، به هر x یک درجه بین ۰ و ۱ بدهیم. فرقش: این منحنی‌ها <b>نرم</b>اند، بدون گوشه تیز؛ پس به جای «فاصله ÷ پهنا» یک فرمول نمایی داریم. «بعدی» را بزن.'],
- [{marks:[{x:5,t:'c=5'}],brk:[SG]},['gcmd','sigma','c'],
-  'دو عدد کروشه بیرون می‌آیند. <b>ترتیب مهم است: اول σ، بعد c</b>.<br>• σ = 2 پهناست: فاصله‌ای روی محور (بنفش).<br>• c = 5 مرکز قله است: یک نقطه روی محور (سبز).',
-  [['params',[[1,'b',0],[3,'m',0]]]]],
- [{fn:'gauss'},['gf','e'],
-  'منحنی گاوسی کشیده می‌شود: قله ۱ در c = 5، دو طرف آینه هم. هرچه دورتر، کمتر — ولی <b>هیچ‌وقت دقیقاً صفر نمی‌شود</b>. فرمولش:'+F('μ(x) = e^( −(x − c)² / (2σ²) )'),
-  [['draw']]],
- [{x:7,brk:[{a:5,b:7,t:'x − c = 2',lv:0,col:P},SG]},[],
-  '<b>x = 7.</b> این فرمول هم فقط به یک چیز وابسته است: <b>x چقدر از مرکز دور است؟</b> روی محور: '+M('x − c = 2')+' (صورتی).',
-  [['xin'],['brk']]],
- [{mu:1},[],
-  'حالا فرمول را تکه‌تکه حساب کن، هر تکه وسط تصویر:'+F('(x − c)² = (7 − 5)² = 4\n2σ² = 2 × 2² = 8\n4 / 8 = 0.5\ne^(−0.5) ≈ 0.607')+'جواب روی منحنی می‌نشیند: '+M('μ(7) ≈ 0.607')+'.',
-  [['calc',{l:['(x − c)² = (7 − 5)² = 4','2σ² = 2 × 2² = 8','4 / 8 = 0.5','e^(−0.5) ≈ 0.607'],r:'0.607'}]]],
- [{x:3,brk:[{a:3,b:5,t:'c − x = 2',lv:0,col:P},SG]},[],
-  '<b>x = 3</b>: این هم ۲ واحد از مرکز دور است، فقط از طرف چپ. چون فاصله به توان ۲ می‌رسد، علامتش مهم نیست:'+F('(3 − 5)² = (−2)² = 4  →  0.607')+'همان جواب x = 7.',
-  [['xin'],['brk'],['calc',{l:['(3 − 5)² = 4','4 / 8 = 0.5','e^(−0.5) ≈ 0.607'],r:'0.607'}]]],
- [{x:0,brk:[{a:0,b:5,t:'c − x = 5',lv:0,col:P},SG]},[],
-  '<b>x = 0</b>، خیلی دور از مرکز:'+F('(0 − 5)² = 25    25 / 8 = 3.125    e^(−3.125) ≈ 0.044')+'خیلی کوچک، ولی <b>صفر نیست</b>. این همان مزیت «غیرصفر در همه نقاط» اسلاید ۹۴ است.',
-  [['xin'],['brk'],['calc',{l:['(0 − 5)² = 25','25 / 8 = 3.125','e^(−3.125) ≈ 0.044'],r:'0.044'}]]],
- [{cmd:['gbellmf(x,[','2',' ','4',' ','6','])'],fn:'bell',marks:[{x:6,t:'c=6'},{tx:540,ty:100,t:'b = 4'}],brk:[BA],x:null,mu:0,half:1},['bcmd','bf'],
-  '<b>زنگوله‌ای (اسلاید ۹۰):</b> سه عدد به ترتیب a، b، c:<br>• a = 2 نیم‌پهنا (بنفش): در فاصله a از مرکز، μ همیشه 0.5 است (خط‌چین صورتی).<br>• b = 4 شیب دیواره‌ها: هرچه بزرگ‌تر، دیواره‌ها عمودتر.<br>• c = 6 مرکز.'+F('μ(x) = 1 / (1 + |(x − c)/a|^(2b))'),
-  [['params',[[1,'b',0],[3,'m',1],[5,'m',0]]],['draw']]],
- [{x:8,mu:1,brk:[{a:6,b:8,t:'x − c = 2',lv:0,col:P},BA]},[],
-  '<b>x = 8</b>: دقیقاً a = 2 واحد از مرکز. فاصله را «بر حسب a» بشمار، بعد به توان 2b برسان:'+F('|(8 − 6) / 2| = 1\n1^(2×4) = 1^8 = 1\n1 / (1 + 1) = 0.5'),
-  [['xin'],['brk'],['calc',{l:['|(8 − 6) / 2| = 1','1^(2×4) = 1^8 = 1','1 / (1 + 1) = 0.5'],r:'0.5'}]]],
- [{x:7,brk:[{a:6,b:7,t:'x − c = 1',lv:0,col:P},BA]},[],
-  '<b>x = 7</b>: نصفِ a از مرکز. عدد کمتر از ۱ به توان ۸ خیلی کوچک می‌شود، پس جواب تقریباً ۱ است:'+F('|(7 − 6) / 2| = 0.5\n0.5^8 ≈ 0.0039\n1 / (1 + 0.0039) ≈ 0.996')+'برای همین با b بزرگ، سقف زنگوله تقریباً صاف است.',
-  [['xin'],['brk'],['calc',{l:['|(7 − 6) / 2| = 0.5','0.5^8 ≈ 0.0039','1 / (1 + 0.0039) ≈ 0.996'],r:'0.996'}]]],
- [{ax:[-5,5],cmd:['S(x) = 1 / (1 + e^(−x))'],fn:'sig',marks:[],brk:[],x:null,mu:0,half:1},['S'],
-  '<b>سیگموئید (اسلاید ۹۳):</b> پارامتر ندارد و محورش از −۵ تا ۵ است. فقط بالا می‌رود: چپ نزدیک ۰، راست نزدیک ۱، و درست در وسط 0.5.',
-  [['draw']]],
- [{x:0,mu:1},[],
-  '<b>x = 0</b>:'+F('e^(−0) = 1\n1 / (1 + 1) = 0.5'),
-  [['xin'],['calc',{l:['e^(−0) = 1','1 / (1 + 1) = 0.5'],r:'0.5'}]]],
- [{x:2},[],
-  '<b>x = 2</b>: e^(−2) را با ماشین‌حساب بزن:'+F('e^(−2) ≈ 0.135\n1 / (1 + 0.135) ≈ 0.881'),
-  [['xin'],['calc',{l:['e^(−2) ≈ 0.135','1 / (1 + 0.135) ≈ 0.881'],r:'0.881'}]]],
- [{x:-2},['Sm'],
-  '<b>x = −2</b>: لازم نیست از اول حساب کنی. منحنی دور وسط قرینه است:'+F('S(−2) = 1 − S(2) = 1 − 0.881 = 0.119'),
-  [['xin'],['calc',{l:['S(−2) = 1 − S(2)','1 − 0.881 = 0.119'],r:'0.119'}]]],
- [{},[],
-  '<b>خلاصه — برای هر سه شکل:</b><br>۱) پارامترها را <b>به ترتیب درست</b> از کروشه بخوان (گاوسی: اول σ بعد c).<br>۲) فاصله x از مرکز را پیدا کن.<br>۳) فرمول را تکه‌تکه حساب کن؛ توان e را اول، بعد خود e.<br>همه نمادها در جدول زیر تصویر آمده‌اند.']
-];
-anPlayer(FN,GL,RAW);
-})();
 </script>
 </body>
 </html>

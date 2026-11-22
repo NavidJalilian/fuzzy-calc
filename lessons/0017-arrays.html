@@ -1,0 +1,507 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scalars, Vectors, Matrices, Tensors</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Vazirmatn:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="../assets/teacher.css">
+</head>
+<body>
+<main id="app"></main>
+<script src="../assets/teacher.js"></script>
+<script src="../assets/graph.js"></script>
+<script>
+// Lesson 17 — slides 122–142 (part 5: linear algebra). Arrays: scalar, vector, matrix, tensor,
+// their notation, zero-based indexing and shapes such as 3×5×6.
+// Explanations are Persian; numbers, math and technical terms stay in English.
+
+const all = list => Promise.all(list);
+const LTR = s => s; // the player now keeps English / number runs in order inside Persian text by itself
+
+// Square brackets around a column of entries, from y1 to y2, at x1 (left) and x2 (right).
+function brackets(b, id, x1, x2, y1, y2, o = {}) {
+  const c = o.color || 'ink';
+  return all([
+    b.path(`${id}-l`, `M${x1 + 10} ${y1}L${x1} ${y1}L${x1} ${y2}L${x1 + 10} ${y2}`, { color: c, dur: 300 }),
+    b.path(`${id}-r`, `M${x2 - 10} ${y1}L${x2} ${y1}L${x2} ${y2}L${x2 - 10} ${y2}`, { color: c, dur: 300 }),
+  ]);
+}
+// A grid of rows × cols cells with top-left corner (x, y) and cell size s; cells are `${id}-${r}-${c}`.
+function cells(b, id, x, y, rows, cols, s, o = {}) {
+  const list = [];
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+    list.push(b.box(`${id}-${r}-${c}`, x + c * s, y + r * s, s, s, { color: o.color || 'blue', fill: o.fill, r: 2, dur: o.dur ?? 60 }));
+  }
+  return all(list);
+}
+
+// Slide 140/141: x ∈ R^{3×5×6} drawn as three 5×6 sheets.
+const S = 30;                                          // cell size
+const SHEET = [[150, 300], [400, 210], [650, 120]];    // top-left corner of sheet k
+const cellXY = (k, i, j) => [SHEET[k][0] + j * S + S / 2, SHEET[k][1] + i * S + S / 2];
+async function tensor356(b) {
+  for (const [k, [x, y]] of SHEET.entries()) {
+    await cells(b, `s${k}`, x, y, 5, 6, S, { color: ['blue', 'purple', 'green'][k], dur: 40 });
+    await b.write(`sk${k}`, x + 90, y - 12, `k = ${k}`, { size: 22, color: ['blue', 'purple', 'green'][k], bold: true });
+  }
+  await all([0, 1, 2, 3, 4].map(i => b.write(`ri${i}`, 132, SHEET[0][1] + i * S + 22, String(i), { size: 18, color: 'soft', dur: 80 })));
+  await all([0, 1, 2, 3, 4, 5].map(j => b.write(`cj${j}`, SHEET[0][0] + j * S + S / 2, 472, String(j), { size: 18, color: 'soft', dur: 80 })));
+  await b.write('rl', 100, 370, 'i', { size: 24, color: 'soft' });
+  await b.write('cl', 240, 500, 'j', { size: 24, color: 'soft' });
+}
+
+function quizBoard(n, question, o = { size: 44 }) {
+  return async b => {
+    await b.clear();
+    await b.write('q-n', 500, 60, `سؤال ${n} از 6`, { size: 24, color: 'soft', fa: true });
+    await b.write('q-q', 500, 140, question, o);
+  };
+}
+
+Teacher.start({
+  id: 'L17',
+  number: 17,
+  title: 'اسکالر، بردار، ماتریس و تانسور',
+  chapter: 'بخش 5 · جبر خطی',
+  slides: '122–142',
+  intro: 'آرایه‌ها ظرف عددها هستند: یک عدد، یک ردیف، یک جدول، یا چند جدول روی هم — و شکلی مثل 3×5×6 می‌گوید چند تا در هر جهت داریم.',
+  next: { href: '0018-what-is-ml.html', title: 'یادگیری ماشین چیست' },
+  steps: [
+    // ---------------------------------------------------------- 1. intro
+    {
+      say: 'سلام! به بخش 5 خوش آمدید: *جبر خطی*. یادگیری ماشین با داده کار می‌کند و داده همیشه در *آرایه*‌ها نگه داشته می‌شود. آرایه یعنی ظرفی برای عددها. چهار نوع آرایه داریم: اسکالر، بردار، ماتریس و تانسور. امروز یاد می‌گیریم هر کدام چیست، چطور نوشته می‌شود، و چطور یک عدد را داخلش پیدا کنیم.',
+      term: ['Array', 'آرایه'],
+      draw: async b => {
+        await b.write('t1', 500, 80, 'بخش 5 · جبر خطی', { size: 46, color: 'blue', bold: true, fa: true });
+        await b.write('t2', 500, 135, 'آرایه‌ها: ظرف‌هایی برای عددها', { size: 28, color: 'soft', fa: true });
+        await b.box('i0', 800, 300, 40, 40, { color: 'orange', r: 3 });
+        await cells(b, 'i1', 600, 240, 4, 1, 40, { color: 'orange' });
+        await cells(b, 'i2', 340, 240, 4, 4, 40, { color: 'orange' });
+        for (let k = 2; k >= 0; k--) await cells(b, `i3${k}`, 90 + k * 22, 260 - k * 22, 3, 3, 36, { color: k ? 'soft' : 'orange' });
+        const L = [[820, 'اسکالر'], [620, 'بردار'], [420, 'ماتریس'], [180, 'تانسور']];
+        await all(L.map(([x, t], k) => b.write(`l${k}`, x, 450, t, { size: 30, bold: true, fa: true })));
+      },
+    },
+    // ---------------------------------------------------------- 2. scalar
+    {
+      say: 'ساده‌ترین آرایه *scalar* یا اسکالر است: فقط *یک عدد تنها* (اسلاید 123). مثل 3، √5، یک‌ششم یا 3.14. هیچ ردیف و ستونی ندارد؛ فقط یک مقدار است.',
+      term: ['Scalar', 'اسکالر'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 90, 'اسکالر', { size: 50, color: 'orange', bold: true, fa: true });
+        await b.write('he', 500, 140, 'scalar', { size: 30, color: 'soft' });
+        await b.write('d', 500, 200, 'یک عدد تنها!', { size: 32, fa: true });
+        const N = ['3', '√5', '1/6', '3.14'];
+        for (const [k, n] of N.entries()) {
+          await b.box(`bx${k}`, 160 + k * 190, 270, 110, 100, { color: 'blue', r: 8, dur: 300 });
+          await b.write(`n${k}`, 215 + k * 190, 340, n, { size: 50, color: 'blue', bold: true });
+        }
+      },
+    },
+    // ---------------------------------------------------------- 3. scalar notation
+    {
+      say: 'نمایش اسکالر (اسلاید 124): با حروف *کوچک* و ایتالیک می‌نویسیم، مثل x، y، z. در جبر خطی می‌نویسیم x ∈ ℝ. علامت ∈ یعنی «عضوِ» یا «متعلق به»، و ℝ مجموعه‌ی همه‌ی عددهای حقیقی است. پس x ∈ ℝ یعنی «x یک عدد حقیقی است».',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 80, 'نمایش اسکالر', { size: 42, color: 'blue', bold: true, fa: true });
+        await b.write('xyz', 500, 170, 'x ,  y ,  z', { size: 56 });
+        await b.write('xyzl', 500, 220, 'حروف کوچک (و ایتالیک)', { size: 24, color: 'soft', fa: true });
+        await b.write('xr', 500, 330, 'x ∈ ℝ', { size: 70, color: 'orange', bold: true });
+        await all([
+          b.write('in', 290, 430, '∈ = «عضوِ»', { size: 28, color: 'purple', fa: true }),
+          b.write('rr', 700, 430, 'ℝ = عددهای حقیقی', { size: 28, color: 'purple', fa: true }),
+        ]);
+        await b.write('rd', 500, 500, 'یعنی: x یک عدد حقیقی است', { size: 28, color: 'green', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 4. slide 125 example
+    {
+      say: 'مثال اسلاید 125: این عبارت‌ها یعنی چه؟ x, y ∈ {0, 1} یعنی x و y هر کدام *فقط* 0 یا 1 هستند. z ∈ ℝ⁺ یعنی z یک عدد حقیقی مثبت است. p ∈ [−1, 1] یعنی p هر عدد حقیقی بین −1 و 1 است، با خود دو سر. s ∈ ℕ یعنی s یک عدد طبیعی است: 1، 2، 3 و ….',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, `مثال اسلاید ${LTR('125')}: یعنی چه؟`, { size: 36, color: 'blue', bold: true, fa: true });
+        const L = [
+          ['x , y ∈ {0, 1}', `هر کدام یا ${LTR('0')} است یا ${LTR('1')}`],
+          ['z ∈ ℝ^{+}', 'یک عدد حقیقی مثبت'],
+          ['p ∈ [−1, 1]', 'هر عدد حقیقی از منفی 1 تا 1'],
+          ['s ∈ ℕ', `عدد طبیعی: ${LTR('1, 2, 3, …')}`],
+        ];
+        for (const [k, [m, t]] of L.entries()) {
+          const y = 160 + k * 95;
+          await b.write(`m${k}`, 250, y, m, { size: 40, color: 'orange' });
+          await b.arrow(`a${k}`, 430, y - 12, 500, y - 12, { color: 'soft', head: 10, dur: 200 });
+          await b.write(`t${k}`, 900, y, t, { size: 28, anchor: 'start', fa: true });
+        }
+      },
+    },
+    // ---------------------------------------------------------- 5. vector
+    {
+      say: 'آرایه‌ی بعدی *vector* یا بردار است (اسلاید 126): یک *لیست* از اسکالرها، پشت سر هم. مثل این ستون: 1.5، √2 و −1. می‌شود گفت بردار *تعمیم‌یافته‌ی* اسکالر است: به جای یک عدد، چند عدد در یک ردیف.',
+      term: ['Vector', 'بردار'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 80, 'بردار', { size: 50, color: 'orange', bold: true, fa: true });
+        await b.write('he', 500, 125, 'vector', { size: 30, color: 'soft' });
+        await b.write('xe', 380, 290, 'x =', { size: 44 });
+        for (const [k, v] of ['1.5', '√2', '−1'].entries()) await b.write(`v${k}`, 500, 225 + k * 65, v, { size: 44, color: 'blue', bold: true });
+        await brackets(b, 'br', 445, 555, 180, 370);
+        await b.write('d1', 860, 240, 'لیستی از اسکالرها', { size: 28, anchor: 'start', fa: true });
+        await b.write('d2', 860, 310, 'تعمیم‌یافته‌ی اسکالر', { size: 28, anchor: 'start', fa: true });
+        await b.write('d3', 500, 460, '3 عدد ← یک بردار', { size: 28, color: 'green', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 6. vector notation
+    {
+      say: 'نمایش بردار (اسلاید 127): با حروف *کوچک و پررنگ* (bold): x، y، z. در جبر خطی می‌نویسیم x ∈ ℝⁿ. آن n بالای ℝ یعنی بردار n عدد حقیقی دارد. مثلاً x ∈ ℝ³ یعنی x سه عدد حقیقی دارد.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 80, 'نمایش بردار', { size: 42, color: 'blue', bold: true, fa: true });
+        await b.write('xyz', 500, 170, 'x ,  y ,  z', { size: 56, bold: true });
+        await b.write('xyzl', 500, 220, 'حروف کوچک و پررنگ (bold)', { size: 24, color: 'soft', fa: true });
+        await b.write('xr', 500, 330, 'x ∈ ℝ^n', { size: 70, color: 'orange', bold: true });
+        await b.write('nn', 500, 420, 'n عدد حقیقی، پشت سر هم', { size: 28, color: 'purple', fa: true });
+        await b.write('ex', 500, 495, `مثال:  ${LTR('x ∈ ℝ³')}  یعنی سه عدد`, { size: 26, color: 'green', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 7. slide 128 example
+    {
+      say: 'مثال اسلاید 128. p ∈ ℕ⁵ یعنی p برداری از 5 عدد طبیعی است. x = [−1, 0, 1, 2, 5]ᵀ یک بردار 5 عضوی است؛ آن T یعنی ستونی نوشته شده، پس x ∈ ℝ⁵. دقت کن: x در ℕ⁵ نیست، چون −1 و 0 طبیعی نیستند. y = [1.5] برداری با فقط *یک* عضو است و z = [0, 0, 0, 1] چهار عضو دارد.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, `مثال اسلاید ${LTR('128')}`, { size: 36, color: 'blue', bold: true, fa: true });
+        const L = [
+          ['p ∈ ℕ^5', `${LTR('5')} عدد طبیعی`],
+          ['x = [−1, 0, 1, 2, 5]^T', `${LTR('5')} عضو، ستونی ← ${LTR('x ∈ ℝ⁵')}`],
+          ['y = [1.5]', `فقط ${LTR('1')} عضو ← ${LTR('ℝ¹')}`],
+          ['z = [0, 0, 0, 1]', `${LTR('4')} عضو ← ${LTR('ℝ⁴')}`],
+        ];
+        for (const [k, [m, t]] of L.entries()) {
+          const y = 160 + k * 90;
+          await b.write(`m${k}`, 80, y, m, { size: 36, color: 'orange', anchor: 'start' });
+          await b.write(`t${k}`, 920, y, t, { size: 26, anchor: 'start', fa: true });
+        }
+        await b.write('trap', 500, 520, 'x ∉ ℕ⁵   چون منفی 1 و صفر طبیعی نیستند', { size: 26, color: 'red', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 8. indexing a vector
+    {
+      say: 'اندیس در بردار (اسلاید 129 و 130): عضو شماره‌ی i را x_i می‌نویسیم، که همان اسکالرِ داخل بردار است. نکته‌ی مهم: شماره‌گذاری از *صفر* شروع می‌شود. در مثال اسلاید x = [0.1, 2.1, 3.0, −1]: x_0 = 0.1، x_1 = 2.1، x_2 = 3.0 و x_3 = −1. پس بردار 4 عضوی آخرین اندیسش 3 است، نه 4.',
+      term: ['Index', 'اندیس'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'x ∈ ℝ^n  →  x_i', { size: 44, color: 'blue', bold: true });
+        await b.write('xe', 290, 300, 'x =', { size: 44 });
+        const V = ['0.1', '2.1', '3.0', '−1'];
+        for (const [k, v] of V.entries()) {
+          const y = 175 + k * 60;
+          await b.write(`v${k}`, 410, y, v, { size: 40 });
+          await b.arrow(`a${k}`, 470, y - 12, 560, y - 12, { color: 'red', head: 10, dur: 250 });
+          await b.write(`x${k}`, 610, y, `x_${k}`, { size: 38, color: 'red', bold: true, dur: 250 });
+        }
+        await brackets(b, 'br', 355, 465, 130, 370);
+        await b.write('z0', 800, 160, 'از صفر شروع کن!', { size: 28, color: 'orange', bold: true, fa: true });
+        await b.write('last', 500, 450, `${LTR('4')} عضو ← اندیس‌ها ${LTR('0, 1, 2, 3')}`, { size: 30, color: 'green', fa: true });
+        await b.write('last2', 500, 505, `آخرین اندیس = ${LTR('n − 1')}`, { size: 26, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 9. column vs row
+    {
+      say: 'بردار ستونی و سطری (اسلاید 131): حالت پیش‌فرض بردار *ستونی* است، یعنی عضوها زیر هم: x ∈ ℝ³. اگر همان عضوها را کنار هم بنویسیم، بردار *سطری* می‌شود و آن را با xᵀ نشان می‌دهیم. T یعنی *transpose* یا ترانهاده: ستون را می‌خوابانیم تا سطر شود.',
+      term: ['Transpose', 'ترانهاده'],
+      draw: async b => {
+        await b.clear();
+        await b.write('cx', 200, 175, 'x =', { size: 38 });
+        for (const k of [0, 1, 2]) await b.write(`c${k}`, 300, 125 + k * 50, `x_${k}`, { size: 34, color: 'blue' });
+        await brackets(b, 'cb', 260, 340, 90, 240);
+        await b.write('ca', 380, 175, '→  x ∈ ℝ^3', { size: 36, anchor: 'start', color: 'orange' });
+        await b.write('cl', 900, 175, 'بردار ستونی (پیش‌فرض)', { size: 26, anchor: 'start', fa: true, bold: true });
+        await b.arrow('turn', 300, 260, 300, 345, { color: 'purple' });
+        await b.write('turnl', 330, 310, 'T', { size: 32, color: 'purple', bold: true, anchor: 'start' });
+        await b.write('rv', 250, 410, 'x = [ x_0   x_1   x_2 ]', { size: 32, color: 'blue' });
+        await b.write('ra', 420, 410, '→  x^T ∈ ℝ^3', { size: 36, anchor: 'start', color: 'orange' });
+        await b.write('rl', 900, 410, 'بردار سطری', { size: 26, anchor: 'start', fa: true, bold: true });
+        await b.write('tn', 500, 505, 'T = transpose: ستون ↔ سطر', { size: 26, color: 'purple', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 10. vector dimension
+    {
+      say: 'ابعاد بردار یا *dimension* (اسلاید 132): یعنی تعداد عضوهای بردار. برای x = [x_0, x_1, x_2] داریم dim(x) = len(x) = 3. تله‌ی امتحان: وقتی می‌گوییم «بردار 3‌بعدی» یعنی 3 *عضو* دارد؛ ولی خودش هنوز یک آرایه‌ی *یک‌محوره* است، یعنی فقط یک ردیف. با تانسور سه‌بعدی، که سه محور دارد، قاطی نکن.',
+      term: ['Dimension', 'ابعاد'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 80, 'ابعاد بردار — Dimension', { size: 38, color: 'blue', bold: true, fa: true });
+        await b.write('x', 500, 170, 'x = [ x_0    x_1    x_2 ]', { size: 40 });
+        await b.write('d', 500, 250, 'dim(x) = len(x) = 3', { size: 46, color: 'green', bold: true });
+        await b.write('dl', 500, 300, 'تعداد عضوهای بردار', { size: 24, color: 'soft', fa: true });
+        await b.box('bx', 110, 350, 780, 160, { color: 'red', fill: 'red' });
+        await b.write('t1', 500, 400, `«بردار ${LTR('3')}‌بعدی» = ${LTR('3')} عضو، ولی فقط یک ردیف`, { size: 26, color: 'red', fa: true });
+        await b.write('t2', 500, 460, `با «تانسور سه‌بعدی» (سه محور، مثل ${LTR('3×5×6')}) فرق دارد`, { size: 24, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 11. matrix
+    {
+      say: 'آرایه‌ی بعدی *matrix* یا ماتریس است (اسلاید 133): یک *شبکه* از عددها، با سطر و ستون. ماتریس تعمیم‌یافته‌ی بردار است: چند بردار که کنار هم یا زیر هم چیده شده‌اند. مثلاً هر ستون این ماتریس 3×3 اسلاید خودش یک بردار است.',
+      term: ['Matrix', 'ماتریس'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 75, 'ماتریس', { size: 48, color: 'orange', bold: true, fa: true });
+        await b.write('he', 500, 120, 'matrix', { size: 28, color: 'soft' });
+        const M = [['1', '1.9', '−1.2'], ['5', '6.9', '0'], ['0', '0.5', '−3.8']];
+        for (const [i, row] of M.entries()) for (const [j, v] of row.entries()) await b.write(`m-${i}-${j}`, 380 + j * 110, 215 + i * 65, v, { size: 38, dur: 150 });
+        await brackets(b, 'br', 320, 660, 170, 365);
+        await b.ring('col', 490, 260, 42, 105, { color: 'purple', tilt: 0 });
+        await b.write('coll', 490, 400, 'یک ستون = یک بردار', { size: 24, color: 'purple', fa: true });
+        await b.write('d1', 920, 220, 'شبکه‌ای از عددها', { size: 26, anchor: 'start', fa: true });
+        await b.write('d2', 920, 280, 'چند بردار کنار هم', { size: 26, anchor: 'start', fa: true });
+        await b.write('d3', 500, 480, 'تعمیم‌یافته‌ی بردار', { size: 28, color: 'green', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 12. matrix notation
+    {
+      say: 'نمایش ماتریس (اسلاید 134): با حروف *بزرگ*: X، Y، Z. در جبر خطی می‌نویسیم X ∈ ℝ^{m×n}. عدد اول، m، تعداد *سطر*هاست و عدد دوم، n، تعداد *ستون*ها. همیشه اول سطر، بعد ستون.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 80, 'نمایش ماتریس', { size: 42, color: 'blue', bold: true, fa: true });
+        await b.write('xyz', 500, 170, 'X ,  Y ,  Z', { size: 56 });
+        await b.write('xyzl', 500, 220, 'حروف بزرگ', { size: 24, color: 'soft', fa: true });
+        await b.write('xr', 500, 340, 'X ∈ ℝ^{m×n}', { size: 70, color: 'orange', bold: true });
+        await b.arrow('am', 545, 300, 470, 420, { color: 'purple', head: 10 });
+        await b.write('ml', 430, 455, 'm = سطر', { size: 28, color: 'purple', fa: true, bold: true });
+        await b.arrow('an', 600, 300, 640, 420, { color: 'green', head: 10 });
+        await b.write('nl', 680, 455, 'n = ستون', { size: 28, color: 'green', fa: true, bold: true });
+        await b.write('rule', 500, 520, 'اول سطر، بعد ستون', { size: 26, color: 'red', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 13. matrix indexing
+    {
+      say: 'اندیس در ماتریس (اسلاید 135): هر عضو دو اندیس دارد: x_{ij} یا x_{i,j}. اولی، i، شماره‌ی *سطر* است و دومی، j، شماره‌ی *ستون*؛ هر دو از صفر. اندیس اول پایین می‌رود و اندیس دوم به راست. مثلاً x_{21} یعنی سطر 2، ستون 1.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'X ∈ ℝ^{m×n}  →  x_{ij}  or  x_{i,j}', { size: 38, color: 'blue', bold: true });
+        for (let i = 0; i < 4; i++) for (let j = 0; j < 3; j++) await b.write(`m-${i}-${j}`, 420 + j * 100, 175 + i * 60, `x_{${i}${j}}`, { size: 34, dur: 100 });
+        await brackets(b, 'br', 365, 675, 135, 370);
+        await b.arrow('ar', 400, 125, 660, 125, { color: 'green', head: 10 });
+        await b.write('arl', 720, 132, 'j  ستون', { size: 24, color: 'green', fa: true, anchor: 'end' });
+        await b.arrow('ad', 345, 150, 345, 360, { color: 'purple', head: 10 });
+        await b.write('adl', 330, 260, 'i  سطر', { size: 24, color: 'purple', fa: true, anchor: 'start' });
+        await b.ring('r21', 520, 283, 42, 26, { color: 'red' });
+        await b.write('e', 500, 445, `${LTR('x₂₁')}: سطر ${LTR('2')}، ستون ${LTR('1')}  (از صفر)`, { size: 28, color: 'red', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 14. matrix shape + square
+    {
+      say: 'ابعاد ماتریس (اسلاید 136): همین ماتریس 4 سطر و 3 ستون دارد، پس X ∈ ℝ^{4×3}. اگر تعداد سطر و ستون برابر باشد، می‌گوییم *ماتریس مربعی*: X ∈ ℝ^{m×m}، مثل همان ماتریس 3×3 اسلاید 133.',
+      term: ['Square matrix', 'ماتریس مربعی'],
+      draw: async b => {
+        await b.erase(['e', 'r21']);
+        await b.write('shape', 820, 270, '→  X ∈ ℝ^{4×3}', { size: 38, color: 'orange', bold: true });
+        await b.write('sh2', 820, 320, `${LTR('4')} سطر × ${LTR('3')} ستون`, { size: 24, color: 'orange', fa: true });
+        await b.box('bx', 200, 410, 600, 115, { color: 'green', fill: 'green' });
+        await b.write('sq', 500, 455, 'ماتریس مربعی — Square matrix', { size: 28, color: 'green', bold: true, fa: true });
+        await b.write('sq2', 500, 503, 'X ∈ ℝ^{m×m}', { size: 34, color: 'green' });
+      },
+    },
+    // ---------------------------------------------------------- 15. tensor
+    {
+      say: 'و آرایه‌ی آخر: *tensor* یا تانسور (اسلاید 137)، تعمیم‌یافته‌ی ماتریس. ماتریس دو عدد در شکلش دارد (سطر و ستون). تانسور می‌تواند بیشتر داشته باشد: X ∈ ℝ^{c×m×n} سه محور دارد؛ c یعنی تعداد *صفحه*‌ها یا کانال‌ها، بعد سطر، بعد ستون. Y ∈ ℝ^{b×c×m×n} چهار محور دارد و Z ∈ ℝ^{p×b×c×m×n} پنج محور. قاعده: تعداد عددهای شکل = تعداد محورها.',
+      term: ['Tensor', 'تانسور'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 75, 'تانسور', { size: 48, color: 'orange', bold: true, fa: true });
+        await b.write('he', 500, 120, 'tensor — تعمیم‌یافته‌ی ماتریس', { size: 26, color: 'soft', fa: true });
+        const L = [['X ∈ ℝ^{c×m×n}', 3], ['Y ∈ ℝ^{b×c×m×n}', 4], ['Z ∈ ℝ^{p×b×c×m×n}', 5]];
+        for (const [k, [m, n]] of L.entries()) {
+          const y = 200 + k * 80;
+          await b.write(`m${k}`, 120, y, m, { size: 40, anchor: 'start', color: 'blue' });
+          await b.write(`n${k}`, 880, y, `${LTR(String(n))} محور`, { size: 30, anchor: 'start', fa: true, bold: true, color: 'purple' });
+        }
+        await b.write('cmn', 500, 450, 'c = صفحه (کانال)     m = سطر     n = ستون', { size: 26, fa: true });
+        await b.write('rule', 500, 510, 'تعداد عددهای شکل = تعداد محورها', { size: 28, color: 'green', bold: true, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 16. tensor notation + index
+    {
+      say: 'نمایش تانسور (اسلاید 138): مثل ماتریس با حروف بزرگ، فقط با یک فونت متفاوت. اندیس در تانسور سه‌محوره: x_{k,i,j}. k شماره‌ی *صفحه* است، i شماره‌ی *سطر* و j شماره‌ی *ستون* — باز هم همه از صفر. یعنی اول صفحه را انتخاب کن، بعد در همان صفحه مثل ماتریس سطر و ستون را.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 75, 'X ∈ ℝ^{c×m×n}  →  x_{k,i,j}', { size: 44, color: 'blue', bold: true });
+        for (let k = 2; k >= 0; k--) {
+          await cells(b, `p${k}`, 170 + k * 40, 210 - k * 40, 3, 4, 40, { color: ['blue', 'purple', 'green'][k], dur: 50 });
+        }
+        await all([
+          b.write('pk0', 250, 355, 'k = 0', { size: 22, color: 'blue', bold: true }),
+          b.write('pk1', 445, 285, 'k = 1', { size: 22, color: 'purple', bold: true }),
+          b.write('pk2', 330, 118, 'k = 2', { size: 22, color: 'green', bold: true }),
+        ]);
+        const L = [['k', 'صفحه', 'orange'], ['i', 'سطر', 'purple'], ['j', 'ستون', 'green']];
+        for (const [k, [s, t, c]] of L.entries()) {
+          await b.write(`ls${k}`, 640, 210 + k * 70, s, { size: 40, color: c, bold: true });
+          await b.write(`lt${k}`, 690, 210 + k * 70, `←  ${t}`, { size: 30, color: c, fa: true, anchor: 'end' });
+        }
+        await b.write('nt', 500, 470, 'اول صفحه، بعد سطر، بعد ستون — همه از صفر', { size: 26, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 17. all arrays are tensors
+    {
+      say: 'اسلاید 139 می‌گوید: *همه‌ی آرایه‌ها تانسورند!* تانسور صفربعدی همان اسکالر است، یعنی هیچ اندیسی لازم ندارد. تانسور یک‌بعدی همان بردار است، با یک اندیس. تانسور دوبعدی همان ماتریس است، با دو اندیس. و تانسور سه‌بعدی سه اندیس می‌خواهد. پس تعداد بعدها همان تعداد اندیس‌هاست.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'همه‌ی آرایه‌ها تانسورند!', { size: 40, color: 'orange', bold: true, fa: true });
+        const X = [830, 620, 400, 160];
+        await b.box('o0', X[0] - 20, 210, 40, 40, { color: 'blue', r: 3 });
+        await cells(b, 'o1', X[1] - 20, 170, 4, 1, 32, { color: 'blue' });
+        await cells(b, 'o2', X[2] - 64, 170, 4, 4, 32, { color: 'blue' });
+        for (let k = 2; k >= 0; k--) await cells(b, `o3${k}`, X[3] - 60 + k * 16, 186 - k * 16, 3, 3, 30, { color: k ? 'soft' : 'blue' });
+        const T = [['0', 'اسکالر', 'x'], ['1', 'بردار', 'x_i'], ['2', 'ماتریس', 'x_{ij}'], ['3', 'تانسور', 'x_{k,i,j}']];
+        for (const [k, [d, n, ix]] of T.entries()) {
+          await b.write(`d${k}`, X[k], 360, `${LTR(d)}‌بعدی`, { size: 26, color: 'purple', bold: true, fa: true });
+          await b.write(`n${k}`, X[k], 405, `= ${n}`, { size: 26, fa: true });
+          await b.write(`i${k}`, X[k], 465, ix, { size: 32, color: 'green' });
+        }
+        await b.write('rule', 500, 525, 'تعداد بعدها = تعداد اندیس‌ها', { size: 24, color: 'green', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 18. the 3×5×6 tensor
+    {
+      say: 'تانسور سه‌بعدی اسلاید 140: x ∈ ℝ^{3×5×6}. شکل را از چپ بخوان: 3 صفحه، هر صفحه 5 سطر و 6 ستون. روی تخته سه صفحه را جدا از هم کشیده‌ام، مثل اسلاید 141. تعداد کل عددها = 3 × 5 × 6 = 90.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 230, 80, 'x ∈ ℝ^{3×5×6}', { size: 44, color: 'blue', bold: true });
+        await tensor356(b);
+        await b.write('rd', 500, 525, `${LTR('3')} صفحه × ${LTR('5')} سطر × ${LTR('6')} ستون = ${LTR('90')} عدد`, { size: 28, color: 'green', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 19. indexing the 3D tensor
+    {
+      say: 'حالا اندیس‌های اسلاید 141 را پیدا کنیم. x_{0,0,1}: صفحه‌ی 0، سطر 0، ستون 1. x_{1,0,5}: صفحه‌ی 1، سطر 0، ستون 5 یعنی آخرین ستون. x_{2,0,1}: صفحه‌ی 2، سطر 0، ستون 1. و x_{0,2,3}: صفحه‌ی 0، سطر 2، ستون 3. اسلاید دو تای اول را با ضربدر قرمز علامت زده است.',
+      draw: async b => {
+        const P = [[0, 0, 1, 'red'], [1, 0, 5, 'red'], [2, 0, 1, 'orange'], [0, 2, 3, 'orange']];
+        for (const [n, [k, i, j, c]] of P.entries()) {
+          const [x, y] = cellXY(k, i, j);
+          await b.write(`px${n}`, x, y + 9, '✕', { size: 26, color: c, bold: true, dur: 150 });
+          await b.write(`pl${n}`, 870, 320 + n * 45, `x_{${k},${i},${j}}  ✓`, { size: 28, color: c, dur: 250 });
+        }
+      },
+    },
+    // ---------------------------------------------------------- 20. the impossible index
+    {
+      say: 'ولی اسلاید یک اندیس دیگر هم دارد: x_{1,5,5}. صفحه‌ی 1، سطر 5؟ هر صفحه فقط 5 سطر دارد، یعنی سطرهای 0 تا 4. سطر 5 *وجود ندارد*! پس x_{1,5,5} عضو این تانسور نیست. یا سؤال تله‌ای است، یا اسلاید اشتباه کرده. در امتحان همیشه اول چک کن هر اندیس از اندازه‌ی همان محور کوچک‌تر باشد.',
+      tip: true,
+      draw: async b => {
+        await b.erase('rd');
+        const [x, y] = cellXY(1, 5, 5);
+        await b.ring('bad', x, y, 22, 18, { color: 'red' });
+        await b.write('badq', x, y + 10, '?', { size: 26, color: 'red', bold: true });
+        await b.write('bl', 870, 500, 'x_{1,5,5}  ✗', { size: 30, color: 'red', bold: true });
+        await b.write('bn', 470, 525, 'سطرها فقط از 0 تا 4 هستند؛ سطر 5 نداریم', { size: 26, color: 'red', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 21. 4D tensor
+    {
+      say: 'و تانسور چهاربعدی اسلاید 142: x ∈ ℝ^{3×5×5×6}. باز از چپ بخوان: یک لیست 3 تایی، که هر عضوش خودش یک تانسور سه‌بعدی 5×5×6 است، یعنی 5 صفحه‌ی 5 در 6. تعداد کل: 3 × 5 × 5 × 6 = 450. یک مثال واقعی از خودمان: 3 عکس رنگی، که هر کدام چند کانال رنگ و یک جدول پیکسل دارد، دقیقاً یک تانسور چهاربعدی است.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 75, 'x ∈ ℝ^{3×5×5×6}', { size: 46, color: 'blue', bold: true });
+        for (let g = 0; g < 3; g++) {
+          const x0 = 140 + g * 260;
+          for (let s = 4; s >= 0; s--) await b.box(`g${g}-${s}`, x0 + s * 12, 220 - s * 12, 120, 100, { color: s ? 'soft' : 'green', r: 3, dur: 120 });
+          await b.write(`gl${g}`, x0 + 60, 360, `${g}`, { size: 30, color: 'purple', bold: true });
+        }
+        await b.write('d1', 500, 420, `لیستی از ${LTR('3')} تانسور سه‌بعدی ${LTR('5×5×6')}`, { size: 28, fa: true });
+        await b.write('d2', 500, 480, '3 × 5 × 5 × 6 = 450', { size: 36, color: 'green', bold: true });
+        await b.write('d3', 500, 530, 'مثلاً: چند عکس رنگی کنار هم', { size: 22, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 22. summary
+    {
+      say: 'جمع‌بندی کنیم. این شش نکته را یک بار دیگر بخوانید، بعد برویم سراغ سؤال‌ها.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'یادت باشد', { size: 48, color: 'orange', bold: true, fa: true });
+        const L = [
+          `اسکالر = یک عدد (${LTR('x ∈ ℝ')})؛ بردار = لیست عددها (${LTR('x ∈ ℝⁿ')})`,
+          `ماتریس ${LTR('X ∈ ℝᵐˣⁿ')}: اول سطر، بعد ستون`,
+          'تانسور = تعمیم ماتریس؛ تعداد عددهای شکل = تعداد محورها',
+          'اسکالر، بردار و ماتریس = تانسور صفر، یک و دوبعدی',
+          'اندیس‌ها از صفر: آخرین اندیس هر محور = اندازه منهای 1',
+          `تعداد کل عددها = ضرب عددهای شکل (${LTR('3×5×6 = 90')})`,
+        ];
+        for (const [k, l] of L.entries()) await b.write(`m${k}`, 900, 145 + k * 66, '•  ' + l, { size: 25, anchor: 'start', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- quizzes
+    {
+      say: 'نوبت شماست! تانسور x ∈ ℝ^{3×5×6} روی هم چند عدد دارد؟',
+      draw: quizBoard(1, 'x ∈ ℝ^{3×5×6}  →  ? numbers'),
+      quiz: { answer: ['90'], hint: 'عددهای شکل را در هم ضرب کن.', explain: '3 × 5 × 6 = 90' },
+      solve: async b => {
+        await b.write('s1', 500, 280, `${LTR('3')} صفحه × ${LTR('5')} سطر × ${LTR('6')} ستون`, { size: 34, color: 'blue', fa: true });
+        await b.write('s2', 500, 380, '3 × 5 × 6 = 90', { size: 50, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'بردار اسلاید 130 را داریم: x = [0.1, 2.1, 3.0, −1]. مقدار x_2 چند است؟',
+      draw: quizBoard(2, 'x = [0.1 , 2.1 , 3.0 , −1]     x_2 = ?'),
+      quiz: { answer: ['3', '3.0'], hint: 'شمارش از صفر است: x_0 اولی است.', explain: 'x_0 = 0.1، x_1 = 2.1، x_2 = 3.0' },
+      solve: async b => {
+        const V = ['0.1', '2.1', '3.0', '−1'];
+        for (const [k, v] of V.entries()) {
+          await b.write(`sv${k}`, 260 + k * 160, 280, v, { size: 40, color: k === 2 ? 'green' : 'ink', bold: k === 2 });
+          await b.write(`si${k}`, 260 + k * 160, 340, `x_${k}`, { size: 32, color: 'purple' });
+        }
+        await b.ring('sr', 580, 300, 60, 60, { color: 'green' });
+        await b.write('s3', 500, 450, 'x_2 = 3.0', { size: 46, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'ماتریس اسلاید 133 را داریم. عضو x_{10} چند است؟',
+      draw: async b => {
+        await quizBoard(3, 'x_{10} = ?', { size: 48 })(b);
+        const M = [['1', '1.9', '−1.2'], ['5', '6.9', '0'], ['0', '0.5', '−3.8']];
+        for (const [i, row] of M.entries()) for (const [j, v] of row.entries()) await b.write(`m-${i}-${j}`, 400 + j * 100, 250 + i * 60, v, { size: 34, dur: 80 });
+        await brackets(b, 'br', 345, 655, 210, 375);
+      },
+      quiz: { answer: ['5'], hint: 'اندیس اول سطر است، اندیس دوم ستون — هر دو از صفر.', explain: 'x_{10} یعنی سطر 1 (دومین سطر)، ستون 0 (اولین ستون): 5' },
+      solve: async b => {
+        await b.ring('sr', 400, 293, 34, 28, { color: 'green' });
+        await b.recolor('m-1-0', 'green');
+        await b.write('s1', 500, 450, 'سطر 1 و ستون 0: جواب 5', { size: 34, color: 'green', fa: true });
+      },
+    },
+    {
+      say: 'بردار x = [−1, 0, 1, 2, 5]ᵀ عضو کدام مجموعه است؟',
+      draw: quizBoard(4, 'x = [−1, 0, 1, 2, 5]^T  ∈  ?'),
+      quiz: { choices: ['ℝ^5', 'ℕ^5', 'ℝ^{5×5}', 'ℝ^1'], correct: 0, explain: 'x پنج عدد حقیقی دارد، پس ℝ⁵. در ℕ⁵ نیست چون −1 و 0 عدد طبیعی نیستند؛ و ℝ^{5×5} یک ماتریس 25 عضوی است.' },
+      solve: async b => {
+        await b.write('s1', 500, 270, '5 عدد حقیقی  ←  ℝ⁵', { size: 36, color: 'green', fa: true });
+        await b.write('s2', 500, 360, 'منفی 1 و صفر طبیعی نیستند  ←  ℕ⁵ نه', { size: 30, color: 'red', fa: true });
+        await b.write('s3', 500, 440, `${LTR('ℝ⁵ˣ⁵')}: ماتریس ${LTR('25')} عضوی`, { size: 28, color: 'soft', fa: true });
+      },
+    },
+    {
+      say: 'برای x ∈ ℝ^{3×5×6} کدام اندیس *معتبر* است؟',
+      draw: quizBoard(5, 'x ∈ ℝ^{3×5×6}:  ?'),
+      quiz: { choices: ['x_{2,4,5}', 'x_{3,0,0}', 'x_{1,5,5}', 'x_{0,0,6}'], correct: 0, explain: 'صفحه‌ها 0 تا 2، سطرها 0 تا 4 و ستون‌ها 0 تا 5 هستند. فقط x_{2,4,5} در این محدوده است؛ آن هم آخرین عدد تانسور است.' },
+      solve: async b => {
+        await b.write('s0', 500, 230, 'k: 0 … 2     i: 0 … 4     j: 0 … 5', { size: 34, color: 'blue' });
+        const C = [['x_{2,4,5}  ✓', 'green'], ['x_{3,0,0}  ✗  (k)', 'red'], ['x_{1,5,5}  ✗  (i)', 'red'], ['x_{0,0,6}  ✗  (j)', 'red']];
+        for (const [k, [t, c]] of C.entries()) await b.write(`s${k + 1}`, 300 + (k % 2) * 400, 330 + Math.floor(k / 2) * 80, t, { size: 32, color: c });
+      },
+    },
+    {
+      say: 'سؤال آخر: تانسور *صفربعدی* همان … است؟',
+      draw: quizBoard(6, 'تانسور صفربعدی = ؟', { size: 44, fa: true }),
+      quiz: { choices: ['اسکالر', 'بردار', 'ماتریس'], correct: 0, explain: 'اسلاید 139: تانسور صفربعدی = اسکالر، یک‌بعدی = بردار، دوبعدی = ماتریس.' },
+      solve: async b => {
+        const T = [['0', 'اسکالر'], ['1', 'بردار'], ['2', 'ماتریس']];
+        for (const [k, [d, n]] of T.entries()) await b.write(`s${k}`, 500, 260 + k * 70, `${LTR(d)}‌بعدی = ${n}`, { size: 34, color: k ? 'soft' : 'green', bold: !k, fa: true });
+      },
+    },
+  ],
+});
+</script>
+</body>
+</html>

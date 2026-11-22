@@ -3,586 +3,537 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>درس ۱۱ — آزمون جامع فصل ۱ تا ۳</title>
-<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
-<style>
-/* ===== SHARED STYLE — copy verbatim into every lesson, do not edit per lesson ===== */
-:root{--bg:#fbfaf7;--surface:#ffffff;--surface-1:#f3f1ec;--text:#1f1e1c;--text-2:#5f5e5a;--text-3:#888780;--border:#e3e0d8;--border-strong:#c9c6bc;
---accent:#534AB7;--accent-bg:#EEEDFE;--ok:#3B6D11;--ok-bg:#EAF3DE;--bad:#A32D2D;--bad-bg:#FCEBEB;--warn:#854F0B;--warn-bg:#FAEEDA;
---c1:#7F77DD;--c2:#1D9E75;--c3:#EF9F27;--c4:#D4537E;--grid:#e3e0d8}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1a1a19;--surface:#232322;--surface-1:#2c2c2a;--text:#ecebe6;--text-2:#b4b2a9;--text-3:#888780;--border:#3a3a37;--border-strong:#55554f;
---accent:#AFA9EC;--accent-bg:#26215C;--ok:#97C459;--ok-bg:#173404;--bad:#F09595;--bad-bg:#501313;--warn:#FAC775;--warn-bg:#412402;--grid:#3a3a37}}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:Vazirmatn,Tahoma,sans-serif;font-size:16px;line-height:1.95}
-main{max-width:760px;margin:0 auto;padding:24px 16px 64px}
-a{color:var(--accent)}
-h1{font-size:26px;font-weight:700;line-height:1.5;margin:6px 0 6px}
-h2{font-size:19px;font-weight:500;margin:0 0 8px}
-h3{font-size:16px;font-weight:500;margin:12px 0 4px}
-p{margin:0 0 10px}
-.top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:13px;color:var(--text-2)}
-.goal{color:var(--text-2);margin-bottom:22px}
-.sec{margin:0 0 28px}
-.lab{font-size:13px;color:var(--text-3);margin:0 0 4px;letter-spacing:0}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
-.soft{background:var(--surface-1);border-radius:12px;padding:12px 14px}
-.m{direction:ltr;unicode-bidi:isolate;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14.5px;white-space:nowrap}
-@media (max-width:700px){.m{white-space:normal;display:inline-block;max-width:100%}}
-.mb{direction:ltr;text-align:left;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:14.5px;background:var(--surface-1);border-radius:8px;padding:8px 12px;margin:6px 0;overflow-x:auto;line-height:1.8}
-.en{direction:ltr;unicode-bidi:isolate;font-size:13px;color:var(--text-2)}
-b,strong{font-weight:500}
-.key{background:var(--warn-bg);color:var(--warn);border-radius:6px;padding:0 6px}
-.tip{border-right:3px solid var(--accent);background:var(--accent-bg);padding:8px 12px;border-radius:0;margin:8px 0}
-.trap{border-right:3px solid var(--bad);background:var(--bad-bg);padding:8px 12px;border-radius:0;margin:8px 0}
-button{font-family:inherit;font-size:14px;background:var(--surface);color:var(--text);border:1px solid var(--border-strong);border-radius:8px;padding:5px 14px;cursor:pointer}
-button:hover{background:var(--surface-1)}
-button.on{background:var(--accent-bg);border-color:var(--accent);color:var(--accent)}
-input[type=text]{font-family:inherit;font-size:15px;direction:ltr;text-align:center;width:72px;height:34px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text)}
-input[type=range]{width:100%;accent-color:var(--accent);direction:ltr}
-table.t{border-collapse:collapse;direction:ltr;font-size:14.5px;margin:6px 0;display:block;max-width:100%;overflow-x:auto}
-table.t>tbody,table.t>thead{display:table;width:100%}
-table.t th,table.t td{border:1px solid var(--border);padding:5px 6px;text-align:center;font-weight:400}
-table.t th{background:var(--surface-1)}
-.ok{background:var(--ok-bg)!important}.no{background:var(--bad-bg)!important}
-.fb{font-size:14px;margin-top:8px;min-height:1em}.fb.good{color:var(--ok)}.fb.bad{color:var(--bad)}
-.q{margin:0 0 18px}
-.mcq .opts{display:grid;gap:6px;margin-top:6px}
-.mcq .opts button{text-align:right;padding:7px 12px}
-.stepper .st{display:none;padding:6px 0;border-bottom:1px dashed var(--border)}
-.stepper .st.show{display:block}
-.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-svg{max-width:100%;height:auto;direction:ltr}
-svg text{font-family:Vazirmatn,Tahoma,sans-serif;fill:var(--text-2);font-size:12px}
-.nav{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:14px;border-top:1px solid var(--border);padding-top:14px;margin-top:28px}
-.ask{font-size:14px;color:var(--text-2)}
-@media print{body{background:#fff}.card,.soft{break-inside:avoid}.stepper .st{display:block}button{display:none}}
-.given{font-size:14px;color:var(--text-2);background:var(--surface-1);border-right:3px solid var(--border-strong);border-radius:0 8px 8px 0;padding:6px 12px;margin:2px 0 10px}
-.given b{color:var(--text)}
-[id]{scroll-margin-top:16px}
-h3:target,.card:target{outline:2px solid var(--accent);outline-offset:6px;border-radius:8px}
-details.sol{margin-top:10px;border:1px dashed var(--border-strong);border-radius:10px;padding:6px 12px;background:var(--surface)}
-details.sol summary{cursor:pointer;color:var(--accent);font-weight:500}
-details.sol[open] summary{margin-bottom:6px}
-.q>details.sol:not([open]){display:inline-block;vertical-align:middle;margin:0;padding:0;border:0;background:none}
-.q>details.sol summary{list-style:none;display:inline-block;font-size:14px;border:1px solid var(--border-strong);border-radius:8px;padding:5px 14px;background:var(--surface)}
-.q>details.sol summary::-webkit-details-marker{display:none}
-.q>details.sol summary:hover{background:var(--surface-1)}
-@media print{details.sol{border-style:solid}}
-/* ===== END SHARED STYLE ===== */
-</style>
-<style>
-/* lesson-specific */
-.pb{margin:0 0 22px}
-.pb h3{margin-top:0}
-.pre{white-space:pre}
-.tag{display:inline-block;font-size:12px;color:var(--text-3);border:1px solid var(--border);border-radius:999px;padding:0 8px;margin-inline-start:6px}
-.timer{font-size:22px;font-weight:500;direction:ltr;unicode-bidi:isolate;min-width:80px;display:inline-block;text-align:center}
-table.plan td,table.plan th{text-align:right}
-#scoreOut .big{font-size:22px;font-weight:700}
-#scoreOut ul{margin:6px 0 0}
-.bar{height:10px;border-radius:999px;background:var(--surface-1);overflow:hidden;margin:6px 0}
-.bar span{display:block;height:100%;background:var(--c2)}
-</style>
+<title>Mock Exam Parts 1–3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Vazirmatn:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="../assets/teacher.css">
 </head>
 <body>
-<main>
-<div class="top"><a href="../index.html">← فهرست درس‌ها</a><span>درس ۱۱ از ۱۱ · فصل ۱ تا ۳ · حدود ۴۵ تا ۶۰ دقیقه</span></div>
-<h1>آزمون جامع فصل ۱ تا ۳</h1>
-<p class="goal">هدف: یک امتحان کامل را در زمان واقعی تمرین کنی — ۱۱ پرسش مفهومی و ۵ مسئله محاسباتی با عددهای تازه، درست به شکل تمرین‌های ۱ و ۲ — و در آخر بفهمی کدام درس‌ها را باید دوباره ببینی.</p>
-
-<!-- ===== 1. RULES ===== -->
-<section class="sec"><p class="lab">۱. قانون بازی</p>
-<div class="card">
-  <ol style="margin:0;padding-inline-start:20px">
-    <li><b>اول روی کاغذ.</b> هر مسئله را کامل روی کاغذ حل کن: جدول، ماتریس، فرمول و مراحل. در امتحان نمره مراحل را می‌دهند، نه فقط عدد آخر.</li>
-    <li><b>بعد جواب را وارد کن.</b> عددها را در خانه‌ها بنویس و «بررسی» را بزن. اعشار با نقطه یا «٫»، رقم فارسی و کسر (مثل <span class="m">2/3</span>) هم قبول است.</li>
-    <li><b>راه‌حل را آخر باز کن.</b> زیر هر مسئله دکمه «راه‌حل کامل» هست. فقط بعد از تلاش واقعی بازش کن.</li>
-    <li><b>کارنامه.</b> در پایان صفحه دکمه «کارنامه» را بزن تا ببینی چند بلوک را درست جواب داده‌ای و کدام درس‌ها را باید مرور کنی.</li>
-  </ol>
-  <div class="tip"><b>قراردادهای این آزمون</b> (همان قراردادهای درس‌ها): very very یعنی <span class="m">μ³</span> طبق اسلاید ۵۲؛ ورودی قطعی <span class="m">x0</span> به <span class="m">A′</span> تبدیل می‌شود که در جای <span class="m">x0</span> مقدار <span class="m">μ_A(x0)</span> دارد و بقیه صفر (اسلاید ۷۷)؛ غیرفازی‌سازی = میانگین وزنی (اسلاید ۷۹)؛ در max-product هر دو min به ضرب تبدیل می‌شوند (خوانش درس ۸).</div>
-</div></section>
-
-<!-- ===== 2. HOW TO USE ===== -->
-<section class="sec"><p class="lab">۲. چطور از این آزمون استفاده کنی</p>
-<div class="card">
-  <p>مثل جلسه امتحان: گوشی کنار، کاغذ و ماشین‌حساب جلو، زمان‌سنج روشن. این برنامه زمانی پیشنهادی است (جمعاً حدود ۵۲ دقیقه):</p>
-  <table class="t plan" style="direction:rtl">
-    <tr><th>بخش</th><th>چه چیزی</th><th>زمان</th></tr>
-    <tr><td>بخش الف</td><td>۱۱ پرسش چندگزینه‌ای از هر سه فصل</td><td>۱۰ دقیقه</td></tr>
-    <tr><td>مسئله ۱</td><td>اجتماع، اشتراک، مکمل (مثل <a href="#hw1-q1">تمرین ۱، سؤال ۱</a>)</td><td>۸ دقیقه</td></tr>
-    <tr><td>مسئله ۲</td><td>قیدهای زبانی (مثل <a href="#hw1-q2">تمرین ۱، سؤال ۲</a>)</td><td>۸ دقیقه</td></tr>
-    <tr><td>مسئله ۳</td><td>ماتریس قانون + max-min + میانگین وزنی</td><td>۱۰ دقیقه</td></tr>
-    <tr><td>مسئله ۴</td><td>max-product (مثل <a href="#hw2">تمرین ۲</a>)</td><td>۸ دقیقه</td></tr>
-    <tr><td>مسئله ۵</td><td>مقدار توابع عضویت متلب در چند نقطه</td><td>۸ دقیقه</td></tr>
-  </table>
-  <div class="row" style="margin-top:8px"><span class="timer" id="tmv" aria-live="off">00:00</span><button id="tmStart">شروع زمان‌سنج</button><button id="tmReset">صفر کن</button></div>
-  <p style="font-size:14px;color:var(--text-2);margin-top:8px">اگر روی سؤالی بیش از ۳ دقیقه گیر کردی، رد شو و آخر برگرد. در امتحان واقعی هم همین کار را بکن.</p>
-</div></section>
-
-<!-- ===== 3. PART A: MCQ ===== -->
-<section class="sec"><p class="lab">۳. بخش الف — پرسش‌های مفهومی (۱۱ پرسش، فصل‌ها درهم)</p>
-<div class="card">
-
-  <div class="q mcq" data-l="0003" data-yes="درست! اول عدد ورودی به درجه عضویت تبدیل می‌شود، بعد قواعد ارزیابی می‌شوند، بعد نتیجه‌ها با هم ترکیب می‌شوند و در آخر به عدد قابل استفاده برمی‌گردند (اسلایدهای ۳۴ تا ۳۹)." data-no="نه. منطقی فکر کن: تا ورودی فازی نشده، قاعده‌ای ارزیابی نمی‌شود؛ تا قواعد ارزیابی نشده‌اند، چیزی برای ترکیب نیست؛ و غیرفازی‌سازی همیشه آخر است (درس ۳).">
-    <p><b>الف۱.</b> <span class="tag">فصل ۱</span> ترتیب درست چهار مرحله کار یک سیستم فازی کدام است؟</p>
-    <div class="opts">
-      <button>استنتاج ← فازی‌سازی ← ترکیب ← غیرفازی‌سازی</button>
-      <button>فازی‌سازی ← ترکیب ← استنتاج ← غیرفازی‌سازی</button>
-      <button data-ok>فازی‌سازی ← استنتاج ← ترکیب ← غیرفازی‌سازی</button>
-      <button>ترکیب ← فازی‌سازی ← استنتاج ← غیرفازی‌سازی</button>
-    </div><div class="fb"></div>
-  </div>
-
-  <div class="q mcq" data-l="0004" data-yes="درست! μ_Ā = 1 − 0.7 = 0.3 و min(0.7, 0.3) = 0.3. پس A ∩ Ā تهی نیست — قانون طرد شق ثالث در فازی برقرار نیست." data-no="نه. اول مکمل: 1 − 0.7 = 0.3. اشتراک = min(0.7, 0.3). در مجموعه قطعی جواب ۰ بود، ولی در فازی نه (درس ۴).">
-    <p><b>الف۲.</b> <span class="tag">فصل ۲</span> اگر <span class="m">μ_A(x) = 0.7</span> باشد، <span class="m">μ_{A∩Ā}(x)</span> چند است؟</p>
-    <div class="opts">
-      <button><span class="m">0.0</span></button>
-      <button data-ok><span class="m">0.3</span></button>
-      <button><span class="m">0.7</span></button>
-      <button><span class="m">1.0</span></button>
-    </div><div class="fb"></div>
-  </div>
-
-  <div class="q mcq" data-l="0010" data-yes="درست! در متلب gaussmf(x,[sigma c]): اول sigma بعد مرکز. این دقیقاً مثال اسلاید ۸۸ است." data-no="نه. ترتیب پارامترهای gaussmf در متلب [sigma c] است — اول پهنا، بعد مرکز (اسلاید ۸۸، درس ۱۰).">
-    <p><b>الف۳.</b> <span class="tag">فصل ۳</span> در دستور متلب <span class="m">y = gaussmf(x,[2 5])</span> (مثال اسلاید ۸۸)، پارامترها چه هستند؟</p>
-    <div class="given"><b>اسلاید ۸۸ چه می‌گوید؟</b> یک نمونه دستور گاوسی در متلب است: <span class="m">y = gaussmf(x,[2 5])</span>. <a href="0010-gaussian-bell-sigmoid.html#gauss" target="_blank" rel="noopener">مرور: درس ۱۰، «گاوسی» ←</a></div>
-    <div class="opts">
-      <button data-ok><span class="m">σ = 2 , c = 5</span></button>
-      <button><span class="m">σ = 5 , c = 2</span></button>
-      <button><span class="m">a = 2 , c = 5</span></button>
-      <button><span class="m">c = 2 , b = 5</span></button>
-    </div><div class="fb"></div>
-  </div>
-
-  <div class="q mcq" data-l="0001" data-yes="درست! درجه عضویت یک واقعیت ثابت نیست؛ به تابع عضویتی بستگی دارد که طراح انتخاب کرده. اسلاید ۱۵ و ۱۹ دو تابع متفاوت دارند." data-no="نه. هر دو اسلاید درست‌اند؛ فقط تابع عضویت «بلند» را متفاوت تعریف کرده‌اند. عدد درجه به تابع انتخاب‌شده بستگی دارد (درس ۱).">
-    <p><b>الف۴.</b> <span class="tag">فصل ۱</span> برای قد ۱۷۵ سانتی‌متر، اسلاید ۱۵ درجه عضویت در «بلند» را <span class="m">0.6</span> و اسلاید ۱۹ آن را <span class="m">0.75</span> می‌دهد. چرا؟</p>
-    <div class="given"><b>اسلایدهای ۱۵ و ۱۹ چه می‌گویند؟</b> هر دو عددِ لازم (۰٫۶ و ۰٫۷۵) در صورت سؤال آمده؛ چیز دیگری از اسلاید لازم نیست. <a href="0001-crisp-vs-fuzzy.html#see" target="_blank" rel="noopener">مرور: درس ۱، نمودار قد ←</a></div>
-    <div class="opts">
-      <button>چون یکی از دو اسلاید اشتباه دارد</button>
-      <button>چون مجموعه فازی همیشه دو جواب دارد</button>
-      <button>چون مجموعه جهانی دو اسلاید یکی نیست</button>
-      <button data-ok>چون تابع عضویت انتخاب‌شده یکی نیست</button>
-    </div><div class="fb"></div>
-  </div>
-
-  <div class="q mcq" data-l="0005" data-yes="درست! اسلاید ۵۲: very very A = pow(A) با توان ۳. در کتاب‌ها اغلب توان ۴ است؛ در امتحان فرمول را هم بنویس." data-no="نه. طبق اسلاید ۵۲ (جزوه استاد)، very very توان ۳ است. very توان ۲ است و somewhat توان ۰٫۵ (درس ۵).">
-    <p><b>الف۵.</b> <span class="tag">فصل ۲</span> طبق جزوه درس، <span class="m">μ</span> مجموعه «very very A» کدام است؟</p>
-    <div class="given"><b>جزوه (اسلاید ۵۲) چه می‌گوید؟</b> جدول فرمول قیدهاست: برای هر قید می‌گوید درجه <span class="m">μ_A</span> را به چه توانی برسانی. <a href="0005-hedges.html#hedges" target="_blank" rel="noopener">مرور: درس ۵، جدول قیدها ←</a></div>
-    <div class="opts">
-      <button><span class="m">(μ_A)^2</span></button>
-      <button data-ok><span class="m">(μ_A)^3</span></button>
-      <button><span class="m">(μ_A)^4</span></button>
-      <button><span class="m">(μ_A)^0.5</span></button>
-    </div><div class="fb"></div>
-  </div>
-
-  <div class="q mcq" data-l="0010" data-yes="درست! در x = c + a داریم |(x−c)/a| = 1 و 1 به هر توانی 1 است؛ پس 1/(1+1) = 0.5، مستقل از b." data-no="نه. عدد بگذار: (x − c)/a = a/a = 1، پس μ = 1/(1 + 1^(2b)) = 1/2. عدد 0.61 مال گاوسی در فاصله σ از مرکز است (درس ۱۰).">
-    <p><b>الف۶.</b> <span class="tag">فصل ۳</span> تابع <span class="m">gbellmf(x,[a b c])</span> در نقطه <span class="m">x = c + a</span> چه مقداری دارد (برای هر b مثبت)؟</p>
-    <div class="opts">
-      <button><span class="m">1.00</span></button>
-      <button><span class="m">0.61</span></button>
-      <button data-ok><span class="m">0.50</span></button>
-      <button><span class="m">0.00</span></button>
-    </div><div class="fb"></div>
-  </div>
-
-  <div class="q mcq" data-l="0003" data-yes="درست! TSK عدد می‌گیرد و عدد می‌دهد (بخش «آنگاه» فرمول است)، و نوع سوم با فازی‌ساز و غیرفازی‌ساز هم عدد می‌گیرد و عدد می‌دهد. فقط سیستم فازی خالص مجموعه فازی می‌گیرد و می‌دهد." data-no="نه. سیستم فازی خالص (I) مجموعه فازی می‌گیرد و می‌دهد — به همین دلیل به درد مهندسی نمی‌خورد. II و III هر دو با عدد حقیقی کار می‌کنند (اسلایدهای ۳۰ تا ۳۲، درس ۳).">
-    <p><b>الف۷.</b> <span class="tag">فصل ۱</span> سه نوع سیستم فازی: <b>I</b> فازی خالص، <b>II</b> تاکاگی–سوگنو–کانگ <span class="en">(TSK)</span>، <b>III</b> با فازی‌ساز و غیرفازی‌ساز. در کدام نوع(ها) ورودی و خروجی سیستم عدد حقیقی است؟</p>
-    <div class="opts">
-      <button>I و II</button>
-      <button>I و III</button>
-      <button>هر سه نوع</button>
-      <button data-ok>II و III</button>
-    </div><div class="fb"></div>
-  </div>
-
-  <div class="q mcq" data-l="0005" data-yes="درست! 0.8 از 0.5 بزرگ‌تر است، پس حالت ۲: 1 − 2(1 − 0.8)² = 1 − 2(0.04) = 0.92." data-no="نه. indeed دو حالت دارد. چون 0.8 ≥ 0.5، فرمول 1 − 2(1 − μ)² را بزن: 1 − 2×0.04. (0.64 جواب very است و 0.89 جواب somewhat.)">
-    <p><b>الف۸.</b> <span class="tag">فصل ۲</span> اگر <span class="m">μ_A(x) = 0.8</span> باشد، درجه «indeed A» در همین x چند است؟</p>
-    <div class="opts">
-      <button><span class="m">0.64</span></button>
-      <button><span class="m">0.89</span></button>
-      <button data-ok><span class="m">0.92</span></button>
-      <button><span class="m">0.96</span></button>
-    </div><div class="fb"></div>
-  </div>
-
-  <div class="q mcq" data-l="0006" data-yes="درست! جدول کامل قوانین یعنی هر ترکیب ممکن از مقدارهای زبانی: 3 × 2 × 4 = 24." data-no="نه. تعداد قانون‌های جدول کامل = حاصل‌ضرب تعداد مقدارهای زبانی هر ورودی، نه جمعشان: 3 × 2 × 4 (درس ۶).">
-    <p><b>الف۹.</b> <span class="tag">فصل ۲</span> یک سیستم خبره فازی سه متغیر زبانی ورودی دارد: دما (سرد، معتدل، گرم)، رطوبت (کم، زیاد) و باد (هیچ، کم، متوسط، زیاد). جدول کامل قوانین چند قانون دارد؟</p>
-    <div class="opts">
-      <button><span class="m">36</span></button>
-      <button data-ok><span class="m">24</span></button>
-      <button><span class="m">12</span></button>
-      <button><span class="m">9</span></button>
-    </div><div class="fb"></div>
-  </div>
-
-  <div class="q mcq" data-l="0007" data-yes="درست! min(1, b_j) = b_j، پس آن سطر عیناً خود B است. (سطری که a_i = 0 دارد تمام صفر است.)" data-no="نه. یک خانه را حساب کن: m_ij = min(1, b_j) = b_j. پس کل سطر همان عضویت‌های B است (درس ۷).">
-    <p><b>الف۱۰.</b> <span class="tag">فصل ۲</span> در ماتریس قانون <span class="m">m_ij = min(a_i , b_j)</span>، سطری که <span class="m">a_i = 1</span> دارد چیست؟</p>
-    <div class="opts">
-      <button data-ok>همان مجموعه B</button>
-      <button>همان مجموعه A</button>
-      <button>سطری تمام صفر</button>
-      <button>سطری تمام یک</button>
-    </div><div class="fb"></div>
-  </div>
-
-  <div class="q mcq" data-l="0010" data-yes="درست! در sigmf(x,[a c]) مقدار در x = c همیشه 0.5 است (اینجا c = 4)، و a منفی یعنی منحنی پایین‌رونده (باز از چپ)." data-no="نه. ترتیب پارامترهای sigmf در متلب [a c] است: a شیب و c نقطه‌ای که μ = 0.5. اینجا a = −2 منفی است، پس منحنی پایین‌رونده است (درس ۱۰).">
-    <p><b>الف۱۱.</b> <span class="tag">فصل ۳</span> درباره <span class="m">y = sigmf(x,[-2 4])</span> کدام درست است؟</p>
-    <div class="opts">
-      <button>در x = −2 برابر 0.5 و بالارونده</button>
-      <button>در x = 4 برابر 0.5 و بالارونده</button>
-      <button>در x = −2 برابر 0.5 و پایین‌رونده</button>
-      <button data-ok>در x = 4 برابر 0.5 و پایین‌رونده</button>
-    </div><div class="fb"></div>
-  </div>
-</div></section>
-
-<!-- ===== 4. PART B: PROBLEMS ===== -->
-<section class="sec"><p class="lab">۴. بخش ب — مسئله‌های محاسباتی (عددها تازه‌اند)</p>
-
-<!-- Problem 1 -->
-<div class="card pb">
-  <h3>مسئله ۱ — اجتماع، اشتراک و مکمل <span class="tag">مثل تمرین ۱، سؤال ۱</span></h3>
-  <div class="given" id="hw1-q1"><b>صورت تمرین ۱، سؤال ۱:</b> «فرض کنید مجموعه جهانی X و مجموعه‌های فازی A و B به صورت زیر تعریف شده باشند. آنگاه مجموعه‌های فازی زیر را به دست آورید: ۱) <span class="m">A∪B</span> ۲) <span class="m">A∩B</span> ۳) <span class="m">Ā</span> ۴) <span class="m">B̄</span> ۵) <span class="m">A∪Ā</span> ۶) <span class="m">B∪Ā</span>»<br><span class="m">X = {1,2,3,4,5,6}</span> · <span class="m">A = {0.5/2, 0.7/3, 1/4, 0.6/5, 1/6}</span> · <span class="m">B = {0.4/1, 0.8/2, 1/3, 0.7/4, 0.3/5}</span><br><i>مسئله زیر همین شکل را با عددهای تازه دارد.</i></div>
-  <p>فرض کنید مجموعه جهانی <span class="m">X</span> و مجموعه‌های فازی <span class="m">A</span> و <span class="m">B</span> به صورت زیر تعریف شده باشند. آنگاه مجموعه‌های فازی زیر را به دست آورید:</p>
-  <p><span class="m">(1) A∪B   (2) A∩B   (3) Ā   (4) B̄   (5) A∩Ā   (6) B∪Ā</span></p>
-  <div class="mb pre">X = {1,2,3,4,5,6}
-A = {0.3/1, 0.8/2, 1/3, 0.5/5} ,  B = {0.6/2, 0.2/3, 0.9/4, 0.4/5, 1/6}</div>
-
-  <div class="q practice" data-l="0004 0002" data-hint="اول یک جدول ۶ ستونی از μ_A و μ_B بساز. عنصری که در مجموعه نوشته نشده درجه ۰ دارد (مثلاً μ_A(4) = 0). اجتماع = بزرگ‌تر، اشتراک = کوچک‌تر، مکمل = ۱ منهای درجه." data-yes="عالی! هر سه سطر درست است. حواست بود که μ_A(4) و μ_A(6) صفرند و مکملشان ۱ می‌شود.">
-    <p><b>۱-الف)</b> سطرهای (۱) تا (۳):</p>
-    <table class="t"><tr><th></th><th>x=1</th><th>x=2</th><th>x=3</th><th>x=4</th><th>x=5</th><th>x=6</th></tr>
-      <tr><th>A ∪ B</th><td><input type="text" data-k="0.3" aria-label="A∪B در x=1"></td><td><input type="text" data-k="0.8" aria-label="A∪B در x=2"></td><td><input type="text" data-k="1" aria-label="A∪B در x=3"></td><td><input type="text" data-k="0.9" aria-label="A∪B در x=4"></td><td><input type="text" data-k="0.5" aria-label="A∪B در x=5"></td><td><input type="text" data-k="1" aria-label="A∪B در x=6"></td></tr>
-      <tr><th>A ∩ B</th><td><input type="text" data-k="0" aria-label="A∩B در x=1"></td><td><input type="text" data-k="0.6" aria-label="A∩B در x=2"></td><td><input type="text" data-k="0.2" aria-label="A∩B در x=3"></td><td><input type="text" data-k="0" aria-label="A∩B در x=4"></td><td><input type="text" data-k="0.4" aria-label="A∩B در x=5"></td><td><input type="text" data-k="0" aria-label="A∩B در x=6"></td></tr>
-      <tr><th>Ā</th><td><input type="text" data-k="0.7" aria-label="مکمل A در x=1"></td><td><input type="text" data-k="0.2" aria-label="مکمل A در x=2"></td><td><input type="text" data-k="0" aria-label="مکمل A در x=3"></td><td><input type="text" data-k="1" aria-label="مکمل A در x=4"></td><td><input type="text" data-k="0.5" aria-label="مکمل A در x=5"></td><td><input type="text" data-k="1" aria-label="مکمل A در x=6"></td></tr>
-    </table>
-    <button class="check">بررسی</button><div class="fb"></div>
-  </div>
-
-  <div class="q practice" data-l="0004" data-hint="B̄ = 1 − μ_B (μ_B(1) = 0 پس B̄ در x=1 برابر 1). برای A∩Ā و B∪Ā از سطر Ā که بالا ساختی استفاده کن." data-yes="عالی! و دیدی که A∩Ā در x=5 به 0.5 رسید — تهی نیست (قانون طرد شق ثالث).">
-    <p><b>۱-ب)</b> سطرهای (۴) تا (۶):</p>
-    <table class="t"><tr><th></th><th>x=1</th><th>x=2</th><th>x=3</th><th>x=4</th><th>x=5</th><th>x=6</th></tr>
-      <tr><th>B̄</th><td><input type="text" data-k="1" aria-label="مکمل B در x=1"></td><td><input type="text" data-k="0.4" aria-label="مکمل B در x=2"></td><td><input type="text" data-k="0.8" aria-label="مکمل B در x=3"></td><td><input type="text" data-k="0.1" aria-label="مکمل B در x=4"></td><td><input type="text" data-k="0.6" aria-label="مکمل B در x=5"></td><td><input type="text" data-k="0" aria-label="مکمل B در x=6"></td></tr>
-      <tr><th>A ∩ Ā</th><td><input type="text" data-k="0.3" aria-label="A∩Ā در x=1"></td><td><input type="text" data-k="0.2" aria-label="A∩Ā در x=2"></td><td><input type="text" data-k="0" aria-label="A∩Ā در x=3"></td><td><input type="text" data-k="0" aria-label="A∩Ā در x=4"></td><td><input type="text" data-k="0.5" aria-label="A∩Ā در x=5"></td><td><input type="text" data-k="0" aria-label="A∩Ā در x=6"></td></tr>
-      <tr><th>B ∪ Ā</th><td><input type="text" data-k="0.7" aria-label="B∪Ā در x=1"></td><td><input type="text" data-k="0.6" aria-label="B∪Ā در x=2"></td><td><input type="text" data-k="0.2" aria-label="B∪Ā در x=3"></td><td><input type="text" data-k="1" aria-label="B∪Ā در x=4"></td><td><input type="text" data-k="0.5" aria-label="B∪Ā در x=5"></td><td><input type="text" data-k="1" aria-label="B∪Ā در x=6"></td></tr>
-    </table>
-    <button class="check">بررسی</button><div class="fb"></div>
-  </div>
-
-  <details class="sol"><summary>راه‌حل کامل</summary>
-    <p><b>گام ۱ — جدول درجه‌ها.</b> عنصر ننوشته = درجه ۰ (درس ۲ و ۴): <span class="m">μ_A(4) = μ_A(6) = 0</span> و <span class="m">μ_B(1) = 0</span>.</p>
-    <table class="t"><tr><th>x</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th></tr>
-      <tr><th>μ_A</th><td>0.3</td><td>0.8</td><td>1</td><td>0</td><td>0.5</td><td>0</td></tr>
-      <tr><th>μ_B</th><td>0</td><td>0.6</td><td>0.2</td><td>0.9</td><td>0.4</td><td>1</td></tr>
-      <tr><th>μ_Ā = 1 − μ_A</th><td>0.7</td><td>0.2</td><td>0</td><td>1</td><td>0.5</td><td>1</td></tr>
-      <tr><th>μ_B̄ = 1 − μ_B</th><td>1</td><td>0.4</td><td>0.8</td><td>0.1</td><td>0.6</td><td>0</td></tr></table>
-    <p><b>گام ۲ — جواب‌ها</b> (هر ستون جدا؛ ∪ = max، ∩ = min):</p>
-    <div class="mb pre">(1) A∪B = {0.3/1, 0.8/2, 1/3, 0.9/4, 0.5/5, 1/6}
-(2) A∩B = {0/1, 0.6/2, 0.2/3, 0/4, 0.4/5, 0/6} = {0.6/2, 0.2/3, 0.4/5}
-(3) Ā   = {0.7/1, 0.2/2, 0/3, 1/4, 0.5/5, 1/6}
-(4) B̄   = {1/1, 0.4/2, 0.8/3, 0.1/4, 0.6/5, 0/6}
-(5) A∩Ā = {0.3/1, 0.2/2, 0/3, 0/4, 0.5/5, 0/6}
-(6) B∪Ā = {0.7/1, 0.6/2, 0.2/3, 1/4, 0.5/5, 1/6}</div>
-    <p><b>گام ۳ — نکته امتحانی.</b> <span class="m">A∩Ā</span> تهی نیست و بیشترین مقدارش <span class="m">0.5</span> (در x=5) است. هیچ‌وقت از 0.5 بیشتر نمی‌شود، چون <span class="m">min(μ, 1−μ) ≤ 0.5</span>. در امتحان یک جمله بنویس: «قانون طرد شق ثالث در فازی برقرار نیست.»</p>
-  </details>
-</div>
-
-<!-- Problem 2 -->
-<div class="card pb">
-  <h3>مسئله ۲ — قیدهای زبانی <span class="tag">مثل تمرین ۱، سؤال ۲</span></h3>
-  <div class="given" id="hw1-q2"><b>صورت تمرین ۱، سؤال ۲:</b> «اگر مجموعه فازی tall به صورت زیر باشد، آنگاه مجموعه‌های فازی <span class="m">somewhat tall</span>، <span class="m">indeed tall</span>، <span class="m">very tall</span>، <span class="m">very very tall</span> و <span class="m">not very tall</span> را به دست آورید.»<br><span class="m">Tall = {(0,0), (20,0.2), (40,0.4), (60,0.7), (80,1), (100,1)}</span><br><i>مسئله زیر همین شکل را با عددهای تازه دارد.</i></div>
-  <p>اگر مجموعه فازی <span class="m">hot</span> به صورت زیر باشد، آنگاه مجموعه‌های فازی <span class="m">very hot</span>، <span class="m">very very hot</span>، <span class="m">not very hot</span>، <span class="m">somewhat hot</span> و <span class="m">indeed hot</span> را به دست آورید.</p>
-  <div class="mb">Hot = {(15,0), (20,0.3), (25,0.5), (30,0.6), (35,0.9), (40,1)}</div>
-  <div class="tip">مثل تمرین ۱، هر جفت به شکل <span class="m">(x, μ)</span> است: اول عنصر (دما)، بعد درجه. جواب‌ها را تا سه رقم اعشار بنویس.</div>
-
-  <div class="q practice" data-l="0005" data-hint="very = μ²، very very = μ³ (اسلاید ۵۲)، not very = 1 − μ². مثلاً 0.3² = 0.09 و 0.3³ = 0.027." data-yes="عالی! اگر تصحیح‌کننده μ⁴ بخواهد، سطر very very می‌شود 0, 0.0081, 0.0625, 0.1296, 0.6561, 1.">
-    <p><b>۲-الف)</b></p>
-    <table class="t"><tr><th></th><th>15</th><th>20</th><th>25</th><th>30</th><th>35</th><th>40</th></tr>
-      <tr><th>very</th><td><input type="text" data-k="0" data-tol="0.005" aria-label="very در 15"></td><td><input type="text" data-k="0.09" data-tol="0.005" aria-label="very در 20"></td><td><input type="text" data-k="0.25" data-tol="0.005" aria-label="very در 25"></td><td><input type="text" data-k="0.36" data-tol="0.005" aria-label="very در 30"></td><td><input type="text" data-k="0.81" data-tol="0.005" aria-label="very در 35"></td><td><input type="text" data-k="1" data-tol="0.005" aria-label="very در 40"></td></tr>
-      <tr><th>very very</th><td><input type="text" data-k="0" data-tol="0.005" aria-label="very very در 15"></td><td><input type="text" data-k="0.027" data-tol="0.005" aria-label="very very در 20"></td><td><input type="text" data-k="0.125" data-tol="0.005" aria-label="very very در 25"></td><td><input type="text" data-k="0.216" data-tol="0.005" aria-label="very very در 30"></td><td><input type="text" data-k="0.729" data-tol="0.005" aria-label="very very در 35"></td><td><input type="text" data-k="1" data-tol="0.005" aria-label="very very در 40"></td></tr>
-      <tr><th>not very</th><td><input type="text" data-k="1" data-tol="0.005" aria-label="not very در 15"></td><td><input type="text" data-k="0.91" data-tol="0.005" aria-label="not very در 20"></td><td><input type="text" data-k="0.75" data-tol="0.005" aria-label="not very در 25"></td><td><input type="text" data-k="0.64" data-tol="0.005" aria-label="not very در 30"></td><td><input type="text" data-k="0.19" data-tol="0.005" aria-label="not very در 35"></td><td><input type="text" data-k="0" data-tol="0.005" aria-label="not very در 40"></td></tr>
-    </table>
-    <button class="check">بررسی</button><div class="fb"></div>
-  </div>
-
-  <div class="q practice" data-l="0005" data-hint="somewhat = جذر μ (مثلاً √0.3 ≈ 0.548). indeed دو حالت دارد: (۱) وقتی ⁦μ ≤ 0.5⁩ باشد، جواب ⁦2μ²⁩ است. (۲) وقتی ⁦μ ≥ 0.5⁩ باشد، جواب ⁦1 − 2(1 − μ)²⁩ است. برای μ = 0.5 هر دو حالت 0.5 می‌دهند." data-yes="عالی! دیدی که indeed درجه 0.5 را ثابت نگه داشت، زیرش را پایین برد و بالایش را بالا.">
-    <p><b>۲-ب)</b> (سه رقم اعشار)</p>
-    <table class="t"><tr><th></th><th>15</th><th>20</th><th>25</th><th>30</th><th>35</th><th>40</th></tr>
-      <tr><th>somewhat</th><td><input type="text" data-k="0" data-tol="0.005" aria-label="somewhat در 15"></td><td><input type="text" data-k="0.548" data-tol="0.005" aria-label="somewhat در 20"></td><td><input type="text" data-k="0.707" data-tol="0.005" aria-label="somewhat در 25"></td><td><input type="text" data-k="0.775" data-tol="0.005" aria-label="somewhat در 30"></td><td><input type="text" data-k="0.949" data-tol="0.005" aria-label="somewhat در 35"></td><td><input type="text" data-k="1" data-tol="0.005" aria-label="somewhat در 40"></td></tr>
-      <tr><th>indeed</th><td><input type="text" data-k="0" data-tol="0.005" aria-label="indeed در 15"></td><td><input type="text" data-k="0.18" data-tol="0.005" aria-label="indeed در 20"></td><td><input type="text" data-k="0.5" data-tol="0.005" aria-label="indeed در 25"></td><td><input type="text" data-k="0.68" data-tol="0.005" aria-label="indeed در 30"></td><td><input type="text" data-k="0.98" data-tol="0.005" aria-label="indeed در 35"></td><td><input type="text" data-k="1" data-tol="0.005" aria-label="indeed در 40"></td></tr>
-    </table>
-    <button class="check">بررسی</button><div class="fb"></div>
-  </div>
-
-  <details class="sol"><summary>راه‌حل کامل</summary>
-    <p><b>فرمول‌ها (اسلایدهای ۵۲ و ۵۳):</b></p><table class="t" style="direction:rtl;margin:4px auto"><tr><th>قید</th><th>فرمول</th></tr><tr><td>not</td><td><span class="m" style="white-space:nowrap">1 − μ</span></td></tr><tr><td>very</td><td><span class="m" style="white-space:nowrap">μ²</span></td></tr><tr><td>very very</td><td><span class="m" style="white-space:nowrap">μ³</span></td></tr><tr><td>not very</td><td><span class="m" style="white-space:nowrap">1 − μ²</span></td></tr><tr><td>somewhat</td><td><span class="m" style="white-space:nowrap">μ^0.5</span> (همان <span class="m" style="white-space:nowrap">√μ</span>)</td></tr></table>
-    <p>indeed دو حالت دارد:</p><table class="t" style="direction:rtl;margin:4px auto"><tr><th>حالت</th><th>وقتی</th><th>فرمول</th></tr><tr><td>۱</td><td><span class="m" style="white-space:nowrap">μ ≤ 0.5</span></td><td><span class="m" style="white-space:nowrap">2μ²</span></td></tr><tr><td>۲</td><td><span class="m" style="white-space:nowrap">μ ≥ 0.5</span></td><td><span class="m" style="white-space:nowrap">1 − 2(1−μ)²</span></td></tr></table>
-    <table class="t"><tr><th>x</th><th>15</th><th>20</th><th>25</th><th>30</th><th>35</th><th>40</th></tr>
-      <tr><th>μ_hot</th><td>0</td><td>0.3</td><td>0.5</td><td>0.6</td><td>0.9</td><td>1</td></tr>
-      <tr><th>very = μ²</th><td>0</td><td>0.09</td><td>0.25</td><td>0.36</td><td>0.81</td><td>1</td></tr>
-      <tr><th>very very = μ³</th><td>0</td><td>0.027</td><td>0.125</td><td>0.216</td><td>0.729</td><td>1</td></tr>
-      <tr><th>not very = 1−μ²</th><td>1</td><td>0.91</td><td>0.75</td><td>0.64</td><td>0.19</td><td>0</td></tr>
-      <tr><th>somewhat = √μ</th><td>0</td><td>0.548</td><td>0.707</td><td>0.775</td><td>0.949</td><td>1</td></tr>
-      <tr><th>indeed</th><td>0</td><td>0.18</td><td>0.5</td><td>0.68</td><td>0.98</td><td>1</td></tr></table>
-    <p><b>indeed، حالت به حالت:</b> <span class="m">0.3 → 2(0.09) = 0.18</span> · <span class="m">0.5 → 2(0.25) = 0.5</span> (حالت ۲ هم <span class="m">1 − 2(0.25) = 0.5</span>) · <span class="m">0.6 → 1 − 2(0.16) = 0.68</span> · <span class="m">0.9 → 1 − 2(0.01) = 0.98</span>.</p>
-    <p><b>جواب به شکل تمرین:</b></p>
-    <div class="mb pre">very hot      = {(15,0), (20,0.09), (25,0.25), (30,0.36), (35,0.81), (40,1)}
-very very hot = {(15,0), (20,0.027), (25,0.125), (30,0.216), (35,0.729), (40,1)}
-not very hot  = {(15,1), (20,0.91), (25,0.75), (30,0.64), (35,0.19), (40,0)}
-somewhat hot  = {(15,0), (20,0.548), (25,0.707), (30,0.775), (35,0.949), (40,1)}
-indeed hot    = {(15,0), (20,0.18), (25,0.5), (30,0.68), (35,0.98), (40,1)}</div>
-    <div class="trap">در امتحان کنار very very بنویس «طبق جزوه <span class="m">μ³</span>». اگر استاد توان ۴ کتاب‌ها را بخواهد: <span class="m">0, 0.0081, 0.0625, 0.1296, 0.6561, 1</span>. و «not very» را با «very not» اشتباه نکن: دومی <span class="m">(1−μ)²</span> است.</div>
-  </details>
-</div>
-
-<!-- Problem 3 -->
-<div class="card pb">
-  <h3>مسئله ۳ — ماتریس قانون، استنتاج max-min و غیرفازی‌سازی <span class="tag">درس ۷ و ۸</span></h3>
-  <p>قاعده فازی «اگر دما معتدل باشد آنگاه دور پنکه متوسط است» را در نظر بگیرید: <span class="m">if x is A then y is B</span>. x دما (درجه سانتی‌گراد) و A مجموعه «معتدل»؛ y دور پنکه (دور در دقیقه) و B مجموعه «متوسط»:</p>
-  <div class="mb pre">A = 0/10 + 0.4/15 + 1/20 + 0.7/25 + 0.2/30
-B = 0.2/100 + 0.6/200 + 1/300 + 0.5/400</div>
-  <p>(الف) ماتریس قانون <span class="m">R</span> را با روش max-min بسازید. (ب) اگر دما <b>۲۵ درجه</b> باشد، مجموعه خروجی <span class="m">B′</span> و دور پنکه را با میانگین وزنی به دست آورید.</p>
-
-  <div class="q practice" data-l="0007" data-hint="هر خانه m_ij = min(a_i , b_j). سطر x=15 یعنی a = 0.4 با هر b_j؛ سطر x=25 یعنی a = 0.7 با هر b_j." data-yes="عالی! هر سطر همان B است که از ارتفاع a_i بریده شده.">
-    <p><b>۳-الف)</b> دو سطر از ماتریس <span class="m">R</span> (۵ سطر × ۴ ستون) را بنویس:</p>
-    <table class="t"><tr><th></th><th>y=100</th><th>y=200</th><th>y=300</th><th>y=400</th></tr>
-      <tr><th>x=15 (a=0.4)</th><td><input type="text" data-k="0.2" aria-label="R سطر 15 ستون 100"></td><td><input type="text" data-k="0.4" aria-label="R سطر 15 ستون 200"></td><td><input type="text" data-k="0.4" aria-label="R سطر 15 ستون 300"></td><td><input type="text" data-k="0.4" aria-label="R سطر 15 ستون 400"></td></tr>
-      <tr><th>x=25 (a=0.7)</th><td><input type="text" data-k="0.2" aria-label="R سطر 25 ستون 100"></td><td><input type="text" data-k="0.6" aria-label="R سطر 25 ستون 200"></td><td><input type="text" data-k="0.7" aria-label="R سطر 25 ستون 300"></td><td><input type="text" data-k="0.5" aria-label="R سطر 25 ستون 400"></td></tr>
-    </table>
-    <button class="check">بررسی</button><div class="fb"></div>
-  </div>
-
-  <div class="q practice" data-l="0008" data-hint="μ_A(25) = 0.7 ← A′ = [0 0 0 0.7 0]. پس b′_j = max_i min(a′_i , r_ij) = min(0.7, b_j). صورت = Σ y·μ ، مخرج = Σ μ." data-yes="عالی! B′ = 0.2/100 + 0.6/200 + 0.7/300 + 0.5/400 و دور پنکه = 550 / 2 = 275.">
-    <p><b>۳-ب)</b> عضویت ورودی، <span class="m">B′</span> و غیرفازی‌سازی:</p>
-    <table class="t"><tr><th>μ_A(25)</th><th>b′(100)</th><th>b′(200)</th><th>b′(300)</th><th>b′(400)</th></tr>
-      <tr><td><input type="text" data-k="0.7" aria-label="عضویت 25 در A"></td><td><input type="text" data-k="0.2" aria-label="B′ در 100"></td><td><input type="text" data-k="0.6" aria-label="B′ در 200"></td><td><input type="text" data-k="0.7" aria-label="B′ در 300"></td><td><input type="text" data-k="0.5" aria-label="B′ در 400"></td></tr></table>
-    <table class="t"><tr><th>صورت Σ y·μ</th><th>مخرج Σ μ</th><th>y*</th></tr>
-      <tr><td><input type="text" data-k="550" data-tol="0.5" aria-label="صورت کسر"></td><td><input type="text" data-k="2" aria-label="مخرج کسر"></td><td><input type="text" data-k="275" data-tol="0.5" aria-label="y*"></td></tr></table>
-    <button class="check">بررسی</button><div class="fb"></div>
-  </div>
-
-  <details class="sol"><summary>راه‌حل کامل</summary>
-    <p><b>گام ۱ — ماتریس قانون</b> <span class="m">r_ij = min(a_i , b_j)</span> (سطر = نقطه x، ستون = نقطه y؛ اسلاید ۷۱):</p>
-    <table class="t"><tr><th></th><th>100 (0.2)</th><th>200 (0.6)</th><th>300 (1)</th><th>400 (0.5)</th></tr>
-      <tr><th>10 (0)</th><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><th>15 (0.4)</th><td>0.2</td><td>0.4</td><td>0.4</td><td>0.4</td></tr>
-      <tr><th>20 (1)</th><td>0.2</td><td>0.6</td><td>1</td><td>0.5</td></tr>
-      <tr><th>25 (0.7)</th><td>0.2</td><td>0.6</td><td>0.7</td><td>0.5</td></tr>
-      <tr><th>30 (0.2)</th><td>0.2</td><td>0.2</td><td>0.2</td><td>0.2</td></tr></table>
-    <p>چک سریع: سطر <span class="m">a = 1</span> (x=20) خود B است و سطر <span class="m">a = 0</span> (x=10) تمام صفر.</p>
-    <p><b>گام ۲ — ورودی قطعی</b> (اسلاید ۷۷): <span class="m">μ_A(25) = 0.7</span>، پس <span class="m">A′ = 0/10 + 0/15 + 0/20 + 0.7/25 + 0/30 = [0 0 0 0.7 0]</span>.</p>
-    <p><b>گام ۳ — ترکیب max-min</b> <span class="m">b′_j = max_i { min(a′_i , r_ij) }</span>:</p>
-    <div class="mb pre">b′1 = max{min(0,0), min(0,0.2), min(0,0.2), min(0.7,0.2), min(0,0.2)} = 0.2
-b′2 = max{min(0,0), min(0,0.4), min(0,0.6), min(0.7,0.6), min(0,0.2)} = 0.6
-b′3 = max{min(0,0), min(0,0.4), min(0,1),   min(0.7,0.7), min(0,0.2)} = 0.7
-b′4 = max{min(0,0), min(0,0.4), min(0,0.5), min(0.7,0.5), min(0,0.2)} = 0.5</div>
-    <p><span class="m">B′ = 0.2/100 + 0.6/200 + 0.7/300 + 0.5/400</span>. چک: همان <span class="m">min(0.7, b_j)</span> — یعنی B از ارتفاع 0.7 بریده شد.</p>
-    <p><b>گام ۴ — میانگین وزنی</b> (اسلاید ۷۹):</p>
-    <div class="mb pre">y* = (100×0.2 + 200×0.6 + 300×0.7 + 400×0.5) / (0.2 + 0.6 + 0.7 + 0.5)
-   = (20 + 120 + 210 + 200) / 2.0 = 550 / 2 = 275</div>
-    <p>جواب: دور پنکه حدود <b>۲۷۵ دور در دقیقه</b>. کمی کمتر از قله B (۳۰۰)، چون نقطه ۴۰۰ وزن کمتری (0.5) از نقطه ۲۰۰ (0.6) دارد.</p>
-  </details>
-</div>
-
-<!-- Problem 4 -->
-<div class="card pb">
-  <h3>مسئله ۴ — استنتاج max-product <span class="tag">مثل تمرین ۲</span></h3>
-  <div class="given" id="hw2"><b>صورت تمرین ۲:</b> «قاعده فازی "اگر بارندگی زیاد باشد آنگاه رطوبت زیاد است" را در نظر بگیرید. فرض کنید x متغیر زبانی میزان بارندگی و H مجموعه فازی زیاد، y متغیر زبانی میزان رطوبت و HN مجموعه فازی زیاد باشند. در این صورت قاعده اگر–آنگاه را می‌توان به صورت <span class="m">if x is H then y is HN</span> نوشت. حال با توجه به مجموعه‌های فازی و قانون بالا اگر میزان بارندگی ۸۰ باشد، آنگاه میزان رطوبت چقدر است؟ (از روش Max-product inference استفاده کنید.)»<br><span class="m">H = 0.2/20 + 0.4/40 + 0.6/60 + 0.8/80 + 1/100</span> · <span class="m">HN = 0.1/25 + 0.6/50 + 0.8/75 + 1/100</span><br><i>مسئله زیر همین شکل را با عددهای تازه دارد.</i></div>
-  <p>قاعده فازی «اگر باد شدید باشد آنگاه ارتفاع موج زیاد است» را در نظر بگیرید. فرض کنید x متغیر زبانی سرعت باد (km/h) و W مجموعه فازی «شدید»، y متغیر زبانی ارتفاع موج (متر) و H مجموعه فازی «زیاد» باشد. در این صورت قاعده را می‌توان به صورت زیر نوشت:</p>
-  <div class="mb">if x is W then y is H</div>
-  <div class="mb pre">W = 0.1/10 + 0.3/20 + 0.6/30 + 0.9/40 + 1/50
-H = 0.2/1 + 0.5/2 + 0.8/3 + 1/4</div>
-  <p>حال با توجه به مجموعه‌های فازی و قانون بالا، اگر سرعت باد <b>۳۰</b> باشد، ارتفاع موج چقدر است؟ (از روش Max-product inference استفاده کنید.)</p>
-
-  <div class="q practice" data-l="0008" data-hint="ماتریس با ضرب: r_ij = w_i · h_j؛ سطر x=30 یعنی 0.6 × H. ورودی: a′ = μ_W(30) = 0.6، پس b′_j = 0.6 × r(30, j) = 0.36 × h_j. بعد میانگین وزنی روی 1، 2، 3، 4." data-yes="عالی! B′ = 0.072/1 + 0.18/2 + 0.288/3 + 0.36/4 و ارتفاع موج = 2.736 / 0.9 = 3.04 متر.">
-    <p><b>۴)</b> سطر x=30 ماتریس ضربی، <span class="m">B′</span> (سه رقم اعشار) و عدد قطعی:</p>
-    <table class="t"><tr><th></th><th>y=1</th><th>y=2</th><th>y=3</th><th>y=4</th></tr>
-      <tr><th>R سطر x=30</th><td><input type="text" data-k="0.12" data-tol="0.002" aria-label="R سطر 30 ستون 1"></td><td><input type="text" data-k="0.3" data-tol="0.002" aria-label="R سطر 30 ستون 2"></td><td><input type="text" data-k="0.48" data-tol="0.002" aria-label="R سطر 30 ستون 3"></td><td><input type="text" data-k="0.6" data-tol="0.002" aria-label="R سطر 30 ستون 4"></td></tr>
-      <tr><th>B′</th><td><input type="text" data-k="0.072" data-tol="0.002" aria-label="B′ در 1"></td><td><input type="text" data-k="0.18" data-tol="0.002" aria-label="B′ در 2"></td><td><input type="text" data-k="0.288" data-tol="0.002" aria-label="B′ در 3"></td><td><input type="text" data-k="0.36" data-tol="0.002" aria-label="B′ در 4"></td></tr></table>
-    <table class="t"><tr><th>صورت Σ y·μ</th><th>مخرج Σ μ</th><th>y*</th></tr>
-      <tr><td><input type="text" data-k="2.736" data-tol="0.005" aria-label="صورت کسر"></td><td><input type="text" data-k="0.9" data-tol="0.002" aria-label="مخرج کسر"></td><td><input type="text" data-k="3.04" data-tol="0.01" aria-label="y*"></td></tr></table>
-    <button class="check">بررسی</button><div class="fb"></div>
-  </div>
-
-  <details class="sol"><summary>راه‌حل کامل</summary>
-    <p><b>گام ۱ — ماتریس قانون با ضرب</b> <span class="m">r_ij = w_i · h_j</span> (اسلاید ۸۰: «به جای min از ضرب استفاده می‌شود»):</p>
-    <table class="t"><tr><th></th><th>1 (0.2)</th><th>2 (0.5)</th><th>3 (0.8)</th><th>4 (1)</th></tr>
-      <tr><th>10 (0.1)</th><td>0.02</td><td>0.05</td><td>0.08</td><td>0.1</td></tr>
-      <tr><th>20 (0.3)</th><td>0.06</td><td>0.15</td><td>0.24</td><td>0.3</td></tr>
-      <tr><th>30 (0.6)</th><td>0.12</td><td>0.3</td><td>0.48</td><td>0.6</td></tr>
-      <tr><th>40 (0.9)</th><td>0.18</td><td>0.45</td><td>0.72</td><td>0.9</td></tr>
-      <tr><th>50 (1)</th><td>0.2</td><td>0.5</td><td>0.8</td><td>1</td></tr></table>
-    <p><b>گام ۲ — ورودی</b>: <span class="m">μ_W(30) = 0.6</span>، پس <span class="m">A′ = 0/10 + 0/20 + 0.6/30 + 0/40 + 0/50 = [0 0 0.6 0 0]</span>.</p>
-    <p><b>گام ۳ — ترکیب max-product</b> <span class="m">b′_j = max_i { a′_i · r_ij }</span>؛ همه حاصل‌ضرب‌ها جز سطر x=30 صفرند:</p>
-    <div class="mb pre">b′1 = max{0, 0, 0.6×0.12, 0, 0} = 0.072
-b′2 = max{0, 0, 0.6×0.3,  0, 0} = 0.18
-b′3 = max{0, 0, 0.6×0.48, 0, 0} = 0.288
-b′4 = max{0, 0, 0.6×0.6,  0, 0} = 0.36</div>
-    <p><span class="m">B′ = 0.072/1 + 0.18/2 + 0.288/3 + 0.36/4</span>. چک: <span class="m">α²·H = 0.36 × (0.2, 0.5, 0.8, 1)</span> ✓</p>
-    <p><b>گام ۴ — میانگین وزنی:</b></p>
-    <div class="mb pre">y* = (1×0.072 + 2×0.18 + 3×0.288 + 4×0.36) / (0.072 + 0.18 + 0.288 + 0.36)
-   = (0.072 + 0.36 + 0.864 + 1.44) / 0.9 = 2.736 / 0.9 = 3.04</div>
-    <p>جواب: ارتفاع موج حدود <b>۳٫۰۴ متر</b>.</p>
-    <div class="trap"><b>ابهام اسلاید ۸۰ (کوتاه):</b> اسلاید فقط یک جمله دارد. اگر کسی ماتریس را با <b>min</b> بسازد و فقط ترکیب را ضرب کند، سطر x=30 می‌شود <span class="m">(0.2, 0.5, 0.6, 0.6)</span>، <span class="m">B′ = 0.12/1 + 0.3/2 + 0.36/3 + 0.36/4</span> و <span class="m">y* = 3.24 / 1.14 ≈ 2.84</span>. برای تمرین ۲ همین دو خوانش ۷۷ و ۷۵ می‌دهند. در امتحان بنویس کدام خوانش را به کار برده‌ای (پیشنهاد ما: ضرب در هر دو جا، مثل درس ۸)، و اگر شد از استاد بپرس.</div>
-  </details>
-</div>
-
-<!-- Problem 5 -->
-<div class="card pb">
-  <h3>مسئله ۵ — مقدار توابع عضویت متلب <span class="tag">درس ۹ و ۱۰</span></h3>
-  <p>در هر مورد، مقدار تابع عضویت را در نقطه داده‌شده حساب کنید (تا سه رقم اعشار). نوشتار <span class="m">trimf(3,[1 4 9])</span> یعنی «<span class="m">trimf(x,[1 4 9])</span> در <span class="m">x = 3</span>».</p>
-
-  <div class="q practice" data-l="0009" data-hint="اول ببین x در کدام بازه است، بعد تکه درست را بردار: بالارونده (x−a)/(b−a)، پایین‌رونده (c−x)/(c−b) برای مثلث یا (d−x)/(d−c) برای ذوزنقه." data-yes="عالی! دو تابع تکه‌ای خطی را درست خواندی.">
-    <p><b>۵-الف)</b> توابع تکه‌ای خطی:</p>
-    <table class="t"><tr><th>trimf(3,[1 4 9])</th><th>trimf(7,[1 4 9])</th><th>trapmf(2,[1 3 6 10])</th><th>trapmf(8.5,[1 3 6 10])</th></tr>
-      <tr><td><input type="text" data-k="0.6667" data-tol="0.005" aria-label="trimf در 3"></td><td><input type="text" data-k="0.4" data-tol="0.005" aria-label="trimf در 7"></td><td><input type="text" data-k="0.5" data-tol="0.005" aria-label="trapmf در 2"></td><td><input type="text" data-k="0.375" data-tol="0.005" aria-label="trapmf در 8.5"></td></tr></table>
-    <button class="check">بررسی</button><div class="fb"></div>
-  </div>
-
-  <div class="q practice" data-l="0010" data-hint="gaussmf(x,[σ c]) = e^(−(x−c)²/(2σ²)) — اول σ! gbellmf(x,[a b c]) = 1/(1+|(x−c)/a|^(2b)). sigmf(x,[a c]) = 1/(1+e^(−a(x−c)))." data-yes="عالی! ترتیب پارامترها را درست گرفتی: gaussmf [σ c]، gbellmf [a b c]، sigmf [a c].">
-    <p><b>۵-ب)</b> توابع هموار:</p>
-    <table class="t"><tr><th>gaussmf(7,[2 6])</th><th>gbellmf(6,[2 3 5])</th><th>gbellmf(7,[2 3 5])</th><th>sigmf(6,[0.5 4])</th></tr>
-      <tr><td><input type="text" data-k="0.8825" data-tol="0.005" aria-label="gaussmf در 7"></td><td><input type="text" data-k="0.9846" data-tol="0.005" aria-label="gbellmf در 6"></td><td><input type="text" data-k="0.5" data-tol="0.005" aria-label="gbellmf در 7"></td><td><input type="text" data-k="0.7311" data-tol="0.005" aria-label="sigmf در 6"></td></tr></table>
-    <button class="check">بررسی</button><div class="fb"></div>
-  </div>
-
-  <details class="sol"><summary>راه‌حل کامل</summary>
-    <p><b>trimf(x,[1 4 9])</b> — گوشه‌ها <span class="m">(1,0), (4,1), (9,0)</span>:</p>
-    <div class="mb pre">x = 3 در [1, 4] (بالارونده):  (3 − 1)/(4 − 1) = 2/3 ≈ 0.667
-x = 7 در [4, 9] (پایین‌رونده): (9 − 7)/(9 − 4) = 2/5 = 0.4</div>
-    <p><b>trapmf(x,[1 3 6 10])</b> — گوشه‌ها <span class="m">(1,0), (3,1), (6,1), (10,0)</span>:</p>
-    <div class="mb pre">x = 2   در [1, 3]  (بالارونده):  (2 − 1)/(3 − 1) = 1/2 = 0.5
-x = 8.5 در [6, 10] (پایین‌رونده): (10 − 8.5)/(10 − 6) = 1.5/4 = 0.375</div>
-    <p><b>gaussmf(x,[2 6])</b> — یعنی <span class="m">σ = 2</span> و مرکز <span class="m">c = 6</span>:</p>
-    <div class="mb">μ(7) = e^(−(7−6)²/(2·2²)) = e^(−1/8) = e^(−0.125) ≈ 0.882</div>
-    <p><b>gbellmf(x,[2 3 5])</b> — <span class="m">a = 2</span> (نیم‌پهنا)، <span class="m">b = 3</span> (شیب)، <span class="m">c = 5</span> (مرکز):</p>
-    <div class="mb pre">μ(6) = 1/(1 + |(6−5)/2|^6) = 1/(1 + 0.5^6) = 1/(1 + 0.015625) ≈ 0.985
-μ(7) = 1/(1 + |(7−5)/2|^6) = 1/(1 + 1) = 0.5     ← x = c + a</div>
-    <p><b>sigmf(x,[0.5 4])</b> — شیب <span class="m">a = 0.5</span>، نقطه نیمه <span class="m">c = 4</span>:</p>
-    <div class="mb">μ(6) = 1/(1 + e^(−0.5(6−4))) = 1/(1 + e^(−1)) = 1/(1 + 0.3679) ≈ 0.731</div>
-    <div class="trap">دام‌های رایج: (۱) در gaussmf اول σ می‌آید، نه مرکز. (۲) فرمول «چگالی احتمال» اسلاید ۸۷ (با ضریب <span class="m">1/(√(2π)σ)</span>) تابع عضویت نیست؛ قله‌اش ۱ نمی‌شود. (۳) در gbellmf توان <span class="m">2b</span> است، نه b.</div>
-  </details>
-</div>
-</section>
-
-<!-- ===== 5. SCORE + SUMMARY ===== -->
-<section class="sec"><p class="lab">۵. کارنامه و جمع‌بندی</p>
-<div class="card">
-  <p>وقتی همه بلوک‌ها را جواب دادی (یا وقتت تمام شد)، دکمه را بزن. یک بلوک فقط وقتی «درست» حساب می‌شود که آخرین بررسی‌اش کاملاً سبز باشد.</p>
-  <button id="scoreBtn">کارنامه من</button>
-  <div id="scoreOut" aria-live="polite" style="margin-top:10px"></div>
-</div>
-<div class="soft" style="margin-top:12px">
-  <p style="margin-bottom:4px"><b>شب امتحان — همین را به خاطر بسپار</b></p>
-  <ul style="margin:0">
-    <li>عنصرِ ننوشته = درجه ۰؛ مکملش ۱ است. در <a href="#hw1-q2">تمرین ۱</a> جفت‌ها <span class="m">(x, μ)</span> هستند، در بقیه جاها <span class="m">μ/x</span>.</li>
-    <li><span class="m" style="white-space:nowrap">very = μ²</span> · <span class="m" style="white-space:nowrap">very very = μ³</span> (جزوه) · <span class="m" style="white-space:nowrap">not very = 1−μ²</span> · <span class="m" style="white-space:nowrap">somewhat = √μ</span> · indeed دو حالت دارد: وقتی <span class="m" style="white-space:nowrap">μ ≤ 0.5</span> فرمول <span class="m" style="white-space:nowrap">2μ²</span>، وقتی <span class="m" style="white-space:nowrap">μ ≥ 0.5</span> فرمول <span class="m" style="white-space:nowrap">1 − 2(1−μ)²</span>.</li>
-    <li>استنتاج: <span class="m">R</span> با min (یا ضرب) ← <span class="m">A′</span> با <span class="m">μ_A(x0)</span> در جای x0 ← <span class="m">b′_j = max_i(…)</span> ← میانگین وزنی.</li>
-    <li>میان‌بر چک: max-min ← <span class="m">min(α, b_j)</span>؛ max-product ← <span class="m">α²·b_j</span>.</li>
-    <li>ترتیب پارامترها: trimf [a b c]، trapmf [a b c d]، gaussmf [σ c]، gbellmf [a b c]، sigmf [a c].</li>
-    <li>در جواب‌های مبهم (very very، max-product) فرمولی را که به کار بردی صریح بنویس.</li>
-  </ul>
-</div></section>
-
-<!-- ===== 6. SOURCE + ASK ===== -->
-<section class="sec"><p class="lab">منبع اصلی</p>
-<p>جزوه درس: اسلایدهای ۱۵ و ۱۹ (درجه عضویت قد)، ۳۰–۳۹ (انواع سیستم و چهار مرحله)، ۴۹–۵۳ (عملیات و قیدها)، ۶۱–۶۶ (سیستم خبره)، ۷۱–۸۰ (ماتریس قانون، max-min، max-product، میانگین وزنی)، ۸۲–۹۴ (توابع عضویت؛ مثال <span class="m">gaussmf(x,[2 5])</span> از اسلاید ۸۸). قالب مسئله‌ها از تمرین ۱ و تمرین ۲. · <a href="https://www.mathworks.com/help/fuzzy/membership-functions.html">MathWorks — Membership Functions</a></p>
-<p><a href="../reference/cheatsheet.html">برگه فرمول‌ها</a> · <a href="../reference/glossary.html">واژه‌نامه</a></p>
-</section>
-
-<div class="nav"><a href="0010-gaussian-bell-sigmoid.html">← درس قبل: توابع گاوسی، زنگوله‌ای، سیگموئید و چندجمله‌ای</a><a href="../index.html">بازگشت به فهرست درس‌ها →</a></div>
-</main>
-
+<main id="app"></main>
+<script src="../assets/teacher.js"></script>
+<script src="../assets/graph.js"></script>
 <script>
-/* ===== SHARED JS — copy verbatim into every lesson ===== */
-(function(){
-function norm(s){return s.trim().replace(/[۰-۹]/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)}).replace(/[٠-٩]/g,function(d){return '٠١٢٣٤٥٦٧٨٩'.indexOf(d)}).replace(/[٫,]/g,'.').replace(/\s+/g,'')}
-function val(s){s=norm(s);if(/^-?\d*\.?\d+\/-?\d*\.?\d+$/.test(s)){var p=s.split('/');return +p[0]/+p[1]}return s===''?NaN:+s}
-document.querySelectorAll('.practice').forEach(function(q){
-  var ins=q.querySelectorAll('input[data-k]'),fb=q.querySelector('.fb'),btn=q.querySelector('.check');
-  ins.forEach(function(i){i.addEventListener('input',function(){i.parentNode.classList.remove('ok','no');fb.textContent='';fb.className='fb'})});
-  btn.addEventListener('click',function(){
-    var empty=0,ok=0;
-    ins.forEach(function(i){var c=i.parentNode;c.classList.remove('ok','no');if(!i.value.trim()){empty++;return}
-      var v=val(i.value),k=+i.dataset.k,tol=i.dataset.tol?+i.dataset.tol:0.01;
-      if(!isNaN(v)&&Math.abs(v-k)<=tol+1e-9){ok++;c.classList.add('ok')}else c.classList.add('no')});
-    if(empty){fb.className='fb bad';fb.textContent='اول همه خانه‌ها را پر کن ('+empty+' خانه خالی است).';return}
-    if(ok===ins.length){fb.className='fb good';fb.textContent=q.dataset.yes||('عالی! همه '+ins.length+' جواب درست است.')}
-    else{fb.className='fb bad';fb.textContent=ok+' از '+ins.length+' درست. '+(q.dataset.hint||'خانه‌های قرمز را دوباره حساب کن.')}
-  });
-});
-document.querySelectorAll('.mcq').forEach(function(q){
-  var fb=q.querySelector('.fb');
-  q.querySelectorAll('.opts button').forEach(function(b){b.addEventListener('click',function(){
-    q.querySelectorAll('.opts button').forEach(function(x){x.classList.remove('ok','no')});
-    if(b.hasAttribute('data-ok')){b.classList.add('ok');fb.className='fb good';fb.textContent=q.dataset.yes||'درست!'}
-    else{b.classList.add('no');fb.className='fb bad';fb.textContent=q.dataset.no||'نه، دوباره فکر کن.'}
-  })});
-});
-document.querySelectorAll('.stepper').forEach(function(s){
-  var st=s.querySelectorAll('.st'),n=0,nx=s.querySelector('.next'),al=s.querySelector('.all');
-  function upd(){st.forEach(function(e,i){e.classList.toggle('show',i<n)});if(nx)nx.textContent=n>=st.length?'از اول':'قدم بعدی ('+n+'/'+st.length+')'}
-  if(nx)nx.addEventListener('click',function(){n=n>=st.length?0:n+1;upd()});
-  if(al)al.addEventListener('click',function(){n=st.length;upd()});
-  upd();
-});
-window.addEventListener('beforeprint',function(){document.querySelectorAll('details.sol').forEach(function(d){d.open=true})});
-})();
-/* ===== END SHARED JS ===== */
-</script>
-<script>
-/* lesson-specific: timer, score summary */
-(function(){
-function fa(n){return String(n).replace(/\d/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'[d]})}
+// Lesson 11 — mock exam for parts 1–3 (lessons 1–10, slides 15–94).
+// Five worked problems shaped like homework 1 and 2, then 10 exam questions.
+// Explanations are Persian; numbers, math and technical terms stay in English.
 
-/* timer */
-var tv=document.getElementById('tmv'),ts=document.getElementById('tmStart'),tr=document.getElementById('tmReset');
-var sec=0,id=null;
-function show(){var m=Math.floor(sec/60),s=sec%60;tv.textContent=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;tv.style.color=sec>=3600?'var(--bad)':''}
-ts.addEventListener('click',function(){
-  if(id){clearInterval(id);id=null;ts.textContent='ادامه زمان‌سنج';ts.classList.remove('on')}
-  else{id=setInterval(function(){sec++;show()},1000);ts.textContent='توقف';ts.classList.add('on')}
-});
-tr.addEventListener('click',function(){if(id){clearInterval(id);id=null}sec=0;show();ts.textContent='شروع زمان‌سنج';ts.classList.remove('on')});
-show();
+const all = list => Promise.all(list);
+const LTR = s => `⁦${s}⁩`; // keeps a left-to-right run intact inside Persian board text
+const r = (v, d = 3) => String(+v.toFixed(d));
+const sum = a => a.reduce((s, v) => s + v, 0);
 
-/* score summary */
-var L={
-  '0001':['0001-crisp-vs-fuzzy.html','مجموعه قطعی در برابر مجموعه فازی'],
-  '0002':['0002-writing-fuzzy-sets.html','نوشتن و خواندن یک مجموعه فازی'],
-  '0003':['0003-fuzzy-system-pipeline.html','ساختار یک سیستم فازی'],
-  '0004':['0004-union-intersection-complement.html','اجتماع، اشتراک و مکمل'],
-  '0005':['0005-hedges.html','قیدهای زبانی'],
-  '0006':['0006-fuzzy-expert-system.html','ساخت یک سیستم خبره فازی'],
-  '0007':['0007-max-min-inference.html','استنتاج max-min'],
-  '0008':['0008-max-product-defuzzify.html','استنتاج max-product و غیرفازی‌سازی'],
-  '0009':['0009-triangle-trapezoid.html','توابع عضویت مثلثی و ذوزنقه‌ای'],
-  '0010':['0010-gaussian-bell-sigmoid.html','توابع گاوسی، زنگوله‌ای، سیگموئید']
-};
-var btn=document.getElementById('scoreBtn'),out=document.getElementById('scoreOut');
-btn.addEventListener('click',function(){
-  var qs=document.querySelectorAll('.q.practice, .q.mcq'),good=0,bad=0,empty=0,miss={},order=[];
-  qs.forEach(function(q){
-    var fb=q.querySelector('.fb'),ok=fb&&fb.classList.contains('good');
-    if(ok){good++;return}
-    if(fb&&fb.classList.contains('bad'))bad++;else empty++;
-    (q.dataset.l||'').split(/\s+/).forEach(function(k){if(!k||!L[k])return;if(!miss[k]){miss[k]=0;order.push(k)}miss[k]++});
-  });
-  var n=qs.length,pct=Math.round(100*good/n);
-  var msg=pct>=85?'عالی — آماده امتحانی. فقط تله‌ها را یک بار دیگر از برگه فرمول‌ها مرور کن.':pct>=60?'خوب — پایه محکم است. درس‌های زیر را یک بار مرور کن و دوباره امتحان بده.':'هنوز جای کار دارد. درس‌های زیر را به ترتیب مرور کن، بعد این آزمون را دوباره بزن.';
-  var h='<p class="big">'+fa(good)+' از '+fa(n)+' بلوک درست ('+fa(pct)+'٪)</p>'+
-    '<div class="bar" role="img" aria-label="'+fa(pct)+' درصد"><span style="width:'+pct+'%"></span></div>'+
-    '<p>غلط: '+fa(bad)+' · بی‌جواب: '+fa(empty)+'</p><p>'+msg+'</p>';
-  if(order.length){
-    order.sort();
-    h+='<p style="margin-bottom:0"><b>درس‌هایی که باید مرور کنی</b> (عدد = بلوک‌های غلط یا بی‌جواب مربوط به آن درس):</p><ul>';
-    order.forEach(function(k){h+='<li><a href="'+L[k][0]+'">درس '+fa(+k)+' — '+L[k][1]+'</a> ('+fa(miss[k])+')</li>'});
-    h+='</ul>';
-  } else h+='<p>هیچ نقطه ضعفی پیدا نشد.</p>';
-  out.innerHTML=h;
-});
+// Membership functions (lessons 9–10).
+const trimf = (x, [a, b, c]) => (x === b ? 1 : x <= a || x >= c ? 0 : x < b ? (x - a) / (b - a) : (c - x) / (c - b));
+const trapmf = (x, [a, b, c, d]) => (x >= b && x <= c ? 1 : x <= a || x >= d ? 0 : x < b ? (x - a) / (b - a) : (d - x) / (d - c));
+const gauss = (s, c) => x => Math.exp(-((x - c) ** 2) / (2 * s * s));
+const bell = (a, bb, c) => x => 1 / (1 + Math.abs((x - c) / a) ** (2 * bb));
+const sig = (a, c) => x => 1 / (1 + Math.exp(-a * (x - c)));
+// Hedges (slides 52–53).
+const indeed = m => (m <= 0.5 ? 2 * m * m : 1 - 2 * (1 - m) ** 2);
 
-})();
+// ---- Problem 1 (like HW1 Q1): X = {1..6}
+const P1 = { A: [0.3, 0.8, 1, 0, 0.5, 0], B: [0, 0.6, 0.2, 0.9, 0.4, 1] };
+P1.nA = P1.A.map(v => 1 - v);
+P1.nB = P1.B.map(v => 1 - v);
+P1.uAB = P1.A.map((v, k) => Math.max(v, P1.B[k]));
+P1.iAB = P1.A.map((v, k) => Math.min(v, P1.B[k]));
+P1.iAnA = P1.A.map((v, k) => Math.min(v, P1.nA[k]));
+P1.uBnA = P1.B.map((v, k) => Math.max(v, P1.nA[k]));
+const C1 = k => 330 + k * 105; // column x for element k
+
+// ---- Problem 2 (like HW1 Q2): Hot
+const HX = [15, 20, 25, 30, 35, 40], HM = [0, 0.3, 0.5, 0.6, 0.9, 1];
+
+// ---- Problem 3: rule matrix + max-min + weighted average
+const P3 = { x: [10, 15, 20, 25, 30], a: [0, 0.4, 1, 0.7, 0.2], y: [100, 200, 300, 400], b: [0.2, 0.6, 1, 0.5], x0: 3 };
+P3.R = P3.a.map(a => P3.b.map(bj => Math.min(a, bj)));
+P3.B = P3.b.map((_, j) => Math.max(...P3.a.map((_, i) => Math.min(i === P3.x0 ? P3.a[i] : 0, P3.R[i][j]))));
+P3.num = sum(P3.B.map((m, j) => m * P3.y[j]));
+P3.den = sum(P3.B);
+
+// ---- Problem 4: max-product (like HW2)
+const P4 = { x: [10, 20, 30, 40, 50], a: [0.1, 0.3, 0.6, 0.9, 1], y: [1, 2, 3, 4], b: [0.2, 0.5, 0.8, 1], x0: 2 };
+P4.R = P4.a.map(a => P4.b.map(bj => a * bj));
+P4.B = P4.b.map((_, j) => Math.max(...P4.a.map((_, i) => (i === P4.x0 ? P4.a[i] : 0) * P4.R[i][j])));
+P4.num = sum(P4.B.map((m, j) => m * P4.y[j]));
+P4.den = sum(P4.B);
+// The other reading of slide 80: min matrix, product composition.
+P4.Bmin = P4.b.map(bj => P4.a[P4.x0] * Math.min(P4.a[P4.x0], bj));
+P4.alt = sum(P4.Bmin.map((m, j) => m * P4.y[j])) / sum(P4.Bmin);
+
+// A matrix table: rows (x with degree), columns (y with degree), cells `${id}-i-j`.
+async function matrix(b, id, top, P, R, o = {}) {
+  const cx = j => 420 + j * 130, ry = i => top + 55 + i * (o.gap || 50);
+  await b.write(`${id}-c`, 250, top, 'x \\ y', { size: 22, color: 'soft' });
+  await all(P.y.map((y, j) => b.write(`${id}-h${j}`, cx(j), top, `${y} (${P.b[j]})`, { size: 22, color: 'blue', dur: 150 })));
+  await b.line(`${id}-hl`, 180, top + 15, 900, top + 15, { color: 'soft', width: 2 });
+  await b.line(`${id}-vl`, 330, top - 25, 330, ry(P.x.length - 1) + 15, { color: 'soft', width: 2 });
+  for (const [i, x] of P.x.entries()) {
+    await b.write(`${id}-r${i}`, 250, ry(i), `${x} (${P.a[i]})`, { size: 22, color: 'blue', dur: 150 });
+    await all(R[i].map((v, j) => b.write(`${id}-${i}-${j}`, cx(j), ry(i), r(v), { size: 24, dur: 100 })));
+  }
+}
+
+const QN = 10;
+function quizBoard(n, question, o = {}) {
+  return async b => {
+    await b.clear();
+    await b.write('q-n', 500, 52, `سؤال ${n} از ${QN}`, { size: 22, color: 'soft', fa: true });
+    await b.write('q-q', 500, 110, question, { size: 32, ...o });
+  };
+}
+
+Teacher.start({
+  id: 'L11',
+  number: 11,
+  title: 'آزمون جامع بخش 1 تا 3',
+  chapter: 'بخش 3 · شکل توابع عضویت',
+  slides: '15–94',
+  intro: 'پنج مسئله‌ی امتحانی مثل تمرین‌های 1 و 2، قدم‌به‌قدم، و بعد 10 سؤال ترکیبی.',
+  next: { href: '0012-fuzzy-reasoning.html', title: 'برهان فازی: قاعده، حقیقت، نتیجه' },
+  steps: [
+    // ---------------------------------------------------------- 1. rules of the game
+    {
+      say: 'به آزمون جامع بخش 1 تا 3 خوش آمدید. اینجا پنج مسئله‌ی محاسباتی مثل تمرین‌های 1 و 2 را با هم حل می‌کنیم و بعد 10 سؤال امتحانی. قانون بازی: قبل از هر قدم، خودت روی کاغذ حل کن، بعد ادامه بده؛ در امتحان نمره‌ی *مراحل* را می‌دهند، نه فقط عدد آخر. این چهار قرارداد درس‌ها را هم در همه‌ی مسئله‌ها به کار می‌بریم.',
+      draw: async b => {
+        await b.write('t1', 500, 90, 'آزمون جامع بخش 1 تا 3', { size: 46, color: 'blue', bold: true, fa: true });
+        await b.write('t2', 500, 150, 'اول روی کاغذ، بعد ادامه', { size: 30, color: 'orange', fa: true });
+        await b.box('bx', 90, 185, 820, 300, { color: 'purple', fill: 'purple' });
+        await b.write('ch', 500, 230, 'قراردادها', { size: 28, color: 'purple', bold: true, fa: true });
+        const L = [
+          `${LTR('very very = μ³')}  (اسلاید 52)`,
+          `ورودی قطعی ${LTR('x₀')} ← ${LTR('A′')}: فقط ${LTR('μ(x₀)')} در جای ${LTR('x₀')}، بقیه 0  (اسلاید 77)`,
+          'غیرفازی‌سازی = میانگین وزنی  (اسلاید 79)',
+          'max-product: به جای min، ضرب  (اسلاید 80)',
+        ];
+        for (const [k, l] of L.entries()) await b.write(`c${k}`, 870, 290 + k * 52, '•  ' + l, { size: 24, anchor: 'start', fa: true, dur: 400 });
+      },
+    },
+    // ---------------------------------------------------------- 2. problem 1: sets and table
+    {
+      say: 'مسئله‌ی 1، مثل تمرین 1 سؤال 1. مجموعه‌ی جهانی X = {1, 2, 3, 4, 5, 6} و دو مجموعه‌ی فازی A و B. بخواه: A∪B، A∩B، مکمل A، مکمل B، A∩Ā و B∪Ā. قدم اول: جدول درجه‌ها. عنصری که *نوشته نشده* درجه‌اش 0 است؛ در A عنصرهای 4 و 6 نیامده‌اند و در B عنصر 1. این صفرها را قرمز نوشتم.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 42, 'مسئله 1 — اجتماع، اشتراک، مکمل (مثل تمرین 1)', { size: 26, color: 'orange', bold: true, fa: true });
+        await b.write('dA', 500, 85, 'A = {0.3/1, 0.8/2, 1/3, 0.5/5}', { size: 26, color: 'blue' });
+        await b.write('dB', 500, 122, 'B = {0.6/2, 0.2/3, 0.9/4, 0.4/5, 1/6}', { size: 26, color: 'blue' });
+        await b.write('th', 170, 168, 'x', { size: 24, color: 'soft' });
+        await all([1, 2, 3, 4, 5, 6].map((x, k) => b.write(`th${k}`, C1(k), 168, String(x), { size: 24, color: 'soft', bold: true, dur: 100 })));
+        await b.line('hl', 90, 182, 900, 182, { color: 'soft', width: 2 });
+        await b.line('vl', 250, 148, 250, 520, { color: 'soft', width: 2 });
+        for (const [id, y, label, vals] of [['rA', 215, 'μ_A', P1.A], ['rB', 255, 'μ_B', P1.B]]) {
+          await b.write(`${id}-l`, 170, y, label, { size: 24, color: 'purple' });
+          await all(vals.map((v, k) => b.write(`${id}-${k}`, C1(k), y, r(v), { size: 24, color: (id === 'rA' && (k === 3 || k === 5)) || (id === 'rB' && k === 0) ? 'red' : 'ink', dur: 120 })));
+        }
+      },
+    },
+    // ---------------------------------------------------------- 3. complements
+    {
+      say: 'مکمل یعنی 1 منهای درجه، ستون به ستون: Ā = 1 - μ_A و B̄ = 1 - μ_B. دقت کن: عنصری که در A نبود، یعنی درجه‌ی 0، در مکمل درجه‌ی 1 می‌گیرد؛ مثلاً x = 4 و x = 6 در Ā.',
+      draw: async b => {
+        for (const [id, y, label, vals] of [['rnA', 295, '1 - μ_A', P1.nA], ['rnB', 335, '1 - μ_B', P1.nB]]) {
+          await b.write(`${id}-l`, 170, y, label, { size: 22, color: 'purple' });
+          for (const [k, v] of vals.entries()) await b.write(`${id}-${k}`, C1(k), y, r(v), { size: 24, dur: 100 });
+        }
+        await all([b.pulse(['rnA-3', 'rnA-5']), b.recolor(['rnA-3', 'rnA-5'], 'orange')]);
+        await b.line('sep', 90, 352, 900, 352, { color: 'soft', width: 2 });
+      },
+    },
+    // ---------------------------------------------------------- 4. union and intersection
+    {
+      say: 'اجتماع یعنی max و اشتراک یعنی min، باز هم ستون به ستون. A∪B = {0.3/1, 0.8/2, 1/3, 0.9/4, 0.5/5, 1/6} و A∩B = {0.6/2, 0.2/3, 0.4/5}؛ صفرها را در جواب نهایی می‌شود ننوشت.',
+      draw: async b => {
+        for (const [id, y, label, vals, color] of [['rU', 385, 'A ∪ B', P1.uAB, 'green'], ['rI', 425, 'A ∩ B', P1.iAB, 'blue']]) {
+          await b.write(`${id}-l`, 170, y, label, { size: 22, color });
+          for (const [k, v] of vals.entries()) {
+            await b.pulse([`rA-${k}`, `rB-${k}`], 250);
+            await b.write(`${id}-${k}`, C1(k), y, r(v), { size: 24, color, dur: 100 });
+          }
+        }
+      },
+    },
+    // ---------------------------------------------------------- 5. A ∩ Ā and B ∪ Ā
+    {
+      say: 'دو سطر آخر از روی سطرهای قبلی: A∩Ā = min(μ_A, 1 - μ_A) و B∪Ā = max(μ_B, 1 - μ_A). نکته‌ی امتحانی: A∩Ā *تهی نیست*؛ بیشترینش اینجا 0.5 در x = 5 است و هیچ‌وقت از 0.5 بالاتر نمی‌رود، چون min(μ, 1 - μ) ≤ 0.5. در برگه یک جمله بنویس: قانون طرد شق ثالث در فازی برقرار نیست.',
+      tip: true,
+      draw: async b => {
+        for (const [id, y, label, vals, color] of [['rAA', 465, 'A ∩ Ā', P1.iAnA, 'orange'], ['rBA', 505, 'B ∪ Ā', P1.uBnA, 'green']]) {
+          await b.write(`${id}-l`, 170, y, label, { size: 22, color });
+          for (const [k, v] of vals.entries()) await b.write(`${id}-${k}`, C1(k), y, r(v), { size: 24, color, dur: 100 });
+        }
+        await b.ring('r5', C1(4), 457, 30, 22, { color: 'red' });
+        await b.write('lem', C1(4), 537, `تهی نیست، ولی ${LTR('≤ 0.5')}`, { size: 18, color: 'red', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 6. problem 2: hedges
+    {
+      say: 'مسئله‌ی 2، مثل تمرین 1 سؤال 2: مجموعه‌ی hot داده شده و very، very very، not very، somewhat و indeed را می‌خواهیم. حواست به ترتیب باشد: در زوج (x, μ) *اول عنصر* می‌آید، بعد درجه؛ یعنی (20, 0.3) یعنی دمای 20 با درجه‌ی 0.3. این برعکس نماد μ/x است که اول درجه را می‌نویسد: همین عضو را 0.3/20 می‌نویسیم. فرمول‌ها از اسلایدهای 52 و 53.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 45, 'مسئله 2 — قیدهای زبانی (مثل تمرین 1)', { size: 28, color: 'orange', bold: true, fa: true });
+        await b.write('d', 500, 100, 'Hot = {(15,0), (20,0.3), (25,0.5), (30,0.6), (35,0.9), (40,1)}', { size: 26, color: 'blue' });
+        await all([
+          b.write('p1', 225, 190, '(', { size: 44, color: 'soft' }), b.write('px', 265, 190, '20', { size: 44, color: 'blue', bold: true }),
+          b.write('p2', 298, 190, ',', { size: 44, color: 'soft' }), b.write('pm', 345, 190, '0.3', { size: 44, color: 'green', bold: true }),
+          b.write('p3', 390, 190, ')', { size: 44, color: 'soft' }),
+        ]);
+        await all([b.write('pxl', 265, 238, 'عنصر', { size: 22, color: 'blue', fa: true }), b.write('pml', 345, 238, 'درجه', { size: 22, color: 'green', fa: true })]);
+        await b.write('eq', 500, 185, '=', { size: 44, color: 'soft' });
+        await all([
+          b.write('qm', 620, 190, '0.3', { size: 44, color: 'green', bold: true }), b.write('qs', 668, 190, '/', { size: 44, color: 'soft' }),
+          b.write('qx', 712, 190, '20', { size: 44, color: 'blue', bold: true }),
+        ]);
+        await all([b.write('qml', 620, 238, 'درجه', { size: 22, color: 'green', fa: true }), b.write('qxl', 712, 238, 'عنصر', { size: 22, color: 'blue', fa: true })]);
+        await b.write('flip', 500, 290, `در ${LTR('(x, μ)')} اول عنصر · در ${LTR('μ/x')} اول درجه`, { size: 26, color: 'red', bold: true, fa: true });
+        const F = [['very = μ²', 280, 360], ['very very = μ³', 280, 410], ['not very = 1 - μ²', 280, 460], ['somewhat = μ^{0.5}', 720, 360], ['indeed (μ ≤ 0.5):  2μ²', 720, 410], ['indeed (μ ≥ 0.5):  1 - 2(1 - μ)²', 720, 460]];
+        for (const [k, [f, x, y]] of F.entries()) await b.write(`f${k}`, x, y, f, { size: 24, color: 'purple', dur: 300 });
+        await b.write('src', 500, 515, 'اسلایدهای 52 و 53', { size: 20, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 7. very, very very, not very
+    {
+      say: 'جدول را ستون به ستون پر کنیم. very یعنی μ به توان 2، very very طبق جزوه μ به توان 3، و not very یعنی 1 منهای μ². مثلاً برای 30 درجه: 0.6² = 0.36، 0.6³ = 0.216 و 1 - 0.36 = 0.64. «not very» را با «very not» اشتباه نکن؛ دومی (1 - μ)² است.',
+      draw: async b => {
+        await b.clear();
+        await b.write('th', 160, 70, 'x', { size: 24, color: 'soft' });
+        await all(HX.map((x, k) => b.write(`th${k}`, C1(k), 70, String(x), { size: 24, color: 'soft', bold: true, dur: 100 })));
+        await b.line('hl', 70, 85, 900, 85, { color: 'soft', width: 2 });
+        await b.line('vl', 250, 45, 250, 440, { color: 'soft', width: 2 });
+        const rows = [['rM', 125, 'μ_{hot}', HM, 'blue'], ['rV', 180, 'very  μ²', HM.map(m => m ** 2), 'ink'], ['rVV', 235, 'very very  μ³', HM.map(m => m ** 3), 'ink'], ['rNV', 290, 'not very  1 - μ²', HM.map(m => 1 - m ** 2), 'ink']];
+        for (const [id, y, label, vals, color] of rows) {
+          await b.write(`${id}-l`, 160, y, label, { size: 20, color: 'purple' });
+          for (const [k, v] of vals.entries()) await b.write(`${id}-${k}`, C1(k), y, r(v), { size: 24, color, dur: 100 });
+        }
+        await b.pulse(['rM-3', 'rV-3', 'rVV-3', 'rNV-3']);
+      },
+    },
+    // ---------------------------------------------------------- 8. somewhat and indeed
+    {
+      say: 'somewhat یعنی جذر μ؛ تا سه رقم اعشار، مثلاً √0.3 ≈ 0.548. indeed دو حالت دارد: وقتی μ ≤ 0.5 فرمول 2μ²، و وقتی μ ≥ 0.5 فرمول 1 - 2(1 - μ)². پس 0.3 می‌شود 2 × 0.09 = 0.18، و 0.6 می‌شود 1 - 2 × 0.16 = 0.68. در 0.5 هر دو فرمول 0.5 می‌دهند. اثر indeed: زیر 0.5 را پایین‌تر و بالای 0.5 را بالاتر می‌برد.',
+      draw: async b => {
+        await b.write('rS-l', 160, 360, 'somewhat  √μ', { size: 20, color: 'purple' });
+        for (const [k, m] of HM.entries()) await b.write(`rS-${k}`, C1(k), 360, r(Math.sqrt(m)), { size: 24, dur: 100 });
+        await b.write('rI-l', 160, 415, 'indeed', { size: 20, color: 'purple' });
+        for (const [k, m] of HM.entries()) await b.write(`rI-${k}`, C1(k), 415, r(indeed(m)), { size: 24, color: m <= 0.5 ? 'orange' : 'green', dur: 100 });
+        await b.write('n1', 500, 480, `μ = 0.3:  2 × 0.09 = ${r(indeed(0.3))}`, { size: 22, color: 'orange' });
+        await b.write('n2', 500, 520, `μ = 0.6:  1 - 2 × 0.16 = ${r(indeed(0.6))}     μ = 0.9:  1 - 2 × 0.01 = ${r(indeed(0.9))}`, { size: 22, color: 'green' });
+      },
+    },
+    // ---------------------------------------------------------- 9. problem 3: setup
+    {
+      say: 'مسئله‌ی 3، از درس‌های 7 و 8. قاعده: «اگر دما معتدل باشد، آنگاه دور پنکه متوسط است»، یعنی if x is A then y is B. A روی دما و B روی دور پنکه تعریف شده‌اند. (الف) ماتریس قانون R را با max-min بساز. (ب) اگر دما 25 درجه باشد، مجموعه‌ی خروجی B′ و دور پنکه را با میانگین وزنی به دست آور.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 50, 'مسئله 3 — ماتریس قانون، max-min، میانگین وزنی', { size: 28, color: 'orange', bold: true, fa: true });
+        await b.write('rule', 500, 120, 'if  x is A  then  y is B', { size: 38, color: 'purple', bold: true });
+        await b.write('dA', 500, 200, 'A = 0/10 + 0.4/15 + 1/20 + 0.7/25 + 0.2/30', { size: 28, color: 'blue' });
+        await b.write('dAf', 500, 238, 'A = دمای معتدل (درجه)', { size: 20, color: 'soft', fa: true });
+        await b.write('dB', 500, 300, 'B = 0.2/100 + 0.6/200 + 1/300 + 0.5/400', { size: 28, color: 'blue' });
+        await b.write('dBf', 500, 338, 'B = دور متوسط پنکه (دور در دقیقه)', { size: 20, color: 'soft', fa: true });
+        await b.write('qa', 500, 410, '(الف) ماتریس R با max-min', { size: 26, fa: true });
+        await b.write('qb', 500, 460, `(ب) ${LTR('x = 25')} ← ${LTR('B′')} و ${LTR('y*')} با میانگین وزنی`, { size: 26, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 10. the rule matrix
+    {
+      say: 'ماتریس قانون: هر خانه r_{ij} = min(a_i, b_j)، سطر برای نقطه‌ی x و ستون برای نقطه‌ی y، طبق اسلاید 71. دو چک سریع: سطری که a = 1 دارد، یعنی x = 20، دقیقاً خود B است؛ و سطری که a = 0 دارد، یعنی x = 10، تمام صفر است. سطر x = 15 هم با 0.4 بریده شده: 0.2، 0.4، 0.4، 0.4.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 50, 'R:   r_{ij} = min(a_i, b_j)', { size: 32, color: 'orange', bold: true });
+        await matrix(b, 'm', 115, P3, P3.R);
+        await all([b.recolor('m-2-*', 'green'), b.recolor('m-0-*', 'soft')]);
+        await b.write('note', 500, 450, `سطر ${LTR('a = 1')} همان B · سطر ${LTR('a = 0')} تمام صفر`, { size: 24, color: 'green', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 11. crisp input → B′
+    {
+      say: 'حالا دما 25 است. طبق اسلاید 77، ورودی قطعی را به A′ تبدیل می‌کنیم: در جای 25 مقدار μ_A(25) = 0.7 و بقیه صفر، یعنی A′ = [0 0 0 0.7 0]. در ترکیب max-min، b′_j = max_i min(a′_i, r_{ij})؛ همه‌ی سطرها جز سطر 25 صفر می‌دهند، پس B′ همان سطر 25 است: 0.2/100 + 0.6/200 + 0.7/300 + 0.5/400. چک: همان min(0.7, b_j)، یعنی B از ارتفاع 0.7 بریده شد.',
+      draw: async b => {
+        await b.erase('note');
+        await b.dim(['m-0-*', 'm-1-*', 'm-2-*', 'm-4-*', 'm-r0', 'm-r1', 'm-r2', 'm-r4'], 0.25);
+        await b.recolor(['m-3-*', 'm-r3'], 'orange');
+        await b.write('ap', 500, 430, 'A′ = [0  0  0  0.7  0]', { size: 28, color: 'blue' });
+        await b.write('bp', 500, 485, `B′ = ${P3.B.map((m, j) => `${r(m)}/${P3.y[j]}`).join(' + ')}`, { size: 28, color: 'green', bold: true });
+        await b.write('ck', 500, 528, 'check:  min(0.7, b_j)', { size: 20, color: 'soft' });
+      },
+    },
+    // ---------------------------------------------------------- 12. weighted average
+    {
+      say: 'غیرفازی‌سازی با میانگین وزنی، اسلاید 79: هر y را در درجه‌اش ضرب کن، جمع بزن، و تقسیم بر جمع درجه‌ها کن. صورت: 20 + 120 + 210 + 200 = 550. مخرج: 0.2 + 0.6 + 0.7 + 0.5 = 2. پس y* = 550 / 2 = 275 دور در دقیقه؛ کمی کمتر از قله‌ی B یعنی 300، چون نقطه‌ی 400 وزن کمتری از نقطه‌ی 200 دارد.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 60, 'y* = Σ y_j · μ(y_j)  /  Σ μ(y_j)', { size: 36, color: 'orange', bold: true });
+        await b.write('n1', 500, 150, P3.B.map((m, j) => `${P3.y[j]}×${r(m)}`).join(' + '), { size: 30 });
+        await b.line('fr', 200, 175, 800, 175, { color: 'ink', width: 3 });
+        await b.write('d1', 500, 215, P3.B.map(m => r(m)).join(' + '), { size: 30 });
+        await b.write('n2', 500, 300, `= (${P3.B.map((m, j) => r(m * P3.y[j])).join(' + ')}) / ${r(P3.den)}`, { size: 30, color: 'blue' });
+        await b.write('n3', 500, 375, `= ${r(P3.num)} / ${r(P3.den)} = ${r(P3.num / P3.den)}`, { size: 44, color: 'green', bold: true });
+        await b.write('ans', 500, 450, `دور پنکه ≈ ${LTR(r(P3.num / P3.den))} دور در دقیقه`, { size: 28, color: 'green', fa: true });
+        await b.write('why', 500, 505, 'کمی کمتر از قله‌ی B (300)؛ وزن 400 کمتر از وزن 200 است', { size: 20, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 13. problem 4: product matrix
+    {
+      say: 'مسئله‌ی 4، مثل تمرین 2: «اگر باد شدید باشد، آنگاه ارتفاع موج زیاد است». سرعت باد 30 است و روش max-product را می‌خواهد. اسلاید 80 فقط می‌گوید: به جای min از *ضرب* استفاده کن. پس ماتریس قانون r_{ij} = w_i × h_j. مثلاً سطر x = 30: 0.6 × 0.2 = 0.12، 0.6 × 0.5 = 0.3، 0.6 × 0.8 = 0.48 و 0.6 × 1 = 0.6.',
+      term: ['max-product inference', 'استنتاج max-product'],
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 40, 'مسئله 4 — max-product (مثل تمرین 2)', { size: 26, color: 'orange', bold: true, fa: true });
+        await b.write('dW', 500, 82, 'W = 0.1/10 + 0.3/20 + 0.6/30 + 0.9/40 + 1/50', { size: 24, color: 'blue' });
+        await b.write('dH', 500, 118, 'H = 0.2/1 + 0.5/2 + 0.8/3 + 1/4      x = 30', { size: 24, color: 'blue' });
+        await b.write('rl', 500, 160, 'r_{ij} = w_i × h_j', { size: 28, color: 'purple', bold: true });
+        await matrix(b, 'm', 210, P4, P4.R, { gap: 46 });
+        await b.recolor(['m-2-*', 'm-r2'], 'orange');
+      },
+    },
+    // ---------------------------------------------------------- 14. B′ and y*
+    {
+      say: 'ورودی: μ_W(30) = 0.6، پس A′ = [0 0 0.6 0 0]. در ترکیب max-product، b′_j = max_i (a′_i × r_{ij})؛ فقط سطر 30 غیرصفر است، پس B′ = 0.6 × سطر 30 = 0.072/1 + 0.18/2 + 0.288/3 + 0.36/4. چک: 0.6² × H. میانگین وزنی: صورت 2.736 و مخرج 0.9، پس y* = 3.04 متر.',
+      draw: async b => {
+        await b.clear();
+        await b.write('ap', 500, 60, 'A′ = [0  0  0.6  0  0]', { size: 30, color: 'blue' });
+        await b.write('row', 500, 120, `R(x = 30) = (${P4.R[2].map(v => r(v)).join(', ')})`, { size: 28, color: 'orange' });
+        await b.write('bp1', 500, 185, `B′ = 0.6 × R(x = 30) = (${P4.B.map(v => r(v)).join(', ')})`, { size: 28, color: 'green', bold: true });
+        await b.write('ck', 500, 230, 'check:  0.6² × H = 0.36 × (0.2, 0.5, 0.8, 1)', { size: 22, color: 'soft' });
+        await b.write('n1', 500, 300, `y* = (${P4.B.map((m, j) => `${P4.y[j]}×${r(m)}`).join(' + ')}) / ${r(P4.den)}`, { size: 24 });
+        await b.write('n2', 500, 350, `= ${r(P4.num)} / ${r(P4.den)} = ${r(P4.num / P4.den)}`, { size: 40, color: 'green', bold: true });
+        await b.write('ans', 500, 405, `ارتفاع موج ≈ ${LTR(r(P4.num / P4.den))} متر`, { size: 28, color: 'green', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 15. the ambiguity of slide 80
+    {
+      say: 'یک ابهام: اسلاید 80 فقط یک جمله دارد. اگر کسی ماتریس را با min بسازد و فقط ترکیب را ضرب کند، سطر 30 می‌شود (0.2, 0.5, 0.6, 0.6)، B′ = (0.12, 0.3, 0.36, 0.36) و y* = 3.24 / 1.14 ≈ 2.84. در امتحان صریح بنویس کدام خوانش را به کار برده‌ای؛ پیشنهاد ما، مثل درس 8: ضرب در هر دو جا.',
+      tip: true,
+      draw: async b => {
+        await b.box('bx', 90, 440, 820, 95, { color: 'red', fill: 'red' });
+        await b.write('a1', 500, 478, `خوانش دیگر (R با min): ${LTR(`B′ = (${P4.Bmin.map(v => r(v)).join(', ')})`)}`, { size: 22, color: 'red', fa: true });
+        await b.write('a2', 500, 518, `${LTR(`y* = 3.24 / 1.14 ≈ ${r(P4.alt, 2)}`)} — خوانشت را در برگه بنویس`, { size: 22, color: 'red', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 16. problem 5a: trimf / trapmf
+    {
+      say: 'مسئله‌ی 5، از درس‌های 9 و 10: مقدار توابع عضویت متلب در چند نقطه. نوشتار trimf(3,[1 4 9]) یعنی trimf(x,[1 4 9]) در x = 3. اول تکه‌ای خطی‌ها. مثلث [1 4 9]: x = 3 روی شیب بالارونده است، (3-1)/(4-1) = 2/3 ≈ 0.667؛ x = 7 روی شیب پایین‌رونده، (9-7)/(9-4) = 0.4. ذوزنقه [1 3 6 10]: x = 2 می‌شود (2-1)/(3-1) = 0.5 و x = 8.5 می‌شود (10-8.5)/(10-6) = 0.375.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 40, 'مسئله 5 — مقدار توابع عضویت متلب', { size: 28, color: 'orange', bold: true, fa: true });
+        const g1 = Graph({ x: 80, y: 130, w: 350, h: 190, from: 0, to: 10 });
+        const g2 = Graph({ x: 570, y: 130, w: 340, h: 190, from: 0, to: 10 });
+        await all([g1.axes(b, 'a1', { ticks: [0, 1, 3, 4, 7, 9, 10], yTicks: [0, 1] }), g2.axes(b, 'a2', { ticks: [0, 1, 2, 3, 6, 8.5, 10], yTicks: [0, 1] })]);
+        await b.write('t1', 255, 85, 'trimf(x,[1 4 9])', { size: 24, color: 'blue', bold: true });
+        await b.write('t2', 740, 85, 'trapmf(x,[1 3 6 10])', { size: 24, color: 'blue', bold: true });
+        await g1.poly(b, 'p1', [[0, 0], [1, 0], [4, 1], [9, 0], [10, 0]], { color: 'blue' });
+        await g2.poly(b, 'p2', [[0, 0], [1, 0], [3, 1], [6, 1], [10, 0]], { color: 'blue' });
+        const T = [1, 4, 9], Z = [1, 3, 6, 10];
+        await g1.guide(b, 'g13', 3, trimf(3, T));
+        await b.write('e1', 255, 405, `x = 3:  (3 - 1)/(4 - 1) = 2/3 ≈ ${r(trimf(3, T))}`, { size: 20, color: 'orange' });
+        await g1.guide(b, 'g17', 7, trimf(7, T), { color: 'green' });
+        await b.write('e2', 255, 445, `x = 7:  (9 - 7)/(9 - 4) = ${r(trimf(7, T))}`, { size: 20, color: 'green' });
+        await g2.guide(b, 'g22', 2, trapmf(2, Z));
+        await b.write('e3', 740, 405, `x = 2:  (2 - 1)/(3 - 1) = ${r(trapmf(2, Z))}`, { size: 20, color: 'orange' });
+        await g2.guide(b, 'g28', 8.5, trapmf(8.5, Z), { color: 'green' });
+        await b.write('e4', 740, 445, `x = 8.5:  (10 - 8.5)/(10 - 6) = ${r(trapmf(8.5, Z))}`, { size: 20, color: 'green' });
+        await b.write('note', 500, 510, 'اول بازه، بعد تکه، بعد عدد', { size: 24, color: 'purple', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 17. problem 5b: smooth ones
+    {
+      say: 'حالا هموارها. gaussmf(7,[2 6]): σ = 2 و c = 6، پس e^{-1/8} ≈ 0.882. gbellmf(6,[2 3 5]): |(6-5)/2| = 0.5 و توان 2b = 6، پس 1/(1+0.5^6) ≈ 0.985. gbellmf(7,[2 3 5]): x = c + a است، پس بدون حساب 0.5. sigmf(6,[0.5 4]): توان -0.5 × 2 = -1، پس 1/(1+e^{-1}) ≈ 0.731. سه دام رایج را هم پایین نوشتم.',
+      draw: async b => {
+        await b.clear();
+        const L = [
+          [`gaussmf(7,[2 6]) = e^{-(7-6)²/8} = e^{-0.125} ≈ ${r(gauss(2, 6)(7))}`, 'blue'],
+          [`gbellmf(6,[2 3 5]) = 1/(1 + 0.5^6) ≈ ${r(bell(2, 3, 5)(6))}`, 'purple'],
+          [`gbellmf(7,[2 3 5]) = 1/(1 + 1^6) = ${r(bell(2, 3, 5)(7))}     (x = c + a)`, 'purple'],
+          [`sigmf(6,[0.5 4]) = 1/(1 + e^{-0.5(6-4)}) = 1/(1 + e^{-1}) ≈ ${r(sig(0.5, 4)(6))}`, 'green'],
+        ];
+        for (const [k, [t, color]] of L.entries()) await b.write(`l${k}`, 500, 75 + k * 70, t, { size: 26, color, dur: 600 });
+        await b.box('bx', 120, 345, 760, 180, { color: 'red', fill: 'red' });
+        await b.write('th', 500, 385, 'دام‌های رایج', { size: 28, color: 'red', bold: true, fa: true });
+        const T = [`${LTR('gaussmf')}: اول σ، بعد c`, 'فرمول چگالی اسلاید 87 (با ضریب) تابع عضویت نیست', `${LTR('gbellmf')}: توان ${LTR('2b')} است، نه b`];
+        for (const [k, t] of T.entries()) await b.write(`t${k}`, 500, 430 + k * 38, t, { size: 22, fa: true, dur: 300 });
+      },
+    },
+    // ---------------------------------------------------------- 18. exam-night summary
+    {
+      say: 'جمع‌بندی شب امتحان. این شش خط را یک بار دیگر بخوان؛ بعد 10 سؤال ترکیبی داریم.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 70, 'یادت باشد', { size: 48, color: 'orange', bold: true, fa: true });
+        const L = [
+          `عنصر ننوشته = درجه‌ی 0 · در ${LTR('(x, μ)')} اول عنصر، در ${LTR('μ/x')} اول درجه`,
+          `${LTR('∪ = max')} · ${LTR('∩ = min')} · مکمل ${LTR('1 - μ')} · ${LTR('A ∩ Ā')} تهی نیست`,
+          `very ${LTR('μ²')} · very very ${LTR('μ³')} · not very ${LTR('1 - μ²')} · somewhat ${LTR('√μ')} · indeed دو حالت`,
+          `استنتاج: R با min یا ضرب ← ${LTR('A′')} ← ${LTR('b′ⱼ = maxᵢ(…)')} ← میانگین وزنی`,
+          `پارامترها: trimf [a b c] · trapmf [a b c d] · gaussmf [σ c] · gbellmf [a b c] · sigmf [a c]`,
+          'در جواب‌های مبهم (very very، max-product) فرمولت را صریح بنویس',
+        ];
+        for (const [k, l] of L.entries()) await b.write(`m${k}`, 950, 145 + k * 66, '•  ' + l, { size: 21, anchor: 'start', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- quizzes
+    {
+      say: 'سؤال‌ها شروع شد! ترتیب درست چهار مرحله‌ی کار یک سیستم فازی کدام است؟',
+      draw: quizBoard(1, 'ترتیب چهار مرحله‌ی سیستم فازی؟', { fa: true }),
+      quiz: {
+        choices: ['inference → fuzzification → composition → defuzzification', 'fuzzification → composition → inference → defuzzification', 'fuzzification → inference → composition → defuzzification', 'composition → fuzzification → inference → defuzzification'], correct: 2,
+        hint: 'اول باید ورودی عددی فازی شود؛ آخر باید دوباره عدد قطعی بگیریم.',
+        explain: 'اسلایدهای 34 تا 38: فازی‌سازی، بعد استنتاج، بعد ساخت یا ترکیب نتیجه‌ها، و آخر غیرفازی‌سازی.',
+      },
+      solve: async b => {
+        const L = ['فازی‌سازی', 'استنتاج', 'ساخت (ترکیب)', 'غیرفازی‌سازی'], X = [830, 610, 390, 170];
+        for (const [k, l] of L.entries()) {
+          await b.box(`sb${k}`, X[k] - 95, 260, 190, 70, { color: 'green', fill: 'green', dur: 300 });
+          await b.write(`st${k}`, X[k], 305, l, { size: 24, fa: true, dur: 250 });
+          await b.write(`sn${k}`, X[k], 245, String(k + 1), { size: 24, color: 'purple', bold: true, dur: 150 });
+          if (k < 3) await b.arrow(`sa${k}`, X[k] - 98, 295, X[k + 1] + 98, 295, { color: 'orange', head: 10, dur: 200 });
+        }
+        await b.write('src', 500, 400, 'اسلایدهای 34 تا 38', { size: 22, color: 'soft', fa: true });
+      },
+    },
+    {
+      say: 'اگر μ_A(x) = 0.7 باشد، μ_{A∩Ā}(x) چند است؟',
+      draw: quizBoard(2, 'μ_A(x) = 0.7   →   μ_{A∩Ā}(x) = ?'),
+      quiz: { answer: ['0.3', '.3'], hint: 'اول مکمل را حساب کن، بعد min بگیر.', explain: 'Ā = 1 - 0.7 = 0.3 و اشتراک یعنی min(0.7, 0.3) = 0.3. پس A∩Ā تهی نیست.' },
+      solve: async b => {
+        await b.write('s1', 500, 240, 'μ_Ā = 1 - 0.7 = 0.3', { size: 36 });
+        await b.write('s2', 500, 320, 'min(0.7, 0.3) = 0.3', { size: 44, color: 'green', bold: true });
+        await b.write('s3', 500, 400, 'تهی نیست — حداکثرش 0.5', { size: 26, color: 'red', fa: true });
+      },
+    },
+    {
+      say: 'قد 175 سانتی‌متر: اسلاید 15 درجه‌ی عضویتش در «بلند» را 0.6 می‌دهد و اسلاید 24 (با 1.75 متر) آن را 0.75. چرا دو جواب؟',
+      draw: quizBoard(3, `قد 175: اسلاید 15 ← ${LTR('0.6')} · اسلاید 24 ← ${LTR('0.75')}`, { fa: true, size: 30 }),
+      quiz: {
+        choices: ['یکی از دو اسلاید اشتباه دارد', 'مجموعه‌ی فازی همیشه دو جواب دارد', 'تابع عضویت انتخاب‌شده یکی نیست', 'قد 175 عضو مجموعه‌ی بلند نیست'], correct: 2,
+        hint: 'μ از کجا می‌آید؟ چه کسی آن را انتخاب می‌کند؟',
+        explain: 'درجه‌ی عضویت از تابع عضویت می‌آید و تابع عضویت را طراح انتخاب می‌کند. دو اسلاید دو تابع عضویت متفاوت برای «بلند» گرفته‌اند؛ هیچ‌کدام اشتباه نیست.',
+      },
+      solve: async b => {
+        const g = Graph({ x: 140, y: 200, w: 520, h: 250, from: 140, to: 210 });
+        await g.axes(b, 'sa', { ticks: [140, 145, 160, 175, 185, 210], label: 'cm' });
+        const f1 = h => Math.min(1, Math.max(0, (h - 160) / 25)), f2 = h => Math.min(1, Math.max(0, (h - 145) / 40));
+        await g.curve(b, 'c1', f1, { color: 'blue', steps: 140 });
+        await g.curve(b, 'c2', f2, { color: 'green', steps: 140 });
+        await g.guide(b, 'g1', 175, f1(175), { color: 'blue' });
+        await g.guide(b, 'g2', 175, f2(175), { color: 'green' });
+        await b.write('l1', 830, 280, `تابع 1 ← ${LTR(r(f1(175)))}`, { size: 26, color: 'blue', fa: true });
+        await b.write('l2', 830, 330, `تابع 2 ← ${LTR(r(f2(175)))}`, { size: 26, color: 'green', fa: true });
+        await b.write('l3', 820, 400, 'تابع عضویت را طراح انتخاب می‌کند', { size: 18, color: 'purple', fa: true });
+      },
+    },
+    {
+      say: 'طبق جزوه، μ مجموعه‌ی «very very A» کدام است؟',
+      draw: quizBoard(4, 'μ_{very very A} = ?'),
+      quiz: {
+        choices: ['(μ_A)^2', '(μ_A)^3', '(μ_A)^4', '(μ_A)^{0.5}'], correct: 1,
+        hint: 'اسلاید 52: very توان 2 است. very very در جزوه چه توانی دارد؟',
+        explain: 'اسلاید 52: very very = (μ_A)^3. بعضی کتاب‌ها توان 4 می‌گیرند؛ در امتحان بنویس «طبق جزوه μ³».',
+      },
+      solve: async b => {
+        const L = [['very', 'μ²'], ['very very', 'μ³'], ['not very', '1 - μ²'], ['somewhat', 'μ^{0.5}']];
+        for (const [k, [n, f]] of L.entries()) {
+          const y = 220 + k * 60;
+          await b.write(`sn${k}`, 420, y, n, { size: 30, color: k === 1 ? 'green' : 'ink', anchor: 'end', bold: k === 1 });
+          await b.write(`sf${k}`, 480, y, f, { size: 30, color: k === 1 ? 'green' : 'ink', anchor: 'start', bold: k === 1 });
+        }
+        await b.ring('sr', 450, 270, 150, 30, { color: 'green' });
+      },
+    },
+    {
+      say: 'اگر μ_A(x) = 0.8 باشد، درجه‌ی «indeed A» در همین x چند است؟',
+      draw: quizBoard(5, 'μ_A(x) = 0.8   →   μ_{indeed A}(x) = ?'),
+      quiz: { answer: ['0.92', '.92'], hint: '0.8 از 0.5 بزرگ‌تر است؛ حالت دوم: 1 - 2(1 - μ)².', explain: 'چون 0.8 ≥ 0.5، فرمول 1 - 2(1 - 0.8)² = 1 - 2 × 0.04 = 0.92.' },
+      solve: async b => {
+        await b.write('s1', 500, 230, 'μ = 0.8 ≥ 0.5   →   1 - 2(1 - μ)²', { size: 32, color: 'orange' });
+        await b.write('s2', 500, 300, '1 - 2(0.2)² = 1 - 2 × 0.04', { size: 32 });
+        await b.write('s3', 500, 380, `= ${r(indeed(0.8))}`, { size: 48, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'یک سیستم خبره‌ی فازی سه متغیر زبانی ورودی دارد: دما با سه مجموعه (سرد، معتدل، گرم)، رطوبت با دو مجموعه (کم، زیاد)، و باد با چهار مجموعه (هیچ، کم، متوسط، زیاد). جدول کامل قوانین چند قانون دارد؟',
+      draw: async b => {
+        await quizBoard(6, 'تعداد قوانین جدول کامل؟', { fa: true })(b);
+        await b.write('q1', 500, 190, 'دما: سرد، معتدل، گرم', { size: 26, color: 'blue', fa: true });
+        await b.write('q2', 500, 235, 'رطوبت: کم، زیاد', { size: 26, color: 'blue', fa: true });
+        await b.write('q3', 500, 280, 'باد: هیچ، کم، متوسط، زیاد', { size: 26, color: 'blue', fa: true });
+      },
+      quiz: { answer: ['24'], hint: 'هر قانون یک مجموعه از هر متغیر برمی‌دارد؛ تعدادها را در هم ضرب کن.', explain: 'جدول کامل یعنی همه‌ی ترکیب‌ها: 3 × 2 × 4 = 24 قانون.' },
+      solve: async b => {
+        await b.write('s1', 500, 380, '3 × 2 × 4 = 24', { size: 52, color: 'green', bold: true });
+        await b.write('s2', 500, 450, 'هر ترکیب = یک قانون', { size: 24, color: 'soft', fa: true });
+      },
+    },
+    {
+      say: 'در ماتریس قانون r_{ij} = min(a_i, b_j)، سطری که a_i = 1 دارد چیست؟',
+      draw: quizBoard(7, 'r_{ij} = min(a_i, b_j),   a_i = 1   →   ?'),
+      quiz: {
+        choices: ['سطری تمام صفر', 'همان مجموعه‌ی A', 'همان مجموعه‌ی B', 'سطری تمام یک'], correct: 2,
+        hint: 'min(1, b_j) چند است؟',
+        explain: 'min(1, b_j) = b_j، پس آن سطر دقیقاً خود B است. سطری با a_i = 0 تمام صفر می‌شود.',
+      },
+      solve: async b => {
+        await b.write('s1', 500, 240, 'min(1, b_j) = b_j', { size: 44, color: 'green', bold: true });
+        await b.write('s2', 500, 320, 'سطر a = 1 ← همان B', { size: 30, color: 'green', fa: true });
+        await b.write('s3', 500, 390, `${LTR('min(0, bⱼ) = 0')} ← سطر صفر`, { size: 26, color: 'soft', fa: true });
+      },
+    },
+    {
+      say: 'سه نوع سیستم فازی داریم: I فازی خالص، II تاکاگی–سوگنو–کانگ یا TSK، و III سیستم با فازی‌ساز و غیرفازی‌ساز. در کدام‌ها ورودی و خروجی سیستم عدد حقیقی است؟',
+      draw: async b => {
+        await quizBoard(8, 'ورودی و خروجی حقیقی؟', { fa: true })(b);
+        const L = ['I — فازی خالص', 'II — TSK', 'III — فازی‌ساز + غیرفازی‌ساز'];
+        for (const [k, l] of L.entries()) await b.write(`q${k}`, 500, 190 + k * 45, l, { size: 26, color: 'blue', fa: true });
+      },
+      quiz: {
+        choices: ['I, II', 'I, III', 'II, III', 'I, II, III'], correct: 2,
+        hint: 'سیستم فازی خالص مجموعه‌ی فازی می‌گیرد و مجموعه‌ی فازی می‌دهد.',
+        explain: 'فازی خالص از مجموعه‌ی فازی به مجموعه‌ی فازی نگاشت می‌کند. TSK ورودی حقیقی دارد و خروجی‌اش فرمول ریاضی مثل y = cx است. نوع III با فازی‌ساز و غیرفازی‌ساز هم عدد می‌گیرد و عدد می‌دهد. پس II و III.',
+      },
+      solve: async b => {
+        const L = [['I', '✗', 'red'], ['II', '✓', 'green'], ['III', '✓', 'green']];
+        for (const [k, [n, m, color]] of L.entries()) await b.write(`s${k}`, 300 + k * 200, 400, `${n}  ${m}`, { size: 44, color, bold: true });
+        await b.write('src', 500, 470, 'اسلایدهای 30 تا 32', { size: 22, color: 'soft', fa: true });
+      },
+    },
+    {
+      say: 'درباره‌ی y = sigmf(x,[-2 4]) کدام درست است؟',
+      draw: quizBoard(9, 'y = sigmf(x,[-2 4])'),
+      quiz: {
+        choices: ['μ(-2) = 0.5, increasing', 'μ(4) = 0.5, increasing', 'μ(-2) = 0.5, decreasing', 'μ(4) = 0.5, decreasing'], correct: 3,
+        hint: 'sigmf(x,[a c]): در x = c مقدار 0.5 است و علامت a جهت را می‌گوید.',
+        explain: 'c = 4، پس μ(4) = 0.5. a = -2 منفی است، پس منحنی پایین‌رونده است (باز از چپ).',
+      },
+      solve: async b => {
+        const g = Graph({ x: 120, y: 200, w: 440, h: 250, from: 0, to: 10 }), f = sig(-2, 4);
+        await g.axes(b, 'sa', { ticks: [0, 2, 4, 6, 8, 10] });
+        await g.curve(b, 'sc', f, { color: 'red' });
+        await g.guide(b, 'sg', 4, f(4), { color: 'purple' });
+        await b.write('s1', 780, 260, 'c = 4  →  μ(4) = 0.5', { size: 26, color: 'purple' });
+        await b.write('s2', 780, 320, `${LTR('a = -2 < 0')} ← پایین‌رونده`, { size: 26, color: 'red', fa: true });
+      },
+    },
+    {
+      say: 'سؤال آخر، ترکیبی از درس‌های 4، 9 و 10. دو مجموعه‌ی فازی روی یک محور: A = trimf(x,[2 5 9]) و B = gaussmf(x,[2 5]). مقدار μ_{A∪B}(7) چقدر است؟ تا سه رقم اعشار.',
+      draw: async b => {
+        await quizBoard(10, 'A = trimf(x,[2 5 9])    B = gaussmf(x,[2 5])')(b);
+        await b.write('q2', 500, 165, 'μ_{A∪B}(7) = ?', { size: 34, color: 'orange' });
+      },
+      quiz: { answer: ['0.607', '0.61', '0.6065', '0.60653'], hint: 'هر دو را در x = 7 حساب کن و max بگیر. مراقب ترتیب پارامترهای gaussmf باش.', explain: 'μ_A(7) = (9 - 7)/(9 - 5) = 0.5 و μ_B(7) = e^{-0.5} ≈ 0.607؛ اجتماع یعنی max، پس 0.607.' },
+      solve: async b => {
+        const g = Graph({ x: 120, y: 230, w: 440, h: 230, from: 0, to: 10 }), fa = x => trimf(x, [2, 5, 9]), fb = gauss(2, 5);
+        await g.axes(b, 'sa', { ticks: [0, 2, 5, 7, 9, 10] });
+        await g.poly(b, 'pa', [[0, 0], [2, 0], [5, 1], [9, 0], [10, 0]], { color: 'blue' });
+        await g.curve(b, 'pb', fb, { color: 'purple' });
+        await g.guide(b, 'ga', 7, fa(7), { color: 'blue' });
+        await g.guide(b, 'gb', 7, fb(7), { color: 'purple' });
+        await b.write('s1', 780, 270, `μ_A(7) = (9 - 7)/(9 - 5) = ${r(fa(7))}`, { size: 22, color: 'blue' });
+        await b.write('s2', 780, 320, `μ_B(7) = e^{-0.5} ≈ ${r(fb(7))}`, { size: 22, color: 'purple' });
+        await b.write('s3', 780, 390, `max(${r(fa(7))}, ${r(fb(7))}) = ${r(Math.max(fa(7), fb(7)))}`, { size: 28, color: 'green', bold: true });
+      },
+    },
+  ],
+});
 </script>
 </body>
 </html>
