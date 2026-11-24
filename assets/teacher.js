@@ -8,7 +8,8 @@
  *   draw   – async (b) => {...} draws on the whiteboard using the Board helpers below
  *   term   – optional [english, persian] exam word added to the word strip
  *   tip    – true marks the step as a teacher tip (not from the book slides)
- *   quiz   – { q, answer: [...] | choices: [...], correct, hint, explain }  (+ solve(b) to animate the method)
+ *   quiz   – { q, answer: [...] | choices: [...], correct, hint, explain, given: [...], find }  (+ solve(b) to animate the method)
+ *            given / find show an exam-style card above the answer box: every value the question needs, then what to find
  *
  * Going Back or jumping to a step redraws the board instantly by replaying the
  * earlier steps with animation switched off, then animates only the current step.
@@ -590,7 +591,12 @@
         ? q.choices.map((c, k) => `<button class="btn" dir="rtl" data-choice="${k}">${bidiHtml(c)}</button>`).join('')
         : `<label class="visually-hidden" for="ans">جواب شما</label><input id="ans" dir="ltr" inputmode="decimal" autocomplete="off" placeholder="جواب شما">
            <button class="btn primary" data-check>بررسی</button>`;
-      box.innerHTML = `${input}<button class="btn" data-show hidden>راه‌حل را نشانم بده</button><div class="feedback" role="status"></div>`;
+      // A section check reads like an exam question: every number it needs is listed, nothing from memory.
+      const card = q.given || q.find
+        ? `<div class="given">${q.given ? `<div class="given-h">داده‌ها</div><ul>${q.given.map(l => `<li>${bidiHtml(l)}</li>`).join('')}</ul>` : ''}${
+          q.find ? `<div class="find"><span class="given-h">بخواه:</span> ${bidiHtml(q.find)}</div>` : ''}</div>`
+        : '';
+      box.innerHTML = `${card}${input}<button class="btn" data-show hidden>راه‌حل را نشانم بده</button><div class="feedback" role="status"></div>`;
       const fb = box.querySelector('.feedback');
       const showBtn = box.querySelector('[data-show]');
       const field = box.querySelector('input');

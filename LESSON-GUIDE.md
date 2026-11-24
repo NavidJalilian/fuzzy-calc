@@ -57,6 +57,18 @@ The inline lesson script must be a plain `<script>` tag (no attributes) — the 
 - Each step's `draw` animates what the teacher is saying *right now* — write, highlight (`pulse`,
   `ring`, `recolor`), cross out (`line` + `dim`), move. Clear the board (`b.clear()`) when the topic changes.
 - Add `term: ['English term', 'واژه‌ی فارسی']` the first time a key exam term appears.
+- **One running example that grows.** Pick one example (in part 4: the wind / pressure / rain rules)
+  and build every section on it, each section adding one new piece and reusing the numbers found
+  before ("از بخش 1"). Don't jump between unrelated pictures. A roadmap step near the start names the
+  sections. Lesson 13 is the reference.
+- **A check question after every section** (1–2 `quiz` steps on the running example, tagged
+  "سؤال بخش k" on the board, drawn on top of the section's picture without clearing). Ask the student
+  to compute the next value *before* the teacher shows it, so the answer feeds the next section.
+  These are on top of the final quizzes; the step count may go past 28 for this.
+- **Every section check is a complete exam question.** Give it `quiz.given` (a list of every value,
+  formula and set it needs — including numbers found in earlier sections) and `quiz.find` (what to
+  compute). The player shows them as a "داده‌ها / بخواه" card. The student must never have to remember
+  or guess what is available. Write math in these lines as plain text without `_` (e.g. `μA1(x) = (x − 5)/5`).
 - End with a "یادت باشد" summary step, then **4–6 exam-style quiz steps** (`quiz` + `solve`). Mix typed
   answers (`answer: [...]`, compared ignoring spaces / parentheses) and multiple choice (`choices`,
   `correct`). `solve(b)` animates the full method on the board.
@@ -103,3 +115,7 @@ It replays every step and reports errors, drawings off the board, Persian digits
 It cannot see overlaps, so lay out coordinates carefully. For overlaps, serve the folder
 (`python3 -m http.server 8765`), open the lesson in a browser, paste `tools/layout-audit.js` into the
 console and run `await auditLesson()`.
+For the exam-question cards (`given` / `find`), paste `tools/card-audit.js` and run
+`await auditCards(['00NN-slug.html'])`: it reports formulas that read out of order, break across lines,
+or leave a stray `]` / `*` (a `*` turns on bold, so write "centroid", not `z*`). If a card is missing
+in the browser, force-reload `assets/teacher.js` — browsers cache the old player.

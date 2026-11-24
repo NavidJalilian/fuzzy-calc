@@ -16,24 +16,31 @@
 <script>
 // Lesson 13 — slides 102–107 (part 4: fuzzy reasoning with fuzzy inputs, several rules).
 // Explanations are Persian; numbers, math and technical terms stay in English.
+//
+// The whole lesson grows ONE example — the wind / pressure / rain rules of lessons 12 and 14 —
+// one piece per section, and ends every section with a short check question on that example:
+//   1. one rule, one antecedent (wind only)        → α = height of A′ ∩ A1 = 0.75
+//   2. + pressure: one rule, two antecedents        → α1 = min(0.75, 0.65) = 0.65
+//   3. + rule 2: two rules                           → α2 = min(0.6, 0.85) = 0.6, combine with max
+//   4. the names: Max-Min and Max-Product composition
 
-const LTR = s => `⁦${s}⁩`; // keeps a left-to-right run intact inside Persian board text
 const all = list => Promise.all(list);
 const fmt = n => String(+n.toFixed(4));
 
 // Membership-function shapes.
 const tri = (a, m, c) => v => Math.max(0, Math.min((v - a) / (m - a), (c - v) / (c - m)));
-const trap = (a, p, q, d) => v => Math.max(0, Math.min(1, (v - a) / (p - a), (d - v) / (d - q)));
-const bell = (c, s) => v => Math.exp(-((v - c) ** 2) / (2 * s * s));
+const ramp = (a, c) => v => Math.max(0, Math.min(1, (v - a) / (c - a)));   // 0 before a, rises to 1 at c
+const fall = (a, c) => v => Math.max(0, Math.min(1, (c - v) / (c - a)));   // 1 before a, falls to 0 at c
 const AND = (f, g) => v => Math.min(f(v), g(v));
 const OR = (f, g) => v => Math.max(f(v), g(v));
+const K = a => () => a;
 
 // Highest point of min(f, g) on [lo, hi] → [v, μ]. This is max over x of (f ∧ g).
 function peak(f, g, lo, hi) {
-  const h = v => Math.min(f(v), g(v)), n = 4000, step = (hi - lo) / n;
+  const h = v => Math.min(f(v), g(v)), n = 6000, step = (hi - lo) / n;
   let best = lo;
   for (let k = 0; k <= n; k++) { const v = lo + step * k; if (h(v) > h(best) + 1e-12) best = v; }
-  let a = Math.max(lo, best - step), c = Math.min(hi, best + step);   // refine: min(f, g) is single-peaked here
+  let a = Math.max(lo, best - step), c = Math.min(hi, best + step);
   for (let k = 0; k < 80; k++) {
     const m1 = a + (c - a) / 3, m2 = c - (c - a) / 3;
     if (h(m1) < h(m2)) a = m1; else c = m2;
@@ -42,79 +49,132 @@ function peak(f, g, lo, hi) {
   return h(v) >= h(best) ? [v, h(v)] : [best, h(best)];
 }
 
+// ---- the sets of lessons 12 and 14 (same lines, same readings 0.6 / 0.2 / 0.3 / 0.7 at x = 8, y = 5)
+const A1 = ramp(5, 10);        // «شدید»  strong wind
+const A2 = tri(3, 6, 8.5);     // «متوسط» medium wind
+const B1 = fall(2.9, 5.9);     // «پایین» low pressure
+const B2 = ramp(2.9, 5.9);     // «بالا»  high pressure
+const C1 = tri(5, 7, 9);       // «زیاد»  heavy rain
+const C2 = tri(2, 4, 6);       // «کم»    light rain
+// ---- this lesson's fuzzy readings
+const AF = tri(5.5, 8, 11);    // A′ = «حدود 8»
+const BF = tri(2, 5, 8);       // B′ = «حدود 5»
+const H = {
+  A1: peak(A1, AF, 0, 12), B1: peak(B1, BF, 0, 10),   // [8.75, 0.75], [3.95, 0.65]
+  A2: peak(A2, AF, 0, 12), B2: peak(B2, BF, 0, 10),   // [7, 0.6],     [5.45, 0.85]
+};
+const AL1 = Math.min(H.A1[1], H.B1[1]);   // 0.65
+const AL2 = Math.min(H.A2[1], H.B2[1]);   // 0.6
+const CUT1 = [5 + 2 * AL1, 9 - 2 * AL1];  // 6.3 … 7.7
+const CUT2 = [2 + 2 * AL2, 6 - 2 * AL2];  // 3.2 … 4.8
+const Z0 = 5.6;                           // the point asked about in sections 3 and 4
+const MAXMIN = OR(AND(C1, K(AL1)), AND(C2, K(AL2)));
+const MAXPROD = z => Math.max(AL1 * C1(z), AL2 * C2(z));
+
+// ---- discrete version of section 1 (wind only at 6, 7, 8, 9)
+const DX = [6, 7, 8, 9], DA = DX.map(A1), DA2 = [0.3, 0.7, 1, 0.7];
+const DMIN = DX.map((_, k) => Math.min(DA[k], DA2[k]));
+const DALPHA = Math.max(...DMIN);         // 0.7
+
 // A filled region under μ = f(v) between lo and hi.
 function shade(b, g, id, f, lo, hi, color = 'green', dur = 700) {
   const pts = [[lo, 0]];
-  for (let k = 0; k <= 100; k++) { const v = lo + ((hi - lo) * k) / 100; pts.push([v, f(v)]); }
+  for (let k = 0; k <= 120; k++) { const v = lo + ((hi - lo) * k) / 120; pts.push([v, f(v)]); }
   pts.push([hi, 0]);
   const d = 'M' + pts.map(([v, m]) => `${g.X(v).toFixed(1)} ${g.Y(m).toFixed(1)}`).join('L') + 'Z';
   return b.path(id, d, { color, fill: color, width: 2.5, dur });
 }
 
 // Persian label on the right, formal English line starting at x = 200.
-async function row(b, id, y, fa, en, color = 'ink', size = 28) {
-  await b.write(`${id}-fa`, 840, y, fa, { size: size - 2, color: 'purple', bold: true, fa: true });
-  await b.write(`${id}-en`, 200, y, en, { size, color, anchor: 'start' });
+async function row(b, id, y, fa, en, color = 'ink', size = 26) {
+  await b.write(`${id}-fa`, 860, y, fa, { size: size - 4, color: 'purple', bold: true, fa: true });
+  await b.write(`${id}-en`, 180, y, en, { size, color, anchor: 'start' });
 }
 
-// ---- case 1 picture (slide 102): bell-shaped A and A′, trapezoid B
-const C1A = bell(4, 1.1), C1A2 = bell(6.4, 0.9), C1B = trap(2, 3.5, 6.5, 8);
-const C1P = peak(C1A, C1A2, 0, 10);                       // crossing point and α
-const G1A = Graph({ x: 100, y: 320, w: 330, h: 150, from: 0, to: 10 });
-const G1B = Graph({ x: 560, y: 320, w: 330, h: 150, from: 0, to: 10 });
+// Small orange tag that marks a section check question on the board.
+const checkTag = (b, n, x = 905, y = 52) =>
+  b.write('chk', x, y, `سؤال بخش ${n}`, { size: 20, color: 'orange', bold: true, fa: true });
 
-// ---- our numeric example: triangles A = (0, 4, 8), A′ = (4, 8, 12)
-const NA = tri(0, 4, 8), NA2 = tri(4, 8, 12);
-const NP = peak(NA, NA2, 0, 12);                          // [6, 0.5]
-const NG = Graph({ x: 120, y: 150, w: 600, h: 280, from: 0, to: 12 });
+// ---- section 1: two big graphs (wind x, rain z)
+const GX = Graph({ x: 100, y: 200, w: 360, h: 180, from: 0, to: 12 });
+const GZ = Graph({ x: 590, y: 200, w: 300, h: 180, from: 0, to: 10 });
 
-// ---- discrete example
-const DX = [1, 2, 3, 4], DA = [0.3, 0.8, 1, 0.5], DA2 = [0.6, 0.4, 0.2, 0.9];
-const DMIN = DX.map((_, k) => Math.min(DA[k], DA2[k]));
-const DALPHA = Math.max(...DMIN);                         // 0.5
+// ---- sections 2–4: one row per rule (x, y, numbers, z) and the combined output
+const ROWS = [110, 265];
+const PX = r => Graph({ x: 80, y: ROWS[r], w: 180, h: 90, from: 0, to: 12 });
+const PY = r => Graph({ x: 320, y: ROWS[r], w: 180, h: 90, from: 0, to: 10 });
+const PZ = r => Graph({ x: 690, y: ROWS[r], w: 190, h: 90, from: 0, to: 10 });
+const NX = 607;                                    // the numbers column between y and z
+const AGG = Graph({ x: 690, y: 425, w: 190, h: 85, from: 0, to: 10 });
+const RULE = [
+  { A: A1, B: B1, C: C1, a: 'A1', b: 'B1', c: 'C1', hA: H.A1, hB: H.B1, al: AL1, cut: CUT1, aL: 11, bL: 1.2, cL: 7 },
+  { A: A2, B: B2, C: C2, a: 'A2', b: 'B2', c: 'C2', hA: H.A2, hB: H.B2, al: AL2, cut: CUT2, aL: 6, bL: 8.8, cL: 4 },
+];
 
-// ---- case 2 (slide 103) with our numbers
-const B2 = tri(4, 8, 12), B2f = tri(0, 2, 6), C2 = trap(2, 4, 6, 8);
-const P2A = NP, P2B = peak(B2, B2f, 0, 12);               // α_A = 0.5, α_B = 0.25
-const ALPHA2 = Math.min(P2A[1], P2B[1]);                  // 0.25
-const G2 = [70, 380, 690].map((x, k) => Graph({ x, y: 345, w: 210, h: 140, from: 0, to: k < 2 ? 12 : 10 }));
-
-// ---- case 3 picture (slide 105): two rules, fuzzy inputs
-const R3 = {
-  A: [bell(6, 1), bell(4.2, 1)], Af: bell(3, 0.8),
-  B: [tri(1, 2, 6), tri(3, 4, 8)], Bf: tri(4, 7.5, 8.5),
-  C: [bell(6, 1.2), trap(1, 2.5, 5.5, 7)],
-};
-R3.pA = R3.A.map(f => peak(f, R3.Af, 0, 10));
-R3.pB = R3.B.map(f => peak(f, R3.Bf, 0, 10));
-R3.al = [0, 1].map(i => Math.min(R3.pA[i][1], R3.pB[i][1]));
-
-// ---- slides 106–107: two rules, crisp inputs x0 and y0
-const R6 = {
-  A: [bell(4.8, 0.8), trap(1.5, 3, 4.6, 5.9)], B: [bell(5, 0.7), bell(3.4, 0.7)],
-  C: [bell(4, 1), bell(6.5, 1.2)], x0: 5.6, y0: 4.4,
-};
-R6.al = [0, 1].map(i => Math.min(R6.A[i](R6.x0), R6.B[i](R6.y0)));
-
-// Layout of the two-row pictures (slides 105–107).
-const ROWS = [90, 240];
-const COLS = [60, 320, 660];
-const rowGraph = (r, c) => Graph({ x: COLS[c], y: ROWS[r], w: 200, h: 90, from: 0, to: 10 });
-const AGG = Graph({ x: 660, y: 420, w: 200, h: 90, from: 0, to: 10 });
-
-async function twoRowAxes(b, p) {
-  for (let r = 0; r < 2; r++) {
-    await all([0, 1, 2].map(c => rowGraph(r, c).axes(b, `${p}ax${r}${c}`, { yTicks: [], label: 'xyz'[c], size: 16 })));
+async function rowAxes(b, r) {
+  const t = { yTicks: [], size: 14 };
+  await all([
+    PX(r).axes(b, `ax${r}`, { ...t, ticks: [0, 4, 8, 12] }),
+    PY(r).axes(b, `ay${r}`, { ...t, ticks: [0, 5, 10], label: 'y' }),
+    PZ(r).axes(b, `az${r}`, { ...t, ticks: [0, 5, 10], label: 'z' }),
+  ]);
+  await b.write(`R${r}`, 44, ROWS[r] + 50, `R${r + 1}`, { size: 20, color: 'purple', bold: true, anchor: 'start' });
+}
+async function rowCurves(b, r) {
+  const R = RULE[r], gx = PX(r), gy = PY(r), gz = PZ(r);
+  await all([
+    gx.curve(b, `A${r}`, R.A, { color: 'blue', dur: 500 }), gx.curve(b, `Af${r}`, AF, { color: 'red', dur: 500 }),
+    gy.curve(b, `B${r}`, R.B, { color: 'blue', dur: 500 }), gy.curve(b, `Bf${r}`, BF, { color: 'red', dur: 500 }),
+    gz.curve(b, `C${r}`, R.C, { color: 'soft', dur: 500 }),
+  ]);
+  await all([
+    b.write(`lA${r}`, gx.X(R.aL), gx.Y(1) - 6, R.a, { size: 15, color: 'blue' }),
+    b.write(`lAf${r}`, gx.X(8.6), gx.Y(1) - 6, "A'", { size: 15, color: 'red' }),
+    b.write(`lB${r}`, gy.X(R.bL), gy.Y(1) - 6, R.b, { size: 15, color: 'blue' }),
+    b.write(`lBf${r}`, gy.X(5), gy.Y(1) - 6, "B'", { size: 15, color: 'red' }),
+    b.write(`lC${r}`, gz.X(R.cL), gz.Y(1) - 6, R.c, { size: 15, color: 'soft' }),
+  ]);
+}
+// Shade one antecedent overlap, mark its highest point and write the height in the numbers column.
+async function rowHeight(b, r, side) {
+  const R = RULE[r];
+  const [g, f, ff, p, lo, hi, line] = side === 'x'
+    ? [PX(r), R.A, AF, R.hA, 0, 12, 0]
+    : [PY(r), R.B, BF, R.hB, 0, 10, 1];
+  await shade(b, g, `o${side}${r}`, AND(f, ff), lo, hi, 'orange', 500);
+  await b.dot(`d${side}${r}`, g.X(p[0]), g.Y(p[1]), { color: 'red', r: 5 });
+  await b.write(`n${side}${r}`, NX, ROWS[r] + 18 + line * 28, `${side}: ${fmt(p[1])}`, { size: 18, color: 'orange', bold: true });
+}
+// α_r = min of the two heights; then cut (min) or scale (prod) C_r.
+async function rowAlpha(b, r) {
+  await b.write(`na${r}`, NX, ROWS[r] + 80, `α${r + 1} = ${fmt(RULE[r].al)}`, { size: 19, color: 'green', bold: true });
+}
+async function rowCut(b, r, mode = 'min') {
+  const R = RULE[r], gz = PZ(r);
+  if (mode === 'min') {
+    await gz.poly(b, `cut${r}`, [[0, R.al], [10, R.al]], { color: 'orange', width: 2, dur: 300 });
+    await shade(b, gz, `Cc${r}`, AND(R.C, K(R.al)), 0, 10, 'green', 500);
+  } else {
+    await shade(b, gz, `Cp${r}`, z => R.al * R.C(z), 0, 10, 'blue', 500);
   }
-  await b.box(`${p}bar`, 598, 70, 14, 280, { color: 'soft', r: 3 });
-  await b.write(`${p}barl`, 605, 58, 'min', { size: 20, bold: true });
+}
+// Explanation lines under the rule rows (x 50–640, y 405–530).
+async function text(b, lines) {
+  await b.erase('t-*', 200);
+  for (const [k, l] of lines.entries()) {
+    await b.write(`t-${k}`, 345, 410 + k * 38, l.t, { size: l.size || 22, color: l.color || 'ink', fa: !!l.fa, bold: !!l.bold });
+  }
+}
+async function header(b, t) {
+  await b.erase('h', 150);
+  await b.write('h', 500, 46, t, { size: 26, color: 'orange', bold: true, fa: true });
 }
 
-// Quiz helpers.
+// Final quiz board.
 function quizBoard(n, lines) {
   return async b => {
     await b.clear();
-    await b.write('q-n', 500, 52, `سؤال ${n} از 6`, { size: 22, color: 'soft', fa: true });
+    await b.write('q-n', 500, 52, `سؤال پایانی ${n} از 5`, { size: 22, color: 'soft', fa: true });
     for (const [k, l] of lines.entries()) {
       await b.write(`q-${k}`, 500, 108 + k * 50, l.t, { size: l.size || 30, color: l.color || 'ink', fa: !!l.fa });
     }
@@ -127,27 +187,57 @@ Teacher.start({
   title: 'برهان با ورودی فازی و چند قاعده',
   chapter: 'بخش 4 · برهان و سیستم استنتاج فازی',
   slides: '102–107',
-  intro: 'وقتی خودِ ورودی یک مجموعه‌ی فازی است: α = بلندترین نقطه‌ی اشتراک؛ بعد چند مقدم و چند قاعده، max-min و max-product.',
+  intro: 'یک مثال (باد، فشار، بارش) که قدم‌به‌قدم بزرگ می‌شود: ورودی فازی، بعد دو مقدم، بعد دو قاعده، بعد max-min و max-product. آخر هر بخش یک سؤال.',
   next: { href: '0014-mamdani-fis.html', title: 'سیستم استنتاج فازی ممدانی' },
   steps: [
-    // ---------------------------------------------------------- 1. crisp vs fuzzy input
+    // ================================================================ intro
     {
-      say: 'در درس قبل ورودی یک عدد دقیق بود، مثلاً سرعت باد x_0 = 8. ولی گاهی خودِ ورودی هم مبهم است: «سرعت باد *حدود* 8 است». یعنی حقیقت A′ خودش یک مجموعه‌ی فازی است، نه یک عدد. این درس می‌گوید در این حالت برهان فازی چطور کار می‌کند.',
+      say: 'یادتان هست در درس 12 قاعده می‌گفت: «اگر باد شدید باشد، بارش زیاد است». سنسور باد عدد دقیق x_0 = 8 داد و درجه‌ی «باد شدید» شد 0.6. حالا فرض کنید سنسور خراب است و فقط می‌گوید باد *حدود* 8 است؛ شاید 7، شاید 9. پس حقیقت ما، A′، دیگر یک عدد نیست، یک مجموعه‌ی فازی است: مثلث قرمز.',
       draw: async b => {
-        await b.write('h', 500, 70, 'ورودی قطعی یا ورودی فازی؟', { size: 38, color: 'orange', bold: true, fa: true });
-        const g1 = Graph({ x: 570, y: 180, w: 320, h: 200, from: 0, to: 12 });
-        const g2 = Graph({ x: 110, y: 180, w: 320, h: 200, from: 0, to: 12 });
-        await all([g1.axes(b, 'a1', { ticks: [8], yTicks: [1] }), g2.axes(b, 'a2', { ticks: [8], yTicks: [1] })]);
-        await g1.poly(b, 's1', [[8, 0], [8, 1]], { color: 'blue', width: 5 });
-        await b.write('t1', 730, 450, `ورودی قطعی: ${LTR('x0 = 8')}`, { size: 26, color: 'blue', fa: true });
-        await g2.poly(b, 's2', [[5.5, 0], [8, 1], [10.5, 0]], { color: 'red' });
-        await b.write('t2', 270, 450, 'ورودی فازی: «حدود 8»', { size: 26, color: 'red', fa: true });
-        await b.write('t2b', 270, 490, `حقیقت ${LTR("A'")} یک مجموعه‌ی فازی است`, { size: 20, color: 'soft', fa: true });
+        await b.write('h', 500, 60, 'همان مثال درس 12، با یک سنسور مبهم', { size: 34, color: 'orange', bold: true, fa: true });
+        const g1 = Graph({ x: 570, y: 170, w: 320, h: 190, from: 0, to: 12 });
+        const g2 = Graph({ x: 110, y: 170, w: 320, h: 190, from: 0, to: 12 });
+        await all([g1.axes(b, 'a1', { ticks: [5, 8, 10], yTicks: [1] }), g2.axes(b, 'a2', { ticks: [5.5, 8, 11], yTicks: [1] })]);
+        await all([g1.curve(b, 'c1', A1, { color: 'blue' }), g2.curve(b, 'c2', A1, { color: 'blue' })]);
+        await all([
+          b.write('l1', g1.X(11), g1.Y(1) - 8, 'A1', { size: 20, color: 'blue' }),
+          b.write('l2', g2.X(11.4), g2.Y(1) - 8, 'A1', { size: 20, color: 'blue' }),
+        ]);
+        await g1.poly(b, 's1', [[8, 0], [8, 1]], { color: 'red', width: 5 });
+        await b.dot('d1', g1.X(8), g1.Y(0.6), { color: 'orange', r: 6 });
+        await b.write('t1', 730, 425, 'درس 12: باد دقیقاً 8 → 0.6', { size: 24, color: 'blue', fa: true });
+        await g2.curve(b, 's2', AF, { color: 'red' });
+        await b.write('l3', g2.X(8), g2.Y(1) - 8, "A'", { size: 20, color: 'red' });
+        await b.write('t2', 270, 425, 'امروز: باد «حدود 8»', { size: 24, color: 'red', fa: true });
+        await b.write('t3', 270, 465, 'حقیقت A′ یک مجموعه‌ی فازی است', { size: 20, color: 'soft', fa: true });
+        await b.write('t4', 500, 525, 'درجه‌ی تطبیق α را حالا چطور حساب کنیم؟', { size: 26, color: 'orange', bold: true, fa: true });
       },
     },
-    // ---------------------------------------------------------- 2. notation
+    // ================================================================ roadmap
     {
-      say: 'اسلاید برای راحتی دو نماد می‌گذارد: ∨ یعنی اجتماع فازی، یعنی *max*؛ و ∧ یعنی اشتراک فازی، یعنی *min*. مثلاً 0.3 ∨ 0.7 = 0.7 و 0.3 ∧ 0.7 = 0.3. راه حفظ کردن: ∧ شبیه حرف A است، مثل AND؛ پس min.',
+      say: 'نقشه‌ی این درس: فقط *یک* مثال داریم که قدم‌به‌قدم بزرگ می‌شود. هر بخش فقط یک چیز به بخش قبل اضافه می‌کند و جواب بخش قبل را دوباره استفاده می‌کنیم: اول فقط باد؛ بعد فشار را اضافه می‌کنیم؛ بعد قاعده‌ی دوم را؛ و آخر اسم این روش‌ها را یاد می‌گیریم. آخر هر بخش یک سؤال کوتاه از همین مثال هست تا مطمئن شوید آن قدم را گرفته‌اید.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 60, 'یک مثال، چهار قدم', { size: 38, color: 'orange', bold: true, fa: true });
+        const L = [
+          ['بخش 1: فقط باد', 'یک قاعده، یک مقدم · اسلاید 102', 'blue'],
+          ['بخش 2: + فشار', 'یک قاعده، دو مقدم · اسلاید 103', 'purple'],
+          ['بخش 3: + قاعده‌ی دوم', 'دو قاعده · اسلاید 104–105', 'green'],
+          ['بخش 4: اسم روش‌ها', 'Max-Min و Max-Product · اسلاید 106–107', 'red'],
+        ];
+        for (const [k, [t, s, c]] of L.entries()) {
+          const y = 125 + k * 95;
+          await b.box(`bx${k}`, 230, y, 540, 70, { color: c, r: 12 });
+          await b.write(`bt${k}`, 500, y + 30, t, { size: 24, color: c, bold: true, fa: true });
+          await b.write(`bs${k}`, 500, y + 58, s, { size: 17, color: 'soft', fa: true });
+          if (k < 3) await b.arrow(`ar${k}`, 500, y + 72, 500, y + 92, { color: 'soft', head: 8 });
+          await b.write(`q${k}`, 840, y + 44, '+ سؤال', { size: 20, color: 'orange', bold: true, fa: true });
+        }
+      },
+    },
+    // ---------------------------------------------------------------- notation
+    {
+      say: 'قبل از شروع، دو نماد اسلاید: ∨ یعنی اجتماع فازی، یعنی *max*؛ و ∧ یعنی اشتراک فازی، یعنی *min*. مثلاً 0.3 ∨ 0.7 = 0.7 و 0.3 ∧ 0.7 = 0.3. راه حفظ کردن: ∧ شبیه حرف A است، مثل AND؛ پس min.',
       term: ['∨ = max ,  ∧ = min', 'اجتماع / اشتراک'],
       draw: async b => {
         await b.clear();
@@ -156,125 +246,124 @@ Teacher.start({
         await b.write('o1f', 330, 250, 'اجتماع فازی', { size: 24, color: 'soft', fa: true });
         await b.write('o2', 690, 200, '∧  =  min', { size: 56, color: 'green', bold: true });
         await b.write('o2f', 690, 250, 'اشتراک فازی', { size: 24, color: 'soft', fa: true });
-        await b.write('e1', 330, 360, '0.3 ∨ 0.7 = 0.7', { size: 36, color: 'blue' });
-        await b.write('e2', 690, 360, '0.3 ∧ 0.7 = 0.3', { size: 36, color: 'green' });
+        await b.write('e1', 330, 340, '0.3 ∨ 0.7 = 0.7', { size: 36, color: 'blue' });
+        await b.write('e2', 690, 340, '0.3 ∧ 0.7 = 0.3', { size: 36, color: 'green' });
       },
     },
-    // ---------------------------------------------------------- 3. case 1 setup
     {
-      say: 'حالت اول، مثال اسلاید: یک قاعده با یک مقدم. قاعده if x is A then y is B است و حقیقت x is A′، که A′ یک مجموعه‌ی فازی است. A آبی است و A′ قرمز؛ کمی با هم هم‌پوشانی دارند. B′ را چطور پیدا کنیم؟',
+      say: 'یک سؤال گرم‌کردن: 0.75 ∧ 0.65 چند است؟ این دو عدد را بعداً در همین مثال دوباره می‌بینید.',
+      draw: async b => {
+        await checkTag(b, 0);
+        await b.write('q', 500, 450, '0.75 ∧ 0.65 = ?', { size: 40, color: 'orange', bold: true });
+      },
+      quiz: {
+        given: ['∧ یعنی min (کوچک‌ترِ دو عدد)'],
+        find: '0.75 ∧ 0.65',
+        answer: ['0.65'], hint: '∧ یعنی min: کوچک‌ترِ دو عدد.', explain: '∧ یعنی min، پس کوچک‌تر یعنی 0.65. در بخش 2 دقیقاً همین حساب α قاعده‌ی 1 می‌شود.' },
+      solve: async b => {
+        await b.write('qa', 500, 510, '= min(0.75, 0.65) = 0.65', { size: 32, color: 'green', bold: true });
+      },
+    },
+
+    // ================================================================ section 1: wind only
+    {
+      say: 'بخش 1، مثال را کوچک می‌کنیم: فقط باد. قاعده: «اگر باد شدید باشد، بارش زیاد است»، یعنی if x is A1 then z is C1. حقیقت: «باد حدود 8 است»، یعنی x is A′. آبی A1 است، یعنی «شدید»؛ قرمز A′ است، یعنی «حدود 8»؛ سبز C1 است، یعنی «بارش زیاد». سؤال: C1′، یعنی نتیجه، چیست؟',
       draw: async b => {
         await b.clear();
-        await b.write('h', 500, 60, 'حالت 1: یک قاعده، یک مقدم، ورودی فازی', { size: 30, color: 'orange', bold: true, fa: true });
-        await row(b, 'r1', 115, 'قاعده', 'if x is A then y is B');
-        await row(b, 'r2', 160, 'حقیقت', "x is A'", 'red');
-        await row(b, 'r3', 205, 'نتیجه', "y is B' = ?", 'green');
-        await all([G1A.axes(b, 'ga', { yTicks: [1] }), G1B.axes(b, 'gb', { yTicks: [1], label: 'y' })]);
-        await G1A.curve(b, 'cA', C1A, { color: 'blue' });
-        await G1A.curve(b, 'cA2', C1A2, { color: 'red' });
+        await b.write('h', 500, 52, 'بخش 1: فقط باد (یک قاعده، یک مقدم)', { size: 30, color: 'orange', bold: true, fa: true });
+        await row(b, 'r1', 100, 'قاعده', 'if x is A1 then z is C1');
+        await row(b, 'r2', 140, 'حقیقت', "x is A'   (about 8)", 'red');
         await all([
-          b.write('lA', G1A.X(2.6), G1A.Y(0.9), 'A', { size: 24, color: 'blue' }),
-          b.write('lA2', G1A.X(7.8), G1A.Y(0.9), "A'", { size: 24, color: 'red' }),
+          GX.axes(b, 'gx', { ticks: [0, 4, 5.5, 8, 11], yTicks: [1] }),
+          GZ.axes(b, 'gz', { ticks: [0, 5, 7, 9], yTicks: [1], label: 'z' }),
         ]);
-        await G1B.curve(b, 'cB', C1B, { color: 'green' });
-        await b.write('lB', G1B.X(5), G1B.Y(1) - 10, 'B', { size: 24, color: 'green' });
+        await all([GX.curve(b, 'cA', A1, { color: 'blue' }), GX.curve(b, 'cAf', AF, { color: 'red' })]);
+        await all([
+          b.write('lA', GX.X(11.4), GX.Y(1) - 8, 'A1', { size: 22, color: 'blue' }),
+          b.write('lAf', GX.X(8), GX.Y(1) - 8, "A'", { size: 22, color: 'red' }),
+        ]);
+        await GZ.curve(b, 'cC', C1, { color: 'green' });
+        await b.write('lC', GZ.X(7), GZ.Y(1) - 8, 'C1', { size: 22, color: 'green' });
       },
     },
-    // ---------------------------------------------------------- 4. intersection
     {
-      say: 'قدم اول: اشتراک A′ و A، یعنی μ_A′(x) ∧ μ_A(x). در هر نقطه‌ی x دو منحنی را مقایسه می‌کنیم و *کوچک‌تر* را برمی‌داریم. حاصل، همین تکه‌ی رنگی است که زیر هر دو منحنی قرار دارد؛ همان ناحیه‌ی زرد اسلاید.',
+      say: 'قدم اول: اشتراک A′ و A1، یعنی μ_A′(x) ∧ μ_A1(x). در هر نقطه‌ی x دو منحنی را مقایسه می‌کنیم و *کوچک‌تر* را برمی‌داریم. حاصل همین تکه‌ی نارنجی است که زیر هر دو منحنی قرار دارد. معنی‌اش: جاهایی که هم «باد حدود 8» باور دارد، هم «باد شدید».',
       draw: async b => {
-        await shade(b, G1A, 'ov', AND(C1A, C1A2), 2, 9, 'orange');
-        await b.write('ovl', G1A.X(C1P[0]), G1A.Y(0) - 12, '∧', { size: 26, color: 'orange', bold: true });
+        await shade(b, GX, 'ov', AND(A1, AF), 5, 11, 'orange');
       },
     },
-    // ---------------------------------------------------------- 5. α = height
     {
-      say: 'قدم دوم: از این تکه، *بلندترین* نقطه‌اش را برمی‌داریم: α = max[μ_A′(x) ∧ μ_A(x)]. یعنی α ارتفاع اشتراک است و می‌گوید حقیقت A′ در بهترین نقطه‌اش چقدر با شرط A جور است. اگر A′ دقیقاً همان A باشد α = 1؛ اگر اصلاً هم‌پوشانی نداشته باشند α = 0.',
+      say: 'قدم دوم: بلندترین نقطه‌ی این تکه: α = max[μ_A′(x) ∧ μ_A1(x)]. پس α ارتفاع اشتراک است: حقیقت در بهترین نقطه‌اش چقدر با شرط جور است. اگر A′ دقیقاً همان A1 بود، α = 1 می‌شد؛ اگر اصلاً هم‌پوشانی نداشتند، α = 0.',
       term: ['α = height of A′ ∩ A', 'درجه‌ی تطبیق = ارتفاع اشتراک'],
       draw: async b => {
-        await b.dot('pk', G1A.X(C1P[0]), G1A.Y(C1P[1]), { color: 'red', r: 6 });
-        await b.line('al', G1A.X(C1P[0]), G1A.Y(C1P[1]), G1B.X(10), G1A.Y(C1P[1]), { color: 'orange', width: 2.5 });
-        await b.write('alt', 495, G1A.Y(C1P[1]) - 10, 'α', { size: 28, color: 'orange', bold: true });
-        await b.write('fa', 265, 528, "α = max[ μ_{A'}(x) ∧ μ_A(x) ]", { size: 26, color: 'orange' });
+        await b.dot('pk', GX.X(H.A1[0]), GX.Y(H.A1[1]), { color: 'red', r: 6 });
+        await b.write('fa', 280, 445, "α = max[ μ_{A'}(x) ∧ μ_{A1}(x) ]", { size: 24, color: 'orange' });
       },
     },
-    // ---------------------------------------------------------- 6. B′
     {
-      say: 'قدم سوم دقیقاً مثل درس قبل است: B را در ارتفاع α می‌بُریم. μ_B′(y) = min[α,μ_B(y)] = α ∧ μ_B(y). پس تنها فرق ورودی فازی در *حساب کردن α* است؛ بقیه‌ی کار عوض نمی‌شود.',
+      say: 'حالا با عدد. بلندترین نقطه جایی است که دامنه‌ی بالارونده‌ی A1، یعنی (x − 5)/5، به دامنه‌ی *پایین‌رونده‌ی* A′، یعنی (11 − x)/3، می‌رسد. مساوی می‌گذاریم: 5(11 − x) = 3(x − 5)، پس 55 − 5x = 3x − 15، یعنی x = 8.75. ارتفاع: (8.75 − 5)/5 = 0.75. پس α = 0.75.',
       draw: async b => {
-        await b.dim('cB', 0.4);
-        await shade(b, G1B, 'Bc', AND(C1B, () => C1P[1]), 2, 8, 'green');
-        await b.write('lB2', G1B.X(5), G1B.Y(C1P[1] / 2) + 8, "B'", { size: 28, color: 'green', bold: true });
-        await b.write('fb', 725, 528, "μ_{B'}(y) = α ∧ μ_B(y)", { size: 26, color: 'green' });
+        await b.erase('fa');
+        await GX.guide(b, 'gd', H.A1[0], H.A1[1], { color: 'green' });
+        await b.write('k1', 280, 440, '(x − 5)/5 = (11 − x)/3', { size: 24 });
+        await b.write('k2', 280, 478, `x = ${fmt(H.A1[0])}`, { size: 24 });
+        await b.write('k3', 280, 522, `α = (8.75 − 5)/5 = ${fmt(H.A1[1])}`, { size: 26, color: 'green', bold: true });
       },
     },
-    // ---------------------------------------------------------- 7. crisp special case
     {
-      say: 'یک نکته‌ی قشنگ: ورودی قطعی، حالت خاصِ همین فرمول است. ورودی دقیق x_0 مثل یک میله‌ی باریک به ارتفاع 1 است. اشتراک این میله با A فقط یک نقطه است، به ارتفاع μ_A(x_0). پس α = μ_A(x_0)؛ دقیقاً همان کاری که در درس قبل کردیم.',
+      say: 'چرا 0.75 و نه 0.6 درس 12؟ ورودی دقیق 8 مثل یک میله‌ی باریک است؛ اشتراکش با A1 فقط یک نقطه است و α = μ_A1(8) = 0.6. یعنی ورودی قطعی *حالت خاصِ* همین فرمول است. ولی «حدود 8» به 8.75 هم با درجه‌ی 0.75 باور دارد، و آنجا باد شدیدتر است؛ پس بهترین جور شدن کمی بالاتر می‌رود.',
       tip: true,
       draw: async b => {
-        await b.clear();
-        await b.write('h', 500, 62, 'ورودی قطعی = حالت خاص', { size: 36, color: 'orange', bold: true, fa: true });
-        const g = Graph({ x: 140, y: 150, w: 480, h: 280, from: 0, to: 10 });
-        await g.axes(b, 'g', { ticks: [0, 4, 6, 8], yTicks: [0.5, 1] });
-        await g.poly(b, 'A', [[0, 0], [4, 1], [8, 0], [10, 0]], { color: 'blue' });
-        await b.write('lA', g.X(3), g.Y(1), 'A', { size: 26, color: 'blue' });
-        await g.poly(b, 'sp', [[6, 0], [6, 1]], { color: 'red', width: 5 });
-        await b.write('lsp', g.X(6) + 10, g.Y(1) + 6, "A' = x0", { size: 24, color: 'red', anchor: 'start' });
-        await b.dot('pk', g.X(6), g.Y(NA(6)), { color: 'orange', r: 7 });
-        await g.guide(b, 'gd', 6, NA(6), { color: 'orange' });
-        await b.write('t1', 820, 250, "α = max[ μ_{A'} ∧ μ_A ]", { size: 24, color: 'orange' });
-        await b.write('t2', 820, 300, '= μ_A(x0)', { size: 28, color: 'orange', bold: true });
-        await b.write('t3', 820, 350, `= ${fmt(NA(6))}`, { size: 28, color: 'green', bold: true });
-        await b.write('t4', 820, 410, 'همان کار درس 12', { size: 20, color: 'soft', fa: true });
+        await GX.poly(b, 'bar', [[8, 0], [8, 1]], { color: 'purple', width: 4 });
+        await b.dot('pk8', GX.X(8), GX.Y(0.6), { color: 'purple', r: 6 });
+        await b.write('cr1', 740, 440, 'ورودی قطعی 8: α = μ_A1(8) = 0.6', { size: 20, color: 'purple', fa: true });
+        await b.write('cr2', 740, 478, 'ورودی «حدود 8»: α = 0.75', { size: 20, color: 'green', fa: true });
       },
     },
-    // ---------------------------------------------------------- 8. numeric example
     {
-      say: 'اسلاید عدد نداده، پس یک مثال عددی به سبک امتحان بسازیم: A مثلثی با رأس‌های (0,4,8) و A′ مثلثی با رأس‌های (4,8,12). α یعنی ارتفاع اشتراک. اشتراک دو مثلث، بالاترین نقطه‌اش جایی است که دامنه‌ی پایین‌رونده‌ی A به دامنه‌ی بالارونده‌ی A′ می‌رسد.',
+      say: 'قدم سوم دقیقاً مثل درس 12: C1 را در ارتفاع α می‌بُریم: μ_C1′(z) = α ∧ μ_C1(z) = min(0.75,μ_C1(z)). سقف صاف از جایی شروع می‌شود که C1 به 0.75 می‌رسد: 5 + 2(0.75) = 6.5 تا 9 − 2(0.75) = 7.5. پس تنها فرق ورودی فازی در *حساب کردن α* بود؛ بقیه عوض نشد.',
       draw: async b => {
-        await b.clear();
-        await b.write('h', 500, 62, 'مثال عددی (از خودمان، به سبک امتحان)', { size: 30, color: 'orange', bold: true, fa: true });
-        await NG.axes(b, 'g', { ticks: [0, 2, 4, 6, 8, 10, 12], yTicks: [0.5, 1] });
-        await NG.curve(b, 'A', NA, { color: 'blue' });
-        await NG.curve(b, 'A2', NA2, { color: 'red' });
-        await all([
-          b.write('lA', NG.X(4), NG.Y(1) - 10, 'A = (0, 4, 8)', { size: 24, color: 'blue' }),
-          b.write('lA2', NG.X(8), NG.Y(1) - 10, "A' = (4, 8, 12)", { size: 24, color: 'red' }),
-        ]);
-        await all([
-          b.write('eA', 860, 230, 'A:  (8 − x) / 4', { size: 24, color: 'blue' }),
-          b.write('eA2', 860, 280, "A':  (x − 4) / 4", { size: 24, color: 'red' }),
-        ]);
-        await b.write('eT', 860, 320, 'دامنه‌های روبه‌رو', { size: 18, color: 'soft', fa: true });
+        await b.erase('cr*');
+        await b.dim('cC', 0.4);
+        await GZ.poly(b, 'cut', [[0, H.A1[1]], [10, H.A1[1]]], { color: 'orange', width: 2 });
+        await shade(b, GZ, 'Cc', AND(C1, K(H.A1[1])), 5, 9, 'green');
+        await b.write('lC2', GZ.X(7), GZ.Y(0.35), "C1'", { size: 22, color: 'ink', bold: true });
+        await b.write('c1f', 740, 445, "μ_{C1'}(z) = 0.75 ∧ μ_{C1}(z)", { size: 22, color: 'green' });
+        await b.write('c1g', 740, 485, 'سقف صاف: 6.5 تا 7.5', { size: 20, color: 'soft', fa: true });
       },
     },
-    // ---------------------------------------------------------- 9. solve crossing
     {
-      say: 'دو دامنه را مساوی می‌گذاریم: (8 − x)/4 = (x − 4)/4، پس 8 − x = x − 4 و x = 6. ارتفاع در این نقطه (8 − 6)/4 = 0.5 است. پس α = 0.5. تله‌ی امتحان: α نه 1 است، که قله‌ی هر مثلث باشد، نه جای قله‌ها؛ ارتفاع *محل برخورد* است.',
+      say: 'سؤال بخش 1، روی همین شکل: بارش z = 6 در نتیجه‌ی C1′ چه درجه‌ای دارد؟ یعنی μ_C1′(6) چند است؟',
       draw: async b => {
-        await shade(b, NG, 'ov', AND(NA, NA2), 4, 8, 'orange');
-        await NG.guide(b, 'gd', NP[0], NP[1], { color: 'green' });
-        await b.write('s1', 500, 498, '(8 − x)/4 = (x − 4)/4    →    x = 6', { size: 28 });
-        await b.write('s2', 500, 538, `α = (8 − 6)/4 = ${fmt(NP[1])}`, { size: 30, color: 'green', bold: true });
+        await checkTag(b, 1);
+        await b.ring('qz', GZ.X(6), GZ.Y(0) + 4, 16, 16, { color: 'orange' });
+        await b.write('qq', 740, 525, "μ_{C1'}(6) = ?", { size: 26, color: 'orange', bold: true });
+      },
+      quiz: {
+        given: ['C1 «بارش زیاد» = مثلث (5, 7, 9): μC1(z) = (z − 5)/2 برای 5 ≤ z ≤ 7 و (9 − z)/2 برای 7 ≤ z ≤ 9','α = 0.75 (ارتفاع اشتراک A′ و A1)','استلزام min: μC1′(z) = min(α, μC1(z))'],
+        find: 'μC1′(6)',
+        answer: ['0.5'], hint: 'اول μ_C1(6) را از دامنه‌ی بالارونده (z − 5)/2 حساب کن، بعد min آن با α = 0.75.', explain: 'μ_C1(6) = (6 − 5)/2 = 0.5. بعد min(0.75,0.5) = 0.5. نقطه‌ی 6 زیر سقف است، پس بریده نمی‌شود.' },
+      solve: async b => {
+        await b.erase(['c1f', 'c1g', 'qq']);
+        await GZ.guide(b, 'qg', 6, 0.5, { color: 'blue' });
+        await b.write('qs1', 740, 445, 'μ_C1(6) = (6 − 5)/2 = 0.5', { size: 22, color: 'blue' });
+        await b.write('qs2', 740, 490, 'min(0.75, 0.5) = 0.5', { size: 26, color: 'green', bold: true });
       },
     },
-    // ---------------------------------------------------------- 10. discrete
     {
-      say: 'در امتحان ممکن است مجموعه‌ها گسسته باشند. یادتان باشد در نماد μ/x اول درجه است و بعد عنصر: 0.8/2 یعنی عنصر 2 با درجه‌ی 0.8. روش همان است: برای هر x، min دو درجه را بگیر، بعد بزرگ‌ترینِ این minها را. اینجا minها 0.3، 0.4، 0.2 و 0.5 هستند، پس α = 0.5.',
+      say: 'همین بخش در فرم گسسته‌ی امتحان: فرض کنید سرعت باد فقط 6، 7، 8 و 9 است. یادتان باشد در نماد μ/x اول درجه است و بعد عنصر: 0.4/7 یعنی عنصر 7 با درجه‌ی 0.4. روش همان است: برای هر x، min دو درجه؛ بعد بزرگ‌ترینِ minها. minها 0.2، 0.4، 0.6 و 0.7 هستند، پس α = 0.7. باز هم بهترین جور شدن *بعد از* 8 است، در 9.',
       draw: async b => {
         await b.clear();
-        await b.write('h', 500, 55, 'نسخه‌ی گسسته', { size: 34, color: 'orange', bold: true, fa: true });
-        await b.write('sA', 500, 110, 'A = 0.3/1 + 0.8/2 + 1/3 + 0.5/4', { size: 28, color: 'blue' });
-        await b.write('sA2', 500, 155, "A' = 0.6/1 + 0.4/2 + 0.2/3 + 0.9/4", { size: 28, color: 'red' });
-        await b.write('nt', 500, 195, `نماد ${LTR('μ/x')}: اول درجه، بعد عنصر`, { size: 20, color: 'purple', fa: true });
+        await b.write('h', 500, 52, 'بخش 1، فرم گسسته', { size: 32, color: 'orange', bold: true, fa: true });
+        await b.write('sA', 500, 105, `A1 = ${DX.map((x, k) => `${fmt(DA[k])}/${x}`).join(' + ')}`, { size: 28, color: 'blue' });
+        await b.write('sA2', 500, 150, `A' = ${DX.map((x, k) => `${fmt(DA2[k])}/${x}`).join(' + ')}`, { size: 28, color: 'red' });
+        await b.write('nt', 500, 190, 'نماد μ/x: اول درجه، بعد عنصر', { size: 20, color: 'purple', fa: true });
         const CX = k => 400 + k * 130;
-        const RY = [260, 315, 370, 425];
-        const labels = ['x', 'μ_A', "μ_{A'}", 'min'];
+        const RY = [250, 305, 360, 415];
+        const labels = ['x', 'μ_{A1}', "μ_{A'}", 'min'];
         await all(labels.map((l, r) => b.write(`rl${r}`, 230, RY[r], l, { size: 26, color: ['purple', 'blue', 'red', 'orange'][r], bold: r === 3 })));
         await b.line('hl', 170, RY[0] + 15, 920, RY[0] + 15, { color: 'soft', width: 2 });
-        await b.line('vl', 300, 225, 300, 445, { color: 'soft', width: 2 });
+        await b.line('vl', 300, 215, 300, 435, { color: 'soft', width: 2 });
         for (let k = 0; k < 4; k++) {
           await all([
             b.write(`m-0-${k}`, CX(k), RY[0], String(DX[k]), { size: 26, color: 'purple', dur: 150 }),
@@ -283,199 +372,282 @@ Teacher.start({
           ]);
           await b.write(`m-3-${k}`, CX(k), RY[3], fmt(DMIN[k]), { size: 28, color: 'orange', bold: true, dur: 200 });
         }
-        const best = DMIN.indexOf(DALPHA);
-        await b.ring('rb', CX(best), RY[3] - 9, 34, 24, { color: 'green' });
-        await b.write('ans', 500, 500, `α = max(${DMIN.map(fmt).join(', ')}) = ${fmt(DALPHA)}`, { size: 32, color: 'green', bold: true });
+        await b.ring('rb', CX(DMIN.indexOf(DALPHA)), RY[3] - 9, 34, 24, { color: 'green' });
+        await b.write('ans', 500, 490, `α = max(${DMIN.map(fmt).join(', ')}) = ${fmt(DALPHA)}`, { size: 32, color: 'green', bold: true });
       },
     },
-    // ---------------------------------------------------------- 11. case 2 formula
     {
-      say: 'حالت دوم (اسلاید): یک قاعده با *چند* ورودی فازی. حالا برای هر مقدم جداگانه ارتفاع اشتراک را حساب می‌کنیم: یکی برای A′ و A، یکی برای B′ و B. چون مقدم‌ها با and وصل‌اند، بین این دو عدد min می‌گیریم تا α به دست بیاید. بعد C مثل قبل در α بریده می‌شود.',
+      say: 'سؤال بخش 1، گسسته: سنسور حالا بیشتر به 7 باور دارد: A′ = 0.5/6 + 1/7 + 0.5/8 + 0.2/9. با همان A1، درجه‌ی تطبیق α چند است؟',
       draw: async b => {
-        await b.clear();
-        await b.write('h', 500, 55, 'حالت 2: یک قاعده با چند ورودی فازی', { size: 30, color: 'orange', bold: true, fa: true });
-        await row(b, 'r1', 105, 'قاعده', 'if x is A and y is B then z is C', 'ink', 24);
-        await row(b, 'r2', 145, 'حقیقت', "x is A'  and  y is B'", 'red', 24);
-        await b.write('f1', 500, 210, "α = min[ max(μ_{A'}(x) ∧ μ_A(x)) , max(μ_{B'}(y) ∧ μ_B(y)) ]", { size: 27, color: 'orange' });
-        await b.write('f2', 500, 262, "μ_{C'}(z) = α ∧ μ_C(z)", { size: 27, color: 'green' });
+        await checkTag(b, 1);
+        await b.erase(['sA2', 'rb', 'ans', 'm-2-*', 'm-3-*']);
+        await b.write('sA2', 500, 150, "A' = 0.5/6 + 1/7 + 0.5/8 + 0.2/9", { size: 28, color: 'red' });
+        await b.write('qq', 500, 490, 'α = ?', { size: 34, color: 'orange', bold: true });
       },
-    },
-    // ---------------------------------------------------------- 12. case 2 picture with numbers
-    {
-      say: 'با عدد ببینیم. A و A′ همان مثلث‌های قبلی‌اند، با ارتفاع اشتراک 0.5. برای y، B مثلث (4,8,12) و B′ مثلث (0,2,6) است: (y − 4)/4 = (6 − y)/4 پس y = 5 و ارتفاع 0.25. حالا min(0.5,0.25) = 0.25، پس α = 0.25 و C در ارتفاع 0.25 بریده می‌شود.',
-      draw: async b => {
-        await all(G2.map((g, k) => g.axes(b, `ax${k}`, { ticks: k < 2 ? [0, 4, 8, 12] : [0, 5, 10], yTicks: [1], label: 'xyz'[k] })));
-        await all([G2[0].curve(b, 'cA', NA, { color: 'blue' }), G2[0].curve(b, 'cA2', NA2, { color: 'red' })]);
-        await all([G2[1].curve(b, 'cB', B2, { color: 'blue' }), G2[1].curve(b, 'cB2', B2f, { color: 'red' })]);
-        await G2[2].curve(b, 'cC', C2, { color: 'green' });
-        await all([
-          b.write('lA2', G2[0].X(10.6), G2[0].Y(0.8), "A'", { size: 20, color: 'red' }),
-          b.write('lB2', G2[1].X(1), G2[1].Y(0.8), "B'", { size: 20, color: 'red' }),
-          b.write('lC', G2[2].X(5), G2[2].Y(1) - 8, 'C', { size: 20, color: 'green' }),
-        ]);
-        await all([shade(b, G2[0], 'oA', AND(NA, NA2), 4, 8, 'orange'), shade(b, G2[1], 'oB', AND(B2, B2f), 4, 6, 'orange')]);
-        await all([
-          b.line('hA', G2[0].X(P2A[0]), G2[0].Y(P2A[1]), 630, G2[0].Y(P2A[1]), { color: 'soft', width: 2 }),
-          b.line('hB', G2[1].X(P2B[0]), G2[1].Y(P2B[1]), 630, G2[1].Y(P2B[1]), { color: 'soft', width: 2 }),
-        ]);
-        await all([
-          b.write('vA', G2[0].X(P2A[0]), G2[0].Y(P2A[1]) - 10, fmt(P2A[1]), { size: 18, color: 'orange', bold: true }),
-          b.write('vB', G2[1].X(P2B[0]), G2[1].Y(P2B[1]) - 10, fmt(P2B[1]), { size: 18, color: 'orange', bold: true }),
-        ]);
-        await b.wire('brk', [[622, G2[0].Y(P2A[1])], [632, G2[0].Y(P2A[1])], [632, G2[1].Y(P2B[1])], [622, G2[1].Y(P2B[1])]], { width: 3 });
-        await b.write('mn', 645, G2[0].Y(P2A[1]) - 10, 'min', { size: 18, bold: true });
-        await G2[2].poly(b, 'al', [[0, ALPHA2], [10, ALPHA2]], { color: 'orange', width: 2 });
-        await b.dim(['cC', 'lC'], 0.35);
-        await shade(b, G2[2], 'Cc', AND(C2, () => ALPHA2), 2, 8, 'green');
-        await b.write('ans', 500, 538, `α = min(${fmt(P2A[1])}, ${fmt(P2B[1])}) = ${fmt(ALPHA2)}`, { size: 28, color: 'green', bold: true });
-      },
-    },
-    // ---------------------------------------------------------- 13. case 3 formulas
-    {
-      say: 'حالت سوم: *چند قاعده* با چند مقدم. هر قاعده‌ی i درجه‌ی تطبیق خودش را دارد، α_i، با همان فرمول حالت 2. هر قاعده C_i خودش را در α_i می‌بُرد. آخر سر نتیجه‌ی قاعده‌ها را با ∨، یعنی max، روی هم می‌گذاریم: μ_C′ = μ_C1′ ∨ μ_C2′. دقت کنید اسلاید سمت چپ را μ_C1 نوشته؛ درستش μ_C1′ است، چون این مجموعه‌ی بریده‌شده است. α هم در فرمول اسلاید اندیس i را جا انداخته.',
-      draw: async b => {
-        await b.clear();
-        await b.write('h', 500, 52, 'حالت 3: چند قاعده با چند مقدم', { size: 30, color: 'orange', bold: true, fa: true });
-        await row(b, 'r1', 98, 'قاعده‌ی 1', 'if x is A1 and y is B1 then z is C1', 'ink', 22);
-        await row(b, 'r2', 132, 'قاعده‌ی 2', 'if x is A2 and y is B2 then z is C2', 'ink', 22);
-        await row(b, 'r3', 166, 'حقیقت', "x is A'  and  y is B'", 'red', 22);
-        await b.write('f1', 500, 228, "α_i = min[ max(μ_{A'} ∧ μ_{Ai}) , max(μ_{B'} ∧ μ_{Bi}) ]      i = 1, 2", { size: 25, color: 'orange' });
-        await b.write('f2', 500, 280, "μ_{C1'}(z) = α_1 ∧ μ_{C1}(z)", { size: 26 });
-        await b.write('f3', 500, 322, "μ_{C2'}(z) = α_2 ∧ μ_{C2}(z)", { size: 26 });
-        await b.write('f4', 500, 378, "μ_{C'}(z) = μ_{C1'}(z) ∨ μ_{C2'}(z)", { size: 30, color: 'green', bold: true });
-        await b.write('e1', 500, 448, `اسلاید سمت چپ را ${LTR('μC1')} نوشته؛ درستش ${LTR("μC1'")} است (مجموعه‌ی بریده‌شده)`, { size: 21, color: 'red', fa: true });
-        await b.write('e2', 500, 488, `در فرمول α اسلاید، اندیس ${LTR('i')} جا افتاده: هر قاعده ${LTR('α')} خودش را دارد`, { size: 21, color: 'red', fa: true });
-      },
-    },
-    // ---------------------------------------------------------- 14. case 3 picture (slide 105)
-    {
-      say: 'این شکل اسلاید است. ردیف بالا قاعده‌ی 1 و ردیف پایین قاعده‌ی 2. در هر ردیف ارتفاع اشتراک A′ با A_i و B′ با B_i را پیدا می‌کنیم؛ میله‌ی min کوچک‌ترشان را برمی‌دارد که می‌شود α_1 و α_2. بعد C1 و C2 هر کدام در α خودشان بریده می‌شوند، و در آخر max این دو، C′ را می‌سازد.',
-      draw: async b => {
-        await b.clear();
-        await twoRowAxes(b, '');
-        for (let r = 0; r < 2; r++) {
-          const [gx, gy, gz] = [0, 1, 2].map(c => rowGraph(r, c));
-          await all([
-            gx.curve(b, `A${r}`, R3.A[r], { color: 'blue', dur: 500 }), gx.curve(b, `Af${r}`, R3.Af, { color: 'red', dur: 500 }),
-            gy.curve(b, `B${r}`, R3.B[r], { color: 'blue', dur: 500 }), gy.curve(b, `Bf${r}`, R3.Bf, { color: 'red', dur: 500 }),
-            gz.curve(b, `C${r}`, R3.C[r], { color: 'soft', dur: 500 }),
-          ]);
-          await all([
-            b.write(`lA${r}`, gx.X(9.4), gx.Y(0.85), `A${r + 1}`, { size: 16, color: 'blue' }),
-            b.write(`lAf${r}`, gx.X(9.4), gx.Y(0.5), "A'", { size: 16, color: 'red' }),
-            b.write(`lB${r}`, gy.X(9.4), gy.Y(0.85), `B${r + 1}`, { size: 16, color: 'blue' }),
-            b.write(`lBf${r}`, gy.X(9.4), gy.Y(0.5), "B'", { size: 16, color: 'red' }),
-          ]);
-          await all([shade(b, gx, `oA${r}`, AND(R3.A[r], R3.Af), 0, 10, 'orange', 400), shade(b, gy, `oB${r}`, AND(R3.B[r], R3.Bf), 0, 10, 'orange', 400)]);
-          const [pa, pb] = [R3.pA[r], R3.pB[r]];
-          await all([
-            b.line(`hA${r}`, gx.X(pa[0]), gx.Y(pa[1]), 598, gx.Y(pa[1]), { color: 'soft', width: 1.5 }),
-            b.line(`hB${r}`, gy.X(pb[0]), gy.Y(pb[1]), 598, gy.Y(pb[1]), { color: 'soft', width: 1.5 }),
-          ]);
-          await b.write(`al${r}`, 632, gz.Y(R3.al[r]) - 6, `α${r + 1}`, { size: 18, color: 'orange', bold: true });
-          await gz.poly(b, `cut${r}`, [[0, R3.al[r]], [10, R3.al[r]]], { color: 'orange', width: 2, dur: 300 });
-          await shade(b, gz, `Cc${r}`, AND(R3.C[r], () => R3.al[r]), 0, 10, 'green', 500);
-          await b.write(`lC${r}`, gz.X(9.3), gz.Y(0.85), `C${r + 1}`, { size: 18, color: 'soft' });
+      quiz: {
+        given: ['A1 (شرط: باد شدید) = 0.2/6 + 0.4/7 + 0.6/8 + 0.8/9','A′ (حقیقت) = 0.5/6 + 1/7 + 0.5/8 + 0.2/9','نماد μ/x: اول درجه، بعد عنصر','α = max روی x از min(μA1(x), μA′(x))'],
+        find: 'α',
+        answer: ['0.5'], hint: 'برای 6، 7، 8، 9 جدا min بگیر، بعد بزرگ‌ترین را.', explain: 'minها: min(0.2,0.5) = 0.2، min(0.4,1) = 0.4، min(0.6,0.5) = 0.5، min(0.8,0.2) = 0.2. بزرگ‌ترین 0.5 است. تله: 1 در عنصر 7 فقط 0.4 می‌دهد، چون A1 آنجا 0.4 است.' },
+      solve: async b => {
+        const A2s = [0.5, 1, 0.5, 0.2], M = DA.map((v, k) => Math.min(v, A2s[k]));
+        const CX = k => 400 + k * 130, RY = [250, 305, 360, 415];
+        await b.erase('qq');
+        for (let k = 0; k < 4; k++) {
+          await b.write(`m-2-${k}`, CX(k), RY[2], fmt(A2s[k]), { size: 26, color: 'red', dur: 150 });
+          await b.write(`m-3-${k}`, CX(k), RY[3], fmt(M[k]), { size: 28, color: 'orange', bold: true, dur: 200 });
         }
-        await AGG.axes(b, 'agg', { yTicks: [], label: 'z', size: 16 });
-        await b.arrow('down', 760, 355, 760, 385, { color: 'red' });
-        await b.write('mx', 790, 378, 'max', { size: 20, color: 'red', bold: true });
-        const U = OR(AND(R3.C[0], () => R3.al[0]), AND(R3.C[1], () => R3.al[1]));
-        await shade(b, AGG, 'U', U, 0, 10, 'green');
-        await b.write('Ut', 300, 450, "C' = C1' ∪ C2'", { size: 32, color: 'green', bold: true });
-        await b.write('Uf', 300, 500, 'ترکیب قاعده‌ها با max = تجمیع (درس 15)', { size: 20, color: 'soft', fa: true });
+        await b.ring('rb', CX(M.indexOf(Math.max(...M))), RY[3] - 9, 34, 24, { color: 'green' });
+        await b.write('ans', 500, 490, `α = max(${M.map(fmt).join(', ')}) = ${fmt(Math.max(...M))}`, { size: 32, color: 'green', bold: true });
       },
     },
-    // ---------------------------------------------------------- 15. max-min composition (slide 106)
+
+    // ================================================================ section 2: + pressure
     {
-      say: 'اسلاید بعد همین ایده را با ورودی‌های *قطعی* x و y نشان می‌دهد و اسمش را می‌گذارد *Max-Min composition*. خط عمودی x و y هر مجموعه را قطع می‌کند؛ در هر قاعده min این دو درجه α_i است؛ C_i در α_i بریده می‌شود؛ و max این‌ها C′ را می‌دهد. min برای and و برش، max برای ترکیب قاعده‌ها؛ برای همین «max-min».',
+      say: 'بخش 2: فشار را اضافه می‌کنیم. قاعده حالا کامل‌تر است: «اگر باد شدید *و* فشار پایین باشد، بارش زیاد است». سنسور فشار هم مبهم است: «حدود 5»، یعنی B′. ردیف بالا همان قاعده است: باد، فشار، و بارش. نکته‌ی مهم: قسمت باد را *قبلاً* حل کرده‌ایم: 0.75. فقط فشار جدید است.',
+      draw: async b => {
+        await b.clear();
+        await header(b, 'بخش 2: + فشار (یک قاعده، دو مقدم)');
+        await rowAxes(b, 0);
+        await rowCurves(b, 0);
+        await rowHeight(b, 0, 'x');
+        await b.write('nxs', NX, ROWS[0] - 14, 'از بخش 1', { size: 14, color: 'soft', fa: true });
+        await text(b, [
+          { t: 'if x is A1 and y is B1 then z is C1' },
+          { t: "facts:  x is A' (about 8)   and   y is B' (about 5)", color: 'red' },
+          { t: "B1 (low) = (5.9 − y)/3        B' (about 5) = (2, 5, 8)", size: 21 },
+        ]);
+      },
+    },
+    {
+      say: 'سؤال بخش 2، خودتان امتحان کنید: ارتفاع اشتراک B′ و B1 چند است؟ دقیقاً همان کار بخش 1: دامنه‌ی پایین‌رونده‌ی B1، یعنی (5.9 − y)/3، با دامنه‌ی بالارونده‌ی B′، یعنی (y − 2)/3، کجا به هم می‌رسند و آنجا چه ارتفاعی دارند؟',
+      draw: async b => {
+        await checkTag(b, 2);
+        await b.write('ny0q', NX, ROWS[0] + 46, 'y: ?', { size: 18, color: 'orange', bold: true });
+        await b.erase('t-2');
+        await b.write('t-2', 345, 486, 'max[ μ_{B\'} ∧ μ_{B1} ] = ?', { size: 24, color: 'orange', bold: true });
+      },
+      quiz: {
+        given: ['B1 «فشار پایین»: μB1(y) = 1 تا y = 2.9، بعد (5.9 − y)/3 تا y = 5.9','B′ «حدود 5» = مثلث (2, 5, 8): بالارونده (y − 2)/3 و پایین‌رونده (8 − y)/3','ارتفاع اشتراک = بلندترین نقطه‌ی min(μB1(y), μB′(y))'],
+        find: 'max[μB′(y) ∧ μB1(y)]',
+        answer: ['0.65'], hint: 'دو مخرج یکی است (3)، پس فقط صورت‌ها را مساوی بگذار: 5.9 − y = y − 2.', explain: '5.9 − y = y − 2 پس y = 3.95. ارتفاع: (5.9 − 3.95)/3 = 0.65. چون شیب‌ها برابرند، دو خط درست وسطِ راه به هم می‌رسند.' },
+      solve: async b => {
+        await b.erase(['ny0q', 't-2']);
+        await rowHeight(b, 0, 'y');
+        await b.write('t-2', 345, 486, '5.9 − y = y − 2  →  y = 3.95  →  (5.9 − 3.95)/3 = 0.65', { size: 22, color: 'green' });
+      },
+    },
+    {
+      say: 'حالا دو ارتفاع داریم: باد 0.75 و فشار 0.65. چون مقدم‌ها با *and* وصل‌اند، min می‌گیریم: α_1 = min(0.75,0.65) = 0.65؛ همان سؤال گرم‌کردن! بعد C1 را در 0.65 می‌بُریم. ببینید: با اضافه شدن یک شرط، α از 0.75 به 0.65 *پایین آمد*. min هیچ‌وقت بالا نمی‌برد؛ هر شرط تازه فقط می‌تواند α را نگه دارد یا کم کند.',
+      draw: async b => {
+        await b.erase('chk');
+        await rowAlpha(b, 0);
+        await rowCut(b, 0);
+        await text(b, [
+          { t: "α1 = min[ max(μ_{A'} ∧ μ_{A1}) , max(μ_{B'} ∧ μ_{B1}) ]", color: 'orange' },
+          { t: 'α1 = min(0.75, 0.65) = 0.65', color: 'green', bold: true, size: 26 },
+          { t: 'C1 در 0.65 بریده می‌شود: سقف صاف از 6.3 تا 7.7', fa: true, size: 20 },
+        ]);
+      },
+    },
+    {
+      say: 'سؤال بخش 2، ترکیبی: فرض کنید سنسور فشار درست شد و عدد دقیق y_0 = 5 داد، ولی باد هنوز «حدود 8» است. حالا α_1 چند است؟ (از درس 12 یادتان هست: μ_B1(5) = 0.3.)',
+      draw: async b => {
+        await checkTag(b, 2);
+        await text(b, [
+          { t: "x is A' (about 8)     y = 5 (exact)", color: 'red' },
+          { t: 'α1 = ?', color: 'orange', bold: true, size: 28 },
+        ]);
+      },
+      quiz: {
+        given: ['قاعده: if x is A1 and y is B1 then z is C1','باد «حدود 8»: ارتفاع اشتراک A′ و A1 = 0.75','فشار دقیق: y0 = 5 ؛ μB1(y) = (5.9 − y)/3','مقدم‌ها با and وصل‌اند'],
+        find: 'α1',
+        answer: ['0.3'], hint: 'هر مقدم جدا: باد فازی → ارتفاع اشتراک (0.75). فشار قطعی → فقط μ_B1(5). بعد min.', explain: 'باد: 0.75 (بخش 1). فشار قطعی: α سهمش μ_B1(5) = 0.3 است. α1 = min(0.75,0.3) = 0.3. می‌شود ورودی فازی و قطعی را در یک قاعده قاطی کرد؛ هر مقدم با روش خودش.' },
+      solve: async b => {
+        await b.erase('t-1');
+        await b.write('t-1', 345, 448, 'باد: 0.75      فشار قطعی: μ_B1(5) = 0.3', { size: 22, fa: true });
+        await b.write('t-2', 345, 492, 'α1 = min(0.75, 0.3) = 0.3', { size: 28, color: 'green', bold: true });
+      },
+    },
+
+    // ================================================================ section 3: + rule 2
+    {
+      say: 'بخش 3: قاعده‌ی دوم را اضافه می‌کنیم: «اگر باد *متوسط* و فشار *بالا* باشد، بارش *کم* است». ردیف پایین مال این قاعده است. نکته‌ی کلیدی: حقیقت‌ها *همان‌اند*، همان A′ و B′ قرمز. فقط شرط‌ها عوض شده‌اند. پس همان دو مثلث قرمز را با A2 و B2 مقایسه می‌کنیم.',
+      draw: async b => {
+        await b.erase('chk');
+        await header(b, 'بخش 3: + قاعده‌ی دوم (دو قاعده)');
+        await rowAxes(b, 1);
+        await rowCurves(b, 1);
+        await text(b, [
+          { t: 'R2:  if x is A2 and y is B2 then z is C2' },
+          { t: 'A2 (medium) = (3, 6, 8.5)   B2 (high) = (y − 2.9)/3   C2 (light) = (2, 4, 6)', size: 20 },
+          { t: 'حقیقت‌ها همان A′ و B′ قرمز هستند', fa: true, size: 20, color: 'red' },
+        ]);
+      },
+    },
+    {
+      say: 'سؤال بخش 3: ارتفاع اشتراک A′ با A2 چند است؟ دقت کنید این بار قله‌ی A2 در 6 است، *سمت چپِ* قله‌ی A′ در 8. پس دامنه‌ی پایین‌رونده‌ی A2، یعنی (8.5 − x)/2.5، به دامنه‌ی بالارونده‌ی A′، یعنی (x − 5.5)/2.5، می‌رسد.',
+      draw: async b => {
+        await checkTag(b, 3);
+        await b.write('nx1q', NX, ROWS[1] + 18, 'x: ?', { size: 18, color: 'orange', bold: true });
+        await b.erase('t-2');
+        await b.write('t-2', 345, 486, "max[ μ_{A'} ∧ μ_{A2} ] = ?", { size: 24, color: 'orange', bold: true });
+      },
+      quiz: {
+        given: ['A2 «باد متوسط» = مثلث (3, 6, 8.5): بالارونده (x − 3)/3 و پایین‌رونده (8.5 − x)/2.5','A′ «حدود 8» = مثلث (5.5, 8, 11): بالارونده (x − 5.5)/2.5 و پایین‌رونده (11 − x)/3','ارتفاع اشتراک = بلندترین نقطه‌ی min(μA2(x), μA′(x))'],
+        find: 'max[μA′(x) ∧ μA2(x)]',
+        answer: ['0.6'], hint: 'مخرج‌ها برابرند (2.5): 8.5 − x = x − 5.5.', explain: '8.5 − x = x − 5.5 پس x = 7. ارتفاع: (8.5 − 7)/2.5 = 0.6.' },
+      solve: async b => {
+        await b.erase(['nx1q', 't-2']);
+        await rowHeight(b, 1, 'x');
+        await b.write('t-2', 345, 486, '8.5 − x = x − 5.5  →  x = 7  →  (8.5 − 7)/2.5 = 0.6', { size: 22, color: 'green' });
+      },
+    },
+    {
+      say: 'فشار در قاعده‌ی 2: دامنه‌ی بالارونده‌ی B2، یعنی (y − 2.9)/3، به دامنه‌ی پایین‌رونده‌ی B′، یعنی (8 − y)/3، می‌رسد: y − 2.9 = 8 − y، پس y = 5.45 و ارتفاع (5.45 − 2.9)/3 = 0.85.',
+      draw: async b => {
+        await b.erase('chk');
+        await rowHeight(b, 1, 'y');
+        await text(b, [
+          { t: 'y − 2.9 = 8 − y  →  y = 5.45  →  (5.45 − 2.9)/3 = 0.85', color: 'orange' },
+        ]);
+      },
+    },
+    {
+      say: 'سؤال بخش 3: حالا درجه‌ی تطبیق قاعده‌ی 2، یعنی α_2، چند است؟',
+      draw: async b => {
+        await checkTag(b, 3);
+        await b.write('t-1', 345, 448, 'α2 = ?', { size: 28, color: 'orange', bold: true });
+      },
+      quiz: {
+        given: ['قاعده‌ی 2: if x is A2 and y is B2 then z is C2','ارتفاع اشتراک A′ و A2 = 0.6','ارتفاع اشتراک B′ و B2 = 0.85'],
+        find: 'α2',
+        answer: ['0.6'], hint: 'دو مقدم با and: min دو ارتفاع ردیف پایین.', explain: 'α2 = min(0.6,0.85) = 0.6. پس C2 در 0.6 بریده می‌شود: سقف صاف از 3.2 تا 4.8.' },
+      solve: async b => {
+        await b.erase('t-1');
+        await rowAlpha(b, 1);
+        await rowCut(b, 1);
+        await b.write('t-1', 345, 448, 'α2 = min(0.6, 0.85) = 0.6', { size: 28, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'حالا دو نتیجه داریم: C1′ از قاعده‌ی 1 و C2′ از قاعده‌ی 2. آخر سر آن‌ها را با ∨، یعنی *max*، روی هم می‌گذاریم: μ_C′(z) = μ_C1′(z) ∨ μ_C2′(z). یعنی در هر z بلندترِ دو شکل را برمی‌داریم. دو اشتباه اسلاید: سمت چپ را μ_C1 نوشته، درستش μ_C1′ است؛ و در فرمول α اندیس i جا افتاده، چون هر قاعده α خودش را دارد.',
+      draw: async b => {
+        await b.erase('chk');
+        await AGG.axes(b, 'agg', { yTicks: [], ticks: [0, 5, 10], label: 'z', size: 14 });
+        await b.arrow('down', 785, 380, 785, 402, { color: 'red', head: 8 });
+        await b.write('mx', 820, 398, 'max', { size: 18, color: 'red', bold: true });
+        await shade(b, AGG, 'U', MAXMIN, 0, 10, 'green');
+        await text(b, [
+          { t: "μ_{C'}(z) = μ_{C1'}(z) ∨ μ_{C2'}(z)", color: 'green', bold: true, size: 26 },
+          { t: 'اسلاید: μC1 نوشته؛ درستش μC1′ است (مجموعه‌ی بریده‌شده)', fa: true, size: 19, color: 'red' },
+          { t: 'اسلاید: اندیس i در فرمول α جا افتاده؛ هر قاعده α خودش را دارد', fa: true, size: 19, color: 'red' },
+        ]);
+      },
+    },
+    {
+      say: 'سؤال بخش 3: خروجی ترکیب‌شده در z = 5.6 چند است؟ یعنی μ_C′(5.6). راهنمایی: هر قاعده را جدا حساب کن، بعد max.',
+      draw: async b => {
+        await checkTag(b, 3);
+        await b.ring('qz', AGG.X(Z0), AGG.Y(0) + 4, 14, 14, { color: 'orange' });
+        await text(b, [{ t: "μ_{C'}(5.6) = ?", color: 'orange', bold: true, size: 28 }]);
+      },
+      quiz: {
+        given: ['C1 = مثلث (5, 7, 9) و α1 = 0.65','C2 = مثلث (2, 4, 6) و α2 = 0.6','Max-Min: μCi′(z) = min(αi, μCi(z))','ترکیب: μC′(z) = max(μC1′(z), μC2′(z))'],
+        find: 'μC′(5.6)',
+        answer: ['0.3'], hint: 'μ_C1(5.6) = (5.6 − 5)/2 و μ_C2(5.6) = (6 − 5.6)/2. هر کدام min با α خودش، بعد max.', explain: 'قاعده‌ی 1: μ_C1(5.6) = 0.3 و min(0.65,0.3) = 0.3. قاعده‌ی 2: μ_C2(5.6) = 0.2 و min(0.6,0.2) = 0.2. ترکیب: max(0.3,0.2) = 0.3.' },
+      solve: async b => {
+        await AGG.guide(b, 'qg', Z0, MAXMIN(Z0), { color: 'blue' });
+        await text(b, [
+          { t: `R1:  min(0.65, μ_C1(5.6) = ${fmt(C1(Z0))}) = ${fmt(Math.min(AL1, C1(Z0)))}` },
+          { t: `R2:  min(0.6, μ_C2(5.6) = ${fmt(C2(Z0))}) = ${fmt(Math.min(AL2, C2(Z0)))}` },
+          { t: `μ_{C'}(5.6) = max(0.3, 0.2) = ${fmt(MAXMIN(Z0))}`, color: 'green', bold: true, size: 26 },
+        ]);
+      },
+    },
+
+    // ================================================================ section 4: the names
+    {
+      say: 'بخش 4: کاری که کردیم اسم دارد: *Max-Min composition*. min دو جا به کار رفت: برای and بین مقدم‌ها، و برای بریدن C_i در α_i. max هم دو جا: برای ارتفاع اشتراک، و برای ترکیب قاعده‌ها. برای همین «max-min».',
       term: ['Max-Min composition', 'ترکیب max-min'],
       draw: async b => {
-        await b.clear();
-        await twoRowAxes(b, '');
-        for (let r = 0; r < 2; r++) {
-          const [gx, gy, gz] = [0, 1, 2].map(c => rowGraph(r, c));
-          await all([
-            gx.curve(b, `A${r}`, R6.A[r], { color: 'blue', dur: 500 }),
-            gy.curve(b, `B${r}`, R6.B[r], { color: 'blue', dur: 500 }),
-            gz.curve(b, `C${r}`, R6.C[r], { color: 'soft', dur: 500 }),
-          ]);
-          await b.write(`lC${r}`, gz.X(9.3), gz.Y(0.85), `C${r + 1}`, { size: 18, color: 'soft' });
-          await all([
-            b.write(`lA${r}`, gx.X(9.4), gx.Y(0.85), `A${r + 1}`, { size: 16, color: 'blue' }),
-            b.write(`lB${r}`, gy.X(9.4), gy.Y(0.85), `B${r + 1}`, { size: 16, color: 'blue' }),
-          ]);
-          const ma = R6.A[r](R6.x0), mb = R6.B[r](R6.y0);
-          await all([b.dot(`dA${r}`, gx.X(R6.x0), gx.Y(ma), { color: 'red' }), b.dot(`dB${r}`, gy.X(R6.y0), gy.Y(mb), { color: 'red' })]);
-          await all([
-            b.line(`hA${r}`, gx.X(R6.x0), gx.Y(ma), 598, gx.Y(ma), { color: 'soft', width: 1.5 }),
-            b.line(`hB${r}`, gy.X(R6.y0), gy.Y(mb), 598, gy.Y(mb), { color: 'soft', width: 1.5 }),
-          ]);
-          await b.write(`al${r}`, 632, gz.Y(R6.al[r]) - 6, `α${r + 1}`, { size: 18, color: 'orange', bold: true });
-        }
-        const gx = rowGraph(1, 0), gy = rowGraph(1, 1);
-        await all([
-          b.line('vx', gx.X(R6.x0), ROWS[0] - 15, gx.X(R6.x0), ROWS[1] + 110, { color: 'red', width: 2.5 }),
-          b.line('vy', gy.X(R6.y0), ROWS[0] - 15, gy.X(R6.y0), ROWS[1] + 110, { color: 'red', width: 2.5 }),
+        await b.erase(['chk', 'qz', 'qg*']);
+        await header(b, 'بخش 4: Max-Min composition');
+        await text(b, [
+          { t: 'min: بین مقدم‌ها (and) و برای بریدن C در α', fa: true, color: 'green' },
+          { t: 'max: ارتفاع اشتراک، و ترکیب قاعده‌ها', fa: true, color: 'red' },
+          { t: "μ_{Ci'} = α_i ∧ μ_{Ci}        μ_{C'} = ∨_i μ_{Ci'}", size: 24 },
         ]);
-        await all([
-          b.write('vxl', gx.X(R6.x0), ROWS[1] + 135, 'x0', { size: 22, color: 'red' }),
-          b.write('vyl', gy.X(R6.y0), ROWS[1] + 135, 'y0', { size: 22, color: 'red' }),
-        ]);
-        await AGG.axes(b, 'agg', { yTicks: [], label: 'z', size: 16 });
-        await b.arrow('down', 760, 355, 760, 385, { color: 'red' });
-        await b.write('mx', 790, 378, 'max', { size: 20, color: 'red', bold: true });
-        for (let r = 0; r < 2; r++) {
-          const gz = rowGraph(r, 2);
-          await shade(b, gz, `o-C${r}`, AND(R6.C[r], () => R6.al[r]), 0, 10, 'green', 500);
-        }
-        const U = OR(AND(R6.C[0], () => R6.al[0]), AND(R6.C[1], () => R6.al[1]));
-        await shade(b, AGG, 'o-U', U, 0, 10, 'green');
-        await b.write('o-t', 220, 470, 'Max-Min', { size: 32, color: 'green', bold: true });
-        await b.write('o-tf', 420, 470, 'بریدن در α', { size: 26, color: 'green', bold: true, fa: true });
-        await b.write('o-f', 300, 515, "μ_{Ci'} = α_i ∧ μ_{Ci}", { size: 26, color: 'green' });
       },
     },
-    // ---------------------------------------------------------- 16. max-product (slide 107)
     {
-      say: 'و *Max-Product composition*: همه چیز مثل قبل است، فقط به جای بریدن، C_i را در α_i *ضرب* می‌کنیم: μ_Ci′ = α_i · μ_Ci. نتیجه همان شکل C_i است ولی کوتاه‌تر، با قله‌ای در ارتفاع α_i؛ نه سقف صاف. در آخر باز max می‌گیریم. در درس بعد این دو روش را با عدد مقایسه می‌کنیم.',
+      say: 'اسلاید 106 همین شکل را با ورودی *قطعی* x_0 و y_0 می‌کشد. با ورودی دقیق 8 و 5، ارتفاع‌ها فقط خواندن نمودار می‌شوند: α_1 = min(0.6,0.3) = 0.3 و α_2 = min(0.2,0.7) = 0.2. این دقیقاً مثال درس 14 است. همان روش، فقط α ها کوچک‌ترند چون ورودی دقیق جای انعطاف ندارد.',
+      draw: async b => {
+        await text(b, [
+          { t: 'ورودی فازی (این درس):   α1 = 0.65    α2 = 0.6', fa: true, color: 'green' },
+          { t: 'ورودی قطعی 8 و 5 (درس 14):   α1 = min(0.6, 0.3) = 0.3    α2 = min(0.2, 0.7) = 0.2', fa: true, color: 'purple', size: 19 },
+          { t: 'روش یکی است؛ فقط α عوض می‌شود', fa: true, size: 20, color: 'soft' },
+        ]);
+      },
+    },
+    {
+      say: 'و *Max-Product composition* (اسلاید 107): همه چیز مثل قبل است، فقط به جای بریدن، C_i را در α_i *ضرب* می‌کنیم: μ_Ci′ = α_i · μ_Ci. نتیجه همان شکل مثلث است ولی کوتاه‌تر، با قله‌ای در ارتفاع α_i؛ سقف صاف ندارد. ترکیب قاعده‌ها باز با max است.',
       term: ['Max-Product composition', 'ترکیب max-product'],
       draw: async b => {
-        await b.erase('o-*');
-        await b.write('barl2', 605, 58, 'product', { size: 18, bold: true, color: 'purple' });
-        await b.erase('barl');
-        for (let r = 0; r < 2; r++) {
-          const gz = rowGraph(r, 2);
-          await shade(b, gz, `o-C${r}`, z => R6.al[r] * R6.C[r](z), 0, 10, 'blue', 500);
-        }
-        const U = z => Math.max(R6.al[0] * R6.C[0](z), R6.al[1] * R6.C[1](z));
-        await shade(b, AGG, 'o-U', U, 0, 10, 'blue');
-        await b.write('o-t', 220, 470, 'Max-Product', { size: 32, color: 'blue', bold: true });
-        await b.write('o-tf', 420, 470, 'ضرب در α', { size: 26, color: 'blue', bold: true, fa: true });
-        await b.write('o-f', 300, 515, "μ_{Ci'} = α_i · μ_{Ci}", { size: 26, color: 'blue' });
+        await header(b, 'بخش 4: Max-Product composition');
+        await b.erase(['Cc*', 'cut*', 'U']);
+        await rowCut(b, 0, 'prod');
+        await rowCut(b, 1, 'prod');
+        await shade(b, AGG, 'Up', MAXPROD, 0, 10, 'blue');
+        await text(b, [
+          { t: "μ_{Ci'} = α_i · μ_{Ci}", color: 'blue', bold: true, size: 26 },
+          { t: 'همان شکل C، کوتاه‌تر؛ قله در ارتفاع α', fa: true, size: 20 },
+          { t: 'بریدن = Max-Min      ضرب = Max-Product', fa: true, size: 20, color: 'soft' },
+        ]);
       },
     },
-    // ---------------------------------------------------------- 17. summary
     {
-      say: 'جمع‌بندی برای امتحان. این نکته‌ها را یک بار دیگر بخوانید، بعد سراغ سؤال‌ها برویم.',
+      say: 'سؤال بخش 4: با Max-Product، خروجی ترکیب‌شده در همان z = 5.6 چند است؟ همان حساب بخش 3، فقط ضرب به جای min.',
+      draw: async b => {
+        await checkTag(b, 4);
+        await b.ring('qz', AGG.X(Z0), AGG.Y(0) + 4, 14, 14, { color: 'orange' });
+        await text(b, [{ t: "Max-Product:   μ_{C'}(5.6) = ?", color: 'orange', bold: true, size: 28 }]);
+      },
+      quiz: {
+        given: ['C1 = مثلث (5, 7, 9) و α1 = 0.65','C2 = مثلث (2, 4, 6) و α2 = 0.6','Max-Product: μCi′(z) = αi × μCi(z)','ترکیب: μC′(z) = max(μC1′(z), μC2′(z))'],
+        find: 'μC′(5.6) با Max-Product',
+        answer: ['0.195'], hint: 'μ_C1(5.6) = 0.3 و μ_C2(5.6) = 0.2 (از بخش 3). هر کدام ضرب در α خودش، بعد max.', explain: 'قاعده‌ی 1: 0.65 × 0.3 = 0.195. قاعده‌ی 2: 0.6 × 0.2 = 0.12. ترکیب: max(0.195,0.12) = 0.195. با Max-Min جواب 0.3 بود؛ ضرب همیشه کوچک‌تر یا مساوی min است.' },
+      solve: async b => {
+        await AGG.guide(b, 'qg', Z0, MAXPROD(Z0), { color: 'blue' });
+        await text(b, [
+          { t: `R1:  0.65 × 0.3 = ${fmt(AL1 * C1(Z0))}` },
+          { t: `R2:  0.6 × 0.2 = ${fmt(AL2 * C2(Z0))}` },
+          { t: `μ_{C'}(5.6) = max(0.195, 0.12) = ${fmt(MAXPROD(Z0))}`, color: 'green', bold: true, size: 26 },
+        ]);
+      },
+    },
+
+    // ================================================================ summary
+    {
+      say: 'جمع‌بندی: کل درس یک زنجیره است که روی یک مثال ساختیم. این را یک بار دیگر بخوانید، بعد سراغ سؤال‌های پایانی برویم که عددهایشان تازه است.',
       draw: async b => {
         await b.clear();
         await b.write('h', 500, 60, 'یادت باشد', { size: 44, color: 'orange', bold: true, fa: true });
         const L = [
-          'نمادها: max یعنی ∨ و min یعنی ∧',
-          'ورودی فازی: α = ارتفاع اشتراک حقیقت و شرط، یعنی بلندترین min',
-          `ورودی قطعی حالت خاص است: ${LTR('α = μA(x0)')}`,
-          'چند مقدم: ارتفاع هر اشتراک جدا، بعد min بین آن‌ها',
-          'چند قاعده: هر قاعده α خودش؛ نتیجه‌ها با max ترکیب می‌شوند',
-          'بریدن در α برای Max-Min، ضرب در α برای Max-Product',
+          'ورودی فازی: ارتفاع اشتراک حقیقت و شرط، یعنی بلندترین min (باد: 0.75)',
+          'ورودی قطعی حالت خاص است: α = μA(x0) (درس 12: 0.6)',
+          'چند مقدم: ارتفاع هر کدام جدا، بعد min (0.75 و 0.65 → 0.65)',
+          'چند قاعده: حقیقت‌ها مشترک، هر قاعده α خودش (0.65 و 0.6)',
+          'C هر قاعده: بریدن در α (Max-Min) یا ضرب در α (Max-Product)',
+          'ترکیب قاعده‌ها همیشه با max (در 5.6: 0.3 یا 0.195)',
         ];
-        for (const [k, l] of L.entries()) await b.write(`m${k}`, 900, 125 + k * 56, '•  ' + l, { size: 25, anchor: 'start', fa: true });
-        await b.write('f', 500, 495, "α = max[ μ_{A'}(x) ∧ μ_A(x) ]        μ_{B'}(y) = α ∧ μ_B(y)", { size: 28, color: 'blue' });
+        for (const [k, l] of L.entries()) await b.write(`m${k}`, 920, 125 + k * 56, '•  ' + l, { size: 23, anchor: 'start', fa: true });
+        await b.write('f', 500, 490, "α = max[ μ_{A'}(x) ∧ μ_A(x) ]        μ_{C'}(z) = α ∧ μ_C(z)", { size: 26, color: 'blue' });
       },
     },
-    // ---------------------------------------------------------- quizzes
+
+    // ================================================================ final quizzes (fresh numbers)
     {
-      say: 'نوبت شماست! دو مجموعه‌ی گسسته داریم: A شرط قاعده است و A′ حقیقت. درجه‌ی تطبیق α چند است؟',
+      say: 'سؤال‌های پایانی با عددهای تازه. اول: دو مجموعه‌ی گسسته داریم؛ A شرط قاعده است و A′ حقیقت. درجه‌ی تطبیق α چند است؟',
       draw: quizBoard(1, [
         { t: 'A = 0.2/1 + 0.7/2 + 1/3 + 0.4/4', color: 'blue' },
         { t: "A' = 0.5/1 + 0.3/2 + 0.6/3 + 1/4", color: 'red' },
@@ -537,32 +709,14 @@ Teacher.start({
       quiz: { answer: ['0.5'], hint: 'هر قاعده: min(α_i, μ_Ci). بعد بین دو قاعده max بگیر.', explain: 'قاعده‌ی 1: min(0.3,0.8) = 0.3. قاعده‌ی 2: min(0.6,0.5) = 0.5. ترکیب: max(0.3,0.5) = 0.5.' },
       solve: async b => {
         const r1 = Math.min(0.3, 0.8), r2 = Math.min(0.6, 0.5);
-        await b.write('s1', 500, 300, `قاعده‌ی 1:  ${LTR(`min(0.3, 0.8) = ${fmt(r1)}`)}`, { size: 28, fa: true });
-        await b.write('s2', 500, 355, `قاعده‌ی 2:  ${LTR(`min(0.6, 0.5) = ${fmt(r2)}`)}`, { size: 28, fa: true });
+        await b.write('s1', 500, 300, `قاعده‌ی 1:  min(0.3, 0.8) = ${fmt(r1)}`, { size: 28, fa: true });
+        await b.write('s2', 500, 355, `قاعده‌ی 2:  min(0.6, 0.5) = ${fmt(r2)}`, { size: 28, fa: true });
         await b.write('s3', 500, 435, `μ_{C'}(z_0) = max(${fmt(r1)}, ${fmt(r2)}) = ${fmt(Math.max(r1, r2))}`, { size: 34, color: 'green', bold: true });
       },
     },
     {
-      say: 'اگر ورودی قطعی x_0 باشد، درجه‌ی تطبیق α = max[μ_A′(x) ∧ μ_A(x)] به چه چیزی تبدیل می‌شود؟',
-      draw: quizBoard(5, [
-        { t: 'ورودی قطعی x0 ؛ α برابر است با:', fa: true, size: 32 },
-      ]),
-      quiz: {
-        choices: ['μ_A(x_0)', 'max μ_A(x) = 1', '1 − μ_A(x_0)'], correct: 0,
-        explain: 'ورودی قطعی مثل میله‌ای به ارتفاع 1 در x_0 است؛ اشتراکش با A فقط نقطه‌ی x_0 است، پس α = μ_A(x_0).',
-      },
-      solve: async b => {
-        const g = Graph({ x: 220, y: 200, w: 440, h: 230, from: 0, to: 10 });
-        await g.axes(b, 's', { ticks: [6], yTicks: [1] });
-        await g.poly(b, 'sA', [[0, 0], [4, 1], [8, 0], [10, 0]], { color: 'blue' });
-        await g.poly(b, 'sp', [[6, 0], [6, 1]], { color: 'red', width: 5 });
-        await g.guide(b, 'sg', 6, 0.5, { color: 'green' });
-        await b.write('e', 820, 330, 'α = μ_A(x_0)', { size: 32, color: 'green', bold: true });
-      },
-    },
-    {
       say: 'آخرین سؤال: در روش Max-Product، خروجی هر قاعده، C_i′، چه شکلی دارد؟',
-      draw: quizBoard(6, [
+      draw: quizBoard(5, [
         { t: 'Max-Product composition', size: 34, color: 'blue' },
         { t: 'خروجی هر قاعده چه شکلی دارد؟', fa: true, size: 30 },
       ]),

@@ -17,6 +17,13 @@
 // Lesson 14 — slides 108–115 (part 4: the Mamdani fuzzy inference system, steps 1–3).
 // Aggregation and defuzzification (steps 4–5) are lesson 15.
 // Explanations are Persian; numbers, math and technical terms stay in English.
+//
+// One running example (wind x = 8, pressure y = 5, rain z) grows through the lesson, and every
+// section ends with a short check question on it:
+//   start. the five parts of an FIS, Mamdani vs Sugeno   → which type if the output were z = 0.5x + y
+//   1. fuzzification                                     → μ_B2(5) = 0.7
+//   2. fuzzy operators (min / prod, max / probor)        → α2 = 0.2, probor(0.2, 0.7) = 0.76
+//   3. implication (min clips, prod scales)              → μ_C1′(7.5) with prod = 0.225, C2′ top starts at 2.4
 
 const LTR = s => `⁦${s}⁩`; // keeps a left-to-right run intact inside Persian board text
 const all = list => Promise.all(list);
@@ -56,14 +63,31 @@ function shade(b, g, id, f, lo, hi, color = 'green', dur = 700) {
 const GX = Graph({ x: 80, y: 270, w: 210, h: 150, from: 0, to: 12 });
 const GY = Graph({ x: 380, y: 270, w: 210, h: 150, from: 0, to: 10 });
 const GZ = Graph({ x: 690, y: 270, w: 210, h: 150, from: 0, to: 10 });
+// Board y of μ on the rule-2 row of the operator steps (section 2).
+const R2Y = m => 330 + 120 * (1 - m);
 // The big output graph used for implication.
 const GC = Graph({ x: 120, y: 150, w: 560, h: 300, from: 0, to: 10 });
 
-// Quiz helpers.
+// Rule 2 after min implication: the clipped C2′ on the big output graph, with its cut points.
+async function rule2Cut(b) {
+  await shade(b, GC, 'o2', z => Math.min(AL2, C2(z)), 2, 6, 'purple');
+  await all([b.dot('cd1', GC.X(CUT2[0]), GC.Y(AL2), { color: 'red' }), b.dot('cd2', GC.X(CUT2[1]), GC.Y(AL2), { color: 'red' })]);
+  await all([
+    b.write('ct1', GC.X(CUT2[0]), GC.Y(0) + 48, fmt(CUT2[0]), { size: 18, color: 'red' }),
+    b.write('ct2', GC.X(CUT2[1]), GC.Y(0) + 48, fmt(CUT2[1]), { size: 18, color: 'red' }),
+    b.write('t2', GC.X(4), GC.Y(AL2) - 12, "C2' (α = 0.2)", { size: 20, color: 'purple', bold: true }),
+  ]);
+}
+
+// Small orange tag that marks a section check question on the board (n = 0 → the start section).
+const checkTag = (b, n, x = 905, y = 52) =>
+  b.write('chk', x, y, n ? `سؤال بخش ${n}` : 'سؤال شروع', { size: 20, color: 'orange', bold: true, fa: true });
+
+// Final quiz board.
 function quizBoard(n, lines) {
   return async b => {
     await b.clear();
-    await b.write('q-n', 500, 52, `سؤال ${n} از 6`, { size: 22, color: 'soft', fa: true });
+    await b.write('q-n', 500, 52, `سؤال پایانی ${n} از 6`, { size: 22, color: 'soft', fa: true });
     for (const [k, l] of lines.entries()) {
       await b.write(`q-${k}`, 500, 108 + k * 50, l.t, { size: l.size || 30, color: l.color || 'ink', fa: !!l.fa });
     }
@@ -101,6 +125,28 @@ Teacher.start({
           b.write('outf', 760, 330, 'میزان بارش', { size: 20, color: 'soft', fa: true }),
         ]);
         await b.write('def', 500, 450, 'نگاشت از یک ورودی به یک خروجی با منطق فازی', { size: 26, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- roadmap
+    {
+      say: 'نقشه‌ی این درس: کل درس روی *یک* مثال است، باد x = 8 و فشار y = 5، و هر بخش یک قدم از ماشین را روی همین عددها اجرا می‌کند و از جواب بخش قبل استفاده می‌کند. اول نگاهی به کل ماشین و دو نوعش، ممدانی و سوگنو. بعد بخش 1، فازی‌سازی: چهار درجه‌ی تعلق. بخش 2، عملگر AND و OR: یک عدد α برای هر قاعده. بخش 3، استلزام: یک مجموعه‌ی خروجی برای هر قاعده. آخر هر بخش یک سؤال کوتاه از همین مثال هست تا مطمئن شوید آن قدم را گرفته‌اید.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 60, 'یک مثال، چهار قدم', { size: 38, color: 'orange', bold: true, fa: true });
+        const L = [
+          ['شروع: کل ماشین، ممدانی و سوگنو', 'پنج بخش FIS · اسلاید 108–109', 'blue'],
+          ['بخش 1: فازی‌سازی', 'x = 8 , y = 5 ← چهار درجه · اسلاید 110', 'purple'],
+          ['بخش 2: عملگر AND / OR', 'چهار درجه ← α1 و α2 · اسلاید 111–113', 'green'],
+          ['بخش 3: استلزام min / prod', "α و C ← C1' و C2' · اسلاید 114–115", 'red'],
+        ];
+        for (const [k, [t, s, c]] of L.entries()) {
+          const y = 125 + k * 95;
+          await b.box(`bx${k}`, 230, y, 540, 70, { color: c, r: 12 });
+          await b.write(`bt${k}`, 500, y + 30, t, { size: 24, color: c, bold: true, fa: true });
+          await b.write(`bs${k}`, 500, y + 58, s, { size: 17, color: 'soft', fa: true });
+          if (k < 3) await b.arrow(`ar${k}`, 500, y + 72, 500, y + 92, { color: 'soft', head: 8 });
+          await b.write(`q${k}`, 840, y + 44, '+ سؤال', { size: 20, color: 'orange', bold: true, fa: true });
+        }
       },
     },
     // ---------------------------------------------------------- 2. five parts
@@ -151,6 +197,31 @@ Teacher.start({
         await b.write('s2', 260, 390, 'z = k', { size: 32 });
         await b.write('s2f', 260, 430, 'عدد ثابت', { size: 20, color: 'soft', fa: true });
         await b.write('st', 260, 470, 'خروجی = تابع خطی یا ثابت', { size: 24, color: 'purple', bold: true, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- check: start section
+    {
+      say: 'سؤال شروع: یک سیستم استنتاج فازی با دو ورودی، سرعت باد x و فشار y، و خروجی بارش z داریم. نتیجه‌ی قاعده‌اش به جای یک مجموعه‌ی فازی، مثل مثلث «بارش زیاد»، این است: z = 0.5x + y. این سیستم از کدام نوع است؟',
+      draw: async b => {
+        await checkTag(b, 0);
+        await b.write('qq', 500, 528, '... then z = 0.5x + y   →   ?', { size: 26, color: 'orange', bold: true });
+      },
+      quiz: {
+        given: [
+          'ورودی‌ها: سرعت باد x و فشار y ؛ خروجی: بارش z',
+          'قاعده: if x is A1 and y is B1 then z = 0.5x + y',
+          'Mamdani: خروجی هر قاعده یک مجموعه‌ی فازی است',
+          'Sugeno: خروجی هر قاعده یک تابع خطی از ورودی‌ها یا یک عدد ثابت است',
+        ],
+        find: 'نوع این سیستم استنتاج',
+        choices: ['ممدانی (Mamdani)', 'سوگنو (Sugeno)', 'دیگر سیستم استنتاج فازی نیست'], correct: 1,
+        hint: 'به شکل خروجی نگاه کن: مجموعه‌ی فازی است یا یک تابع خطی از ورودی‌ها؟',
+        explain: 'خروجی یک تابع خطی از ورودی‌هاست، نه مجموعه‌ی فازی؛ پس سوگنو. مثلاً با x = 8 و y = 5 مستقیم یک عدد می‌دهد: 0.5 × 8 + 5 = 9. در این درس خروجی مثلث است، پس ممدانی می‌مانیم.',
+      },
+      solve: async b => {
+        await b.erase('qq', 150);
+        await b.ring('qr', 260, 150, 120, 50, { color: 'green' });
+        await b.write('qa', 500, 528, '... then z = 0.5x + y   →   Sugeno', { size: 26, color: 'green', bold: true });
       },
     },
     // ---------------------------------------------------------- 4. the example rules
@@ -212,15 +283,38 @@ Teacher.start({
     },
     // ---------------------------------------------------------- 7. the other three readings
     {
-      say: 'همین کار را برای *هر* بخش مقدم در *هر* قاعده می‌کنیم. همان x = 8 روی «متوسط» درجه‌ی 0.2 می‌دهد. فشار y = 5 روی «پایین» 0.3 می‌دهد و روی «بالا» 0.7. حالا هر بخش مقدم یک عدد بین 0 و 1 شده است. دقت کنید یک ورودی می‌تواند هم‌زمان عضو دو مجموعه باشد.',
+      say: 'همین کار را برای *هر* بخش مقدم در *هر* قاعده می‌کنیم. همان x = 8 روی «متوسط» درجه‌ی 0.2 می‌دهد. فشار y = 5 روی «پایین» 0.3 می‌دهد. دقت کنید یک ورودی می‌تواند هم‌زمان عضو دو مجموعه باشد: x = 8 هم کمی «متوسط» است و هم بیشتر «شدید».',
       draw: async b => {
         await GX.guide(b, 'g2', X0, MU.A2, { color: 'purple' });
         await b.write('e2', 185, 522, `μ_{A2}(8) = ${fmt(MU.A2)}`, { size: 22, color: 'purple', bold: true });
         await GY.guide(b, 'g3', Y0, MU.B1, { color: 'blue' });
         await b.write('e3', 485, 488, `μ_{B1}(5) = ${fmt(MU.B1)}`, { size: 22, color: 'blue', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- check: section 1
+    {
+      say: 'سؤال بخش 1: فشار y = 5 است. مجموعه‌ی «فشار بالا»، B2، تا y = 2.9 صفر است، بعد با خط راست بالا می‌رود، μ_B2(y) = (y − 2.9)/3، و در y = 5.9 به 1 می‌رسد. درجه‌ی تعلق y = 5 به B2، یعنی μ_B2(5)، چند است؟',
+      draw: async b => {
+        await checkTag(b, 1);
+        await b.write('qh', 800, 470, 'B2: (y − 2.9)/3', { size: 20, color: 'purple' });
+        await b.write('e4', 485, 522, 'μ_{B2}(5) = ?', { size: 22, color: 'orange', bold: true });
+      },
+      quiz: {
+        given: [
+          'فشار: y = 5',
+          'B2 = «فشار بالا»',
+          'μB2(y) = (y − 2.9)/3   (2.9 ≤ y ≤ 5.9)',
+          'μB2(y) = 0   (y ≤ 2.9) ,   μB2(y) = 1   (y ≥ 5.9)',
+        ],
+        find: 'μB2(5)',
+        answer: ['0.7'],
+        hint: 'y = 5 را در دامنه‌ی بالارونده‌ی B2 بگذار: (5 − 2.9)/3.',
+        explain: 'μ_B2(5) = (5 − 2.9)/3 = 2.1/3 = 0.7. در این مثال B1 و B2 قرینه‌اند، پس 0.3 + 0.7 = 1؛ ولی این همیشه درست نیست، فقط چون این دو خط این‌طور کشیده شده‌اند.',
+      },
+      solve: async b => {
         await GY.guide(b, 'g4', Y0, MU.B2, { color: 'purple' });
         await b.write('e4', 485, 522, `μ_{B2}(5) = ${fmt(MU.B2)}`, { size: 22, color: 'purple', bold: true });
-        await b.write('e5', 800, 505, 'هر بخش مقدم ← یک عدد', { size: 20, color: 'soft', fa: true });
+        await b.write('e5', 800, 510, 'هر بخش مقدم ← یک عدد', { size: 20, color: 'soft', fa: true });
       },
     },
     // ---------------------------------------------------------- 8. fuzzy operators
@@ -309,7 +403,7 @@ Teacher.start({
     },
     // ---------------------------------------------------------- 12. rule 2: α2
     {
-      say: 'قاعده‌ی 2 هم همین‌طور: μ_A2(8) = 0.2 و μ_B2(5) = 0.7. پس α_2 = min(0.2,0.7) = 0.2. حالا هر قاعده یک عدد دارد: قاعده‌ی 1 با درجه‌ی 0.3 و قاعده‌ی 2 با درجه‌ی 0.2 برقرار است.',
+      say: 'قاعده‌ی 2 هم همین‌طور. درجه‌هایش را از بخش 1 داریم: μ_A2(8) = 0.2 و μ_B2(5) = 0.7، همان که خودتان خواندید. دو خط افقی خاکستری همین دو ارتفاع‌اند. قدم بعد را شما بردارید.',
       draw: async b => {
         const r = 1, c = 'purple';
         const gx = Graph({ x: 80, y: 330, w: 220, h: 120, from: 0, to: 12 });
@@ -326,11 +420,54 @@ Teacher.start({
           b.line(`ha${r}`, gx.X(X0), gx.Y(ma), 640, gx.Y(ma), { color: 'soft', width: 2 }),
           b.line(`hb${r}`, gy.X(Y0), gy.Y(mb), 640, gy.Y(mb), { color: 'soft', width: 2 }),
         ]);
-        await b.wire(`br${r}`, [[632, gy.Y(mb)], [642, gy.Y(mb)], [642, gx.Y(ma)], [632, gx.Y(ma)]], { width: 3 });
-        await b.write(`mn${r}`, 642, gy.Y(mb) - 10, 'min', { size: 18, bold: true });
-        await b.arrow(`ar${r}`, 650, gx.Y(AL2), 690, gx.Y(AL2), { color: 'green', head: 10 });
-        await b.write(`al${r}`, 700, gx.Y(AL2) + 8, `α_2 = min(${fmt(ma)}, ${fmt(mb)}) = ${fmt(AL2)}`, { size: 20, color: 'green', bold: true, anchor: 'start' });
         await b.write('rl1', 50, 310, 'R2', { size: 24, color: 'purple', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- check: section 2
+    {
+      say: 'سؤال بخش 2: قاعده‌ی 2 می‌گوید if x is A2 and y is B2 then z is C2. با x = 8 و y = 5 درجه‌ها μ_A2(8) = 0.2 و μ_B2(5) = 0.7 هستند و AND با روش min است. درجه‌ی تطبیق قاعده‌ی 2، یعنی α_2، چند است؟',
+      draw: async b => {
+        await checkTag(b, 2);
+        await b.write('al1', 700, R2Y(AL2) + 8, 'α_2 = ?', { size: 22, color: 'orange', bold: true, anchor: 'start' });
+      },
+      quiz: {
+        given: [
+          'R2: if x is A2 and y is B2 then z is C2',
+          'μA2(8) = 0.2 ,  μB2(5) = 0.7',
+          'AND = min',
+        ],
+        find: 'α2 (درجه‌ی تطبیق قاعده‌ی 2)',
+        answer: ['0.2'],
+        hint: 'AND = min: کوچک‌ترِ 0.2 و 0.7.',
+        explain: 'α_2 = min(0.2, 0.7) = 0.2. پس قاعده‌ی 1 با درجه‌ی 0.3 و قاعده‌ی 2 با درجه‌ی 0.2 برقرار است. این دو عدد ورودی بخش 3 هستند.',
+      },
+      solve: async b => {
+        await b.wire('br1', [[632, R2Y(MU.B2)], [642, R2Y(MU.B2)], [642, R2Y(MU.A2)], [632, R2Y(MU.A2)]], { width: 3 });
+        await b.write('mn1', 642, R2Y(MU.B2) - 10, 'min', { size: 18, bold: true });
+        await b.arrow('ar1', 650, R2Y(AL2), 690, R2Y(AL2), { color: 'green', head: 10 });
+        await b.write('al1', 700, R2Y(AL2) + 8, `α_2 = min(${fmt(MU.A2)}, ${fmt(MU.B2)}) = ${fmt(AL2)}`, { size: 20, color: 'green', bold: true, anchor: 'start' });
+      },
+    },
+    {
+      say: 'سؤال بخش 2، یک قدم جلوتر: فرض کنید قاعده‌ی 2 با *or* نوشته شده: if x is A2 or y is B2 then z is C2. درجه‌ها μ_A2(8) = 0.2 و μ_B2(5) = 0.7 هستند و OR با روش probor است، یعنی probor(a,b) = a + b − ab. درجه‌ی تطبیق این قاعده چند است؟',
+      draw: async b => {
+        await checkTag(b, 2);
+        await b.write('qp', 805, 280, 'probor(0.2, 0.7) = ?', { size: 22, color: 'orange', bold: true });
+      },
+      quiz: {
+        given: [
+          'R2: if x is A2 or y is B2 then z is C2',
+          'μA2(8) = 0.2 ,  μB2(5) = 0.7',
+          'OR = probor ,  probor(a, b) = a + b − ab',
+        ],
+        find: 'درجه‌ی تطبیق این قاعده: probor(0.2, 0.7)',
+        answer: ['0.76'],
+        hint: 'probor(a, b) = a + b − ab. اول ضرب 0.2 × 0.7 را حساب کن.',
+        explain: 'probor(0.2, 0.7) = 0.2 + 0.7 − 0.14 = 0.76. با max جواب فقط 0.7 بود؛ probor همیشه از max بزرگ‌تر یا مساوی است.',
+      },
+      solve: async b => {
+        await b.write('qp', 805, 280, 'probor(0.2, 0.7)', { size: 22, color: 'purple', bold: true });
+        await b.write('qp2', 805, 315, `= 0.2 + 0.7 − 0.14 = ${fmt(probor(0.2, 0.7))}`, { size: 20, color: 'green', bold: true });
       },
     },
     // ---------------------------------------------------------- 13. implication: two methods
@@ -384,6 +521,37 @@ Teacher.start({
         await b.write('cmp', 400, 520, `z = 6:   min → ${fmt(Math.min(AL1, C1(6)))}      prod → ${fmt(AL1 * C1(6))}`, { size: 26, color: 'purple', bold: true });
       },
     },
+    // ---------------------------------------------------------- check: section 3 (prod at 7.5)
+    {
+      say: 'سؤال بخش 3: قاعده‌ی 1 درجه‌ی تطبیق α_1 = 0.3 دارد و مؤخرش C1 مثلث (5,7,9) است: از 5 بالا می‌رود، در 7 به 1 می‌رسد و در 9 صفر می‌شود. استلزام با روش *prod* است، یعنی μ_C1′(z) = α_1 · μ_C1(z). مقدار μ_C1′(7.5) چند است؟',
+      draw: async b => {
+        await checkTag(b, 3);
+        await b.line('q75', GC.X(7.5), GC.Y(0), GC.X(7.5), GC.Y(C1(7.5)), { color: 'orange', width: 2 });
+        await b.write('q75t', 840, 490, "prod:  μ_{C1'}(7.5) = ?", { size: 22, color: 'orange', bold: true });
+      },
+      quiz: {
+        given: [
+          'α1 = 0.3',
+          'C1 = tri(5, 7, 9)',
+          'μC1(z) = (z − 5)/2   (5 ≤ z ≤ 7)',
+          'μC1(z) = (9 − z)/2   (7 ≤ z ≤ 9)',
+          "استلزام prod:  μC1'(z) = α1 · μC1(z)",
+          'z = 7.5',
+        ],
+        find: "μC1'(7.5)",
+        answer: ['0.225'],
+        hint: 'μ_C1(7.5) از دامنه‌ی پایین‌رونده: (9 − 7.5)/2. بعد ضرب در α_1 = 0.3.',
+        explain: 'μ_C1(7.5) = (9 − 7.5)/2 = 0.75. با prod: 0.3 × 0.75 = 0.225. با min همان نقطه 0.3 می‌شد، چون 0.75 بالای سقف است و بریده می‌شود.',
+      },
+      solve: async b => {
+        await all([
+          b.dot('q75m', GC.X(7.5), GC.Y(Math.min(AL1, C1(7.5))), { color: 'green', r: 6 }),
+          b.dot('q75p', GC.X(7.5), GC.Y(AL1 * C1(7.5)), { color: 'blue', r: 6 }),
+        ]);
+        await b.write('q75t', 840, 485, `μ_{C1}(7.5) = ${fmt(C1(7.5))}`, { size: 20, color: 'ink' });
+        await b.write('q75s', 840, 522, `0.3 × ${fmt(C1(7.5))} = ${fmt(AL1 * C1(7.5))}`, { size: 22, color: 'green', bold: true });
+      },
+    },
     // ---------------------------------------------------------- 16. min vs prod
     {
       say: 'فرقشان را به خاطر بسپارید. min همه‌ی نقطه‌های بالای α را صاف می‌کند؛ قله پهن می‌شود و اطلاعات شکلِ بالای خط از بین می‌رود. prod شکل اصلی را *حفظ* می‌کند و فقط کوتاهش می‌کند. در هر دو روش هیچ نقطه‌ای از α بالاتر نمی‌رود، و prod هیچ‌وقت از min بیشتر نیست.',
@@ -402,23 +570,56 @@ Teacher.start({
         await b.write('r', 500, 490, 'α · μ_C ≤ min(α, μ_C) ≤ α', { size: 28, color: 'purple' });
       },
     },
-    // ---------------------------------------------------------- 17. rule 2 → two output sets
+    // ---------------------------------------------------------- 17. rule 2 → implication
     {
-      say: 'قاعده‌ی 2 هم استلزام می‌خورد: C2، مثلث «بارش کم»، با min در α_2 = 0.2 بریده می‌شود؛ سقفش از 2.4 تا 5.6 است. حالا *دو* مجموعه‌ی خروجی داریم، C1′ و C2′، یکی برای هر قاعده. ترکیب این دو در یک مجموعه، یعنی تجمیع، و تبدیلش به یک عدد، یعنی غیرفازی‌سازی، موضوع درس بعد است.',
+      say: 'قاعده‌ی 2 هم استلزام می‌خورد، با min و با α_2 = 0.2 که در بخش 2 خودتان حساب کردید. C1′ را از قبل داریم، ذوزنقه‌ی سبز با سقف 0.3. حالا مثلث «بارش کم»، C2 = (2,4,6)، باید در خط نارنجی 0.2 بریده شود.',
       draw: async b => {
         await b.clear();
-        await GC.axes(b, 'gc', { ticks: [0, 2, 2.4, 4, 5.6, 7, 9, 10], yTicks: [0.5, 1], label: 'z' });
+        await GC.axes(b, 'gc', { ticks: [0, 2, 4, 7, 9, 10], yTicks: [0.5, 1], label: 'z' });
         await all([GC.curve(b, 'cC2', C2, { color: 'soft' }), GC.curve(b, 'cC1', C1, { color: 'soft' })]);
         await all([
           b.write('lC2', GC.X(4), GC.Y(1) - 10, 'کم (C2)', { size: 22, color: 'soft', fa: true }),
           b.write('lC1', GC.X(7), GC.Y(1) - 10, 'زیاد (C1)', { size: 22, color: 'soft', fa: true }),
         ]);
-        await shade(b, GC, 'o2', z => Math.min(AL2, C2(z)), 2, 6, 'purple');
         await shade(b, GC, 'o1', z => Math.min(AL1, C1(z)), 5, 9, 'green');
-        await all([
-          b.write('t2', GC.X(4), GC.Y(AL2) - 12, "C2' (α = 0.2)", { size: 20, color: 'purple', bold: true }),
-          b.write('t1', GC.X(7), GC.Y(AL1) - 12, "C1' (α = 0.3)", { size: 20, color: 'green', bold: true }),
-        ]);
+        await b.write('t1', GC.X(7), GC.Y(AL1) - 12, "C1' (α = 0.3)", { size: 20, color: 'green', bold: true });
+        await GC.poly(b, 'al2', [[0, AL2], [6.5, AL2]], { color: 'orange', width: 2.5 });
+        await b.write('al2t', GC.X(1), GC.Y(AL2) - 10, 'α_2 = 0.2', { size: 20, color: 'orange' });
+      },
+    },
+    // ---------------------------------------------------------- check: section 3 (C2′ cut)
+    {
+      say: 'سؤال بخش 3: قاعده‌ی 2 درجه‌ی تطبیق α_2 = 0.2 دارد و مؤخرش C2 مثلث (2,4,6) است. استلزام با روش *min* است، یعنی μ_C2′(z) = min(0.2, μ_C2(z)). سقف صاف C2′ از کدام z *شروع* می‌شود؟',
+      draw: async b => {
+        await checkTag(b, 3);
+        await b.write('q3a', 840, 230, "C2'  سقف صاف از کجا؟", { size: 22, color: 'orange', bold: true, fa: true });
+        await b.write('q3b', 840, 280, 'z = ?', { size: 30, color: 'orange', bold: true });
+      },
+      quiz: {
+        given: [
+          'α2 = 0.2',
+          'C2 = tri(2, 4, 6)',
+          'μC2(z) = (z − 2)/2   (2 ≤ z ≤ 4)',
+          'μC2(z) = (6 − z)/2   (4 ≤ z ≤ 6)',
+          "استلزام min:  μC2'(z) = min(α2, μC2(z))",
+        ],
+        find: "کوچک‌ترین z که در آن سقف صاف C2' (ارتفاع 0.2) شروع می‌شود",
+        answer: ['2.4'],
+        hint: 'دامنه‌ی بالارونده‌ی C2 یعنی (z − 2)/2. آن را برابر 0.2 بگذار.',
+        explain: '(z − 2)/2 = 0.2 پس z = 2 + 0.4 = 2.4. از آن طرف (6 − z)/2 = 0.2 پس z = 5.6. سقف صاف C2′ از 2.4 تا 5.6 است.',
+      },
+      solve: async b => {
+        await b.write('q3b', 840, 280, '(z − 2)/2 = 0.2', { size: 22 });
+        await b.write('q3c', 840, 325, `z = ${fmt(CUT2[0])}  …  ${fmt(CUT2[1])}`, { size: 26, color: 'green', bold: true });
+        await rule2Cut(b);
+      },
+    },
+    // ---------------------------------------------------------- 17b. two output sets
+    {
+      say: 'پس C2 در 0.2 بریده شد و سقفش از 2.4 تا 5.6 است. حالا *دو* مجموعه‌ی خروجی داریم، C1′ و C2′، یکی برای هر قاعده. ترکیب این دو در یک مجموعه، یعنی تجمیع، و تبدیلش به یک عدد، یعنی غیرفازی‌سازی، موضوع درس بعد است.',
+      draw: async b => {
+        await b.erase(['chk', 'q3*']);
+        await rule2Cut(b);
         await b.write('nx', 840, 260, 'دو مجموعه‌ی خروجی', { size: 22, bold: true, fa: true });
         await b.write('nx2', 840, 300, 'ترکیبشان = تجمیع', { size: 20, color: 'soft', fa: true });
         await b.write('nx3', 840, 335, 'یک عدد = غیرفازی‌سازی', { size: 20, color: 'soft', fa: true });
@@ -445,7 +646,7 @@ Teacher.start({
     },
     // ---------------------------------------------------------- quizzes
     {
-      say: 'نوبت شماست! یک قاعده با OR داریم و برای OR روش probor انتخاب شده. درجه‌های دو بخش مقدم 0.5 و 0.4 هستند. α چند است؟',
+      say: 'سؤال‌های پایانی با عددهای تازه. اول: یک قاعده با OR داریم و برای OR روش probor انتخاب شده. درجه‌های دو بخش مقدم 0.5 و 0.4 هستند. α چند است؟',
       draw: quizBoard(1, [
         { t: 'μ_1 = 0.5        μ_2 = 0.4', size: 32 },
         { t: 'OR = probor', size: 30, color: 'purple' },
@@ -459,50 +660,52 @@ Teacher.start({
       },
     },
     {
-      say: 'قاعده‌ی 2 مثال را دوباره حساب کنید، ولی این بار AND را *prod* بگیرید: μ_A2(8) = 0.2 و μ_B2(5) = 0.7. α_2 چند است؟',
+      say: 'یک قاعده‌ی تازه: «اگر دما بالا *و* رطوبت زیاد باشد، آنگاه ...». درجه‌ی دو بخش مقدم 0.8 و 0.45 است و برای AND روش *prod* انتخاب شده. α چند است؟',
       draw: quizBoard(2, [
-        { t: 'μ_{A2}(8) = 0.2        μ_{B2}(5) = 0.7', size: 32 },
+        { t: 'μ_1 = 0.8        μ_2 = 0.45', size: 32 },
         { t: 'AND = prod', size: 30, color: 'blue' },
-        { t: 'α_2 = ?', color: 'orange', size: 36 },
+        { t: 'α = ?', color: 'orange', size: 36 },
       ]),
-      quiz: { answer: ['0.14'], hint: 'prod یعنی ضرب دو درجه.', explain: 'α_2 = 0.2 × 0.7 = 0.14. با min جواب 0.2 بود؛ prod همیشه کوچک‌تر یا مساوی min است.' },
+      quiz: { answer: ['0.36'], hint: 'prod یعنی ضرب دو درجه.', explain: 'α = 0.8 × 0.45 = 0.36. با min جواب 0.45 بود؛ prod همیشه کوچک‌تر یا مساوی min است.' },
       solve: async b => {
-        await b.write('s1', 500, 320, `α_2 = prod(0.2, 0.7) = 0.2 × 0.7 = ${fmt(0.2 * 0.7)}`, { size: 34, color: 'green', bold: true });
-        await b.write('s2', 500, 400, `با min: ${LTR('min(0.2, 0.7) = 0.2')}`, { size: 24, color: 'soft', fa: true });
+        await b.write('s1', 500, 320, `α = prod(0.8, 0.45) = 0.8 × 0.45 = ${fmt(0.8 * 0.45)}`, { size: 34, color: 'green', bold: true });
+        await b.write('s2', 500, 400, `با min: ${LTR('min(0.8, 0.45) = 0.45')}`, { size: 24, color: 'soft', fa: true });
       },
     },
     {
-      say: 'استلزام min روی قاعده‌ی 2: C2 مثلث (2,4,6) است و α_2 = 0.2. سقف صاف C2′ از کدام z *شروع* می‌شود؟',
+      say: 'استلزام min: مؤخر قاعده مثلث C = (3,6,9) است و α = 0.4. سقف صاف C′ از کدام z *شروع* می‌شود؟',
       draw: quizBoard(3, [
-        { t: 'C2 = (2, 4, 6)        α_2 = 0.2', size: 32 },
+        { t: 'C = (3, 6, 9)        α = 0.4', size: 32 },
         { t: 'استلزام min — سقف صاف از کدام z شروع می‌شود؟', fa: true, size: 26 },
         { t: 'z = ?', color: 'orange', size: 36 },
       ]),
-      quiz: { answer: ['2.4'], hint: 'دامنه‌ی بالارونده (z − 2)/2 را برابر 0.2 بگذار.', explain: '(z − 2)/2 = 0.2 پس z = 2 + 0.4 = 2.4. سقف تا 6 − 0.4 = 5.6 ادامه دارد.' },
+      quiz: { answer: ['4.2'], hint: 'دامنه‌ی بالارونده (z − 3)/3 را برابر 0.4 بگذار.', explain: '(z − 3)/3 = 0.4 پس z = 3 + 1.2 = 4.2. سقف تا 9 − 1.2 = 7.8 ادامه دارد.' },
       solve: async b => {
-        const g = Graph({ x: 150, y: 270, w: 480, h: 200, from: 1, to: 7 });
-        await g.axes(b, 's', { ticks: [2, 2.4, 4, 5.6, 6], yTicks: [0.2, 1], label: 'z' });
-        await g.curve(b, 'sc', C2, { color: 'soft' });
-        await g.poly(b, 'sa', [[1, AL2], [7, AL2]], { color: 'orange', width: 2 });
-        await shade(b, g, 'ss', z => Math.min(AL2, C2(z)), 2, 6, 'green');
-        await all([b.dot('sd1', g.X(CUT2[0]), g.Y(AL2), { color: 'red', r: 6 }), b.dot('sd2', g.X(CUT2[1]), g.Y(AL2), { color: 'red' })]);
-        await b.write('e1', 830, 330, '(z − 2)/2 = 0.2', { size: 24 });
-        await b.write('e2', 830, 380, `z = ${fmt(CUT2[0])}`, { size: 32, color: 'green', bold: true });
-        await b.write('e3', 830, 420, `تا ${LTR(fmt(CUT2[1]))}`, { size: 18, color: 'soft', fa: true });
+        const C = tri(3, 6, 9), al = 0.4, cut = [3 + 3 * al, 9 - 3 * al];
+        const g = Graph({ x: 150, y: 270, w: 480, h: 200, from: 2, to: 10 });
+        await g.axes(b, 's', { ticks: [3, 4.2, 6, 7.8, 9], yTicks: [al, 1], label: 'z' });
+        await g.curve(b, 'sc', C, { color: 'soft' });
+        await g.poly(b, 'sa', [[2, al], [10, al]], { color: 'orange', width: 2 });
+        await shade(b, g, 'ss', z => Math.min(al, C(z)), 3, 9, 'green');
+        await all([b.dot('sd1', g.X(cut[0]), g.Y(al), { color: 'red', r: 6 }), b.dot('sd2', g.X(cut[1]), g.Y(al), { color: 'red' })]);
+        await b.write('e1', 830, 330, '(z − 3)/3 = 0.4', { size: 24 });
+        await b.write('e2', 830, 380, `z = ${fmt(cut[0])}`, { size: 32, color: 'green', bold: true });
+        await b.write('e3', 830, 420, `تا ${LTR(fmt(cut[1]))}`, { size: 18, color: 'soft', fa: true });
       },
     },
     {
-      say: 'این بار استلزام prod روی قاعده‌ی 1: α_1 = 0.3 و C1 مثلث (5,7,9). مقدار μ_C1′ در z = 7.5 چند است؟',
+      say: 'استلزام prod: α = 0.4 و مؤخر مثلث C = (2,5,8). مقدار μ_C′ در z = 6.5 چند است؟',
       draw: quizBoard(4, [
-        { t: 'C1 = (5, 7, 9)        α_1 = 0.3', size: 32 },
+        { t: 'C = (2, 5, 8)        α = 0.4', size: 32 },
         { t: 'استلزام prod', fa: true, size: 26 },
-        { t: "μ_{C1'}(7.5) = ?", color: 'orange', size: 36 },
+        { t: "μ_{C'}(6.5) = ?", color: 'orange', size: 36 },
       ]),
-      quiz: { answer: ['0.225'], hint: 'اول μ_C1(7.5) را از دامنه‌ی پایین‌رونده (9 − z)/2 حساب کن، بعد در 0.3 ضرب کن.', explain: 'μ_C1(7.5) = (9 − 7.5)/2 = 0.75. با prod: 0.3 × 0.75 = 0.225. (با min جواب 0.3 بود.)' },
+      quiz: { answer: ['0.2'], hint: 'اول μ_C(6.5) را از دامنه‌ی پایین‌رونده (8 − z)/3 حساب کن، بعد در 0.4 ضرب کن.', explain: 'μ_C(6.5) = (8 − 6.5)/3 = 0.5. با prod: 0.4 × 0.5 = 0.2. (با min جواب min(0.4,0.5) = 0.4 بود.)' },
       solve: async b => {
-        await b.write('s1', 500, 300, `μ_{C1}(7.5) = (9 − 7.5)/2 = ${fmt(C1(7.5))}`, { size: 30 });
-        await b.write('s2', 500, 370, `μ_{C1'}(7.5) = 0.3 × ${fmt(C1(7.5))} = ${fmt(AL1 * C1(7.5))}`, { size: 34, color: 'green', bold: true });
-        await b.write('s3', 500, 440, `با min: ${LTR(`min(0.3, 0.75) = ${fmt(Math.min(AL1, C1(7.5)))}`)}`, { size: 24, color: 'soft', fa: true });
+        const C = tri(2, 5, 8);
+        await b.write('s1', 500, 300, `μ_C(6.5) = (8 − 6.5)/3 = ${fmt(C(6.5))}`, { size: 30 });
+        await b.write('s2', 500, 370, `μ_{C'}(6.5) = 0.4 × ${fmt(C(6.5))} = ${fmt(0.4 * C(6.5))}`, { size: 34, color: 'green', bold: true });
+        await b.write('s3', 500, 440, `با min: ${LTR(`min(0.4, 0.5) = ${fmt(Math.min(0.4, C(6.5)))}`)}`, { size: 24, color: 'soft', fa: true });
       },
     },
     {

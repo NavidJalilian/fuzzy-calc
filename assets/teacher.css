@@ -160,6 +160,14 @@ button { font: inherit; color: inherit; }
   font: inherit; font-size: 18px; padding: 8px 12px; border-radius: 10px; width: 160px;
   border: 1px solid var(--line); background: var(--surface-2); color: var(--text);
 }
+.quiz .given {
+  flex-basis: 100%; padding: 10px 14px; border-radius: 10px; font-size: 16px; line-height: 1.7;
+  border: 1px solid var(--line); border-inline-start: 4px solid var(--orange); background: var(--surface-2);
+}
+.quiz .given [dir="ltr"] { display: inline-block; }   /* a formula never breaks across two lines */
+.quiz .given-h { font-weight: 700; color: var(--orange); }
+.quiz .given ul { margin: 2px 0 6px; padding-inline-start: 20px; }
+.quiz .given .find { font-weight: 600; }
 .quiz .feedback { flex-basis: 100%; padding: 8px 12px; border-radius: 10px; font-size: 16px; }
 .quiz .feedback.good { background: var(--good-bg); }
 .quiz .feedback.bad { background: var(--bad-bg); }

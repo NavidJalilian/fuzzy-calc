@@ -77,12 +77,27 @@ const C4 = M4 / A4;                                     // 3472.06
 const BIS4 = Y1 + (A4 / 2 - P4[0].area) / AL;           // 3471.15
 const MOM4 = (Y1 + Y2) / 2;                             // 3442.31
 
+
+// Every section ends with a short check question on the same problem ("you try, then see"):
+// the student computes the very next value, then the teacher's next step draws it on the same picture.
+//   HW3: 1 T medium(29) = 0.2 · 2 which RH degree is unused (Low) · 3 R2 = 0.2 · 4 flat top starts 26.2
+//        5 Low/Medium meet at 24.1 · 6 rect area 7.2, z* ≈ 37.1 · 7 MOM = 44.2
+//   HW4: 1 α = 3/13 · 2 y1 ≈ 2615.38 · 3 rect area ≈ 381.66 · 4 area from rect ≈ 197.49 · 5 MOM ≈ 3442.31
+
 const GV = Graph({ x: 110, y: 210, w: 680, h: 240, from: 2000, to: 5000 });
+const GT = Graph({ x: 120, y: 110, w: 640, h: 300, from: 10, to: 85 });    // HW3 temperature
+const GRH = Graph({ x: 120, y: 110, w: 640, h: 300, from: 0, to: 100 });   // HW3 humidity
+const GS = Graph({ x: 110, y: 110, w: 680, h: 340, from: 0, to: 100 });    // HW3 speed (full μ)
+const GH = Graph({ x: 120, y: 130, w: 640, h: 300, from: 20, to: 50 });    // HW4 temperature
+
+// Small orange tag that marks a section check question on the board.
+const checkTag = (b, n, x = 905, y = 52) =>
+  b.write('chk', x, y, `سؤال بخش ${n}`, { size: 20, color: 'orange', bold: true, fa: true });
 
 function quizBoard(n, question, o = { size: 40 }) {
   return async b => {
     await b.clear();
-    await b.write('q-n', 500, 60, `سؤال ${n} از 10`, { size: 24, color: 'soft', fa: true });
+    await b.write('q-n', 500, 60, `سؤال پایانی ${n} از 7`, { size: 24, color: 'soft', fa: true });
     await b.write('q-q', 500, 130, question, o);
   };
 }
@@ -91,10 +106,20 @@ const GZ = Graph({ x: 110, y: 130, w: 680, h: 320, from: 0, to: 100, max: 0.25 }
 async function zoomAxes(b) {
   await GZ.axes(b, 'za', { ticks: [0, 20, 40, 60, 80, 100], yTicks: [0.1, 0.2], label: 'z' });
 }
-async function hw4Clipped(b) {
+const AGG3 = [[0, R1], [B1, R1], [B2, R2], [B3, R2], [67, 0], [100, 0]];
+async function hw4Base(b) {
   await GV.axes(b, 'vx', { ticks: [2000, 2500, 3000, 3500, 4000, 4500, 5000], yTicks: [1], label: 'y' });
   await GV.poly(b, 'v', [[2000, 0], [2500, 0], [3000, 1], [3500, 1], [4500, 0], [5000, 0]], { color: 'soft' });
+}
+async function hw4Clipped(b) {
+  await hw4Base(b);
   await GV.poly(b, 'vc', [[2500, 0], [Y1, AL], [Y2, AL], [4500, 0]], { color: 'orange' });
+}
+// Roadmap list (right-aligned Persian lines).
+async function roadmap(b, title, lines) {
+  await b.clear();
+  await b.write('h', 500, 70, title, { size: 36, color: 'blue', bold: true, fa: true });
+  for (const [k, l] of lines.entries()) await b.write(`m${k}`, 860, 140 + k * 50, l, { size: 25, anchor: 'start', fa: true, dur: 300 });
 }
 
 Teacher.start({
@@ -103,11 +128,10 @@ Teacher.start({
   title: 'تمرین بخش 4',
   chapter: 'بخش 4 · برهان و سیستم استنتاج فازی',
   slides: '96–121',
-  intro: 'تمرین‌های 3 و 4: یک کنترل‌کننده‌ی ممدانی کامل، و یک قاعده با هر پنج روش غیرفازی‌سازی — قدم‌به‌قدم.',
+  intro: 'تمرین‌های 3 و 4: یک کنترل‌کننده‌ی ممدانی کامل، و یک قاعده با هر پنج روش غیرفازی‌سازی. بعد از هر بخش یک سؤال کوتاه: اول خودت عدد بعدی را حساب کن، بعد ببین.',
   next: { href: '0017-arrays.html', title: 'اسکالر، بردار، ماتریس و تانسور' },
   steps: [
     // ========================================================== HOMEWORK 3
-    // ---------------------------------------------------------- 1. the problem
     {
       say: 'سلام! این درس تمرینی است: دو تمرین بخش 4 را کامل حل می‌کنیم. تمرین 3 یک کنترل‌کننده‌ی فازی رطوبت برای انکوباتور است: دو ورودی دارد، یعنی *دما* و *رطوبت نسبی*، و یک خروجی، یعنی *سرعت*. سه قاعده دارد و سنسورها دمای 29 درجه و رطوبت 61 درصد را نشان می‌دهند. می‌خواهیم (الف) مجموعه‌ی فازی نهایی سرعت و (ب) عدد سرعت را پیدا کنیم.',
       draw: async b => {
@@ -124,116 +148,257 @@ Teacher.start({
         await b.write('how', 300, 445, `ممدانی:  ${LTR('AND = min ، تجمیع = max ، centroid')}`, { size: 22, color: 'soft', fa: true });
       },
     },
-    // ---------------------------------------------------------- 2. fuzzify temperature
     {
-      say: 'مرحله‌ی 1، *fuzzification*: از T = 29 یک خط عمودی می‌کشیم. «سرد» از 15 تا 30 پایین می‌آید، پس (30 − 29) / 15 ≈ 0.07؛ برگه‌ی تمرین آن را 0.1 نوشته و ما هم با 0.1 جلو می‌رویم. «متوسط» از 25 تا 45 بالا می‌رود: (29 − 25) / 20 = 0.2. «زیاد» از 60 شروع می‌شود، پس صفر است.',
+      say: 'نقشه‌ی راه: هفت بخش کوتاه، هر کدام روی نتیجه‌ی بخش قبل ساخته می‌شود. آخر هر بخش یک سؤال کوچک می‌پرسم: *عدد بعدی* را خودتان حساب کنید، بعد من روی همان شکل نشانش می‌دهم. اگر جایی گیر کردید، همان‌جا بفهمید، نه سر امتحان.',
+      draw: async b => {
+        await roadmap(b, `نقشه‌ی راه تمرین ${LTR('3')}`, [
+          `1. فازی‌سازی دما (${LTR('T = 29')})`,
+          `2. فازی‌سازی رطوبت (${LTR('RH = 61')})`,
+          `3. قدرت هر قاعده با ${LTR('AND = min')}`,
+          '4. برش خروجی هر قاعده',
+          `5. تجمیع با ${LTR('max')} ← جواب الف`,
+          `6. ${LTR('centroid')} ← جواب ب`,
+          `7. روش‌های دیگر: ${LTR('MOM ، SOM ، LOM ، bisector')}`,
+        ]);
+        await b.write('nt', 500, 515, 'آخر هر بخش: اول تو حساب کن، بعد ببین', { size: 24, color: 'orange', bold: true, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- section 1: fuzzify temperature
+    {
+      say: 'بخش 1، *fuzzification*: از T = 29 یک خط عمودی می‌کشیم و می‌بینیم به هر منحنی کجا می‌خورد. «سرد» از 15 تا 30 پایین می‌آید، پس (30 − 29) / 15 ≈ 0.07؛ برگه‌ی تمرین آن را 0.1 نوشته و ما هم با 0.1 جلو می‌رویم. «زیاد» از 60 شروع می‌شود، پس در 29 صفر است. «متوسط» با شماست.',
       term: ['Fuzzification', 'فازی‌سازی'],
       draw: async b => {
         await b.clear();
-        const g = Graph({ x: 120, y: 110, w: 640, h: 300, from: 10, to: 85 });
-        await g.axes(b, 'tx', { ticks: [10, 20, 30, 40, 50, 60, 70, 80], yTicks: [0.2, 1], label: 'T' });
+        await GT.axes(b, 'tx', { ticks: [10, 20, 30, 40, 50, 60, 70, 80], yTicks: [0.2, 1], label: 'T' });
         await all([
-          g.poly(b, 'tc', [[10, 1], [15, 1], [30, 0]], { color: 'blue' }),
-          g.poly(b, 'tm', [[25, 0], [45, 1], [65, 0]], { color: 'orange' }),
-          g.poly(b, 'th', [[60, 0], [75, 1], [80, 1]], { color: 'purple' }),
+          GT.poly(b, 'tc', [[10, 1], [15, 1], [30, 0]], { color: 'blue' }),
+          GT.poly(b, 'tm', [[25, 0], [45, 1], [65, 0]], { color: 'orange' }),
+          GT.poly(b, 'th', [[60, 0], [75, 1], [80, 1]], { color: 'purple' }),
         ]);
         await all([
-          b.write('tcl', g.X(18), g.Y(1) - 12, 'Cold', { size: 22, color: 'blue' }),
-          b.write('tml', g.X(45), g.Y(1) - 12, 'Medium', { size: 22, color: 'orange' }),
-          b.write('thl', g.X(77), g.Y(1) - 12, 'High', { size: 22, color: 'purple' }),
+          b.write('tcl', GT.X(18), GT.Y(1) - 12, 'Cold', { size: 22, color: 'blue' }),
+          b.write('tml', GT.X(45), GT.Y(1) - 12, 'Medium', { size: 22, color: 'orange' }),
+          b.write('thl', GT.X(77), GT.Y(1) - 12, 'High', { size: 22, color: 'purple' }),
         ]);
-        await b.line('t29', g.X(29), g.Y(0), g.X(29), g.Y(0.45), { color: 'red' });
-        await b.write('t29l', g.X(29), g.Y(0.45) - 12, 'T = 29', { size: 24, color: 'red', bold: true });
-        await g.guide(b, 'gm', 29, 0.2);
-        await b.dot('gc', g.X(29), g.Y(1 / 15), { color: 'blue' });
+        await b.line('t29', GT.X(29), GT.Y(0), GT.X(29), GT.Y(0.45), { color: 'red' });
+        await b.write('t29l', GT.X(29), GT.Y(0.45) - 12, 'T = 29', { size: 24, color: 'red', bold: true });
+        await b.dot('gc', GT.X(29), GT.Y(1 / 15), { color: 'blue' });
         await b.write('v1', 890, 180, 'cold = 0.1', { size: 24, color: 'blue' });
         await b.write('v1n', 890, 210, 'دقیق: 0.07', { size: 16, color: 'soft', fa: true });
-        await b.write('v2', 890, 260, 'medium = 0.2', { size: 24, color: 'orange' });
         await b.write('v3', 890, 310, 'high = 0', { size: 24, color: 'purple' });
       },
     },
-    // ---------------------------------------------------------- 3. fuzzify humidity
     {
-      say: 'حالا رطوبت RH = 61. «کم» در 40 به صفر رسیده، پس 0 است. «متوسط» و «بالا» را برگه‌ی تمرین 0.58 و 0.5 داده است. اگر با خط‌های نمودار حساب کنیم کمی کمتر می‌شود، حدود 0.54 و 0.44؛ ولی خواهیم دید که این دو عدد اصلاً در جواب اثر ندارند.',
+      say: 'سؤال بخش 1: دمای انکوباتور T = 29 است. «دمای متوسط» مثلثی با گوشه‌های 25، 45 و 65 است، پس از 25 تا 45 بالا می‌رود: μmedium(T) = (T − 25)/20. عضویت 29 در «دمای متوسط» چند است؟',
+      draw: async b => {
+        await checkTag(b, 1);
+        await b.write('v2', 890, 260, 'medium = ?', { size: 24, color: 'orange', bold: true });
+      },
+      quiz: {
+        given: ["T = 29","μmedium(T) = (T − 25)/20  برای 25 ≤ T ≤ 45","μmedium(T) = (65 − T)/20  برای 45 ≤ T ≤ 65"],
+        find: "μmedium(29)",
+        answer: ['0.2', '.2'], hint: '29 روی شاخه‌ی بالارونده‌ی 25 تا 45 است: (T − 25) / 20.', explain: '(29 − 25) / 20 = 4 / 20 = 0.2. این عدد در بخش 3 به قاعده‌ی 2 می‌رود.' },
+      solve: async b => {
+        await GT.guide(b, 'gm', 29, 0.2);
+        await b.write('v2', 890, 260, 'medium = 0.2', { size: 24, color: 'orange' });
+      },
+    },
+    {
+      say: 'جواب: (29 − 25) / 20 = 0.2. پس دمای 29 درجه سه عدد دارد: سرد 0.1، متوسط 0.2، زیاد 0. این سه عدد را نگه دارید؛ در بخش 3 لازمشان داریم.',
+      draw: async b => {
+        await b.erase('chk');
+        await GT.guide(b, 'gm', 29, 0.2);
+        await b.write('v2', 890, 260, 'medium = 0.2', { size: 24, color: 'orange' });
+        await b.write('vf', 500, 515, '(29 − 25) / 20 = 0.2', { size: 28, color: 'green', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- section 2: fuzzify humidity
+    {
+      say: 'بخش 2، رطوبت RH = 61. «کم» در 40 به صفر رسیده، پس 0 است. «متوسط» و «بالا» را برگه‌ی تمرین 0.58 و 0.5 داده است. اگر با خط‌های نمودار حساب کنیم کمی کمتر می‌شود، حدود 0.54 و 0.44؛ ولی خواهیم دید که این دو عدد اصلاً در جواب اثر ندارند.',
       draw: async b => {
         await b.clear();
-        const g = Graph({ x: 120, y: 110, w: 640, h: 300, from: 0, to: 100 });
-        await g.axes(b, 'hx', { ticks: [0, 20, 40, 60, 80, 100], yTicks: [0.5, 1], label: 'RH' });
+        await GRH.axes(b, 'hx', { ticks: [0, 20, 40, 60, 80, 100], yTicks: [0.5, 1], label: 'RH' });
         await all([
-          g.poly(b, 'hl', [[0, 1], [15, 1], [40, 0]], { color: 'blue' }),
-          g.poly(b, 'hm', [[0, 0], [45, 1], [80, 0]], { color: 'orange' }),
-          g.poly(b, 'hh', [[50, 0], [75, 1], [100, 1]], { color: 'purple' }),
+          GRH.poly(b, 'hl', [[0, 1], [15, 1], [40, 0]], { color: 'blue' }),
+          GRH.poly(b, 'hm', [[0, 0], [45, 1], [80, 0]], { color: 'orange' }),
+          GRH.poly(b, 'hh', [[50, 0], [75, 1], [100, 1]], { color: 'purple' }),
         ]);
         await all([
-          b.write('hll', g.X(8), g.Y(1) - 12, 'Low', { size: 22, color: 'blue' }),
-          b.write('hml', g.X(45), g.Y(1) - 12, 'Medium', { size: 22, color: 'orange' }),
-          b.write('hhl', g.X(88), g.Y(1) - 12, 'High', { size: 22, color: 'purple' }),
+          b.write('hll', GRH.X(8), GRH.Y(1) - 12, 'Low', { size: 22, color: 'blue' }),
+          b.write('hml', GRH.X(45), GRH.Y(1) - 12, 'Medium', { size: 22, color: 'orange' }),
+          b.write('hhl', GRH.X(88), GRH.Y(1) - 12, 'High', { size: 22, color: 'purple' }),
         ]);
-        await b.line('h61', g.X(61), g.Y(0), g.X(61), g.Y(0.75), { color: 'red' });
-        await b.write('h61l', g.X(61) + 8, g.Y(0.75) - 12, 'RH = 61', { size: 24, color: 'red', bold: true });
-        await all([b.dot('dm', g.X(61), g.Y((80 - 61) / 35), { color: 'orange' }), b.dot('dh', g.X(61), g.Y((61 - 50) / 25), { color: 'purple' })]);
+        await b.line('h61', GRH.X(61), GRH.Y(0), GRH.X(61), GRH.Y(0.75), { color: 'red' });
+        await b.write('h61l', GRH.X(61) + 8, GRH.Y(0.75) - 12, 'RH = 61', { size: 24, color: 'red', bold: true });
+        await all([b.dot('dm', GRH.X(61), GRH.Y((80 - 61) / 35), { color: 'orange' }), b.dot('dh', GRH.X(61), GRH.Y((61 - 50) / 25), { color: 'purple' })]);
         await b.write('v1', 890, 180, 'low = 0', { size: 24, color: 'blue' });
         await b.write('v2', 890, 230, 'medium = 0.58', { size: 22, color: 'orange' });
         await b.write('v3', 890, 280, 'high = 0.5', { size: 24, color: 'purple' });
         await b.write('vn', 890, 330, 'برگه‌ی تمرین', { size: 16, color: 'soft', fa: true });
       },
     },
-    // ---------------------------------------------------------- 4. rule strengths
     {
-      say: 'مرحله‌ی 2، عملگر AND = min: قاعده‌ی 1: min(0.1, 0.58) = 0.1 و سرعت «پایین». قاعده‌ی 2: min(0.2, 0.58) = 0.2 و سرعت «متوسط». قاعده‌ی 3: min(0, 0.5) = 0، پس اصلاً روشن نمی‌شود. ببینید: در هر سه قاعده عدد *دما* کوچک‌تر است و min همان را برمی‌دارد؛ برای همین عددهای رطوبت در جواب اثری ندارند.',
+      say: 'سؤال بخش 2: سه قاعده این‌ها هستند: قاعده‌ی 1، اگر دما سرد و رطوبت متوسط، سرعت پایین. قاعده‌ی 2، اگر دما متوسط و رطوبت متوسط، سرعت متوسط. قاعده‌ی 3، اگر دما زیاد و رطوبت بالا، سرعت بالا. عضویت‌های رطوبت 61: کم 0، متوسط 0.58، بالا 0.5. کدام یک در هیچ قاعده‌ای به کار نمی‌رود؟',
+      draw: async b => {
+        await checkTag(b, 2);
+        await b.write('rq', 500, 515, 'کدام عضویت رطوبت در هیچ قاعده‌ای نیست؟', { size: 26, color: 'orange', bold: true, fa: true });
+      },
+      quiz: {
+        given: ["قاعده‌ی 1: اگر دما سرد و رطوبت متوسط ← سرعت پایین","قاعده‌ی 2: اگر دما متوسط و رطوبت متوسط ← سرعت متوسط","قاعده‌ی 3: اگر دما زیاد و رطوبت بالا ← سرعت بالا","RH = 61:  low = 0, medium = 0.58, high = 0.5"],
+        find: "کدام عضویت رطوبت در هیچ قاعده‌ای نیست؟",
+       
+        choices: ['Low (کم)', 'Medium (متوسط)', 'High (بالا)'],
+        correct: 0,
+        hint: 'قاعده‌ها: سرد و متوسط، متوسط و متوسط، زیاد و بالا.',
+        explain: 'قاعده‌های 1 و 2 «رطوبت متوسط» را می‌خواهند و قاعده‌ی 3 «رطوبت بالا» را. «کم» در هیچ قاعده‌ای نیست، پس عددش (0) کنار می‌رود.',
+      },
+      solve: async b => {
+        await b.dim(['hl', 'hll', 'v1'], 0.25);
+        await b.write('rq', 500, 515, 'Low در هیچ قاعده‌ای نیست ← کنار می‌رود', { size: 26, color: 'green', bold: true, fa: true });
+      },
+    },
+    {
+      say: 'درست: «کم» در هیچ قاعده‌ای نیامده. قاعده‌های 1 و 2 «رطوبت متوسط» یعنی 0.58 را می‌خواهند و قاعده‌ی 3 «رطوبت بالا» یعنی 0.5 را. پس از رطوبت فقط دو عدد 0.58 و 0.5 به بخش 3 می‌روند.',
+      draw: async b => {
+        await b.erase('chk');
+        await b.dim(['hl', 'hll', 'v1'], 0.25);
+        await b.write('rq', 500, 515, 'به بخش 3 می‌رود: medium = 0.58 ، high = 0.5', { size: 26, color: 'green', bold: true, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- section 3: rule strengths
+    {
+      say: 'بخش 3، عملگر AND = min: قدرت هر قاعده کوچک‌ترینِ عضویت‌های شرط‌هایش است. قاعده‌ی 1: سرد 0.1 از بخش 1 و رطوبت متوسط 0.58 از بخش 2؛ min(0.1, 0.58) = 0.1 و خروجی‌اش سرعت «پایین» است. دو قاعده‌ی دیگر را با هم حساب می‌کنیم.',
       draw: async b => {
         await b.clear();
-        await b.write('h', 500, 70, 'قدرت هر قاعده = min', { size: 38, color: 'blue', bold: true, fa: true });
-        const R = [
-          [`R1 = min( cold , RH medium ) = min(${HW3.cold}, ${HW3.hmed}) = ${R1}`, '→ Low', 'green'],
-          [`R2 = min( T medium , RH medium ) = min(${HW3.tmed}, ${HW3.hmed}) = ${R2}`, '→ Medium', 'green'],
-          [`R3 = min( T high , RH high ) = min(${HW3.thigh}, ${HW3.hhigh}) = ${R3}`, '→ High', 'red'],
-        ];
-        for (const [k, [r, o, c]] of R.entries()) {
-          await b.write(`r${k}`, 60, 160 + k * 75, r, { size: 25, anchor: 'start', dur: 600 });
-          await b.write(`o${k}`, 920, 160 + k * 75, o, { size: 27, color: c, bold: true, anchor: 'end' });
-        }
+        await b.write('h', 500, 70, 'بخش 3: قدرت هر قاعده = min', { size: 36, color: 'blue', bold: true, fa: true });
+        await b.write('r0', 60, 160, `R1 = min( cold , RH medium ) = min(${HW3.cold}, ${HW3.hmed}) = ${R1}`, { size: 25, anchor: 'start', dur: 600 });
+        await b.write('o0', 920, 160, '→ Low', { size: 27, color: 'green', bold: true, anchor: 'end' });
+        await b.write('r1', 60, 235, `R2 = min( T medium , RH medium ) = min(${HW3.tmed}, ${HW3.hmed}) = ?`, { size: 25, anchor: 'start', color: 'soft', dur: 600 });
+        await b.write('r2', 60, 310, `R3 = min( T high , RH high ) = min(${HW3.thigh}, ${HW3.hhigh}) = ?`, { size: 25, anchor: 'start', color: 'soft', dur: 600 });
+      },
+    },
+    {
+      say: 'سؤال بخش 3: قاعده‌ی 2 می‌گوید اگر دما متوسط و رطوبت متوسط، سرعت متوسط. عضویت دمای 29 در «متوسط» 0.2 است و عضویت رطوبت 61 در «متوسط» 0.58. AND با min حساب می‌شود. قدرت قاعده‌ی 2 چند است؟',
+      draw: async b => {
+        await checkTag(b, 3);
+        await b.recolor('r1', 'orange');
+        await b.write('rq', 500, 450, 'R2 = ?', { size: 34, color: 'orange', bold: true });
+      },
+      quiz: {
+        given: ["قاعده‌ی 2: اگر دما متوسط و رطوبت متوسط ← سرعت متوسط","μTmedium(29) = 0.2","μRHmedium(61) = 0.58","AND = min"],
+        find: "قدرت قاعده‌ی 2، یعنی R2",
+        answer: ['0.2', '.2'], hint: 'AND یعنی min: عدد کوچک‌تر را بردار.', explain: 'min(0.2, 0.58) = 0.2. پس سرعت «متوسط» با قدرت 0.2 روشن می‌شود.' },
+      solve: async b => {
+        await b.write('r1', 60, 235, `R2 = min( T medium , RH medium ) = min(${HW3.tmed}, ${HW3.hmed}) = ${R2}`, { size: 25, anchor: 'start', dur: 400 });
+        await b.write('o1', 920, 235, '→ Medium', { size: 27, color: 'green', bold: true, anchor: 'end' });
+        await b.erase('rq');
+      },
+    },
+    {
+      say: 'R2 = min(0.2, 0.58) = 0.2 و سرعت «متوسط». قاعده‌ی 3: min(0, 0.5) = 0، پس اصلاً روشن نمی‌شود. ببینید: در هر سه قاعده عدد *دما* کوچک‌تر است و min همان را برمی‌دارد؛ برای همین عددهای رطوبت در جواب اثری ندارند.',
+      draw: async b => {
+        await b.erase(['chk', 'rq']);
+        await b.write('r1', 60, 235, `R2 = min( T medium , RH medium ) = min(${HW3.tmed}, ${HW3.hmed}) = ${R2}`, { size: 25, anchor: 'start', dur: 400 });
+        await b.write('o1', 920, 235, '→ Medium', { size: 27, color: 'green', bold: true, anchor: 'end' });
+        await b.write('r2', 60, 310, `R3 = min( T high , RH high ) = min(${HW3.thigh}, ${HW3.hhigh}) = ${R3}`, { size: 25, anchor: 'start', dur: 400 });
+        await b.write('o2', 920, 310, '→ High', { size: 27, color: 'red', bold: true, anchor: 'end' });
         await b.line('x3', 80, 300, 900, 316, { color: 'red' });
         await b.dim(['r2', 'o2'], 0.35);
-        await b.write('n3', 500, 370, `قاعده‌ی ${LTR('3')} خاموش است`, { size: 26, color: 'red', fa: true });
+        await b.write('n3', 500, 380, `قاعده‌ی ${LTR('3')} خاموش است`, { size: 26, color: 'red', fa: true });
         await b.write('nt', 500, 450, 'در هر قاعده عدد دما کوچک‌تر است ← رطوبت اثری ندارد', { size: 26, color: 'orange', fa: true });
       },
     },
-    // ---------------------------------------------------------- 5. output sets and clipping
+    // ---------------------------------------------------------- section 4: output sets and clipping
     {
-      say: 'مرحله‌ی 3، استلزام: مجموعه‌های خروجی سرعت را از روی نمودار می‌خوانیم: Low تا 6 برابر 1 و در 27 صفر، Medium مثلثی 22، 43، 67، و High از 58 تا 75 بالا می‌رود. هر خروجی در ارتفاع قدرت قاعده‌اش *بریده* می‌شود: Low در 0.1 و Medium در 0.2. High با قدرت صفر کلاً حذف می‌شود.',
+      say: 'بخش 4، استلزام: مجموعه‌های خروجی سرعت را از روی نمودار می‌خوانیم: Low تا 6 برابر 1 و در 27 صفر، Medium مثلثی 22، 43، 67، و High از 58 تا 75 بالا می‌رود. هر خروجی در ارتفاع قدرت قاعده‌اش از بخش 3 *بریده* می‌شود: Low در 0.1 و Medium در 0.2. High با قدرت صفر کلاً حذف می‌شود.',
       term: ['Implication (clipping)', 'استلزام (برش)'],
       draw: async b => {
         await b.clear();
-        const g = Graph({ x: 110, y: 110, w: 680, h: 340, from: 0, to: 100 });
-        await g.axes(b, 'sx', { ticks: [0, 6, 22, 27, 43, 58, 67, 75, 100], yTicks: [0.2, 1], label: 'z' });
+        await GS.axes(b, 'sx', { ticks: [0, 6, 22, 27, 43, 58, 67, 75, 100], yTicks: [0.2, 1], label: 'z' });
         await all([
-          g.poly(b, 'sl', [[0, 1], [6, 1], [27, 0]], { color: 'blue' }),
-          g.poly(b, 'sm', [[22, 0], [43, 1], [67, 0]], { color: 'orange' }),
-          g.poly(b, 'sh', [[58, 0], [75, 1], [100, 1]], { color: 'purple' }),
+          GS.poly(b, 'sl', [[0, 1], [6, 1], [27, 0]], { color: 'blue' }),
+          GS.poly(b, 'sm', [[22, 0], [43, 1], [67, 0]], { color: 'orange' }),
+          GS.poly(b, 'sh', [[58, 0], [75, 1], [100, 1]], { color: 'purple' }),
         ]);
         await all([
-          b.write('sll', g.X(3), g.Y(1) - 12, 'Low', { size: 22, color: 'blue' }),
-          b.write('sml', g.X(43), g.Y(1) - 12, 'Medium', { size: 22, color: 'orange' }),
-          b.write('shl', g.X(88), g.Y(1) - 12, 'High', { size: 22, color: 'purple' }),
+          b.write('sll', GS.X(3), GS.Y(1) - 12, 'Low', { size: 22, color: 'blue' }),
+          b.write('sml', GS.X(43), GS.Y(1) - 12, 'Medium', { size: 22, color: 'orange' }),
+          b.write('shl', GS.X(88), GS.Y(1) - 12, 'High', { size: 22, color: 'purple' }),
         ]);
-        await b.line('c1', g.X(0), g.Y(0.1), g.X(100), g.Y(0.1), { color: 'blue', width: 2 });
-        await b.line('c2', g.X(0), g.Y(0.2), g.X(100), g.Y(0.2), { color: 'orange', width: 2 });
-        await b.write('c1l', 890, g.Y(0.1) + 8, 'R1 = 0.1', { size: 22, color: 'blue' });
-        await b.write('c2l', 890, g.Y(0.2) - 4, 'R2 = 0.2', { size: 22, color: 'orange' });
+        await b.line('c1', GS.X(0), GS.Y(0.1), GS.X(100), GS.Y(0.1), { color: 'blue', width: 2 });
+        await b.line('c2', GS.X(0), GS.Y(0.2), GS.X(100), GS.Y(0.2), { color: 'orange', width: 2 });
+        await b.write('c1l', 890, GS.Y(0.1) + 8, 'R1 = 0.1', { size: 22, color: 'blue' });
+        await b.write('c2l', 890, GS.Y(0.2) - 4, 'R2 = 0.2', { size: 22, color: 'orange' });
         await b.dim(['sh', 'shl'], 0.2);
-        await b.write('shx', g.X(88), g.Y(0.6), 'R3 = 0  ✗', { size: 22, color: 'red' });
+        await b.write('shx', GS.X(88), GS.Y(0.6), 'R3 = 0  ✗', { size: 22, color: 'red' });
       },
     },
-    // ---------------------------------------------------------- 6. aggregation → part (a)
     {
-      say: 'مرحله‌ی 4، تجمیع با max. محور μ را بزرگ کرده‌ایم تا پله‌ها دیده شوند. از 0 تا 24.1 فقط Low بریده‌شده با ارتفاع 0.1 هست. در z = 22 + 0.1 × 21 = 24.1 شاخه‌ی بالارونده‌ی Medium از 0.1 رد می‌شود و در 22 + 0.2 × 21 = 26.2 به 0.2 می‌رسد. تا 62.2 صاف است، چون 67 − 0.2 × 24 = 62.2، و در 67 به صفر می‌رسد. این جواب (الف) است.',
+      say: 'سؤال بخش 4: خروجی Medium مثلثی با گوشه‌های 22، 43 و 67 است، پس شاخه‌ی بالارونده‌اش (z − 22)/21 است. قاعده‌ی 2 قدرت 0.2 دارد، پس Medium در ارتفاع 0.2 بریده می‌شود. سقف صاف از چه z شروع می‌شود؟',
+      draw: async b => {
+        await checkTag(b, 4);
+        await b.write('qq', 500, 520, '(z − 22) / 21 = 0.2   →   z = ?', { size: 26, color: 'orange', bold: true });
+      },
+      quiz: {
+        given: ["Medium: مثلث (22, 43, 67)","μmedium(z) = (z − 22)/21  برای 22 ≤ z ≤ 43","R2 = 0.2  ←  Medium در 0.2 بریده می‌شود"],
+        find: "z که در آن (z − 22)/21 = 0.2، یعنی شروع سقف صاف",
+        answer: ['26.2'], hint: 'دو طرف را در 21 ضرب کن: z − 22 = 0.2 × 21.', explain: 'z − 22 = 0.2 × 21 = 4.2، پس z = 26.2. از همین راه سمت راست: 67 − 0.2 × 24 = 62.2.' },
+      solve: async b => {
+        await b.dot('p1', GS.X(B2), GS.Y(R2), { color: 'green', r: 6 });
+        await b.write('p1l', GS.X(B2) - 8, GS.Y(R2) - 16, fmt(B2, 1), { size: 20, color: 'green', bold: true, anchor: 'end' });
+        await b.write('qq', 500, 520, 'z − 22 = 0.2 × 21 = 4.2   →   z = 26.2', { size: 26, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'جواب: z = 22 + 0.2 × 21 = 26.2. سمت راست هم همین‌طور: (67 − z)/24 = 0.2، پس z = 67 − 4.8 = 62.2. پس Medium بریده‌شده از 26.2 تا 62.2 صاف است. این دو عدد را در بخش 5 و 7 لازم داریم.',
+      draw: async b => {
+        await b.erase('chk');
+        await all([
+          b.dot('p1', GS.X(B2), GS.Y(R2), { color: 'green', r: 6 }),
+          b.dot('p2', GS.X(B3), GS.Y(R2), { color: 'green', r: 6 }),
+        ]);
+        await b.write('p1l', GS.X(B2) - 8, GS.Y(R2) - 16, fmt(B2, 1), { size: 20, color: 'green', bold: true, anchor: 'end' });
+        await b.write('p2l', GS.X(B3) + 8, GS.Y(R2) - 16, fmt(B3, 1), { size: 20, color: 'green', bold: true, anchor: 'start' });
+        await b.write('qq', 500, 520, 'flat top:  22 + 0.2 × 21 = 26.2   …   67 − 0.2 × 24 = 62.2', { size: 24, color: 'green', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- section 5: aggregation → part (a)
+    {
+      say: 'بخش 5، تجمیع با max: دو شکل بریده‌شده را روی هم می‌گذاریم و همیشه بالاترین را نگه می‌داریم. محور μ را بزرگ کرده‌ایم تا پله‌ها دیده شوند. آبی Low بریده‌شده در 0.1 است، نارنجی Medium بریده‌شده در 0.2 که از بخش 4 می‌دانیم از 26.2 تا 62.2 صاف است. سؤال: پله‌ی 0.1 کجا تمام می‌شود و Medium بالاتر می‌رود؟',
       draw: async b => {
         await b.clear();
-        await b.write('h', 500, 55, 'الف) مجموعه‌ی فازی نهایی سرعت', { size: 30, color: 'blue', bold: true, fa: true });
+        await b.write('h', 500, 55, 'بخش 5: تجمیع با max', { size: 30, color: 'blue', bold: true, fa: true });
         await zoomAxes(b);
-        const pts = [[0, R1], [B1, R1], [B2, R2], [B3, R2], [67, 0], [100, 0]];
-        await GZ.poly(b, 'agg', pts, { color: 'green', width: 6, dur: 1200 });
+        await all([
+          GZ.poly(b, 'cl', [[0, R1], [27 - 21 * R1, R1], [27, 0]], { color: 'blue', width: 2 }),
+          GZ.poly(b, 'cm', [[22, 0], [B2, R2], [B3, R2], [67, 0]], { color: 'orange', width: 2 }),
+        ]);
+        await b.write('lowl', GZ.X(9), GZ.Y(R1) - 14, 'Low ∧ 0.1', { size: 20, color: 'blue' });
+        await b.write('medl', GZ.X(44), GZ.Y(R2) + 40, 'Medium ∧ 0.2', { size: 22, color: 'orange' });
+      },
+    },
+    {
+      say: 'سؤال بخش 5: Low در 0.1 بریده شده و Medium در 0.2. شاخه‌ی بالارونده‌ی Medium (z − 22)/21 است. این شاخه در چه z از ارتفاع 0.1 رد می‌شود؟ از آنجا به بعد Medium بالاتر از Low است.',
+      draw: async b => {
+        await checkTag(b, 5);
+        await b.write('qq', 500, 520, '(z − 22) / 21 = 0.1   →   z = ?', { size: 26, color: 'orange', bold: true });
+      },
+      quiz: {
+        given: ["Low بریده در R1 = 0.1","Medium بریده در R2 = 0.2","μmedium(z) = (z − 22)/21  برای 22 ≤ z ≤ 43"],
+        find: "z که در آن (z − 22)/21 = 0.1",
+        answer: ['24.1'], hint: 'مثل بخش 4، فقط با 0.1: z − 22 = 0.1 × 21.', explain: 'z − 22 = 2.1، پس z = 24.1. تا 24.1 پله‌ی Low (0.1) بالاتر است، بعد Medium.' },
+      solve: async b => {
+        await b.dot('qd', GZ.X(B1), GZ.Y(R1), { color: 'green', r: 6 });
+        await b.write('bl0', GZ.X(B1) - 6, GZ.Y(R1) - 14, fmt(B1, 1), { size: 20, color: 'purple', anchor: 'end' });
+        await b.write('qq', 500, 520, 'z − 22 = 0.1 × 21 = 2.1   →   z = 24.1', { size: 26, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'جواب 24.1. حالا لبه‌ی بالایی را سبز می‌کشیم: از 0 تا 24.1 پله‌ی 0.1، از 24.1 تا 26.2 بالا رفتن روی Medium، از 26.2 تا 62.2 صاف در 0.2، و در 67 به صفر. این جواب (الف) است.',
+      draw: async b => {
+        await b.erase(['chk', 'qd', 'qq', 'lowl']);
+        await b.write('h', 500, 55, 'الف) مجموعه‌ی فازی نهایی سرعت', { size: 30, color: 'blue', bold: true, fa: true });
+        await GZ.poly(b, 'agg', AGG3, { color: 'green', width: 6, dur: 1200 });
         for (const [k, v] of [B1, B2, B3, 67].entries()) await b.line(`bv${k}`, GZ.X(v), 450, GZ.X(v), GZ.Y(agg3(v)), { color: 'soft', width: 2, dur: 200 });
         await all([
           b.write('bl0', GZ.X(B1) - 6, GZ.Y(R1) - 14, fmt(B1, 1), { size: 20, color: 'purple', anchor: 'end' }),
@@ -241,13 +406,11 @@ Teacher.start({
           b.write('bl2', GZ.X(B3), GZ.Y(R2) - 14, fmt(B3, 1), { size: 20, color: 'purple' }),
           b.write('bl3', GZ.X(67) + 8, GZ.Y(0.03), '67', { size: 20, color: 'purple', anchor: 'start' }),
         ]);
-        await b.write('lowl', GZ.X(9), GZ.Y(R1) - 14, 'Low ∧ 0.1', { size: 20, color: 'blue' });
-        await b.write('medl', GZ.X(44), GZ.Y(R2) + 40, 'Medium ∧ 0.2', { size: 22, color: 'orange' });
       },
     },
-    // ---------------------------------------------------------- 7. centroid table
+    // ---------------------------------------------------------- section 6: centroid → part (b)
     {
-      say: 'مرحله‌ی 5، غیرفازی‌سازی با *centroid*. شکل را چهار تکه می‌کنیم و برای هر تکه مساحت و گشتاور را حساب می‌کنیم. مثلاً تکه‌ی سوم مستطیل است: مساحت 0.2 × 36 = 7.2 و گشتاور 0.2 × (62.2² − 26.2²) / 2 = 318.24. تکه‌ی چهارم مثلثی با قاعده‌ی 4.8 و ارتفاع 0.2 است: مساحت ½ × 4.8 × 0.2 = 0.48.',
+      say: 'بخش 6، غیرفازی‌سازی با *centroid*: شکل بخش 5 را چهار تکه می‌کنیم و برای هر تکه مساحت و گشتاور (مساحت ضربدر فاصله از صفر) را حساب می‌کنیم. تکه‌ی اول مستطیل کوتاه است: مساحت 0.1 × 24.1 = 2.41. تکه‌ی چهارم مثلثی با قاعده‌ی 67 − 62.2 = 4.8 و ارتفاع 0.2: مساحت ½ × 4.8 × 0.2 = 0.48. تکه‌ی سوم با شما.',
       term: ['Moment', 'گشتاور'],
       draw: async b => {
         await b.clear();
@@ -256,36 +419,107 @@ Teacher.start({
         await b.line('tg', 50, 112, 950, 112, { color: 'soft', width: 2 });
         const MU = ['0.1', '(z − 22)/21', '0.2', '(67 − z)/24'];
         for (const [k, p] of P3.entries()) {
-          const y = 160 + k * 55;
+          const y = 160 + k * 55, hide = k === 2;
           await all([
             b.write(`ti${k}`, X[0], y, `[${fmt(p.a, 1)} , ${fmt(p.b, 1)}]`, { size: 24, dur: 150 }),
             b.write(`tm${k}`, X[1], y, MU[k], { size: 24, dur: 150 }),
-            b.write(`ta${k}`, X[2], y, fmt(p.area, 3), { size: 24, color: 'green', dur: 150 }),
-            b.write(`to${k}`, X[3], y, fmt(p.moment, 2), { size: 24, color: 'green', dur: 150 }),
+            b.write(`ta${k}`, X[2], y, hide ? '?' : fmt(p.area, 3), { size: 24, color: hide ? 'orange' : 'green', bold: hide, dur: 150 }),
+            b.write(`to${k}`, X[3], y, hide ? '?' : fmt(p.moment, 2), { size: 24, color: hide ? 'orange' : 'green', bold: hide, dur: 150 }),
           ]);
         }
         await b.line('tg2', 50, 372, 950, 372, { color: 'soft', width: 2 });
+        await b.write('ex', 500, 480, 'piece 1:  0.1 × 24.1 = 2.41        piece 4:  ½ × 4.8 × 0.2 = 0.48', { size: 24, color: 'soft' });
+      },
+    },
+    {
+      say: 'سؤال بخش 6: مجموعه‌ی نهایی سرعت از 26.2 تا 62.2 صاف و در ارتفاع 0.2 است. این تکه یک مستطیل است. مساحتش چند است؟',
+      draw: async b => {
+        await checkTag(b, 6);
+        await b.ring('rr', 620, 262, 70, 28, { color: 'orange' });
+        await b.write('ex', 500, 480, 'rect:  0.2 × (62.2 − 26.2) = ?', { size: 28, color: 'orange', bold: true });
+      },
+      quiz: {
+        given: ["تکه‌ی سوم: z از 26.2 تا 62.2","ارتفاع ثابت μ = 0.2","مساحت مستطیل = ارتفاع × عرض"],
+        find: "مساحت تکه‌ی سوم",
+        answer: ['7.2'], hint: 'مساحت مستطیل = ارتفاع × عرض. عرض = 62.2 − 26.2.', explain: '0.2 × 36 = 7.2. بزرگ‌ترین تکه همین است، پس جواب نزدیک وسطش (44.2) کشیده می‌شود.' },
+      solve: async b => {
+        await b.write('ta2', 620, 270, fmt(P3[2].area, 3), { size: 24, color: 'green', bold: true });
+        await b.write('ex', 500, 480, 'rect:  0.2 × 36 = 7.2', { size: 28, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'مساحت 0.2 × 36 = 7.2 و گشتاورش 0.2 × (62.2² − 26.2²) / 2 = 318.24. حالا ستون‌ها را جمع می‌زنیم: مساحت کل 10.405 و گشتاور کل 385.86.',
+      draw: async b => {
+        await b.erase(['chk', 'rr']);
+        const X = [170, 400, 620, 830];
+        await b.write('ta2', X[2], 270, fmt(P3[2].area, 3), { size: 24, color: 'green' });
+        await b.write('to2', X[3], 270, fmt(P3[2].moment, 2), { size: 24, color: 'green' });
         await all([
           b.write('tt', X[0], 410, 'total', { size: 26, bold: true }),
           b.write('tat', X[2], 410, fmt(A3, 3), { size: 28, color: 'orange', bold: true }),
           b.write('tot', X[3], 410, fmt(M3, 2), { size: 28, color: 'orange', bold: true }),
         ]);
-        await b.ring('rr', X[2] + 105, 270, 230, 30, { color: 'orange' });
         await b.write('ex', 500, 480, 'rect:  0.2 × 36 = 7.2      0.2 × (62.2^2 − 26.2^2) / 2 = 318.24', { size: 24, color: 'soft' });
       },
     },
-    // ---------------------------------------------------------- 8. part (b)
+    {
+      say: 'سؤال دوم بخش 6: مساحت چهار تکه 2.41، 0.315، 7.2 و 0.48 است، روی هم 10.405. گشتاورهایشان 29.04، 7.96، 318.24 و 30.62 است، روی هم 385.86. centroid برابر گشتاور کل تقسیم بر مساحت کل است. centroid چند است؟ تا یک رقم اعشار.',
+      draw: async b => {
+        await checkTag(b, 6);
+        await b.write('res', 520, 535, `z* = ${fmt(M3, 2)} / ${fmt(A3, 3)} = ?`, { size: 34, color: 'orange', bold: true });
+      },
+      quiz: {
+        given: ["مساحت تکه‌ها: 2.41, 0.315, 7.2, 0.48","مساحت کل = 10.405","گشتاور تکه‌ها: 29.04, 7.96, 318.24, 30.62","گشتاور کل = 385.86","centroid = گشتاور کل / مساحت کل"],
+        find: "عدد centroid، تا یک رقم اعشار",
+        answer: ['37.1', '37.08', '37.084'], hint: 'جمع ستون moment تقسیم بر جمع ستون area.', explain: '385.86 / 10.405 ≈ 37.1. نزدیک «متوسط» است ولی کمی به طرف «پایین» کشیده شده، چون قاعده‌ی 1 هم با 0.1 روشن بود.' },
+      solve: async b => {
+        await b.write('res', 520, 535, `z* = ${fmt(M3, 2)} / ${fmt(A3, 3)} ≈ ${fmt(Z3, 1)} %`, { size: 36, color: 'green', bold: true });
+      },
+    },
     {
       say: 'گشتاور کل تقسیم بر مساحت کل: z* = 385.86 / 10.405 ≈ 37.1. پس جواب (ب): سرعت حدود 37 درصد است؛ نزدیک «متوسط» ولی کمی به طرف «پایین»، چون قاعده‌ی «سرعت پایین» هم با درجه‌ی 0.1 روشن شده بود. این همان جواب حل‌المسائل است و درست است.',
       draw: async b => {
+        await b.erase('chk');
         await b.write('resb', 175, 535, 'ب)', { size: 34, color: 'green', bold: true, fa: true });
         await b.write('res', 520, 535, `z* = ${fmt(M3, 2)} / ${fmt(A3, 3)} ≈ ${fmt(Z3, 1)} %`, { size: 36, color: 'green', bold: true });
         await b.dim(['ex'], 0.2);
       },
     },
-    // ---------------------------------------------------------- 9. other methods + honest caveat
+    // ---------------------------------------------------------- section 7: other methods
     {
-      say: 'برای تمرین بیشتر، روش‌های دیگر روی همین شکل: ماکزیمم 0.2 روی بازه‌ی 26.2 تا 62.2 است، پس SOM = 26.2، LOM = 62.2 و MOM = 44.2. bisector حدود 38.6 می‌شود. اگر centroid را گسسته با نقطه‌های 0، 10، …، 100 بگیریم: 39 / 1.1 ≈ 35.5. یک نکته‌ی صادقانه: عضویت دقیق «سرد» 0.07 است نه 0.1؛ با آن، centroid حدود 39.2 می‌شود. در امتحان عددی را بنویسید که خود سؤال داده.',
+      say: 'بخش 7، روش‌های دیگر روی همان شکل بخش 5. بیشترین عضویت 0.2 است و روی کل بازه‌ی صاف 26.2 تا 62.2 رخ می‌دهد؛ همان دو عددی که در بخش 4 پیدا کردید. SOM، کوچک‌ترینِ ماکزیمم، اولین نقطه است: 26.2. LOM، بزرگ‌ترینِ ماکزیمم، آخرین نقطه است: 62.2.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 55, `بخش ${LTR('7')}: روش‌های دیگر روی تمرین ${LTR('3')}`, { size: 30, color: 'blue', bold: true, fa: true });
+        await zoomAxes(b);
+        await GZ.poly(b, 'agg', AGG3, { color: 'green', width: 4, dur: 800 });
+        await b.line('pl', GZ.X(B2), GZ.Y(R2), GZ.X(B3), GZ.Y(R2), { color: 'purple', width: 5 });
+        for (const [k, [n, v]] of [['SOM', B2], ['LOM', B3]].entries()) {
+          await b.dot(`pd${k}`, GZ.X(v), GZ.Y(R2), { color: 'purple', r: 7 });
+          await b.write(`pn${k}`, GZ.X(v), GZ.Y(R2) - 50, n, { size: 24, color: 'purple', bold: true });
+          await b.write(`pv${k}`, GZ.X(v), GZ.Y(R2) - 22, fmt(v, 1), { size: 20, color: 'purple' });
+        }
+      },
+    },
+    {
+      say: 'سؤال بخش 7: بیشترین عضویت مجموعه‌ی نهایی 0.2 است و روی بازه‌ی 26.2 تا 62.2 رخ می‌دهد. پس SOM = 26.2 و LOM = 62.2. MOM، وسط این بازه، چند است؟',
+      draw: async b => {
+        await checkTag(b, 7);
+        await b.write('qq', 500, 520, 'MOM = (SOM + LOM) / 2 = ?', { size: 28, color: 'orange', bold: true });
+      },
+      quiz: {
+        given: ["بیشترین عضویت: 0.2 روی z از 26.2 تا 62.2","SOM = 26.2","LOM = 62.2","MOM = (SOM + LOM)/2"],
+        find: "MOM",
+        answer: ['44.2'], hint: 'ماکزیمم 0.2 از 26.2 تا 62.2 است؛ وسطش را بگیر.', explain: '(26.2 + 62.2) / 2 = 88.4 / 2 = 44.2. با centroid (37.1) فرق دارد، چون MOM پله‌ی Low را اصلاً نمی‌بیند.' },
+      solve: async b => {
+        await b.dot('pd2', GZ.X(44.2), GZ.Y(R2), { color: 'green', r: 8 });
+        await b.write('pn2', GZ.X(44.2), GZ.Y(R2) - 50, 'MOM', { size: 24, color: 'green', bold: true });
+        await b.write('pv2', GZ.X(44.2), GZ.Y(R2) - 22, '44.2', { size: 20, color: 'green', bold: true });
+        await b.write('qq', 500, 520, 'MOM = (26.2 + 62.2) / 2 = 44.2', { size: 28, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'همه‌ی روش‌ها روی تمرین 3: MOM = 44.2. bisector، نقطه‌ای که مساحت را نصف می‌کند، حدود 38.6 می‌شود. اگر centroid را گسسته با نقطه‌های 0، 10، …، 100 بگیریم: 39 / 1.1 ≈ 35.5. یک نکته‌ی صادقانه: عضویت دقیق «سرد» 0.07 است نه 0.1؛ با آن، centroid حدود 39.2 می‌شود. در امتحان عددی را بنویسید که خود سؤال داده.',
       tip: true,
       draw: async b => {
         await b.clear();
@@ -303,7 +537,6 @@ Teacher.start({
       },
     },
     // ========================================================== HOMEWORK 4
-    // ---------------------------------------------------------- 10. the problem
     {
       say: 'تمرین 4: در یک کولر قاعده این است: اگر دمای اتاق «بالا» (H) باشد، قدرت چرخش موتور «زیاد» (V) است. تابع‌های عضویت به شکل فرمول داده شده‌اند. اگر دما 28 درجه باشد، قدرت موتور چقدر است؟ با *هر پنج* روش غیرفازی‌سازی. یک نکته: برگه x/13 − 25/13 نوشته که همان (x − 25)/13 است.',
       draw: async b => {
@@ -318,30 +551,90 @@ Teacher.start({
         await b.write('q', 820, 420, 'پنج روش؟', { size: 28, color: 'red', fa: true });
       },
     },
-    // ---------------------------------------------------------- 11. fuzzify 28
     {
-      say: 'فازی‌سازی: 28 روی شاخه‌ی بالارونده‌ی H است، پس μ_H(28) = (28 − 25) / 13 = 3/13 ≈ 0.231. یعنی 28 درجه فقط حدود 23 درصد «بالا» است و قاعده خیلی ضعیف روشن می‌شود: α = 3/13.',
+      say: 'نقشه‌ی راه تمرین 4: پنج بخش. هر بخش یک عدد تازه می‌سازد که بخش بعد از آن استفاده می‌کند: α، بعد دو نقطه‌ی برش y_1 و y_2، بعد مساحت‌ها برای centroid و bisector، و آخر MOM. باز هم آخر هر بخش اول شما حساب می‌کنید.',
       draw: async b => {
-        await b.clear();
-        const g = Graph({ x: 120, y: 130, w: 640, h: 300, from: 20, to: 50 });
-        await g.axes(b, 'hx', { ticks: [20, 25, 28, 30, 35, 38, 40, 45, 50], yTicks: [1], label: 'x' });
-        await g.poly(b, 'hh', [[20, 0], [25, 0], [38, 1], [40, 1], [45, 0], [50, 0]], { color: 'blue' });
-        await b.write('hl', g.X(39), g.Y(1) - 12, 'H', { size: 26, color: 'blue', bold: true });
-        await g.guide(b, 'g28', 28, AL, { color: 'red' });
-        await b.write('mv', 560, 70, `μ_H(28) = (28 − 25)/13 = 3/13 ≈ ${fmt(AL, 3)}`, { size: 30, color: 'red', bold: true });
-        await b.write('al', 890, g.Y(AL) + 8, 'α = 3/13', { size: 26, color: 'orange', bold: true });
+        await roadmap(b, `نقشه‌ی راه تمرین ${LTR('4')}`, [
+          `1. فازی‌سازی ${LTR('T = 28')} ← ${LTR('α')}`,
+          `2. برش ${LTR('V')} در ${LTR('α')} ← ${LTR('y_1')} و ${LTR('y_2')}`,
+          `3. ${LTR('centroid')} ← مساحت و گشتاور سه تکه`,
+          `4. ${LTR('bisector')} ← نصف مساحت`,
+          `5. ${LTR('SOM ، LOM ، MOM')} ← دو سر و وسط سقف`,
+        ]);
+        await b.write('nt', 500, 470, 'آخر هر بخش: اول تو حساب کن، بعد ببین', { size: 24, color: 'orange', bold: true, fa: true });
       },
     },
-    // ---------------------------------------------------------- 12. clip V
+    // ---------------------------------------------------------- HW4 section 1: fuzzify 28
     {
-      say: 'استلزام ممدانی: V را در ارتفاع α = 3/13 می‌بریم. نقطه‌های برش را از فرمول‌ها پیدا می‌کنیم: سمت بالارونده y/500 − 5 = 3/13، پس y1 = 2500 + 500 × 3/13 ≈ 2615.38. سمت پایین‌رونده 4.5 − y/1000 = 3/13، پس y2 = 4500 − 1000 × 3/13 ≈ 4269.23. خروجی یک ذوزنقه‌ی کوتاه و پهن است.',
+      say: 'بخش 1، فازی‌سازی: از x = 28 خط عمودی می‌کشیم. H از 25 تا 38 بالا می‌رود، پس 28 روی شاخه‌ی بالارونده است و فرمولش (x − 25)/13 است.',
       draw: async b => {
         await b.clear();
+        await GH.axes(b, 'hx', { ticks: [20, 25, 28, 30, 35, 38, 40, 45, 50], yTicks: [1], label: 'x' });
+        await GH.poly(b, 'hh', [[20, 0], [25, 0], [38, 1], [40, 1], [45, 0], [50, 0]], { color: 'blue' });
+        await b.write('hl', GH.X(42.5), GH.Y(0.75), 'H', { size: 26, color: 'blue', bold: true, anchor: 'start' });
+        await b.line('x28', GH.X(28), GH.Y(0), GH.X(28), GH.Y(0.6), { color: 'red', width: 2 });
+        await b.write('mv', 500, 70, `${LTR('25 ≤ 28 ≤ 38')} ← شاخه‌ی بالارونده: ${LTR('(x − 25)/13')}`, { size: 26, color: 'ink', fa: true });
+      },
+    },
+    {
+      say: 'سؤال بخش 1 (تمرین 4): دمای اتاق 28 است. H از 25 تا 38 بالا می‌رود با فرمول μH(x) = (x − 25)/13. عضویت 28 در H چند است؟ همین عدد α، قدرت قاعده، می‌شود. کسر یا اعشار، هر دو قبول است.',
+      draw: async b => {
+        await checkTag(b, 1);
+        await b.write('mq', 500, 112, 'α = μ_H(28) = ?', { size: 30, color: 'orange', bold: true });
+      },
+      quiz: {
+        given: ["x = 28","μH(x) = (x − 25)/13  برای 25 ≤ x ≤ 38","α = μH(28)"],
+        find: "α = μH(28)",
+        answer: ['3/13', '0.23', '0.231', '.23', '.231', '0.2308'], hint: 'x = 28 را در (x − 25)/13 بگذار.', explain: '(28 − 25) / 13 = 3/13 ≈ 0.231. قاعده خیلی ضعیف روشن می‌شود.' },
+      solve: async b => {
+        await GH.guide(b, 'g28', 28, AL, { color: 'red' });
+        await b.write('mq', 500, 112, `α = (28 − 25)/13 = 3/13 ≈ ${fmt(AL, 3)}`, { size: 30, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'μ_H(28) = (28 − 25) / 13 = 3/13 ≈ 0.231. یعنی 28 درجه فقط حدود 23 درصد «بالا» است و قاعده خیلی ضعیف روشن می‌شود: α = 3/13. همین α در بخش 2 ارتفاع برش است.',
+      draw: async b => {
+        await b.erase(['chk', 'x28']);
+        await GH.guide(b, 'g28', 28, AL, { color: 'red' });
+        await b.write('mq', 500, 112, `μ_H(28) = (28 − 25)/13 = 3/13 ≈ ${fmt(AL, 3)}`, { size: 30, color: 'red', bold: true });
+        await b.write('al', 890, GH.Y(AL) + 8, 'α = 3/13', { size: 26, color: 'orange', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- HW4 section 2: clip V
+    {
+      say: 'بخش 2، استلزام ممدانی: V را در ارتفاع α = 3/13 از بخش 1 می‌بریم. خط افقی نارنجی همان سقف است. نقطه‌ی برش چپ جایی است که شاخه‌ی بالارونده‌ی V، یعنی y/500 − 5، به 3/13 می‌رسد.',
+      draw: async b => {
+        await b.clear();
+        await hw4Base(b);
+        await b.write('vl', GV.X(3250), GV.Y(1) - 12, 'V', { size: 26, color: 'soft', bold: true });
+        await b.line('cut', GV.X(2000), GV.Y(AL), GV.X(5000), GV.Y(AL), { color: 'orange', width: 2 });
+        await b.write('vcl', GV.X(4500) + 60, GV.Y(AL) + 8, 'α = 3/13', { size: 22, color: 'orange' });
+        await b.write('y1', 500, 70, 'y/500 − 5 = 3/13', { size: 30, color: 'purple' });
+      },
+    },
+    {
+      say: 'سؤال بخش 2 (تمرین 4): α = 3/13 است و V در این ارتفاع بریده می‌شود. شاخه‌ی بالارونده‌ی V فرمول μV(y) = y/500 − 5 دارد، از 2500 تا 3000. نقطه‌ی برش چپ، y1، کجاست؟ تا دو رقم اعشار.',
+      draw: async b => {
+        await checkTag(b, 2);
+        await b.write('y1', 500, 70, 'y/500 − 5 = 3/13   →   y_1 = ?', { size: 30, color: 'orange', bold: true });
+      },
+      quiz: {
+        given: ["α = 3/13 ≈ 0.231","μV(y) = y/500 − 5  برای 2500 ≤ y ≤ 3000","μV(y) = 4.5 − y/1000  برای 3500 ≤ y ≤ 4500"],
+        find: "y1 که در آن y/500 − 5 = 3/13، تا دو رقم اعشار",
+        answer: ['2615.38', '2615.4', '2615.385'], hint: 'y/500 = 5 + 3/13، پس y = 2500 + 500 × 3/13.', explain: 'y_1 = 2500 + 500 × 3/13 = 2500 + 115.38 ≈ 2615.38. سمت راست هم: 4.5 − y/1000 = 3/13 پس y_2 = 4500 − 1000 × 3/13 ≈ 4269.23.' },
+      solve: async b => {
+        await b.dot('d1', GV.X(Y1), GV.Y(AL), { color: 'purple' });
+        await b.write('d1l', GV.X(Y1) - 8, GV.Y(AL) - 14, 'y_1', { size: 22, color: 'purple', anchor: 'end' });
+        await b.write('y1', 500, 70, `y_1 = 2500 + 500 × 3/13 ≈ ${fmt(Y1)}`, { size: 30, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'y_1 = 2500 + 500 × 3/13 ≈ 2615.38. از همین راه سمت پایین‌رونده: 4.5 − y/1000 = 3/13، پس y_2 = 4500 − 1000 × 3/13 ≈ 4269.23. خروجی یک ذوزنقه‌ی کوتاه و پهن است؛ y_1 و y_2 را در همه‌ی بخش‌های بعد لازم داریم.',
+      draw: async b => {
+        await b.erase(['chk', 'cut']);
         await b.write('y1', 500, 70, `y_1 = 2500 + 500 × 3/13 ≈ ${fmt(Y1)}`, { size: 30, color: 'purple' });
         await b.write('y2', 500, 120, `y_2 = 4500 − 1000 × 3/13 ≈ ${fmt(Y2)}`, { size: 30, color: 'purple' });
-        await hw4Clipped(b);
-        await b.write('vl', GV.X(3250), GV.Y(1) - 12, 'V', { size: 26, color: 'soft', bold: true });
-        await b.write('vcl', GV.X(4500) + 60, GV.Y(AL) + 8, 'α = 3/13', { size: 22, color: 'orange' });
+        await GV.poly(b, 'vc', [[2500, 0], [Y1, AL], [Y2, AL], [4500, 0]], { color: 'orange' });
         await all([
           b.dot('d1', GV.X(Y1), GV.Y(AL), { color: 'purple' }),
           b.dot('d2', GV.X(Y2), GV.Y(AL), { color: 'purple' }),
@@ -350,9 +643,9 @@ Teacher.start({
         await b.write('d2l', GV.X(Y2) + 8, GV.Y(AL) - 14, 'y_2', { size: 22, color: 'purple', anchor: 'start' });
       },
     },
-    // ---------------------------------------------------------- 13. centroid
+    // ---------------------------------------------------------- HW4 section 3: centroid
     {
-      say: 'روش 1، centroid. شکل سه تکه است: مثلث چپ، مستطیل، مثلث راست. مرکز هر مثلث در یک‌سوم قاعده از ضلع عمودی‌اش است. مساحت‌ها 13.31، 381.66 و 26.63 است، روی هم 421.60. گشتاور هر تکه = مساحت × مرکزش. جمع گشتاورها تقسیم بر مساحت کل: y* ≈ 3472.06. حل‌المسائل هم همین را دارد.',
+      say: 'بخش 3، روش 1: centroid. ذوزنقه‌ی بخش 2 سه تکه است: مثلث چپ، مستطیل، مثلث راست. مثلث چپ قاعده‌ی 2615.38 − 2500 = 115.38 دارد، پس مساحتش ½ × 115.38 × 3/13 ≈ 13.31. مثلث راست قاعده‌ی 230.77 دارد و مساحتش 26.63. مرکز هر مثلث در یک‌سوم قاعده از ضلع عمودی‌اش است. مستطیل با شما.',
       draw: async b => {
         await b.clear();
         await b.write('h', 500, 60, `روش ${LTR('1')}: ${LTR('centroid')}`, { size: 34, color: 'blue', bold: true, fa: true });
@@ -363,33 +656,77 @@ Teacher.start({
         ]);
         await b.line('tg', 60, 140, 940, 140, { color: 'soft', width: 2 });
         for (const [k, p] of P4.entries()) {
-          const y = 190 + k * 55;
+          const y = 190 + k * 55, hide = k === 1;
           await all([
             b.write(`tn${k}`, X[0], y, p.name, { size: 24, fa: true, dur: 150 }),
-            b.write(`ta${k}`, X[1], y, fmt(p.area), { size: 24, color: 'green', dur: 150 }),
+            b.write(`ta${k}`, X[1], y, hide ? '?' : fmt(p.area), { size: 24, color: hide ? 'orange' : 'green', bold: hide, dur: 150 }),
             b.write(`tc${k}`, X[2], y, fmt(p.c), { size: 24, dur: 150 }),
-            b.write(`tm${k}`, X[3], y, String(Math.round(p.area * p.c)), { size: 24, color: 'green', dur: 150 }),
+            b.write(`tm${k}`, X[3], y, hide ? '?' : String(Math.round(p.area * p.c)), { size: 24, color: hide ? 'orange' : 'green', bold: hide, dur: 150 }),
           ]);
         }
         await b.line('tg2', 60, 340, 940, 340, { color: 'soft', width: 2 });
+        await b.write('ex', 500, 525, 'center of a triangle: 1/3 of its base from the vertical side', { size: 20, color: 'soft' });
+      },
+    },
+    {
+      say: 'سؤال بخش 3 (تمرین 4): ذوزنقه‌ی بریده‌شده سقفی از y1 = 2615.38 تا y2 = 4269.23 در ارتفاع α = 3/13 دارد. قسمت وسطش یک مستطیل است. مساحت این مستطیل چند است؟ تا دو رقم اعشار.',
+      draw: async b => {
+        await checkTag(b, 3);
+        await b.write('res', 500, 440, `rect:  (${fmt(Y2)} − ${fmt(Y1)}) × 3/13 = ?`, { size: 30, color: 'orange', bold: true });
+      },
+      quiz: {
+        given: ["y1 = 2615.38","y2 = 4269.23","ارتفاع α = 3/13 ≈ 0.231","مساحت مستطیل = (y2 − y1) × α"],
+        find: "مساحت مستطیل، تا دو رقم اعشار",
+        answer: ['381.66', '381.7', '381.657'], hint: 'عرض = 4269.23 − 2615.38 = 1653.85. ضرب در 3/13.', explain: '1653.85 × 3/13 ≈ 381.66. این تقریباً 90 درصد کل مساحت است؛ دو مثلث کناری کوچک‌اند.' },
+      solve: async b => {
+        await b.write('ta1', 600, 245, fmt(P4[1].area), { size: 24, color: 'green', bold: true });
+        await b.write('res', 500, 440, `rect:  ${fmt(Y2 - Y1)} × 3/13 ≈ ${fmt(P4[1].area)}`, { size: 30, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'مساحت مستطیل ≈ 381.66 و مرکزش وسطش است: 3442.31. مساحت کل 13.31 + 381.66 + 26.63 = 421.60. گشتاور هر تکه = مساحت × مرکزش. جمع گشتاورها تقسیم بر مساحت کل: y* ≈ 3472.06. حل‌المسائل هم همین را دارد.',
+      draw: async b => {
+        await b.erase(['chk', 'res']);
+        const X = [840, 600, 400, 170];
+        await b.write('ta1', X[1], 245, fmt(P4[1].area), { size: 24, color: 'green' });
+        await b.write('tm1', X[3], 245, String(Math.round(P4[1].area * P4[1].c)), { size: 24, color: 'green' });
         await all([
           b.write('tt', X[0], 380, 'جمع', { size: 26, bold: true, fa: true }),
           b.write('tat', X[1], 380, fmt(A4), { size: 26, color: 'orange', bold: true }),
           b.write('tmt', X[3], 380, String(Math.round(M4)), { size: 26, color: 'orange', bold: true }),
         ]);
-        await b.write('res', 500, 470, `y* = ${Math.round(M4)} / ${fmt(A4)} ≈ ${fmt(C4)}`, { size: 40, color: 'green', bold: true });
-        await b.write('ex', 500, 525, 'center of a triangle: 1/3 of its base from the vertical side', { size: 20, color: 'soft' });
+        await b.write('res', 500, 460, `y* = ${Math.round(M4)} / ${fmt(A4)} ≈ ${fmt(C4)}`, { size: 40, color: 'green', bold: true });
       },
     },
-    // ---------------------------------------------------------- 14. bisector
+    // ---------------------------------------------------------- HW4 section 4: bisector
     {
-      say: 'روش 2، bisector: نصف مساحت 421.60 / 2 = 210.80 است. مثلث چپ فقط 13.31 دارد، پس بقیه، یعنی 197.49، باید از مستطیل با ارتفاع 3/13 برداشته شود: عرض لازم 197.49 / 0.231 ≈ 855.77. پس y* = 2615.38 + 855.77 ≈ 3471.15. بررسی: سمت راست هم دقیقاً 210.80 می‌ماند.',
+      say: 'بخش 4، روش 2: bisector، خط عمودی‌ای که مساحت را نصف می‌کند. از بخش 3 مساحت کل 421.60 است، پس هر طرف باید 210.80 داشته باشد. از چپ شروع کنیم: مثلث چپ فقط 13.31 دارد، کم است؛ پس خط bisector داخل مستطیل می‌افتد.',
       draw: async b => {
         await b.clear();
         await b.write('h', 500, 60, `روش ${LTR('2')}: ${LTR('bisector')}`, { size: 34, color: 'blue', bold: true, fa: true });
         await b.write('l1', 500, 120, `half = ${fmt(A4)} / 2 = ${fmt(A4 / 2)}        left triangle = ${fmt(P4[0].area)}`, { size: 26 });
-        await b.write('l2', 500, 170, `y* = ${fmt(Y1)} + (${fmt(A4 / 2)} − ${fmt(P4[0].area)}) / (3/13) ≈ ${fmt(BIS4)}`, { size: 28, color: 'green', bold: true });
         await hw4Clipped(b);
+      },
+    },
+    {
+      say: 'سؤال بخش 4 (تمرین 4): مساحت کل شکل بریده‌شده 421.60 است، پس نصفش 210.80. مثلث چپ مساحت 13.31 دارد، مستطیل 381.66 و مثلث راست 26.63. از چپ که جلو برویم، چه مقدار مساحت باید از مستطیل برداریم تا به نصف برسیم؟',
+      draw: async b => {
+        await checkTag(b, 4);
+        await b.write('l2', 500, 170, `from rectangle:  ${fmt(A4 / 2)} − ${fmt(P4[0].area)} = ?`, { size: 28, color: 'orange', bold: true });
+      },
+      quiz: {
+        given: ["مساحت کل = 421.60  ←  نصف = 210.80","مثلث چپ = 13.31 (از 2500 تا 2615.38)","مستطیل = 381.66 (از 2615.38 تا 4269.23، ارتفاع 3/13)","مثلث راست = 26.63"],
+        find: "مساحتی که باید از مستطیل برداشت",
+        answer: ['197.49', '197.5', '197.485'], hint: 'نصف مساحت منهای مساحت مثلث چپ.', explain: '210.80 − 13.31 = 197.49. با ارتفاع 3/13 این یعنی عرض 197.49 / (3/13) ≈ 855.77 داخل مستطیل.' },
+      solve: async b => {
+        await b.write('l2', 500, 170, `from rectangle:  ${fmt(A4 / 2)} − ${fmt(P4[0].area)} = ${fmt(A4 / 2 - P4[0].area)}`, { size: 28, color: 'green', bold: true });
+      },
+    },
+    {
+      say: '197.49 باید از مستطیل بیاید. ارتفاع مستطیل 3/13 است، پس عرض لازم 197.49 / 0.231 ≈ 855.77. پس y* = 2615.38 + 855.77 ≈ 3471.15. بررسی: سمت راست هم دقیقاً 210.80 می‌ماند.',
+      draw: async b => {
+        await b.erase('chk');
+        await b.write('l2', 500, 170, `y* = ${fmt(Y1)} + (${fmt(A4 / 2)} − ${fmt(P4[0].area)}) / (3/13) ≈ ${fmt(BIS4)}`, { size: 28, color: 'green', bold: true });
         await b.line('bl', GV.X(BIS4), GV.Y(0), GV.X(BIS4), GV.Y(AL + 0.25), { color: 'purple' });
         await all([
           b.write('al', (GV.X(2500) + GV.X(BIS4)) / 2, GV.Y(AL / 2) + 8, fmt(A4 / 2), { size: 22, color: 'purple', bold: true }),
@@ -398,23 +735,47 @@ Teacher.start({
         await b.write('bll', GV.X(BIS4), GV.Y(AL + 0.25) - 12, 'bisector', { size: 22, color: 'purple' });
       },
     },
-    // ---------------------------------------------------------- 15. MOM, SOM, LOM
+    // ---------------------------------------------------------- HW4 section 5: MOM, SOM, LOM
     {
-      say: 'روش‌های 3 تا 5: بیشترین عضویت 3/13 است و روی *کل* بازه‌ی 2615.38 تا 4269.23 رخ می‌دهد. SOM اولین نقطه‌اش است: 2615.38. LOM آخرین نقطه‌اش: 4269.23. MOM وسط آن: (2615.38 + 4269.23) / 2 ≈ 3442.31.',
+      say: 'بخش 5، روش‌های 3 تا 5: بیشترین عضویت 3/13 است و روی *کل* سقف، از y_1 تا y_2، رخ می‌دهد. پس SOM اولین نقطه‌ی سقف است، یعنی همان y_1 = 2615.38 از بخش 2، و LOM آخرین نقطه‌اش، y_2 = 4269.23.',
       draw: async b => {
         await b.clear();
         await b.write('h', 500, 60, `روش‌های ${LTR('3')} تا ${LTR('5')}: ${LTR('MOM ، SOM ، LOM')}`, { size: 32, color: 'blue', bold: true, fa: true });
-        await b.write('l1', 500, 125, `MOM = (${fmt(Y1)} + ${fmt(Y2)}) / 2 ≈ ${fmt(MOM4)}`, { size: 28, color: 'green', bold: true });
+        await b.write('l1', 500, 120, `SOM = y_1 ≈ ${fmt(Y1)}        LOM = y_2 ≈ ${fmt(Y2)}`, { size: 26, color: 'purple' });
         await hw4Clipped(b);
         await b.line('pl', GV.X(Y1), GV.Y(AL), GV.X(Y2), GV.Y(AL), { color: 'purple' });
-        for (const [k, [n, v]] of [['SOM', Y1], ['MOM', MOM4], ['LOM', Y2]].entries()) {
+        for (const [k, n, v] of [[0, 'SOM', Y1], [2, 'LOM', Y2]]) {
           await b.dot(`pd${k}`, GV.X(v), GV.Y(AL), { color: 'purple', r: 7 });
           await b.write(`pn${k}`, GV.X(v), GV.Y(AL) - 60, n, { size: 24, color: 'purple', bold: true });
           await b.write(`pv${k}`, GV.X(v), GV.Y(AL) - 30, fmt(v), { size: 20, color: 'purple' });
         }
       },
     },
-    // ---------------------------------------------------------- 16. all five + product note
+    {
+      say: 'سؤال بخش 5 (تمرین 4): سقف شکل بریده‌شده از SOM = 2615.38 تا LOM = 4269.23 است. MOM وسط این سقف است. MOM چند است؟ تا دو رقم اعشار.',
+      draw: async b => {
+        await checkTag(b, 5);
+        await b.write('l2', 500, 170, 'MOM = (SOM + LOM) / 2 = ?', { size: 28, color: 'orange', bold: true });
+      },
+      quiz: {
+        given: ["SOM = y1 = 2615.38","LOM = y2 = 4269.23","MOM = (SOM + LOM)/2"],
+        find: "MOM، تا دو رقم اعشار",
+        answer: ['3442.31', '3442.3', '3442.308'], hint: '(2615.38 + 4269.23) / 2', explain: '(2615.38 + 4269.23) / 2 = 6884.62 / 2 ≈ 3442.31. همان مرکز مستطیل در بخش 3.' },
+      solve: async b => {
+        await b.dot('pd1', GV.X(MOM4), GV.Y(AL), { color: 'green', r: 7 });
+        await b.write('l2', 500, 170, `MOM = (${fmt(Y1)} + ${fmt(Y2)}) / 2 ≈ ${fmt(MOM4)}`, { size: 28, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'MOM = (2615.38 + 4269.23) / 2 ≈ 3442.31؛ همان مرکز مستطیل که در جدول centroid دیدیم.',
+      draw: async b => {
+        await b.erase('chk');
+        await b.write('l2', 500, 170, `MOM = (${fmt(Y1)} + ${fmt(Y2)}) / 2 ≈ ${fmt(MOM4)}`, { size: 28, color: 'green', bold: true });
+        await b.dot('pd1', GV.X(MOM4), GV.Y(AL), { color: 'purple', r: 7 });
+        await b.write('pn1', GV.X(MOM4), GV.Y(AL) - 60, 'MOM', { size: 24, color: 'green', bold: true });
+        await b.write('pv1', GV.X(MOM4), GV.Y(AL) - 30, fmt(MOM4), { size: 20, color: 'green' });
+      },
+    },
     {
       say: 'جدول جواب تمرین 4. centroid و bisector تقریباً یکی‌اند، چون شکل بریده‌شده تقریباً یک مستطیل پهن است. همه‌ی این عددها را خودم دوباره حساب کردم و با حل‌المسائل یکی است. یک نکته‌ی اضافه: اگر به جای برش min از استلزام *prod* استفاده کنیم، V فقط کوچک می‌شود و شکلش عوض نمی‌شود؛ آن‌وقت centroid همان مرکز خود V است: 3400.',
       draw: async b => {
@@ -433,9 +794,9 @@ Teacher.start({
         await b.write('p2', 500, 500, 'centroid = (250×2833.3 + 500×3250 + 500×3833.3) / 1250 = 3400', { size: 22, color: 'orange' });
       },
     },
-    // ---------------------------------------------------------- 17. summary
+    // ---------------------------------------------------------- summary
     {
-      say: 'جمع‌بندی دو تمرین. این مسیر را برای هر سؤال ممدانی در امتحان دنبال کنید، بعد برویم سراغ ده سؤال.',
+      say: 'جمع‌بندی دو تمرین. این مسیر را برای هر سؤال ممدانی در امتحان دنبال کنید، بعد برویم سراغ هفت سؤال پایانی با عددهای تازه.',
       draw: async b => {
         await b.clear();
         await b.write('h', 500, 75, 'یادت باشد', { size: 48, color: 'orange', bold: true, fa: true });
@@ -450,7 +811,7 @@ Teacher.start({
         for (const [k, l] of L.entries()) await b.write(`m${k}`, 900, 150 + k * 64, '•  ' + l, { size: 25, anchor: 'start', fa: true });
       },
     },
-    // ========================================================== quizzes
+    // ========================================================== final quizzes (fresh numbers)
     {
       say: 'در تمرین 3، اگر دما 35 درجه بود، عضویتش در «دمای متوسط» (25، 45، 65) چند می‌شد؟',
       draw: quizBoard(1, 'μ_{T medium}(35) = ?', { size: 48 }),
@@ -462,17 +823,8 @@ Teacher.start({
       },
     },
     {
-      say: 'باز هم با T = 35 و عضویت 0.58 برای رطوبت متوسط: قدرت قاعده‌ی 2 چند است؟',
-      draw: quizBoard(2, 'R2 = min( 0.5 , 0.58 ) = ?', { size: 48 }),
-      quiz: { answer: ['0.5', '.5'], hint: 'AND یعنی min: عدد کوچک‌تر را بردار.', explain: 'min(0.5, 0.58) = 0.5' },
-      solve: async b => {
-        await b.write('s1', 500, 280, 'عدد کوچک‌تر را بردار: AND = min', { size: 36, color: 'blue', fa: true });
-        await b.write('s2', 500, 380, 'min(0.5 , 0.58) = 0.5', { size: 46, color: 'green', bold: true });
-      },
-    },
-    {
       say: 'در جواب تمرین 3، عضویت مجموعه‌ی نهایی سرعت در z = 50 چند است؟',
-      draw: quizBoard(3, 'μ_{speed}(50) = ?', { size: 48 }),
+      draw: quizBoard(2, 'μ_{speed}(50) = ?', { size: 48 }),
       quiz: { answer: ['0.2', '.2'], hint: '50 بین 26.2 و 62.2 است؛ آنجا شکل صاف است.', explain: 'در z = 50: Low صفر است و Medium (67 − 50)/24 ≈ 0.71 است که در 0.2 بریده شده؛ max(0, 0.2) = 0.2' },
       solve: async b => {
         await b.write('s1', 500, 240, 'Low(50) = 0', { size: 34, color: 'blue' });
@@ -482,7 +834,7 @@ Teacher.start({
     },
     {
       say: 'و در z = 10 چند است؟',
-      draw: quizBoard(4, 'μ_{speed}(10) = ?', { size: 48 }),
+      draw: quizBoard(3, 'μ_{speed}(10) = ?', { size: 48 }),
       quiz: { answer: ['0.1', '.1'], hint: 'در z = 10 فقط Low غیرصفر است، و Low در 0.1 بریده شده.', explain: 'Low(10) = (27 − 10)/21 ≈ 0.81، بریده در 0.1 ← 0.1. Medium آنجا صفر است. پس 0.1' },
       solve: async b => {
         await b.write('s1', 500, 240, 'Low(10) = (27 − 10)/21 ≈ 0.81  →  min(0.1, 0.81) = 0.1', { size: 30, color: 'blue' });
@@ -491,35 +843,8 @@ Teacher.start({
       },
     },
     {
-      say: 'برای مجموعه‌ی نهایی تمرین 3، جواب روش MOM چند است؟',
-      draw: quizBoard(5, 'HW3:   MOM = ?', { size: 48 }),
-      quiz: { answer: ['44.2'], hint: 'ماکزیمم 0.2 از 26.2 تا 62.2 است.', explain: '(26.2 + 62.2) / 2 = 88.4 / 2 = 44.2' },
-      solve: async b => {
-        await zoomAxes(b);
-        await b.erase('q-q');
-        await GZ.poly(b, 'agg', [[0, R1], [B1, R1], [B2, R2], [B3, R2], [67, 0], [100, 0]], { color: 'green' });
-        await b.line('pl', GZ.X(B2), GZ.Y(R2), GZ.X(B3), GZ.Y(R2), { color: 'purple' });
-        await b.dot('pm', GZ.X(44.2), GZ.Y(R2), { color: 'purple', r: 8 });
-        await b.write('pml', GZ.X(44.2), GZ.Y(R2) - 20, 'MOM = (26.2 + 62.2)/2 = 44.2', { size: 28, color: 'green', bold: true });
-      },
-    },
-    {
-      say: 'چرا در تمرین 3 عددهای رطوبت (0.58 و 0.5) در جواب نهایی اثری ندارند؟',
-      draw: quizBoard(6, 'چرا عددهای رطوبت اثری ندارند؟', { size: 40, fa: true }),
-      quiz: {
-        choices: ['چون در هر قاعده عدد دما کوچک‌تر است و min همان را برمی‌دارد', 'چون تجمیع با max انجام می‌شود', 'چون رطوبت ورودی سیستم نیست'],
-        correct: 0,
-        explain: 'min(0.1, 0.58) = 0.1، min(0.2, 0.58) = 0.2، min(0, 0.5) = 0 — هر بار عدد دما انتخاب شد. اگر رطوبت مثلاً 0.15 بود، قاعده‌ی 2 عوض می‌شد.',
-      },
-      solve: async b => {
-        const L = ['min(0.1 , 0.58) = 0.1', 'min(0.2 , 0.58) = 0.2', 'min(0 , 0.5) = 0'];
-        for (const [k, l] of L.entries()) await b.write(`s${k}`, 500, 240 + k * 60, l, { size: 34 });
-        await b.write('s3', 500, 450, 'هر بار عدد دما برنده شد', { size: 30, color: 'green', fa: true });
-      },
-    },
-    {
       say: 'تمرین 4: عضویت دمای 41 درجه در H چند است؟',
-      draw: quizBoard(7, 'μ_H(41) = ?', { size: 48 }),
+      draw: quizBoard(4, 'μ_H(41) = ?', { size: 48 }),
       quiz: { answer: ['0.8', '.8'], hint: '41 روی شاخه‌ی پایین‌رونده است: 9 − x/5', explain: '9 − 41/5 = 9 − 8.2 = 0.8' },
       solve: async b => {
         await b.write('s1', 500, 260, '40 ≤ 41 ≤ 45  →  μ_H = 9 − x/5', { size: 36, color: 'blue' });
@@ -529,7 +854,7 @@ Teacher.start({
     },
     {
       say: 'فرض کنید دما 31.5 درجه باشد، پس α = (31.5 − 25)/13 = 0.5. با برش min، جواب SOM چند است؟',
-      draw: quizBoard(8, 'α = 0.5    SOM = ?', { size: 48 }),
+      draw: quizBoard(5, 'α = 0.5    SOM = ?', { size: 48 }),
       quiz: { answer: ['2750'], hint: 'روی شاخه‌ی بالارونده‌ی V: y/500 − 5 = 0.5', explain: 'y/500 − 5 = 0.5 ← y = 500 × 5.5 = 2750. SOM اولین نقطه‌ی ماکزیمم است: 2750' },
       solve: async b => {
         await b.write('s1', 500, 260, 'y/500 − 5 = 0.5', { size: 38, color: 'blue' });
@@ -539,7 +864,7 @@ Teacher.start({
     },
     {
       say: 'با همان α = 0.5، جواب MOM چند است؟',
-      draw: quizBoard(9, 'α = 0.5    MOM = ?', { size: 48 }),
+      draw: quizBoard(6, 'α = 0.5    MOM = ?', { size: 48 }),
       quiz: { answer: ['3375'], hint: 'LOM را از 4.5 − y/1000 = 0.5 پیدا کن، بعد وسط SOM و LOM.', explain: 'LOM: 4.5 − y/1000 = 0.5 ← y = 4000. MOM = (2750 + 4000)/2 = 3375' },
       solve: async b => {
         await b.write('s1', 500, 240, 'SOM = 2750', { size: 34, color: 'purple' });
@@ -549,7 +874,7 @@ Teacher.start({
     },
     {
       say: 'سؤال آخر: در تمرین 4، چرا centroid (3472.06) و bisector (3471.15) این‌قدر به هم نزدیک‌اند؟',
-      draw: quizBoard(10, 'چرا centroid ≈ bisector؟', { size: 42, fa: true }),
+      draw: quizBoard(7, 'چرا centroid ≈ bisector؟', { size: 42, fa: true }),
       quiz: {
         choices: ['چون شکل بریده‌شده تقریباً یک مستطیل پهنِ کم‌وبیش متقارن است', 'چون این دو روش همیشه یک جواب می‌دهند', 'چون α کوچک است'],
         correct: 0,
