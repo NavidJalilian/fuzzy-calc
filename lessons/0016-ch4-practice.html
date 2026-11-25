@@ -94,12 +94,27 @@ const GH = Graph({ x: 120, y: 130, w: 640, h: 300, from: 20, to: 50 });    // HW
 const checkTag = (b, n, x = 905, y = 52) =>
   b.write('chk', x, y, `سؤال بخش ${n}`, { size: 20, color: 'orange', bold: true, fa: true });
 
-function quizBoard(n, question, o = { size: 40 }) {
+// Exam question board: header, then the problem's data lines (kept above y 230; the solution goes below).
+function examBoard(n, lines) {
   return async b => {
     await b.clear();
-    await b.write('q-n', 500, 60, `سؤال پایانی ${n} از 7`, { size: 24, color: 'soft', fa: true });
-    await b.write('q-q', 500, 130, question, o);
+    await b.write('q-n', 500, 60, `سؤال امتحانی ${n} از 6`, { size: 26, color: 'blue', bold: true, fa: true });
+    for (const [k, [l, c]] of lines.entries()) {
+      await b.write(`e${k}`, 500, 106 + k * 38, l, { size: l.length > 60 ? 21 : 25, color: c, bold: c === 'orange', dur: 300 });
+    }
   };
+}
+// Member-by-member table for discrete fuzzy sets: a header row of x values, then one row per set.
+async function setTable(b, rows, xs = [1, 2, 3, 4, 5, 6]) {
+  const X = k => 340 + k * 105;
+  await b.write('tx', 175, 270, 'x', { size: 24, color: 'soft', bold: true });
+  await all(xs.map((x, k) => b.write(`tx${k}`, X(k), 270, String(x), { size: 24, color: 'soft', bold: true, dur: 150 })));
+  await b.line('tg', 60, 285, 960, 285, { color: 'soft', width: 2 });
+  for (const [r, [name, vals, color]] of rows.entries()) {
+    const y = 325 + r * 48;
+    await b.write(`tl${r}`, 175, y, name, { size: 22, color, dur: 150 });
+    await all(vals.map((v, k) => b.write(`tv${r}-${k}`, X(k), y, String(v), { size: 24, color, dur: 150 })));
+  }
 }
 // A zoomed μ axis for the homework-3 output (μ only goes up to 0.2 there).
 const GZ = Graph({ x: 110, y: 130, w: 680, h: 320, from: 0, to: 100, max: 0.25 });
@@ -128,7 +143,7 @@ Teacher.start({
   title: 'تمرین بخش 4',
   chapter: 'بخش 4 · برهان و سیستم استنتاج فازی',
   slides: '96–121',
-  intro: 'تمرین‌های 3 و 4: یک کنترل‌کننده‌ی ممدانی کامل، و یک قاعده با هر پنج روش غیرفازی‌سازی. بعد از هر بخش یک سؤال کوتاه: اول خودت عدد بعدی را حساب کن، بعد ببین.',
+  intro: 'تمرین‌های 3 و 4: یک کنترل‌کننده‌ی ممدانی کامل، و یک قاعده با هر پنج روش غیرفازی‌سازی. بعد از هر بخش یک سؤال کوتاه، و آخر درس شش سؤال امتحانی مستقل.',
   next: { href: '0017-arrays.html', title: 'اسکالر، بردار، ماتریس و تانسور' },
   steps: [
     // ========================================================== HOMEWORK 3
@@ -796,7 +811,7 @@ Teacher.start({
     },
     // ---------------------------------------------------------- summary
     {
-      say: 'جمع‌بندی دو تمرین. این مسیر را برای هر سؤال ممدانی در امتحان دنبال کنید، بعد برویم سراغ هفت سؤال پایانی با عددهای تازه.',
+      say: 'جمع‌بندی دو تمرین. این مسیر را برای هر سؤال ممدانی در امتحان دنبال کنید، بعد شش سؤال امتحانی: هر کدام یک مسئله‌ی کامل و مستقل با داده‌های خودش، درست مثل برگه‌های تمرین استاد.',
       draw: async b => {
         await b.clear();
         await b.write('h', 500, 75, 'یادت باشد', { size: 48, color: 'orange', bold: true, fa: true });
@@ -811,81 +826,207 @@ Teacher.start({
         for (const [k, l] of L.entries()) await b.write(`m${k}`, 900, 150 + k * 64, '•  ' + l, { size: 25, anchor: 'start', fa: true });
       },
     },
-    // ========================================================== final quizzes (fresh numbers)
+    // ========================================================== exam questions (each one stands alone)
+    // Six full exam problems shaped like the teacher's homework sheets 1–4. Each has its own story and
+    // all of its own data; none uses a number from the homework or from another question.
     {
-      say: 'در تمرین 3، اگر دما 35 درجه بود، عضویتش در «دمای متوسط» (25، 45، 65) چند می‌شد؟',
-      draw: quizBoard(1, 'μ_{T medium}(35) = ?', { size: 48 }),
-      quiz: { answer: ['0.5', '.5'], hint: 'روی شاخه‌ی بالارونده از 25 تا 45 هستی: (T − 25) / 20', explain: '(35 − 25) / 20 = 10 / 20 = 0.5' },
-      solve: async b => {
-        await b.write('s1', 500, 260, 'μ = (T − 25) / (45 − 25)', { size: 38, color: 'blue' });
-        await b.write('s2', 500, 340, '(35 − 25) / 20 = 10 / 20', { size: 38 });
-        await b.write('s3', 500, 430, '= 0.5', { size: 50, color: 'green', bold: true });
-      },
-    },
-    {
-      say: 'در جواب تمرین 3، عضویت مجموعه‌ی نهایی سرعت در z = 50 چند است؟',
-      draw: quizBoard(2, 'μ_{speed}(50) = ?', { size: 48 }),
-      quiz: { answer: ['0.2', '.2'], hint: '50 بین 26.2 و 62.2 است؛ آنجا شکل صاف است.', explain: 'در z = 50: Low صفر است و Medium (67 − 50)/24 ≈ 0.71 است که در 0.2 بریده شده؛ max(0, 0.2) = 0.2' },
-      solve: async b => {
-        await b.write('s1', 500, 240, 'Low(50) = 0', { size: 34, color: 'blue' });
-        await b.write('s2', 500, 300, 'Medium(50) = (67 − 50)/24 ≈ 0.71  →  min(0.2, 0.71) = 0.2', { size: 30, color: 'orange' });
-        await b.write('s3', 500, 400, 'max(0 , 0.2) = 0.2', { size: 46, color: 'green', bold: true });
-      },
-    },
-    {
-      say: 'و در z = 10 چند است؟',
-      draw: quizBoard(3, 'μ_{speed}(10) = ?', { size: 48 }),
-      quiz: { answer: ['0.1', '.1'], hint: 'در z = 10 فقط Low غیرصفر است، و Low در 0.1 بریده شده.', explain: 'Low(10) = (27 − 10)/21 ≈ 0.81، بریده در 0.1 ← 0.1. Medium آنجا صفر است. پس 0.1' },
-      solve: async b => {
-        await b.write('s1', 500, 240, 'Low(10) = (27 − 10)/21 ≈ 0.81  →  min(0.1, 0.81) = 0.1', { size: 30, color: 'blue' });
-        await b.write('s2', 500, 300, 'Medium(10) = 0', { size: 34, color: 'orange' });
-        await b.write('s3', 500, 400, 'max(0.1 , 0) = 0.1', { size: 46, color: 'green', bold: true });
-      },
-    },
-    {
-      say: 'تمرین 4: عضویت دمای 41 درجه در H چند است؟',
-      draw: quizBoard(4, 'μ_H(41) = ?', { size: 48 }),
-      quiz: { answer: ['0.8', '.8'], hint: '41 روی شاخه‌ی پایین‌رونده است: 9 − x/5', explain: '9 − 41/5 = 9 − 8.2 = 0.8' },
-      solve: async b => {
-        await b.write('s1', 500, 260, '40 ≤ 41 ≤ 45  →  μ_H = 9 − x/5', { size: 36, color: 'blue' });
-        await b.write('s2', 500, 340, '9 − 41/5 = 9 − 8.2', { size: 38 });
-        await b.write('s3', 500, 430, '= 0.8', { size: 50, color: 'green', bold: true });
-      },
-    },
-    {
-      say: 'فرض کنید دما 31.5 درجه باشد، پس α = (31.5 − 25)/13 = 0.5. با برش min، جواب SOM چند است؟',
-      draw: quizBoard(5, 'α = 0.5    SOM = ?', { size: 48 }),
-      quiz: { answer: ['2750'], hint: 'روی شاخه‌ی بالارونده‌ی V: y/500 − 5 = 0.5', explain: 'y/500 − 5 = 0.5 ← y = 500 × 5.5 = 2750. SOM اولین نقطه‌ی ماکزیمم است: 2750' },
-      solve: async b => {
-        await b.write('s1', 500, 260, 'y/500 − 5 = 0.5', { size: 38, color: 'blue' });
-        await b.write('s2', 500, 340, 'y = 2500 + 500 × 0.5', { size: 38 });
-        await b.write('s3', 500, 430, 'SOM = 2750', { size: 50, color: 'green', bold: true });
-      },
-    },
-    {
-      say: 'با همان α = 0.5، جواب MOM چند است؟',
-      draw: quizBoard(6, 'α = 0.5    MOM = ?', { size: 48 }),
-      quiz: { answer: ['3375'], hint: 'LOM را از 4.5 − y/1000 = 0.5 پیدا کن، بعد وسط SOM و LOM.', explain: 'LOM: 4.5 − y/1000 = 0.5 ← y = 4000. MOM = (2750 + 4000)/2 = 3375' },
-      solve: async b => {
-        await b.write('s1', 500, 240, 'SOM = 2750', { size: 34, color: 'purple' });
-        await b.write('s2', 500, 300, '4.5 − y/1000 = 0.5  →  LOM = 4000', { size: 34, color: 'purple' });
-        await b.write('s3', 500, 400, 'MOM = (2750 + 4000)/2 = 3375', { size: 44, color: 'green', bold: true });
-      },
-    },
-    {
-      say: 'سؤال آخر: در تمرین 4، چرا centroid (3472.06) و bisector (3471.15) این‌قدر به هم نزدیک‌اند؟',
-      draw: quizBoard(7, 'چرا centroid ≈ bisector؟', { size: 42, fa: true }),
+      say: 'سؤال امتحانی 1 (مثل تمرین 1): مجموعه‌ی جهانی X = {1, 2, 3, 4, 5, 6} است و دو مجموعه‌ی فازی A و B روی آن داده شده‌اند. مجموعه‌ی فازی A ∩ B̄ را به دست آورید.',
+      draw: examBoard(1, [
+        ['X = {1, 2, 3, 4, 5, 6}', 'ink'],
+        ['A = 0.3/1 + 0.9/2 + 0.6/3 + 1/4 + 0.2/5', 'blue'],
+        ['B = 0.7/2 + 0.4/3 + 0.8/4 + 1/5 + 0.5/6', 'blue'],
+        ['A ∩ B̄ = ?', 'orange'],
+      ]),
       quiz: {
-        choices: ['چون شکل بریده‌شده تقریباً یک مستطیل پهنِ کم‌وبیش متقارن است', 'چون این دو روش همیشه یک جواب می‌دهند', 'چون α کوچک است'],
-        correct: 0,
-        explain: 'بیشتر مساحت (381.66 از 421.60) در مستطیل است و دو مثلث کناری کوچک‌اند. در شکل متقارن دو روش یکی می‌شوند؛ این شکل تقریباً متقارن است. در شکل کج، مثل ذوزنقه‌ی اسلاید 121، با هم فرق می‌کنند.',
+        given: ['X = {1, 2, 3, 4, 5, 6}', 'A = 0.3/1 + 0.9/2 + 0.6/3 + 1/4 + 0.2/5', 'B = 0.7/2 + 0.4/3 + 0.8/4 + 1/5 + 0.5/6'],
+        find: 'مجموعه‌ی فازی A ∩ B̄',
+        choices: [
+          '0.3/2 + 0.6/3 + 0.2/4',
+          '0.3/1 + 0.3/2 + 0.6/3 + 0.2/4',
+          '0.7/2 + 0.4/3 + 0.8/4 + 0.2/5',
+          '1/1 + 0.9/2 + 0.6/3 + 1/4 + 0.2/5 + 0.5/6',
+        ],
+        correct: 1,
+        hint: 'اول مکمل B را برای هر 6 عضو X بنویس. عضو 1 در B نیامده، پس B(1) = 0 و B̄(1) = 1. بعد با A عضو به عضو min بگیر.',
+        explain: 'B̄ = 1 − B: یعنی 1/1 + 0.3/2 + 0.6/3 + 0.2/4 + 0/5 + 0.5/6. min با A: x=1: min(0.3, 1) = 0.3، x=2: 0.3، x=3: 0.6، x=4: 0.2، x=5 و x=6: 0. تله: اگر x = 1 را فراموش کنی، 0.3/1 جا می‌ماند.',
       },
       solve: async b => {
-        await hw4Clipped(b);
-        await b.erase('q-q');
-        await b.write('s1', 500, 150, `rect = ${fmt(P4[1].area)}  of  ${fmt(A4)}`, { size: 32, color: 'orange', bold: true });
-        await b.line('sc', GV.X(C4), GV.Y(0), GV.X(C4), GV.Y(0.5), { color: 'red' });
-        await b.write('sct', GV.X(C4), GV.Y(0.5) - 12, 'centroid ≈ bisector', { size: 24, color: 'red' });
+        await setTable(b, [
+          ['A', [0.3, 0.9, 0.6, 1, 0.2, 0], 'blue'],
+          ['B', [0, 0.7, 0.4, 0.8, 1, 0.5], 'blue'],
+          ['B̄ = 1 − B', [1, 0.3, 0.6, 0.2, 0, 0.5], 'purple'],
+          ['min(A, B̄)', [0.3, 0.3, 0.6, 0.2, 0, 0], 'green'],
+        ]);
+        await b.write('res', 500, 520, 'A ∩ B̄ = 0.3/1 + 0.3/2 + 0.6/3 + 0.2/4', { size: 30, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'سؤال امتحانی 2 (مثل تمرین 1، بخش قیدها): مجموعه‌ی فازی tall به صورت زوج‌های (x, μ) داده شده. مجموعه‌ی فازی not very tall را به دست آورید.',
+      draw: examBoard(2, [
+        ['tall = {(0, 0), (20, 0.1), (40, 0.3), (60, 0.7), (80, 0.9), (100, 1)}', 'blue'],
+        ['not very tall = ?', 'orange'],
+      ]),
+      quiz: {
+        given: ['tall = {(0, 0), (20, 0.1), (40, 0.3), (60, 0.7), (80, 0.9), (100, 1)}'],
+        find: 'مجموعه‌ی فازی not very tall',
+        choices: [
+          '{(0, 1), (20, 0.81), (40, 0.49), (60, 0.09), (80, 0.01), (100, 0)}',
+          '{(0, 0), (20, 0.01), (40, 0.09), (60, 0.49), (80, 0.81), (100, 1)}',
+          '{(0, 1), (20, 0.99), (40, 0.91), (60, 0.51), (80, 0.19), (100, 0)}',
+          '{(0, 1), (20, 0.9), (40, 0.7), (60, 0.3), (80, 0.1), (100, 0)}',
+        ],
+        correct: 2,
+        hint: 'از داخل به بیرون: اول very (μ به توان 2)، بعد not (1 منهای آن).',
+        explain: 'very tall = μ²: 0، 0.01، 0.09، 0.49، 0.81، 1. not very tall = 1 − μ²: 1، 0.99، 0.91، 0.51، 0.19، 0. تله: (1 − μ)² یعنی very not tall، که ترتیبش برعکس است.',
+      },
+      solve: async b => {
+        await setTable(b, [
+          ['μ tall', [0, 0.1, 0.3, 0.7, 0.9, 1], 'blue'],
+          ['very = μ^2', [0, 0.01, 0.09, 0.49, 0.81, 1], 'purple'],
+          ['not very = 1 − μ^2', [1, 0.99, 0.91, 0.51, 0.19, 0], 'green'],
+        ], [0, 20, 40, 60, 80, 100]);
+        await b.write('res', 500, 520, '{(0, 1), (20, 0.99), (40, 0.91), (60, 0.51), (80, 0.19), (100, 0)}', { size: 26, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'سؤال امتحانی 3 (مثل تمرین 2): قاعده‌ی فازی «اگر ترافیک سنگین باشد آنگاه زمان سفر طولانی است» را در نظر بگیرید: if x is H then y is L. اگر ترافیک 300 خودرو در ساعت باشد، زمان سفر چقدر است؟ از روش Max-product inference استفاده کنید.',
+      draw: examBoard(3, [
+        ['if  x is H  then  y is L', 'ink'],
+        ['H = 0.1/100 + 0.4/200 + 0.6/300 + 0.9/400 + 1/500', 'blue'],
+        ['L = 0.2/20 + 0.5/30 + 0.9/40 + 1/50', 'blue'],
+        ['x = 300        max-product        L′ = ?', 'orange'],
+      ]),
+      quiz: {
+        given: ['if x is H then y is L', 'H = 0.1/100 + 0.4/200 + 0.6/300 + 0.9/400 + 1/500', 'L = 0.2/20 + 0.5/30 + 0.9/40 + 1/50', 'x = 300', 'روش: Max-product inference'],
+        find: 'مجموعه‌ی فازی زمان سفر (خروجی قاعده)',
+        choices: [
+          '0.12/20 + 0.3/30 + 0.54/40 + 0.6/50',
+          '0.2/20 + 0.5/30 + 0.6/40 + 0.6/50',
+          '0.6/20 + 0.6/30 + 0.6/40 + 0.6/50',
+          '0.08/20 + 0.2/30 + 0.36/40 + 0.4/50',
+        ],
+        correct: 0,
+        hint: 'α = μH(300). در max-product هر عضویت L در α ضرب می‌شود؛ بریده نمی‌شود.',
+        explain: 'α = μH(300) = 0.6. خروجی = 0.6 × L: 0.12/20 + 0.3/30 + 0.54/40 + 0.6/50. گزینه‌ی دوم جواب max-min است (برش در 0.6)، نه max-product.',
+      },
+      solve: async b => {
+        await b.write('s1', 500, 275, 'α = μ_H(300) = 0.6', { size: 32, color: 'purple', bold: true });
+        const Y = [20, 30, 40, 50], L = [0.2, 0.5, 0.9, 1];
+        for (const [k, y] of Y.entries()) {
+          await b.write(`p${k}`, 500, 322 + k * 45, `y = ${y}:   0.6 × ${L[k]} = ${fmt(0.6 * L[k])}`, { size: 26, dur: 250 });
+        }
+        await b.write('res', 500, 520, 'L′ = 0.12/20 + 0.3/30 + 0.54/40 + 0.6/50', { size: 30, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'سؤال امتحانی 4 (مثل تمرین 3): کنترل‌کننده‌ی فازی فن یک گلخانه دو ورودی دارد، دما و رطوبت نسبی، و یک خروجی، سرعت فن. مجموعه‌ها و سه قاعده در کارت داده‌ها هستند. اگر دما 31 درجه و رطوبت 72 درصد باشد، سرعت فن چقدر است؟ استنتاج ممدانی با AND = min، تجمیع max و غیرفازی‌سازی centroid.',
+      draw: examBoard(4, [
+        ['R1:  T Cold  AND  RH Medium  →  Speed Low', 'ink'],
+        ['R2:  T Warm  AND  RH Medium  →  Speed Medium', 'ink'],
+        ['R3:  T Hot  AND  RH High  →  Speed High', 'ink'],
+        ['T = 31 °C      RH = 72 %      centroid = ?', 'orange'],
+      ]),
+      quiz: {
+        given: [
+          'T Cold = trapmf([0 0 10 25])',
+          'T Warm = trimf([15 25 35])',
+          'T Hot = trapmf([30 40 50 50])',
+          'RH Dry = trapmf([0 0 20 60])',
+          'RH Medium = trimf([30 60 90])',
+          'RH High = trapmf([60 90 100 100])',
+          'Speed Low = trapmf([0 0 10 40])',
+          'Speed Medium = trimf([20 50 80])',
+          'Speed High = trapmf([60 90 100 100])',
+          'قاعده‌ی 1: اگر دما Cold و رطوبت Medium ← سرعت Low',
+          'قاعده‌ی 2: اگر دما Warm و رطوبت Medium ← سرعت Medium',
+          'قاعده‌ی 3: اگر دما Hot و رطوبت High ← سرعت High',
+          'T = 31 ، RH = 72',
+          'ممدانی: AND = min، برش با min، تجمیع max، غیرفازی‌سازی centroid',
+        ],
+        find: 'سرعت فن (عدد centroid)، تا دو رقم اعشار',
+        answer: ['53.95', '53.9', '54', '53.951'],
+        hint: 'قدرت قاعده‌ها 0، 0.4 و 0.1 می‌شود. Medium را در 0.4 و High را در 0.1 ببر. شاخه‌ی پایین‌رونده‌ی Medium در z = 77 به 0.1 می‌رسد. شکل را چهار تکه کن: [20, 32]، [32, 68]، [68, 77]، [77, 100].',
+        explain: 'Warm(31) = 0.4، Hot(31) = 0.1، Cold(31) = 0؛ RH Medium(72) = 0.6، High(72) = 0.4. قاعده‌ها: 0، 0.4، 0.1. شکل نهایی: از 20 تا 32 بالا، 0.4 تا 68، پایین تا 0.1 در 77، بعد 0.1 تا 100. مساحت‌ها 2.4 + 14.4 + 2.25 + 2.3 = 21.35، گشتاورها 67.2 + 720 + 161.1 + 203.55 = 1151.85. centroid = 1151.85 / 21.35 ≈ 53.95.',
+      },
+      solve: async b => {
+        const L = [
+          ['Cold(31) = 0    Warm(31) = (35 − 31)/10 = 0.4    Hot(31) = (31 − 30)/10 = 0.1', 'blue'],
+          ['RH Medium(72) = (90 − 72)/30 = 0.6    RH High(72) = (72 − 60)/30 = 0.4', 'blue'],
+          ['R1 = min(0, 0.6) = 0    R2 = min(0.4, 0.6) = 0.4    R3 = min(0.1, 0.4) = 0.1', 'purple'],
+          ['Medium cut at 0.4: 32 … 68        (80 − z)/30 = 0.1  →  z = 77', 'purple'],
+          ['area: 2.4 + 14.4 + 2.25 + 2.3 = 21.35', 'ink'],
+          ['moment: 67.2 + 720 + 161.1 + 203.55 = 1151.85', 'ink'],
+        ];
+        for (const [k, [l, c]] of L.entries()) await b.write(`s${k}`, 500, 250 + k * 40, l, { size: 21, color: c, dur: 300 });
+        await b.write('res', 500, 520, 'centroid = 1151.85 / 21.35 ≈ 53.95', { size: 32, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'سؤال امتحانی 5 (مثل تمرین 4): در یک مخزن یکی از قاعده‌ها این است: اگر فشار مخزن زیاد باشد آنگاه شیر خروجی زیاد باز می‌شود، if x is P then y is V. تابع‌های عضویت به شکل فرمول داده شده‌اند. اگر فشار 9.4 بار باشد، باز شدن شیر چند درصد است؟ استنتاج ممدانی، غیرفازی‌سازی با centroid.',
+      draw: examBoard(5, [
+        ['μ_P(x) = (x − 2)/4  [2, 6]      1  [6, 8]      (10 − x)/2  [8, 10]', 'blue'],
+        ['μ_V(y) = (y − 20)/20  [20, 40]      1  [40, 50]      (80 − y)/30  [50, 80]', 'blue'],
+        ['x = 9.4        centroid = ?', 'orange'],
+      ]),
+      quiz: {
+        given: [
+          'if x is P then y is V',
+          'μP(x) = (x − 2)/4  برای 2 ≤ x ≤ 6',
+          'μP(x) = 1  برای 6 ≤ x ≤ 8',
+          'μP(x) = (10 − x)/2  برای 8 ≤ x ≤ 10',
+          'μV(y) = (y − 20)/20  برای 20 ≤ y ≤ 40',
+          'μV(y) = 1  برای 40 ≤ y ≤ 50',
+          'μV(y) = (80 − y)/30  برای 50 ≤ y ≤ 80',
+          'x = 9.4 ، ممدانی (برش با min)',
+        ],
+        find: 'باز شدن شیر با روش centroid، تا دو رقم اعشار',
+        answer: ['49.29', '49.3', '49.286', '49.2857'],
+        hint: '9.4 روی شاخه‌ی پایین‌رونده‌ی P است: α = (10 − 9.4)/2. بعد V را در α ببر و سه تکه کن: مثلث، مستطیل، مثلث.',
+        explain: 'α = (10 − 9.4)/2 = 0.3. برش: (y − 20)/20 = 0.3 ← y1 = 26 و (80 − y)/30 = 0.3 ← y2 = 71. مثلث چپ: مساحت 0.9، مرکز 24. مستطیل: 13.5، مرکز 48.5. مثلث راست: 1.35، مرکز 74. centroid = (21.6 + 654.75 + 99.9) / 15.75 = 776.25 / 15.75 ≈ 49.29.',
+      },
+      solve: async b => {
+        const L = [
+          ['8 ≤ 9.4 ≤ 10  →  α = (10 − 9.4)/2 = 0.3', 'purple'],
+          ['y_1 = 20 + 20 × 0.3 = 26        y_2 = 80 − 30 × 0.3 = 71', 'purple'],
+          ['left: ½ × 6 × 0.3 = 0.9  at 24      rect: 45 × 0.3 = 13.5  at 48.5', 'ink'],
+          ['right: ½ × 9 × 0.3 = 1.35  at 74      total area = 15.75', 'ink'],
+          ['moment = 0.9×24 + 13.5×48.5 + 1.35×74 = 776.25', 'ink'],
+        ];
+        for (const [k, [l, c]] of L.entries()) await b.write(`s${k}`, 500, 250 + k * 48, l, { size: 23, color: c, dur: 300 });
+        await b.write('res', 500, 520, 'centroid = 776.25 / 15.75 ≈ 49.29', { size: 32, color: 'green', bold: true });
+      },
+    },
+    {
+      say: 'سؤال امتحانی 6 (مثل تمرین 4، روش دیگر): در ترمز خودکار یک خودرو قاعده این است: اگر سرعت زیاد باشد آنگاه فشار ترمز زیاد است، if x is S then y is B. اگر سرعت 90 کیلومتر بر ساعت باشد، فشار ترمز با روش bisector چقدر است؟',
+      draw: examBoard(6, [
+        ['μ_S(x) = (x − 60)/40  [60, 100]      1  [100, 140]', 'blue'],
+        ['μ_B(y) = (y − 10)/30  [10, 40]      1  [40, 60]      (100 − y)/40  [60, 100]', 'blue'],
+        ['x = 90        bisector = ?', 'orange'],
+      ]),
+      quiz: {
+        given: [
+          'if x is S then y is B',
+          'μS(x) = (x − 60)/40  برای 60 ≤ x ≤ 100',
+          'μS(x) = 1  برای 100 ≤ x ≤ 140',
+          'μB(y) = (y − 10)/30  برای 10 ≤ y ≤ 40',
+          'μB(y) = 1  برای 40 ≤ y ≤ 60',
+          'μB(y) = (100 − y)/40  برای 60 ≤ y ≤ 100',
+          'x = 90 ، ممدانی (برش با min)',
+        ],
+        find: 'فشار ترمز با روش bisector، تا دو رقم اعشار',
+        answer: ['53.13', '53.125', '53.12', '53.1'],
+        hint: 'α = (90 − 60)/40. بعد نقطه‌های برش، مساحت سه تکه، و نصف مساحت کل را پیدا کن. خط bisector داخل مستطیل می‌افتد.',
+        explain: 'α = 0.75. برش: y1 = 10 + 30 × 0.75 = 32.5 و y2 = 100 − 40 × 0.75 = 70. مساحت‌ها: 8.4375 + 28.125 + 11.25 = 47.8125، نصف = 23.906. از مستطیل لازم: 23.906 − 8.4375 = 15.469، عرض 15.469 / 0.75 = 20.625. bisector = 32.5 + 20.625 ≈ 53.13.',
+      },
+      solve: async b => {
+        const L = [
+          ['α = (90 − 60)/40 = 0.75', 'purple'],
+          ['y_1 = 10 + 30 × 0.75 = 32.5        y_2 = 100 − 40 × 0.75 = 70', 'purple'],
+          ['areas: 8.4375 + 28.125 + 11.25 = 47.8125      half = 23.906', 'ink'],
+          ['from rect: 23.906 − 8.4375 = 15.469  →  width = 15.469 / 0.75 = 20.625', 'ink'],
+        ];
+        for (const [k, [l, c]] of L.entries()) await b.write(`s${k}`, 500, 260 + k * 55, l, { size: 23, color: c, dur: 300 });
+        await b.write('res', 500, 520, 'bisector = 32.5 + 20.625 ≈ 53.13', { size: 32, color: 'green', bold: true });
       },
     },
   ],

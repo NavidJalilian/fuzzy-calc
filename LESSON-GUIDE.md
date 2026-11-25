@@ -76,6 +76,11 @@ The inline lesson script must be a plain `<script>` tag (no attributes) — the 
   or a concept, use multiple choice.
 - Practice / mock-exam lessons (11, 16) are mostly worked exam problems: pose, solve step by step on the
   board, then quiz. They may have more quizzes (up to 10).
+- **Final exam questions stand alone.** Each final quiz is a complete exam problem shaped like the
+  teacher's homework sheets (`source/hw1.pdf` … `hw4.pdf`): its own story, its own sets / formulas /
+  rules / input, all listed in `given`, and one final answer. Never "in homework 3, …", "with the same
+  α, …", or a number from another question. (Section checks are the exception: they grow the running
+  example on purpose.) Lesson 16 is the reference.
 
 ## Correctness
 - Recompute every number, table, max-min product, centroid and gradient step yourself (run a quick
