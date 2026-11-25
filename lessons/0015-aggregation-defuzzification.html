@@ -46,6 +46,16 @@ const T_MOM = T_AREA.reduce((s, a, k) => s + a * T_CX[k], 0); // -34.5
 const T_C = T_MOM / 10.5;                                       // -3.2857
 const T_B = -4 + (11 - Math.sqrt(121 - 22 * 0.25));            // -3.747 (continuous bisector)
 
+// ---- why a right triangle balances 1/3 of its base from the tall side:
+// triangle on [0, 3], height x/3; cut into n equal strips, each strip = a point at its middle,
+// weighted by its area. 3 strips → 1.94, 6 strips → 1.99, thinner and thinner → 2 = 3 − 3/3.
+const stripCentroid = n => {
+  let m = 0, a = 0;
+  for (let k = 0; k < n; k++) { const c = (k + 0.5) * 3 / n, w = c / 3; m += c * w; a += w; }
+  return m / a;
+};
+const GS = Graph({ x: 150, y: 130, w: 420, h: 230, from: 0, to: 3 });
+
 const G = Graph({ x: 130, y: 110, w: 650, h: 360, from: 0, to: 10 });
 const GT = Graph({ x: 120, y: 130, w: 700, h: 300, from: -10, to: 10 });
 
@@ -501,11 +511,124 @@ Teacher.start({
         await b.write('qs', 500, 515, 'area = 2/2 + 4×1 + 11/2 = 1 + 4 + 5.5 = 10.5', { size: 28, color: 'green', bold: true });
       },
     },
+    // ---------------------------------------------------------- 16a. from points to pieces
+    {
+      say: 'حالا centroid ذوزنقه. فرمول بخش 2 برای نقطه‌های جدا بود: هر نقطه × عضویتش، جمع، تقسیم بر جمع عضویت‌ها. ولی ذوزنقه یک شکل *پُر* است، نه چند نقطه. ترفند: شکل را به نوارهای خیلی نازک تقسیم کن. هر نوار یک نقطه است و وزنش ارتفاعش. فرمول همان است، فقط با هزاران نوار. برای اینکه هزاران نوار را تک‌تک جمع نزنیم، نوارها را در همان سه تکه‌ی سؤال قبل گروه می‌کنیم. بعد هر تکه را با یک کیسه‌ی شن عوض می‌کنیم: وزن کیسه = مساحت تکه، جای کیسه = *نقطه‌ی تعادل* تکه، یعنی جایی که آن تکه به‌تنهایی روی نوک انگشت تعادل دارد.',
+      term: ['Balance point (center of a piece)', 'نقطه‌ی تعادل'],
+      draw: async b => {
+        await b.clear();
+        await trapAxes(b);
+        const piece = v => v < -8 ? 'blue' : v < -4 ? 'green' : 'purple';
+        const V = Array.from({ length: 34 }, (_, k) => -9.75 + k * 0.5);
+        await all(V.map((v, k) => b.line(`st${k}`, GT.X(v), GT.Y(0), GT.X(v), GT.Y(Math.min(1, (v + 10) / 2, (7 - v) / 11)), { color: piece(v), width: 3, dur: 400 })));
+        await b.write('h', 500, 60, 'از نقطه به تکه', { size: 32, color: 'orange', bold: true, fa: true });
+        await b.write('f1', 500, 492, 'Σ x·μ / Σ μ   →   Σ (area × balance point) / Σ area', { size: 26 });
+        await b.write('f2', 500, 530, 'هر تکه = یک کیسه: وزنش مساحت تکه، جایش نقطه‌ی تعادل تکه', { size: 22, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 16b. balance point of a rectangle
+    {
+      say: 'نقطه‌ی تعادل هر تکه کجاست؟ اول مستطیل. مستطیل همه‌جا هم‌ارتفاع است، پس همه‌ی نوارهایش هم‌وزن‌اند. نیمه‌ی چپ و نیمه‌ی راستش درست هم‌وزن‌اند، پس روی *وسطش* تعادل دارد. مستطیل ذوزنقه از -8 تا -4 است، پس نقطه‌ی تعادلش (-8 + -4) / 2 = -6.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 60, 'مستطیل: وسطش', { size: 34, color: 'green', bold: true, fa: true });
+        await b.box('rb', 300, 170, 400, 200, { color: 'green', fill: 'green' });
+        await all(Array.from({ length: 7 }, (_, k) => b.line(`rs${k}`, 350 + k * 50, 172, 350 + k * 50, 368, { color: 'green', width: 2, dur: 150 })));
+        await b.line('rmid', 500, 150, 500, 370, { color: 'orange', width: 3 });
+        await all([
+          b.write('rl', 400, 140, 'نیمه‌ی چپ', { size: 22, color: 'soft', fa: true }),
+          b.write('rr', 600, 140, 'نیمه‌ی راست', { size: 22, color: 'soft', fa: true }),
+        ]);
+        await b.path('ful', 'M500 372 L480 410 L520 410 Z', { color: 'orange', fill: 'orange' });
+        await all([
+          b.write('r1', 300, 400, '-8', { size: 24, color: 'soft' }),
+          b.write('r2', 700, 400, '-4', { size: 24, color: 'soft' }),
+          b.write('r3', 500, 440, '-6', { size: 26, color: 'orange', bold: true }),
+        ]);
+        await b.write('res', 500, 500, 'balance point = (-8 + -4) / 2 = -6', { size: 30, color: 'green', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- 16c. right triangle: strips and weights
+    {
+      say: 'حالا مثلث قائم، یعنی مثلثی که یک ضلعش عمودی و بلند است و طرف دیگرش به نوک تیز می‌رسد. یک مثلث ساده بگیریم: از 0 تا 3، نوکش در 0 و ضلع بلندش در 3. آن را سه نوار هم‌عرض می‌کنیم. ارتفاع وسط نوارها 1/6، 3/6 و 5/6 است؛ پس وزن نوارها به نسبت *1، 3 و 5* است. نوار کنار ضلع بلند پنج برابر نوار کنار نوک وزن دارد. برای همین نقطه‌ی تعادل مثلث وسطش نیست؛ به طرف ضلع بلند کشیده می‌شود.',
+      draw: async b => {
+        await b.clear();
+        await b.write('h', 500, 60, 'مثلث قائم: چرا وسطش نیست؟', { size: 32, color: 'purple', bold: true, fa: true });
+        await GS.axes(b, 'gx', { ticks: [0, 1, 2, 3], yTicks: [1], label: 'x' });
+        for (let k = 0; k < 3; k++) {
+          const h = (2 * k + 1) / 6;
+          await b.box(`sb${k}`, GS.X(k) + 3, GS.Y(h), GS.X(k + 1) - GS.X(k) - 6, GS.Y(0) - GS.Y(h), { color: 'blue', fill: 'blue', dur: 300 });
+          await b.write(`sw${k}`, GS.X(k + 0.5), GS.Y(h) - 12, String(2 * k + 1), { size: 26, color: 'orange', bold: true, dur: 200 });
+        }
+        await GS.poly(b, 'tri', [[0, 0], [3, 1], [3, 0]], { color: 'ink' });
+        await all([
+          b.write('tip', GS.X(0) - 40, GS.Y(0) - 8, 'نوک', { size: 20, color: 'soft', fa: true }),
+          b.write('tall', GS.X(3) + 60, GS.Y(0.55), 'ضلع بلند', { size: 20, color: 'soft', fa: true }),
+        ]);
+        await b.write('w', 800, 200, 'وزن نوارها:  1 : 3 : 5', { size: 26, color: 'orange', bold: true, fa: true });
+        await b.write('w2', 800, 250, 'سنگینی کنار ضلع بلند است', { size: 22, color: 'soft', fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 16d. right triangle: the 1/3 rule
+    {
+      say: 'با همان فرمول بخش 2 حساب کنیم: وسط نوارها 0.5، 1.5 و 2.5 است و وزن‌ها 1، 3 و 5. پس (0.5×1 + 1.5×3 + 2.5×5) / 9 = 17.5 / 9 ≈ 1.94. با 6 نوار نازک‌تر جواب 1.99 می‌شود، و هرچه نوارها نازک‌تر، جواب به 2 نزدیک‌تر. پس جواب دقیق 2 است: یک واحد از ضلع بلند، یعنی *یک‌سوم قاعده‌ی 3*. این برای هر مثلث قائم درست است: نقطه‌ی تعادل یک‌سوم قاعده از ضلع بلند است، به طرف داخل مثلث. یعنی دو‌سوم قاعده از نوک تیز.',
+      tip: true,
+      draw: async b => {
+        await b.write('s3', 500, 430, `(0.5×1 + 1.5×3 + 2.5×5) / (1 + 3 + 5) = 17.5 / 9 ≈ ${fmt(stripCentroid(3))}`, { size: 24 });
+        await b.erase(['w', 'w2']);
+        await all([
+          b.write('n3', 800, 170, `3 نوار ← ${fmt(stripCentroid(3))}`, { size: 24, fa: true }),
+          b.write('n6', 800, 215, `6 نوار ← ${fmt(stripCentroid(6))}`, { size: 24, fa: true }),
+          b.write('ni', 800, 260, 'نوارهای خیلی نازک ← 2', { size: 24, fa: true, bold: true }),
+        ]);
+        await b.line('bal', GS.X(2), GS.Y(0), GS.X(2), GS.Y(0.95), { color: 'red' });
+        await b.write('ball', GS.X(2), GS.Y(0.95) - 10, 'تعادل', { size: 20, color: 'red', bold: true, fa: true });
+        await b.write('rule1', 800, 320, '2 = 3 − 3/3', { size: 30, color: 'green', bold: true });
+        await b.write('rule', 500, 495, 'نقطه‌ی تعادل مثلث قائم: یک‌سوم قاعده از ضلع بلند (دو‌سوم از نوک)', { size: 25, color: 'purple', bold: true, fa: true });
+      },
+    },
+    // ---------------------------------------------------------- 16e. balance points of the trapezoid's pieces
+    {
+      say: 'برگردیم به ذوزنقه. مثلث چپ: ضلع بلندش در -8 است، جایی که ارتفاع 1 است، و نوکش در -10. قاعده 2 است و یک‌سومش 0.67. از ضلع بلند به طرف داخل مثلث، یعنی به چپ، می‌رویم: -8 − 0.67 = -8.67. مستطیل را دیدیم: -6. مثلث راست با شما.',
+      draw: async b => {
+        await b.clear();
+        await trapAxes(b);
+        await all([
+          b.line('dv1', GT.X(-8), GT.Y(0), GT.X(-8), GT.Y(1), { color: 'soft', width: 2 }),
+          b.line('dv2', GT.X(-4), GT.Y(0), GT.X(-4), GT.Y(1), { color: 'soft', width: 2 }),
+        ]);
+        await b.dot('bp1', GT.X(T_CX[0]), GT.Y(0), { color: 'orange', r: 7 });
+        await b.write('b1', 500, 492, 'left triangle:  -8 − 2/3 ≈ -8.67        rectangle:  (-8 + -4)/2 = -6', { size: 24 });
+        await b.dot('bp2', GT.X(-6), GT.Y(0), { color: 'orange', r: 7 });
+        await b.write('rq', 500, 532, 'right triangle:  ?', { size: 26, color: 'orange', bold: true });
+      },
+    },
+    {
+      say: 'سؤال بخش 4، سوم: مثلث راست ذوزنقه از -4 تا 7 است. ضلع بلندش در -4 است، جایی که ارتفاع 1 است، و نوک تیزش در 7. نقطه‌ی تعادلش کجاست؟ تا دو رقم اعشار.',
+      draw: async b => {
+        await checkTag(b, 4);
+        await b.ring('rqr', GT.X(1.5), GT.Y(0.25), 120, 45, { color: 'orange' });
+      },
+      quiz: {
+        given: ['مثلث راست ذوزنقه: قاعده از -4 تا 7', 'ضلع بلند (ارتفاع 1) در x = -4، نوک تیز در x = 7', 'نقطه‌ی تعادل مثلث قائم = یک‌سوم قاعده از ضلع بلند، به طرف داخل مثلث'],
+        find: 'نقطه‌ی تعادل مثلث راست، تا دو رقم اعشار',
+        answer: ['-0.33', '-0.333', '-1/3', '−0.33'],
+        hint: 'قاعده = 7 − (-4) = 11. از -4 به طرف راست (به طرف نوک) 11/3 جلو برو.',
+        explain: '-4 + 11/3 = -4 + 3.67 ≈ -0.33. این مثلث خیلی پهن است، پس نقطه‌ی تعادلش از ضلع بلند خیلی دور می‌افتد و centroid کل شکل را به راست می‌کشد.',
+      },
+      solve: async b => {
+        await b.erase(['rq', 'rqr']);
+        await b.dot('bp3', GT.X(T_CX[2]), GT.Y(0), { color: 'orange', r: 7 });
+        await b.write('rq', 500, 532, 'right triangle:  -4 + 11/3 ≈ -0.33', { size: 26, color: 'green', bold: true });
+      },
+    },
     // ---------------------------------------------------------- 16. centroid of the trapezoid
     {
-      say: 'حالا centroid. همان سه تکه‌ی سؤال قبل: مثلث چپ با مساحت ½ × 2 × 1 = 1، مستطیل با مساحت 4 × 1 = 4، و مثلث راست با مساحت ½ × 11 × 1 = 5.5؛ کل مساحت 10.5. مرکز هر مثلث در یک‌سوم قاعده از ضلع عمودی‌اش است: -8.67 و -0.33؛ مرکز مستطیل -6. گشتاور کل: 1 × (-8.67) + 4 × (-6) + 5.5 × (-0.33) = -34.5. پس centroid = -34.5 / 10.5 ≈ -3.29، همان عدد اسلاید.',
+      say: 'حالا هر سه کیسه را داریم. مثلث چپ: مساحت ½ × 2 × 1 = 1 در نقطه‌ی -8.67. مستطیل: مساحت 4 × 1 = 4 در نقطه‌ی -6. مثلث راست: مساحت ½ × 11 × 1 = 5.5 در نقطه‌ی -0.33. کل مساحت 10.5. گشتاور هر تکه = مساحت × نقطه‌ی تعادل. جمع گشتاورها: 1 × (-8.67) + 4 × (-6) + 5.5 × (-0.33) = -34.5. پس centroid = -34.5 / 10.5 ≈ -3.29، همان عدد اسلاید.',
+      term: ['Moment', 'گشتاور'],
       draw: async b => {
-        await b.erase(['res', 'chk', 'qq', 'qs']);
+        await b.erase(['b1', 'rq', 'chk', 'rqr']);
+        await b.dot('bp3', GT.X(T_CX[2]), GT.Y(0), { color: 'orange', r: 7 });
         await all([
           b.line('dv1', GT.X(-8), GT.Y(0), GT.X(-8), GT.Y(1), { color: 'soft', width: 2 }),
           b.line('dv2', GT.X(-4), GT.Y(0), GT.X(-4), GT.Y(1), { color: 'soft', width: 2 }),
@@ -572,7 +695,7 @@ Teacher.start({
     },
     // ---------------------------------------------------------- 20. summary
     {
-      say: 'جمع‌بندی کنیم. این پنج نکته را یک بار دیگر بخوانید، بعد برویم سراغ سؤال‌ها.',
+      say: 'جمع‌بندی کنیم. این شش نکته را یک بار دیگر بخوانید، بعد برویم سراغ سؤال‌ها.',
       draw: async b => {
         await b.clear();
         await b.write('h', 500, 75, 'یادت باشد', { size: 48, color: 'orange', bold: true, fa: true });
@@ -580,10 +703,11 @@ Teacher.start({
           `تجمیع: خروجی همه‌ی قاعده‌ها ← یک مجموعه؛ روش اسلایدها ${LTR('max')}`,
           `روش‌های تجمیع در ${LTR('MATLAB')}:  ${LTR('max ،  probor = a + b − ab ،  sum')}`,
           'مرکز ثقل (centroid): نقطه‌ی تعادل شکل، تقسیمِ دو جمع',
+          'شکل پُر: تکه کن؛ مستطیل ← وسطش، مثلث ← یک‌سوم قاعده از ضلع بلند',
           'نیمساز (bisector): مساحت را دو نیمه‌ی مساوی می‌کند',
           'اول / وسط / آخرِ نقطه‌های ماکزیمم: SOM / MOM / LOM',
         ];
-        for (const [k, l] of L.entries()) await b.write(`m${k}`, 890, 160 + k * 72, '•  ' + l, { size: 25, anchor: 'start', fa: true });
+        for (const [k, l] of L.entries()) await b.write(`m${k}`, 890, 150 + k * 66, '•  ' + l, { size: 25, anchor: 'start', fa: true });
       },
     },
     // ---------------------------------------------------------- quizzes
