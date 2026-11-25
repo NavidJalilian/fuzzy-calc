@@ -137,6 +137,39 @@ async function roadmap(b, title, lines) {
   for (const [k, l] of lines.entries()) await b.write(`m${k}`, 860, 140 + k * 50, l, { size: 25, anchor: 'start', fa: true, dur: 300 });
 }
 
+// ---------------------------------------------------------------- exam walk-throughs
+// After exam questions 4–6, a few steps show where every number of the answer comes from:
+// which side of a shape the input falls on, where the cut line meets each side, how the final shape
+// splits into rectangles and triangles, and each piece's area and balance point.
+const GW = Graph({ x: 110, y: 110, w: 720, h: 200, from: 0, to: 100 });             // full μ
+const GWZ = Graph({ x: 110, y: 100, w: 720, h: 200, from: 0, to: 100, max: 0.5 });  // μ zoomed to 0.5
+const walkTitle = (b, t) => b.write('wt', 500, 55, t, { size: 26, color: 'blue', bold: true, fa: true });
+async function mathLines(b, L, y0, dy, size = 22) {
+  for (const [k, [l, c]] of L.entries()) await b.write(`w${k}`, 500, y0 + k * dy, l, { size, color: c, dur: 300 });
+}
+// A filled closed shape through [[v, μ], ...] on graph g.
+const fillShape = (b, g, id, pts, color) =>
+  b.path(id, 'M' + pts.map(([v, m]) => `${g.X(v).toFixed(1)} ${g.Y(m).toFixed(1)}`).join('L') + 'Z', { color, fill: color, width: 1.5, dur: 300 });
+// One row per piece: name, area, balance point, area × balance point; then totals, the rule, the result.
+async function pieceTable(b, rows, totals, result) {
+  const X = [150, 390, 640, 870];
+  await all(['piece', 'area', 'balance point', 'area × point'].map((h, k) =>
+    b.write(`th${k}`, X[k], 100, h, { size: 22, color: 'blue', bold: true, dur: 150 })));
+  await b.line('tg', 40, 118, 960, 118, { color: 'soft', width: 2 });
+  for (const [r, row] of rows.entries()) {
+    await all(row.map((c, k) => b.write(`tc${r}-${k}`, X[k], 160 + r * 46, c, { size: 20, color: k === 3 ? 'green' : 'ink', dur: 150 })));
+  }
+  const yt = 160 + rows.length * 46;
+  await b.line('tg2', 40, yt - 24, 960, yt - 24, { color: 'soft', width: 2 });
+  await all([
+    b.write('tt', X[0], yt + 8, 'total', { size: 22, bold: true }),
+    b.write('tta', X[1], yt + 8, totals[0], { size: 24, color: 'orange', bold: true }),
+    b.write('ttm', X[3], yt + 8, totals[1], { size: 24, color: 'orange', bold: true }),
+  ]);
+  await b.write('rule', 500, yt + 60, 'نقطه‌ی تعادل مستطیل: وسطش  ·  مثلث: یک‌سوم قاعده از طرف ضلع بلندش', { size: 21, color: 'purple', fa: true });
+  await b.write('res', 500, 525, result, { size: 30, color: 'green', bold: true });
+}
+
 Teacher.start({
   id: 'L16',
   number: 16,
@@ -946,19 +979,146 @@ Teacher.start({
         find: 'سرعت فن (عدد centroid)، تا دو رقم اعشار',
         answer: ['53.95', '53.9', '54', '53.951'],
         hint: 'قدرت قاعده‌ها 0، 0.4 و 0.1 می‌شود. Medium را در 0.4 و High را در 0.1 ببر. شاخه‌ی پایین‌رونده‌ی Medium در z = 77 به 0.1 می‌رسد. شکل را چهار تکه کن: [20, 32]، [32, 68]، [68, 77]، [77, 100].',
-        explain: 'Warm(31) = 0.4، Hot(31) = 0.1، Cold(31) = 0؛ RH Medium(72) = 0.6، High(72) = 0.4. قاعده‌ها: 0، 0.4، 0.1. شکل نهایی: از 20 تا 32 بالا، 0.4 تا 68، پایین تا 0.1 در 77، بعد 0.1 تا 100. مساحت‌ها 2.4 + 14.4 + 2.25 + 2.3 = 21.35، گشتاورها 67.2 + 720 + 161.1 + 203.55 = 1151.85. centroid = 1151.85 / 21.35 ≈ 53.95.',
+        explain: 'Warm(31) = 0.4، Hot(31) = 0.1، Cold(31) = 0؛ RH Medium(72) = 0.6، High(72) = 0.4. قاعده‌ها: 0، 0.4، 0.1. برش Medium در 0.4: (z − 20)/30 = 0.4 یعنی z = 32، و (80 − z)/30 = 0.4 یعنی z = 68. High در 0.1 از 63 صاف است و Medium در z = 77 به 0.1 می‌رسد. شکل را پنج تکه می‌کنیم: مساحت کل 21.35، گشتاور کل 1151.85، centroid ≈ 53.95. در صفحه‌های بعد هر عدد قدم‌به‌قدم ساخته می‌شود.',
       },
       solve: async b => {
         const L = [
-          ['Cold(31) = 0    Warm(31) = (35 − 31)/10 = 0.4    Hot(31) = (31 − 30)/10 = 0.1', 'blue'],
+          ['Warm(31) = (35 − 31)/10 = 0.4    Hot(31) = (31 − 30)/10 = 0.1    Cold(31) = 0', 'blue'],
           ['RH Medium(72) = (90 − 72)/30 = 0.6    RH High(72) = (72 − 60)/30 = 0.4', 'blue'],
           ['R1 = min(0, 0.6) = 0    R2 = min(0.4, 0.6) = 0.4    R3 = min(0.1, 0.4) = 0.1', 'purple'],
-          ['Medium cut at 0.4: 32 … 68        (80 − z)/30 = 0.1  →  z = 77', 'purple'],
-          ['area: 2.4 + 14.4 + 2.25 + 2.3 = 21.35', 'ink'],
-          ['moment: 67.2 + 720 + 161.1 + 203.55 = 1151.85', 'ink'],
+          ['Medium cut at 0.4:   (z − 20)/30 = 0.4 → z = 32     (80 − z)/30 = 0.4 → z = 68', 'purple'],
+          ['High cut at 0.1 from z = 63     Medium falls to 0.1:  (80 − z)/30 = 0.1 → z = 77', 'purple'],
+          ['area:  ½×12×0.4 + 36×0.4 + 9×0.1 + ½×9×0.3 + 23×0.1 = 21.35', 'ink'],
+          ['moment:  2.4×28 + 14.4×50 + 0.9×72.5 + 1.35×71 + 2.3×88.5 = 1151.85', 'ink'],
         ];
-        for (const [k, [l, c]] of L.entries()) await b.write(`s${k}`, 500, 250 + k * 40, l, { size: 21, color: c, dur: 300 });
-        await b.write('res', 500, 520, 'centroid = 1151.85 / 21.35 ≈ 53.95', { size: 32, color: 'green', bold: true });
+        for (const [k, [l, c]] of L.entries()) await b.write(`s${k}`, 500, 252 + k * 36, l, { size: 20, color: c, dur: 300 });
+        await b.write('res', 500, 522, 'centroid = 1151.85 / 21.35 ≈ 53.95', { size: 32, color: 'green', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- exam 4, step by step
+    {
+      say: 'سؤال 4 را قدم‌به‌قدم باز کنیم. قدم 1، فازی‌سازی: برای هر مجموعه ببین ورودی روی کدام ضلع افتاده و فرمول همان ضلع را بنویس. Warm مثلثی با گوشه‌های 15، 25 و 35 است و 31 بین 25 و 35 است، یعنی روی ضلع پایین‌رونده؛ پس (35 − 31)/(35 − 25) = 0.4. Hot از 30 بالا می‌رود و در 40 به 1 می‌رسد؛ 31 روی ضلع بالارونده است، پس (31 − 30)/10 = 0.1. Cold در 25 تمام شده، پس صفر. رطوبت 72 هم همین‌طور: Medium روی ضلع پایین‌رونده 0.6 و High روی ضلع بالارونده 0.4. قدرت هر قاعده min دو عدد مقدمش است.',
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        await walkTitle(b, 'سؤال 4 گام‌به‌گام · قدم 1: فازی‌سازی و قدرت قاعده‌ها');
+        await mathLines(b, [
+          ['Cold [0 0 10 25]:   31 > 25   →   Cold(31) = 0', 'blue'],
+          ['Warm [15 25 35]:   25 ≤ 31 ≤ 35, falling side   →   (35 − 31)/(35 − 25) = 0.4', 'blue'],
+          ['Hot [30 40 50 50]:   30 ≤ 31 ≤ 40, rising side   →   (31 − 30)/(40 − 30) = 0.1', 'blue'],
+          ['RH Medium [30 60 90]:   60 ≤ 72 ≤ 90, falling side   →   (90 − 72)/(90 − 60) = 0.6', 'blue'],
+          ['RH High [60 90 100 100]:   60 ≤ 72 ≤ 90, rising side   →   (72 − 60)/(90 − 60) = 0.4', 'blue'],
+          ['R1 = min(Cold, RH Medium) = min(0, 0.6) = 0   →   Low', 'purple'],
+          ['R2 = min(Warm, RH Medium) = min(0.4, 0.6) = 0.4   →   Medium', 'purple'],
+          ['R3 = min(Hot, RH High) = min(0.1, 0.4) = 0.1   →   High', 'purple'],
+        ], 108, 50, 21);
+        await b.write('note', 500, 525, 'ورودی روی کدام ضلع است؟ فرمول همان ضلع  ·  قدرت قاعده = min', { size: 22, color: 'orange', bold: true, fa: true });
+      },
+    },
+    {
+      say: 'قدم 2: خروجی قاعده‌ی 2 سرعت Medium است، مثلثی با گوشه‌های 20، 50 و 80. یعنی در 20 صفر است، در 50 به نوک 1 می‌رسد و در 80 دوباره صفر می‌شود. ضلع چپ در 30 واحد، از 20 تا 50، از 0 به 1 بالا می‌رود؛ پس ارتفاعش در هر z برابر (z − 20)/30 است. امتحانش کن: در z = 50 می‌شود 30/30 = 1. ضلع راست برعکس پایین می‌آید: (80 − z)/30.',
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        await walkTitle(b, 'قدم 2: فرمول دو ضلع مثلث Medium');
+        await GW.axes(b, 'gx', { ticks: [0, 20, 50, 80, 100], yTicks: [0.4, 1], label: 'z' });
+        await GW.poly(b, 'med', [[20, 0], [50, 1], [80, 0]], { color: 'orange' });
+        await all([
+          b.write('mL', GW.X(50), GW.Y(1) - 12, 'Medium', { size: 22, color: 'orange' }),
+          b.write('sl', GW.X(35) - 12, GW.Y(0.5), '(z − 20)/30', { size: 20, color: 'orange', anchor: 'end' }),
+          b.write('sr', GW.X(65) + 12, GW.Y(0.5), '(80 − z)/30', { size: 20, color: 'orange', anchor: 'start' }),
+        ]);
+        await mathLines(b, [
+          ['left side:  0 at z = 20,  1 at z = 50   →   μ = (z − 20)/(50 − 20) = (z − 20)/30', 'ink'],
+          ['right side:  1 at z = 50,  0 at z = 80   →   μ = (80 − z)/(80 − 50) = (80 − z)/30', 'ink'],
+          ['check:  z = 50   →   (50 − 20)/30 = 1   ✓', 'soft'],
+        ], 395, 46, 21);
+      },
+    },
+    {
+      say: 'قدم 3، برش: قاعده‌ی 2 فقط به اندازه‌ی 0.4 درست است، پس Medium هیچ‌جا نباید از 0.4 بالاتر برود. یک خط افقی در 0.4 می‌کشیم و هر چه بالای آن است بریده می‌شود. نقطه‌های برش جایی است که هر ضلع دقیقاً به 0.4 می‌رسد. ضلع چپ را برابر 0.4 بگذار: (z − 20)/30 = 0.4. دو طرف ضربدر 30: z − 20 = 12، پس z = 32. ضلع راست: (80 − z)/30 = 0.4، پس 80 − z = 12 و z = 68. «Medium cut at 0.4: 32 … 68» یعنی همین: سقف صاف از 32 تا 68.',
+      tip: true,
+      draw: async b => {
+        await b.erase(['w*', 'sl', 'sr']);
+        await walkTitle(b, 'قدم 3: برش Medium در ارتفاع 0.4');
+        await b.line('cut', GW.X(0), GW.Y(0.4), GW.X(100), GW.Y(0.4), { color: 'red', width: 2 });
+        await b.write('cutl', GW.X(100) + 8, GW.Y(0.4) + 6, 'R2 = 0.4', { size: 20, color: 'red', anchor: 'start' });
+        await b.dim(['med', 'mL'], 0.35);
+        await fillShape(b, GW, 'clip', [[20, 0], [32, 0.4], [68, 0.4], [80, 0]], 'green');
+        await all([
+          b.dot('p32', GW.X(32), GW.Y(0.4), { color: 'red', r: 6 }),
+          b.dot('p68', GW.X(68), GW.Y(0.4), { color: 'red', r: 6 }),
+          b.write('t32', GW.X(32) - 8, GW.Y(0.4) - 12, '32', { size: 22, color: 'red', bold: true, anchor: 'end' }),
+          b.write('t68', GW.X(68) + 8, GW.Y(0.4) - 12, '68', { size: 22, color: 'red', bold: true, anchor: 'start' }),
+        ]);
+        await mathLines(b, [
+          ['left:   (z − 20)/30 = 0.4   →   z − 20 = 0.4 × 30 = 12   →   z = 32', 'ink'],
+          ['right:   (80 − z)/30 = 0.4   →   80 − z = 0.4 × 30 = 12   →   z = 68', 'ink'],
+          ['Medium cut at 0.4:  flat top from 32 to 68', 'green'],
+        ], 395, 46, 22);
+      },
+    },
+    {
+      say: 'قدم 4: قاعده‌ی 3 هم با قدرت 0.1 روشن است، پس High هم بریده می‌شود، در ارتفاع 0.1. ضلع بالارونده‌ی High (z − 60)/30 است، پس در z = 63 به 0.1 می‌رسد و از آنجا تا 100 یک نوار صاف 0.1 است. Low با قدرت صفر کلاً حذف است. حالا تجمیع با max: در هر نقطه بلندترین شکل را نگه دار. ضلع پایین‌رونده‌ی Medium از 0.4 پایین می‌آید و تا وقتی بالاتر از 0.1 است، Medium برنده است. جایی که به 0.1 می‌رسد: (80 − z)/30 = 0.1، پس 80 − z = 3 و z = 77. بعد از 77 نوار High بلندتر است. محور μ را بزرگ کرده‌ایم تا 0.1 دیده شود. خط سبز شکل نهایی است.',
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        await walkTitle(b, 'قدم 4: برش High در 0.1 و تجمیع با max');
+        await GWZ.axes(b, 'gx', { ticks: [0, 20, 32, 63, 68, 77, 100], yTicks: [0.1, 0.4], label: 'z' });
+        await all([
+          GWZ.poly(b, 'mc', [[20, 0], [32, 0.4], [68, 0.4], [80, 0]], { color: 'orange' }),
+          GWZ.poly(b, 'hc', [[60, 0], [63, 0.1], [100, 0.1]], { color: 'purple' }),
+        ]);
+        await all([
+          b.write('mcl', GWZ.X(50), GWZ.Y(0.4) - 12, 'Medium cut at 0.4', { size: 20, color: 'orange' }),
+          b.write('hcl', GWZ.X(90), GWZ.Y(0.1) - 12, 'High cut at 0.1', { size: 20, color: 'purple' }),
+        ]);
+        await GWZ.poly(b, 'agg', [[20, 0], [32, 0.4], [68, 0.4], [77, 0.1], [100, 0.1], [100, 0]], { color: 'green', width: 6, dur: 1000 });
+        await b.dot('p77', GWZ.X(77), GWZ.Y(0.1), { color: 'red', r: 6 });
+        await mathLines(b, [
+          ['High:   (z − 60)/30 = 0.1   →   z = 63   →   flat 0.1 from 63 to 100', 'purple'],
+          ['max:   Medium falls  (80 − z)/30 = 0.1   →   80 − z = 3   →   z = 77', 'ink'],
+          ['before 77 Medium is higher,  after 77 High is higher', 'soft'],
+        ], 380, 46, 22);
+      },
+    },
+    {
+      say: 'قدم 5، مساحت: شکل سبز را به تکه‌هایی می‌بُریم که فرمول مساحتشان را بلدیم: مستطیل (عرض × ارتفاع) و مثلث (½ × قاعده × ارتفاع). خط عمودی در 32، 68 و 77 می‌زنیم. تکه‌ی شیب‌دار بین 68 و 77 را با یک خط افقی در 0.1 دو تکه می‌کنیم: یک مستطیل پایین و یک مثلث بالا. عرض هر تکه عدد راست منهای عدد چپ است، مثلاً 32 − 20 = 12. ارتفاع مثلث بالایی 0.4 − 0.1 = 0.3 است. جمع پنج مساحت 21.35 می‌شود. تکه‌های 3 و 4 با هم همان 2.25 هستند که در خلاصه آمده بود.',
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        await walkTitle(b, 'قدم 5: شکل را تکه کن، مساحت هر تکه');
+        await GWZ.axes(b, 'gx', { ticks: [0, 20, 32, 68, 77, 100], yTicks: [0.1, 0.4], label: 'z' });
+        const P = [
+          [[[20, 0], [32, 0], [32, 0.4]], 'orange', [28.5, 0.12]],
+          [[[32, 0], [68, 0], [68, 0.4], [32, 0.4]], 'blue', [50, 0.2]],
+          [[[68, 0], [77, 0], [77, 0.1], [68, 0.1]], 'blue', [72.5, 0.05]],
+          [[[68, 0.1], [77, 0.1], [68, 0.4]], 'orange', [70.8, 0.18]],
+          [[[77, 0], [100, 0], [100, 0.1], [77, 0.1]], 'blue', [88.5, 0.05]],
+        ];
+        for (const [k, [pts, c]] of P.entries()) await fillShape(b, GWZ, `pc${k}`, pts, c);
+        await all(P.map(([, , [v, m]], k) => b.write(`pn${k}`, GWZ.X(v), GWZ.Y(m) + 7, String(k + 1), { size: 20, color: 'ink', bold: true, dur: 150 })));
+        await mathLines(b, [
+          ['1  triangle 20…32:   ½ × 12 × 0.4 = 2.4          2  rectangle 32…68:   36 × 0.4 = 14.4', 'ink'],
+          ['3  rectangle 68…77:   9 × 0.1 = 0.9          4  triangle 68…77:   ½ × 9 × 0.3 = 1.35', 'ink'],
+          ['5  rectangle 77…100:   23 × 0.1 = 2.3', 'ink'],
+          ['total area = 2.4 + 14.4 + 0.9 + 1.35 + 2.3 = 21.35', 'green'],
+        ], 375, 42, 20);
+      },
+    },
+    {
+      say: 'قدم 6، گشتاور و centroid: centroid نقطه‌ای است که اگر شکل را رویش بگذاری، تعادل دارد. برای پیدا کردنش هر تکه را با نقطه‌ی تعادل خودش عوض می‌کنیم. نقطه‌ی تعادل مستطیل وسط آن است، مثلاً (32 + 68)/2 = 50. نقطه‌ی تعادل مثلث قائم یک‌سوم قاعده از طرف ضلع بلندش است، چون بیشتر وزنش آنجاست: ضلع بلند مثلث 1 در 32 است، پس 32 − 12/3 = 28. ضلع بلند مثلث 4 در 68 است، پس 68 + 9/3 = 71. گشتاور هر تکه = مساحت × نقطه‌ی تعادل. در آخر جمع گشتاورها را بر جمع مساحت‌ها تقسیم می‌کنیم: 1151.85 / 21.35 ≈ 53.95.',
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        await walkTitle(b, 'قدم 6: نقطه‌ی تعادل هر تکه، گشتاور، centroid');
+        await pieceTable(b, [
+          ['1  triangle 20…32', '½ × 12 × 0.4 = 2.4', '32 − 12/3 = 28', '2.4 × 28 = 67.2'],
+          ['2  rectangle 32…68', '36 × 0.4 = 14.4', '(32 + 68)/2 = 50', '14.4 × 50 = 720'],
+          ['3  rectangle 68…77', '9 × 0.1 = 0.9', '(68 + 77)/2 = 72.5', '0.9 × 72.5 = 65.25'],
+          ['4  triangle 68…77', '½ × 9 × 0.3 = 1.35', '68 + 9/3 = 71', '1.35 × 71 = 95.85'],
+          ['5  rectangle 77…100', '23 × 0.1 = 2.3', '(77 + 100)/2 = 88.5', '2.3 × 88.5 = 203.55'],
+        ], ['21.35', '1151.85'], 'centroid = 1151.85 / 21.35 ≈ 53.95');
       },
     },
     {
@@ -996,6 +1156,40 @@ Teacher.start({
         await b.write('res', 500, 520, 'centroid = 776.25 / 15.75 ≈ 49.29', { size: 32, color: 'green', bold: true });
       },
     },
+    // ---------------------------------------------------------- exam 5, step by step
+    {
+      say: 'سؤال 5 قدم‌به‌قدم. قدم 1: P سه فرمول دارد و هر کدام برای یک بازه است. 9.4 بین 8 و 10 است، پس فرمول سوم را می‌گیریم: (10 − 9.4)/2 = 0.3. این قدرت قاعده است. قدم 2، برش: V را در ارتفاع 0.3 می‌بُریم. ضلع چپ V فرمول (y − 20)/20 دارد؛ برابر 0.3 بگذار: y − 20 = 0.3 × 20 = 6، پس y = 26. ضلع راست: (80 − y)/30 = 0.3، پس 80 − y = 9 و y = 71. سقف صاف از 26 تا 71 است.',
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        await walkTitle(b, 'سؤال 5 گام‌به‌گام · قدم 1 و 2: قدرت قاعده و برش V');
+        await GW.axes(b, 'gx', { ticks: [0, 20, 26, 40, 50, 71, 80, 100], yTicks: [0.3, 1], label: 'y' });
+        await GW.poly(b, 'v', [[20, 0], [40, 1], [50, 1], [80, 0]], { color: 'soft' });
+        await b.write('vl', GW.X(45), GW.Y(1) - 12, 'V', { size: 22, color: 'soft' });
+        await b.line('cut', GW.X(0), GW.Y(0.3), GW.X(100), GW.Y(0.3), { color: 'red', width: 2 });
+        await b.write('cutl', GW.X(100) + 8, GW.Y(0.3) + 6, 'α = 0.3', { size: 20, color: 'red', anchor: 'start' });
+        await fillShape(b, GW, 'clip', [[20, 0], [26, 0.3], [71, 0.3], [80, 0]], 'green');
+        await all([b.dot('p1', GW.X(26), GW.Y(0.3), { color: 'red', r: 6 }), b.dot('p2', GW.X(71), GW.Y(0.3), { color: 'red', r: 6 })]);
+        await mathLines(b, [
+          ['8 ≤ 9.4 ≤ 10   →   third formula   →   α = (10 − 9.4)/2 = 0.3', 'purple'],
+          ['left:   (y − 20)/20 = 0.3   →   y − 20 = 0.3 × 20 = 6   →   y = 26', 'ink'],
+          ['right:   (80 − y)/30 = 0.3   →   80 − y = 0.3 × 30 = 9   →   y = 71', 'ink'],
+        ], 395, 46, 22);
+      },
+    },
+    {
+      say: 'قدم 3: شکل بریده‌شده سه تکه است: یک مثلث چپ از 20 تا 26، یک مستطیل از 26 تا 71، و یک مثلث راست از 71 تا 80. مساحت هر تکه با فرمول مستطیل یا مثلث. نقطه‌ی تعادل مستطیل وسطش است: (26 + 71)/2 = 48.5. مثلث چپ ضلع بلندش در 26 است، پس 26 − 6/3 = 24. مثلث راست ضلع بلندش در 71 است، پس 71 + 9/3 = 74. گشتاور = مساحت × نقطه‌ی تعادل، و centroid = جمع گشتاورها / جمع مساحت‌ها ≈ 49.29.',
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        await walkTitle(b, 'قدم 3: سه تکه، مساحت، نقطه‌ی تعادل، centroid');
+        await pieceTable(b, [
+          ['1  triangle 20…26', '½ × 6 × 0.3 = 0.9', '26 − 6/3 = 24', '0.9 × 24 = 21.6'],
+          ['2  rectangle 26…71', '45 × 0.3 = 13.5', '(26 + 71)/2 = 48.5', '13.5 × 48.5 = 654.75'],
+          ['3  triangle 71…80', '½ × 9 × 0.3 = 1.35', '71 + 9/3 = 74', '1.35 × 74 = 99.9'],
+        ], ['15.75', '776.25'], 'centroid = 776.25 / 15.75 ≈ 49.29');
+      },
+    },
     {
       say: 'سؤال امتحانی 6 (مثل تمرین 4، روش دیگر): در ترمز خودکار یک خودرو قاعده این است: اگر سرعت زیاد باشد آنگاه فشار ترمز زیاد است، if x is S then y is B. اگر سرعت 90 کیلومتر بر ساعت باشد، فشار ترمز با روش bisector چقدر است؟',
       draw: examBoard(6, [
@@ -1027,6 +1221,65 @@ Teacher.start({
         ];
         for (const [k, [l, c]] of L.entries()) await b.write(`s${k}`, 500, 260 + k * 55, l, { size: 23, color: c, dur: 300 });
         await b.write('res', 500, 520, 'bisector = 32.5 + 20.625 ≈ 53.13', { size: 32, color: 'green', bold: true });
+      },
+    },
+    // ---------------------------------------------------------- exam 6, step by step
+    {
+      say: 'سؤال 6 قدم‌به‌قدم. قدم 1: 90 بین 60 و 100 است، پس فرمول اول S را می‌گیریم: (90 − 60)/40 = 0.75. قدم 2، برش B در ارتفاع 0.75: ضلع چپ (y − 10)/30 = 0.75، پس y − 10 = 22.5 و y = 32.5. ضلع راست (100 − y)/40 = 0.75، پس 100 − y = 30 و y = 70.',
+      tip: true,
+      draw: async b => {
+        await b.clear();
+        await walkTitle(b, 'سؤال 6 گام‌به‌گام · قدم 1 و 2: قدرت قاعده و برش B');
+        await GW.axes(b, 'gx', { ticks: [0, 10, 32.5, 40, 60, 70, 100], yTicks: [0.75, 1], label: 'y' });
+        await GW.poly(b, 'bb', [[10, 0], [40, 1], [60, 1], [100, 0]], { color: 'soft' });
+        await b.write('bl', GW.X(50), GW.Y(1) - 12, 'B', { size: 22, color: 'soft' });
+        await b.line('cut', GW.X(0), GW.Y(0.75), GW.X(100), GW.Y(0.75), { color: 'red', width: 2 });
+        await b.write('cutl', GW.X(100) + 8, GW.Y(0.75) + 6, 'α = 0.75', { size: 20, color: 'red', anchor: 'start' });
+        await fillShape(b, GW, 'clip', [[10, 0], [32.5, 0.75], [70, 0.75], [100, 0]], 'green');
+        await all([b.dot('p1', GW.X(32.5), GW.Y(0.75), { color: 'red', r: 6 }), b.dot('p2', GW.X(70), GW.Y(0.75), { color: 'red', r: 6 })]);
+        await mathLines(b, [
+          ['60 ≤ 90 ≤ 100   →   first formula   →   α = (90 − 60)/40 = 0.75', 'purple'],
+          ['left:   (y − 10)/30 = 0.75   →   y − 10 = 0.75 × 30 = 22.5   →   y = 32.5', 'ink'],
+          ['right:   (100 − y)/40 = 0.75   →   100 − y = 0.75 × 40 = 30   →   y = 70', 'ink'],
+        ], 395, 46, 22);
+      },
+    },
+    {
+      say: 'قدم 3، مساحت‌ها: شکل بریده‌شده سه تکه است. مثلث چپ از 10 تا 32.5، یعنی قاعده‌ی 22.5: ½ × 22.5 × 0.75 = 8.4375. مستطیل از 32.5 تا 70، یعنی عرض 37.5: 37.5 × 0.75 = 28.125. مثلث راست از 70 تا 100، یعنی قاعده‌ی 30: ½ × 30 × 0.75 = 11.25. مساحت کل 47.8125 است و نصفش 23.906. bisector خط عمودی‌ای است که شکل را به دو نیمه‌ی هم‌مساحت تقسیم می‌کند.',
+      tip: true,
+      draw: async b => {
+        await b.erase(['w*', 'clip', 'cut', 'cutl']);
+        await walkTitle(b, 'قدم 3: مساحت سه تکه و نصف مساحت');
+        const P = [
+          [[[10, 0], [32.5, 0], [32.5, 0.75]], 'orange', [26, 0.25]],
+          [[[32.5, 0], [70, 0], [70, 0.75], [32.5, 0.75]], 'blue', [51, 0.35]],
+          [[[70, 0], [100, 0], [70, 0.75]], 'orange', [80, 0.25]],
+        ];
+        for (const [k, [pts, c]] of P.entries()) await fillShape(b, GW, `pc${k}`, pts, c);
+        await all(P.map(([, , [v, m]], k) => b.write(`pn${k}`, GW.X(v), GW.Y(m) + 7, String(k + 1), { size: 20, color: 'ink', bold: true, dur: 150 })));
+        await mathLines(b, [
+          ['1  triangle 10…32.5:   ½ × 22.5 × 0.75 = 8.4375', 'ink'],
+          ['2  rectangle 32.5…70:   37.5 × 0.75 = 28.125', 'ink'],
+          ['3  triangle 70…100:   ½ × 30 × 0.75 = 11.25', 'ink'],
+          ['total = 47.8125      half = 47.8125 / 2 = 23.906', 'green'],
+        ], 380, 42, 21);
+      },
+    },
+    {
+      say: 'قدم 4، bisector: از چپ مساحت جمع می‌کنیم تا به نصف، یعنی 23.906، برسیم. مثلث 1 فقط 8.4375 است، کمتر از نصف؛ پس خط داخل مستطیل می‌افتد. هنوز 23.906 − 8.4375 = 15.469 مساحت لازم داریم. در مستطیل ارتفاع 0.75 است، پس عرض لازم 15.469 / 0.75 = 20.625. خط از 32.5 به اندازه‌ی 20.625 جلو می‌رود: 32.5 + 20.625 ≈ 53.13.',
+      tip: true,
+      draw: async b => {
+        await b.erase(['w*', 'pn*']);
+        await walkTitle(b, 'قدم 4: خط نصف‌کننده‌ی مساحت');
+        await b.dim(['pc*'], 0.35);
+        await fillShape(b, GW, 'half', [[10, 0], [32.5, 0.75], [53.125, 0.75], [53.125, 0]], 'green');
+        await b.line('bis', GW.X(53.125), GW.Y(0) + 4, GW.X(53.125), GW.Y(1) - 4, { color: 'red', width: 3 });
+        await b.write('bisl', GW.X(53.125) + 8, GW.Y(0.9), '53.13', { size: 22, color: 'red', bold: true, anchor: 'start' });
+        await mathLines(b, [
+          ['triangle 1 = 8.4375 < 23.906   →   the line is inside the rectangle', 'ink'],
+          ['still needed:   23.906 − 8.4375 = 15.469', 'ink'],
+          ['width = 15.469 / 0.75 = 20.625   →   bisector = 32.5 + 20.625 ≈ 53.13', 'green'],
+        ], 395, 46, 22);
       },
     },
   ],
